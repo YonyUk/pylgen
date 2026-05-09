@@ -1,5 +1,5 @@
 from hashlib import sha256
-from typing import Any
+from typing import Any, Dict, List, Set, Tuple
 
 class State:
 
@@ -21,3 +21,57 @@ class State:
     def __eq__(self, __o: object) -> bool: ...
     
     def __hash__(self) -> int: ...
+
+class Automaton:
+    '''
+    Base class for automaton definition
+    '''
+    
+    @property
+    def alphabet(self) -> Set[str]: ...
+    
+    @property
+    def start_state(self) -> State: ...
+    
+    @property
+    def current_state(self) -> State: ...
+    
+    @property
+    def states(self) -> Set[State]: ...
+    
+    @property
+    def finals(self) -> Set[State]: ...
+    
+    @property
+    def is_complete(self) -> bool: ...
+    
+    @property
+    def transition_function(self) -> Dict[Tuple[str,str],str]: ...
+    
+    def add_transition(self,from_state:State,to_state: State,symbol: str) -> None: ...
+    
+    def has_transition(self,state: State,symbol: str) -> bool: ...
+
+    def next(self,state: State,symbol: str) -> State: ...
+    
+    def reset(self) -> None: ...
+    
+    def clousure(self,state: State) -> Set[State]: ...
+    
+    def make_complete(self) -> None: ...
+
+    def restore_to_before_complete(self) -> None: ...
+
+class DFA(Automaton):
+
+    def __init__(
+        self,
+        start_id: str,
+        start_value: str,
+        alphabet: Set[str],
+        start_accept:bool=False
+    ): ...
+    
+    def walk(self,symbol:str) -> None: ...
+    
+    def accept(self,string: List[str]) -> bool: ...

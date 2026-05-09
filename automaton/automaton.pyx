@@ -1,4 +1,9 @@
+# cython: language_level=3
+
 from hashlib import sha256
+from typing import Set,Dict,Tuple
+
+from common.table cimport Table
 
 cdef class State:
     '''
@@ -59,3 +64,252 @@ cdef class State:
         for i in range(8):
             h = (h << 8) | digest[i]
         return h # type:ignore
+
+cdef class Automaton:
+    '''
+    Base class for automaton definition
+    '''
+    
+    def __init__(self):
+        raise ValueError("Can not instance this class")
+    
+    @property
+    def alphabet(self) -> Set[str]:
+        '''
+        Returns:
+            Set[str]: a copy of the alphabet of this automaton
+        '''
+        return set(self._alphabet)
+    
+    @property
+    def start_state(self) -> State:
+        '''
+        Returns:
+            State: A copy of the start state of this automaton
+        '''
+        cdef State result = State(self._start_state._id,self._start_state._value,self._start_state._is_accept)
+        if isinstance(result._value,set):
+            result._value = set(result._value)
+        return result
+    
+    @property
+    def current_state(self) -> State:
+        '''
+        Returns:
+            State: A copy of the current state of the automaton
+        '''
+        cdef State result = State(self._current_state._id,self._current_state._value,self._current_state._is_accept)
+        if isinstance(result._value,set):
+            result._value = set(result._value)
+        return result
+    
+    @property
+    def states(self) -> Set[State]:
+        '''
+        Returns:
+            Set[State]: A copy of the states of this automaton
+        '''
+        cdef State state,copy_state
+        cdef set result = set()
+        for state in self._states_by_id.values():
+            copy_state = State(state._id,state._value,state._is_accept)
+            if isinstance(copy_state._value,set):
+                copy_state._value = set(copy_state._value)
+            result.add(copy_state)
+        return result
+    
+    @property
+    def finals(self) -> Set[State]:
+        '''
+        Returns:
+            Set[State]: A copy of the finals states of this automaton
+        '''
+        cdef State state
+        cdef set result = set()
+        for state in self.states:
+            if state._is_accept:
+                result.add(state)
+        return result
+    
+    @property
+    def is_complete(self) -> bool:
+        return self._is_complete # type:ignore
+    
+    @property
+    def transition_function(self) -> Dict[Tuple[str,str],str]:
+        '''
+        Returns:
+            Dict[Tuple[str,str],str]: A dictionary representing the transition function of this automaton
+        '''
+        return self._trans_func.to_dict()
+    
+    cpdef void add_transition(self,State from_state,State to_state,str symbol):
+        '''
+        Args:
+            from_state (State): Origin state
+            to_state (State): destination state
+            symbol (str): symbol that raise this transition
+        
+        Returns:
+            None: adds a new transition to this automaton
+        '''
+        cdef str f_id = from_state._id
+        cdef str t_id = to_state._id
+        cdef tuple[str,str] key = (f_id,symbol)
+
+        if not symbol in self._alphabet:
+            raise ValueError(f'Symbol {symbol} must be in the alphabet')
+        if not f_id in self._states_by_id:
+            self._states_by_id[f_id] = State(f_id,from_state._value,from_state._is_accept)
+            if isinstance(self._states_by_id[f_id]._value,set):
+                self._states_by_id[f_id]._value = set(self._states_by_id[f_id]._value) # type:ignore
+        if not t_id in self._states_by_id:
+            self._states_by_id[t_id] = State(t_id,to_state._value,to_state._is_accept)
+            if isinstance(self._states_by_id[t_id]._value,set):
+                self._states_by_id[t_id]._value = set(self._states_by_id[t_id]._value) # type:ignore
+        self._trans_func._table[key] = t_id
+        self._is_complete = len(self._trans_func._table) == len(self._states_by_id) * len(self._alphabet) # type:ignore
+    
+    cpdef bint has_transition(self,State state, str symbol):
+        '''
+        Args:
+            state (State)
+            symbol (str)
+
+        Returns:
+            bool: True if there is a transition for the givne tuple (state,symbol)
+        '''
+        cdef tuple[str,str] key = (state._id,symbol)
+        return key in self._trans_func._table # type:ignore
+    
+    cpdef State next(self,State state,str symbol):
+        '''
+        Args:
+            state (State)
+            symbol (str)
+        
+        Returns:
+            State: the destination state for this transition if exists
+        
+        Raises:
+            KeyError: If there is no transition for the given pair (state,symbol)
+        '''
+        cdef tuple[str,str] key = (state._id,symbol)
+        return self._states_by_id[self._trans_func._table[key]]
+    
+    cpdef void reset(self):
+        '''
+        Returns:
+            None: Reset this automaton to its initial state
+        '''
+        self._current_state = self._start_state
+        self._is_stuck = False # type:ignore
+    
+    cpdef set[State] clousure(self,State state):
+        '''
+        Args:
+            state (State):
+        
+        Returns:
+            Set[State]: the clousure-set of the given state
+        '''
+        raise NotImplementedError()
+    
+    cpdef void make_complete(self):
+        '''
+        Returns:
+            None: adds any missing transition if any
+        '''
+        cdef State state,state_fault
+        cdef str symbol,state_id
+        cdef tuple[str,str] transition
+        cdef list[str] states_ids = [state._id for state in self._states_by_id.values()]
+
+        if not self._is_complete:
+            states_ids.sort()
+            state_fault = State(sha256(''.join(states_ids).encode()).hexdigest(),'FAULT')
+            self._states_by_id[state_fault._id] = state_fault
+            self._fault_id = state_fault._id
+            for state in self._states_by_id.values():
+                state_id = state._id
+                for symbol in self._alphabet:
+                    transition = (state_id,symbol)
+                    if not transition in self._trans_func._table:
+                        self._transitions_added_while_completing.append(transition)
+                        self._trans_func._table[transition] = state_fault._id
+            self._is_complete = True # type:ignore
+    
+    cpdef void restore_to_before_complete(self):
+        '''
+        Returns:
+            None: restore this automaton to before it was completed
+        '''
+        cdef tuple[str,str] transition
+
+        if self._transitions_added_while_completing:
+            del self._states_by_id[self._fault_id]
+            for transition in self._transitions_added_while_completing:
+                del self._trans_func._table[transition]
+            self._is_complete = False # type:ignore
+
+cdef class DFA(Automaton):
+
+    def __init__(
+        self,
+        str start_id,
+        object start_value,
+        set[str] alphabet,
+        bint start_accept=False # type:ignore
+    ):
+        '''
+        Args:
+            start_id (str): id of the start state
+            start_value (object): value of the start_state
+            alphabet (Set[str]): alphabet of this automaton
+            start_accept (bool): says if the start state is an accepting state
+        '''
+        if isinstance(start_value,set):
+            self._start_state = State(start_id,set(start_value),start_accept)
+        else:
+            self._start_state = State(start_id,start_value,start_accept)
+        self._alphabet = set(alphabet)
+        self._current_state = self._start_state
+        self._states_by_id = { start_id:self._start_state }
+        self._clousures = {}
+        self._epsilons = {}
+        self._is_complete = False # type:ignore
+        self._is_stuck = False # type:ignore
+        self._trans_func = Table()
+        self._transitions_added_while_completing = []
+        self._fault_id = ''
+    
+    cpdef void walk(self,str symbol):
+        '''
+        Args:
+            symbol (str):
+        
+        Returns:
+            None: move forward with the given symbol if its possible
+        '''
+        cdef tuple[str,str] transition = (self._current_state._id,symbol)
+        
+        if not self._is_stuck:
+            if transition in self._trans_func._table:
+                self._current_state = self._states_by_id[self._trans_func._table[transition]]
+            else:
+                self._is_stuck = True # type:ignore
+    
+    cpdef bint accept(self,list[str] string):
+        '''
+        Args:
+            string (List[str])
+        
+        Returns:
+            bool: says when this automaton ends on an accepting state after read all the given string
+        '''
+        cdef str symbol
+        for symbol in string:
+            self.walk(symbol)
+            if self._is_stuck:
+                return False # type:ignore
+        return self._current_state._is_accept
