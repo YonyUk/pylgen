@@ -232,6 +232,7 @@ cdef class Automaton:
         cdef list[tuple[State,set[State],int,list[State]]] stack = []
         cdef set[str] in_progress = set()
         cdef bint entered = False # type:ignore
+        cdef dict[str,set[str]] notify = {}
 
         # if clousure is already computed for this state
         if state_id in self._clousures:
@@ -268,11 +269,14 @@ cdef class Automaton:
             # continues the process from the last iteration
             for idx in range(last_state_idx,len(states_to_check)):
 
-                loop_state = <State>[states_to_check][idx]
+                loop_state = <State>states_to_check[idx]
                 loop_state_id = loop_state._id
 
                 # if this state clousure is already in progress, ignore it
                 if loop_state_id in in_progress:
+                    if not loop_state_id in notify:
+                        notify[loop_state_id] = set()
+                    notify[loop_state_id].add(current_state._id)
                     continue
 
                 # if the current state has not clousure already computed
@@ -304,6 +308,9 @@ cdef class Automaton:
                 self._clousures[current_state._id] = current_clousure
                 stack.pop()
                 in_progress.discard(current_state._id)
+                if current_state._id in notify:
+                    for loop_state_id in notify[current_state._id]:
+                        self._clousures[loop_state_id].update(current_clousure)
             
         return self._clousures[state_id]
     
@@ -482,7 +489,7 @@ cdef class NFA(Automaton):
 
         if not f_id in self._epsilons:
             self._epsilons[f_id] = set()
-        self._epsilons[f_id] = t_id
+        self._epsilons[f_id].add(t_id)
     
     cpdef DFA to_deterministic(self):
         '''

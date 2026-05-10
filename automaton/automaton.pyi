@@ -67,7 +67,7 @@ class DFA(Automaton):
     def __init__(
         self,
         start_id: str,
-        start_value: str,
+        start_value: Any,
         alphabet: Set[str],
         start_accept:bool=False
     ): ...
@@ -77,3 +77,17 @@ class DFA(Automaton):
     def accept(self,string: List[str]) -> bool: ...
 
     def __iadd__(self,transition:Tuple[State,str,State] ) -> DFA: ...
+
+class NFA(Automaton):
+    
+    def __init__(
+        self,
+        start_id: str,
+        start_value:Any,
+        alphabet:Set[str],
+        start_accept:bool=False
+    ): ...
+
+    def add_epsilon_transition(self,from_state:State,to_state:State) -> None: ...
+    
+    def to_deterministic(self) -> DFA: ...

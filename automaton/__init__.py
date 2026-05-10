@@ -1,1 +1,1 @@
-from .automaton import State,Automaton,DFA
+from .automaton import State,Automaton,DFA,NFA
