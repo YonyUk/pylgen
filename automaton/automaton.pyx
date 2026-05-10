@@ -155,18 +155,23 @@ cdef class Automaton:
         '''
         cdef str f_id = from_state._id
         cdef str t_id = to_state._id
+        cdef object f_value = from_state._value
+        cdef object t_value = to_state._value
+        cdef bint f_accept = from_state._is_accept
+        cdef bint t_accept = to_state._is_accept
+
         cdef tuple[str,str] key = (f_id,symbol)
 
         if not symbol in self._alphabet:
             raise ValueError(f'Symbol {symbol} must be in the alphabet')
         if not f_id in self._states_by_id:
-            self._states_by_id[f_id] = State(f_id,from_state._value,from_state._is_accept)
-            if isinstance(self._states_by_id[f_id]._value,set):
-                self._states_by_id[f_id]._value = set(self._states_by_id[f_id]._value) # type:ignore
+            self._states_by_id[f_id] = State(f_id,f_value,f_accept)
+            if isinstance(f_value,set):
+                self._states_by_id[f_id]._value = set(f_value)
         if not t_id in self._states_by_id:
-            self._states_by_id[t_id] = State(t_id,to_state._value,to_state._is_accept)
-            if isinstance(self._states_by_id[t_id]._value,set):
-                self._states_by_id[t_id]._value = set(self._states_by_id[t_id]._value) # type:ignore
+            self._states_by_id[t_id] = State(t_id,t_value,t_accept)
+            if isinstance(t_value,set):
+                self._states_by_id[t_id]._value = set(t_value)
         self._trans_func._table[key] = t_id
         self._is_complete = len(self._trans_func._table) == len(self._states_by_id) * len(self._alphabet) # type:ignore
     
