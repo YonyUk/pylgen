@@ -1,5 +1,6 @@
 import pytest
-from typing import Set
+from typing import List, Set, Tuple
+from random import random
 
 from automaton import DFA,State,Automaton
 
@@ -51,3 +52,42 @@ class TestAutomaton:
         assert automaton.next(automaton.start_state,symbol) == s0
         assert (automaton.start_state.id,symbol) in automaton.transition_function
         assert automaton.transition_function[(automaton.start_state.id,symbol)] == s0.id
+    
+    @pytest.mark.parametrize("is_accept,symbol",[
+        (True,'0'),
+        (True,'1'),
+        (False,'0'),
+        (False,'1')
+    ])
+    def test_automaton_overwrite_transition(self,is_accept:bool,symbol:str,automaton:Automaton):
+        s0 = State('s0','s0')
+        s1 = State('s1','s1',is_accept)
+
+        automaton.add_transition(automaton.start_state,s0,symbol)
+        automaton.add_transition(automaton.start_state,s1,symbol)
+
+        assert s0 in automaton.states
+        assert s1 in automaton.states
+        if is_accept:
+            assert s1 in automaton.finals
+        assert automaton.has_transition(automaton.start_state,symbol)
+        assert automaton.next(automaton.start_state,symbol) == s1
+        assert (automaton.start_state.id,symbol) in automaton.transition_function
+        assert automaton.transition_function[(automaton.start_state.id,symbol)] == s1.id
+    
+    @pytest.mark.parametrize("symbol",[
+        '0',
+        '1'
+    ])
+    def test_automaton_key_error(self,symbol:str,automaton:Automaton):
+        with pytest.raises(KeyError):
+            n = automaton.next(automaton.start_state,symbol)
+        
+    def test_automaton_make_complete(self,automaton:Automaton):
+        automaton.make_complete()
+        assert automaton.is_complete
+        assert len(automaton.transition_function) == len(automaton.states) * len(automaton.alphabet)
+
+        automaton.restore_to_before_complete()
+        assert not automaton.is_complete
+        assert len(automaton.transition_function) != len(automaton.states) * len(automaton.alphabet)
