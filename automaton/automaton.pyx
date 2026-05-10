@@ -318,3 +318,21 @@ cdef class DFA(Automaton):
             if self._is_stuck:
                 return False # type:ignore
         return self._current_state._is_accept
+    
+    def __iadd__(self,tuple[State,str,State] transition) -> DFA:
+        '''
+        Description:
+            '+=' operator overwrite, equivalent to self.add_transition
+        
+        Args:
+            transition (Tuple[State,str,State]): corresponds to (from_state,symbol,to_state)
+        
+        Returns:
+            DFA: the same automaton with the transition added
+        '''
+        cdef State from_state = <State>transition[0]
+        cdef State to_state = <State>transition[2]
+        cdef str symbol = <str>transition[1]
+
+        self.add_transition(from_state,to_state,symbol)
+        return self
