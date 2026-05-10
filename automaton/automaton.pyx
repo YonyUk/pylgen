@@ -550,6 +550,11 @@ cdef class DFA(Automaton):
                         if len(intersection) <= len(diff):
                             queue.append(intersection)
                     block_idx += 1
+        
+        result = self._build_new_dfa(partition)
+        if was_completed:
+            self.restore_to_before_complete()
+        return result
     
     def __iadd__(self,tuple[State,str,State] transition) -> DFA:
         '''
