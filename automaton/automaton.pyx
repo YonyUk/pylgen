@@ -381,7 +381,78 @@ cdef class DFA(Automaton):
         self._trans_func = Table()
         self._transitions_added_while_completing = []
         self._fault_id = ''
+        self._preimages = {}
     
+    cdef set[State] _state_preimage_for_symbol(self,State state,str symbol):
+        cdef tuple[str,str] key = (state._id,symbol)
+        cdef set[State] result = set()
+        cdef str state_id
+        cdef str current_state_id = state._id
+
+        if key in self._preimages:
+            return self._preimages[key]
+        
+        for key,state_id in self._trans_func._table.items():
+            if state_id == current_state_id and key[1] == symbol:
+                result.add(self._states_by_id[key[0]])
+        key = (state._id,symbol)
+        self._preimages[key] = result
+        return result
+    
+    cdef set[State] _block_preimage_for_symbol(self,set[State] states,str symbol):
+        cdef State state
+        cdef set[State] result = set()
+
+        for state in states:
+            result.update(self._state_preimage_for_symbol(state,symbol))
+        
+        return result
+    
+    cdef Table _build_new_transition_function(self,dict[str,str] old_ids_to_new_ids_map):
+        cdef str from_id,to_id
+        cdef State from_state,to_state
+        cdef tuple[str,str] key
+        cdef Table result = Table()
+
+        for key,to_id in self._trans_func._table.items():
+            from_id = old_ids_to_new_ids_map[key[0]]
+            to_id = old_ids_to_new_ids_map[to_id]
+            key = (from_id,key[1])
+            result._table[key] = to_id
+        
+        return result
+
+    cdef DFA _build_new_dfa(self,list[set[State]] partition):
+        cdef set[State] states,new_states
+        cdef dict[str,str] old_ids_to_new_ids_map = {}
+        cdef list[str] states_ids
+        cdef State state
+        cdef str new_state_id
+        cdef bint is_accept
+        cdef Table transition_function
+        
+        new_states = set()
+
+        for states in partition:
+            if not states:
+                continue
+
+            is_accept = False # type:ignore
+            states_ids = [state._id for state in states]
+            states_ids.sort()
+            new_state_id = sha256(''.join(states_ids).encode()).hexdigest()
+            
+            for state in states:
+                old_ids_to_new_ids_map[state._id] = new_state_id
+                if state._is_accept:
+                    is_accept = True # type:ignore
+            
+            state = State(new_state_id,set(states),is_accept)
+            new_states.add(state)
+        
+        transition_function = self._build_new_transition_function(old_ids_to_new_ids_map)
+        return create_dfa(new_states,transition_function,old_ids_to_new_ids_map[self._start_state._id],self._alphabet)
+
     cpdef void walk(self,str symbol):
         '''
         Args:
@@ -412,6 +483,73 @@ cdef class DFA(Automaton):
             if self._is_stuck:
                 return False # type:ignore
         return self._current_state._is_accept
+    
+    cpdef DFA minimize(self):
+        '''
+        Returns:
+            DFA: a minimized dfa equivalent to this (this process is done with the Hopcroft's algortihm)
+        '''
+        # to know if the dfa was complete before start the minimization process
+        cdef bint was_completed = False # type:ignore
+        cdef set[State] finals,not_finals
+        # partition of states to build equivalent classes
+        cdef list[set[State]] partition = []
+        # queue of work for the minimization process
+        cdef list[set[State]] queue = []
+        # current block that is processing
+        cdef set[State] current_block
+        # premiage of the current block processing
+        cdef set[State] current_block_preimage,current_partition_item,intersection
+
+        cdef str symbol
+        cdef int block_idx
+        cdef DFA result
+
+        if not self._is_complete:
+            was_completed = True # type:ignore
+            self.make_complete()
+        
+        finals = self.finals
+        not_finals = self.states.difference(finals)
+
+        partition.append(finals)
+        partition.append(not_finals)
+
+        # puts into the queue the set with smaller size, if both has the same size,
+        # puts both sets
+        if len(finals) <= len(not_finals):
+            queue.append(finals)
+        if len(not_finals) <= len(finals):
+            queue.append(not_finals)
+        
+        while queue:
+
+            current_block = queue.pop()
+
+            # if the current block already doesn't exists, is skiped
+            if not current_block in partition:
+                continue
+            
+            for symbol in self._alphabet:
+                # for symbol in alphabet, gets the preimage for the current block of states
+                current_block_preimage = self._block_preimage_for_symbol(current_block,symbol)
+                block_idx = 0
+                while block_idx < len(partition):
+                    current_partition_item = partition[block_idx]
+                    # gets the intersection between the preimage and the item
+                    intersection = current_partition_item.intersection(current_block_preimage)
+                    # if there is states in the preimage that are outside of the current item
+                    # of the current partition
+                    if intersection and intersection != current_partition_item:
+                        # updates the partition
+                        partition[block_idx] = intersection
+                        diff = current_partition_item.difference(intersection)
+                        partition.append(diff)
+                        if len(diff) <= len(intersection):
+                            queue.append(diff)
+                        if len(intersection) <= len(diff):
+                            queue.append(intersection)
+                    block_idx += 1
     
     def __iadd__(self,tuple[State,str,State] transition) -> DFA:
         '''

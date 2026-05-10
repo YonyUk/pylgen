@@ -1,5 +1,6 @@
 from hashlib import sha256
 from typing import Any, Dict, List, Set, Tuple
+from common.table import Table
 
 class State:
 
@@ -76,6 +77,8 @@ class DFA(Automaton):
     
     def accept(self,string: List[str]) -> bool: ...
 
+    def minimize(self) -> DFA: ...
+
     def __iadd__(self,transition:Tuple[State,str,State] ) -> DFA: ...
 
 class NFA(Automaton):
@@ -91,3 +94,5 @@ class NFA(Automaton):
     def add_epsilon_transition(self,from_state:State,to_state:State) -> None: ...
     
     def to_deterministic(self) -> DFA: ...
+
+def create_dfa(states:Set[State],transition_function:Table,start_id:str,alphabet:Set[str]) -> DFA: ...

@@ -15,6 +15,7 @@ cdef class Automaton:
     cdef list[tuple[str,str]] _transitions_added_while_completing
     cdef bint _is_complete,_is_stuck
     cdef str _fault_id
+    cdef dict[tuple[str,str],set[State]] _preimages
 
     cpdef void add_transition(self,State from_state,State to_state,str symbol)
     cpdef bint has_transition(self,State state,str symbol)
@@ -25,8 +26,14 @@ cdef class Automaton:
     cpdef void restore_to_before_complete(self)
 
 cdef class DFA(Automaton):
+    cdef set[State] _state_preimage_for_symbol(self,State state,str symbol)
+    cdef set[State] _block_preimage_for_symbol(self,set[State] states,str symbol)
+    cdef Table _build_new_transition_function(self,dict[str,str] old_ids_to_new_ids_map)
+    cdef DFA _build_new_dfa(self,list[set[State]] partition)
+
     cpdef bint accept(self,list[str] string)
     cpdef void walk(self,str symbol)
+    cpdef DFA minimize(self)
 
 cdef class NFA(Automaton):
     cdef State _build_state(self,set[State] states)
