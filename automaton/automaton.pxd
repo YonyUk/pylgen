@@ -27,3 +27,7 @@ cdef class Automaton:
 cdef class DFA(Automaton):
     cpdef bint accept(self,list[str] string)
     cpdef void walk(self,str symbol)
+
+cdef class NFA(Automaton):
+    cpdef void add_epsilon_transition(self,State from_state,State to_state)
+    cpdef DFA to_deterministic(self)

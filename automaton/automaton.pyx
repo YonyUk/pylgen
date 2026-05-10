@@ -218,7 +218,94 @@ cdef class Automaton:
         Returns:
             Set[State]: the clousure-set of the given state
         '''
-        raise NotImplementedError()
+        cdef str state_id = state._id
+        cdef object state_value = state._value
+        cdef set[State] result
+        cdef State current_state,loop_state,inner_loop_state
+        cdef set[State] current_clousure,loop_state_clousure
+        cdef int last_state_idx
+        cdef int idx = 0
+        cdef tuple[State,set[State],int,list[State]] stack_head
+        cdef list[State] states_to_check = []
+        cdef list[State] new_states_to_check = []
+        cdef str loop_state_id,inner_loop_state_id
+        cdef list[tuple[State,set[State],int,list[State]]] stack = []
+        cdef set[str] in_progress = set()
+        cdef bint entered = False # type:ignore
+
+        # if clousure is already computed for this state
+        if state_id in self._clousures:
+            return self._clousures[state_id]
+        # if this state has not epsilon-transitions
+        if state_id not in self._epsilons:
+            # clousure is a set with only this state inside
+            self._clousures[state_id] = { state }
+            return self._clousures[state_id]
+
+        # initialize clousure
+        current_clousure = { state }
+        # put in all states reachable from the given state with one epsilon-transition into
+        # the clousure, put in this states into states_to_check
+        for loop_state_id in self._epsilons[state_id]:
+            current_clousure.add(self._states_by_id[loop_state_id])
+            states_to_check.append(self._states_by_id[loop_state_id])
+        
+        stack_head = (state,current_clousure,idx,states_to_check)
+        stack.append(stack_head)
+        in_progress.add(state_id)
+
+        # while there is clousures to compute
+        while stack:
+            entered = False # type:ignore
+            # pop the current computing process
+            stack_head = stack[-1]
+
+            current_state = <State>stack_head[0]
+            current_clousure = <set[State]>stack_head[1]
+            last_state_idx = <int>stack_head[2]
+            states_to_check = <list[State]>stack_head[3]
+
+            # continues the process from the last iteration
+            for idx in range(last_state_idx,len(states_to_check)):
+
+                loop_state = <State>[states_to_check][idx]
+                loop_state_id = loop_state._id
+
+                # if this state clousure is already in progress, ignore it
+                if loop_state_id in in_progress:
+                    continue
+
+                # if the current state has not clousure already computed
+                if not loop_state_id in self._clousures:
+                    new_states_to_check = []
+                    # initialize its clousure
+                    loop_state_clousure = { loop_state }
+                    # if this state has epsilon-transitions
+                    if loop_state_id in self._epsilons:
+                        # adds all reachable states with an epsilon-transition to the clousure
+                        # of the state and put it to new_states_to_check
+                        for inner_loop_state_id in self._epsilons[loop_state_id]:
+                            loop_state_clousure.add(self._states_by_id[inner_loop_state_id])
+                            new_states_to_check.append(self._states_by_id[inner_loop_state_id])
+                        
+                        stack_head = (loop_state,loop_state_clousure,0,new_states_to_check)
+                        stack.append(stack_head)
+                        in_progress.add(loop_state_id)
+                        entered = True # type:ignore
+                        break
+                    else:
+                        self._clousures[loop_state_id] = loop_state_clousure
+                # adds the states on the clousure of loop_state
+                current_clousure.update(self._clousures[loop_state_id])
+                # advance the idx counter in 1
+                stack_head = (current_state,current_state,idx + 1,states_to_check)
+            
+            if not entered:
+                self._clousures[current_state._id] = current_clousure
+                stack.pop()
+                in_progress.discard(current_state._id)
+            
+        return self._clousures[state_id]
     
     cpdef void make_complete(self):
         '''
@@ -336,3 +423,70 @@ cdef class DFA(Automaton):
 
         self.add_transition(from_state,to_state,symbol)
         return self
+
+cdef class NFA(Automaton):
+
+    def __init__(
+        self,
+        str start_id,
+        object start_value,
+        set[str] alphabet,
+        bint start_accept=False # type:ignore
+    ):
+        '''
+        Args:
+            start_id (str): id of the start state
+            start_value (object): value of the start_state
+            alphabet (Set[str]): alphabet of this automaton
+            start_accept (bool): says if the start state is an accepting state
+        '''
+        if isinstance(start_value,set):
+            self._start_state = State(start_id,set(start_value),start_accept)
+        else:
+            self._start_state = State(start_id,start_value,start_accept)
+        self._alphabet = set(alphabet)
+        self._current_state = self._start_state
+        self._states_by_id = { start_id:self._start_state }
+        self._clousures = {}
+        self._epsilons = {}
+        self._is_complete = False # type:ignore
+        self._is_stuck = False # type:ignore
+        self._trans_func = Table()
+        self._transitions_added_while_completing = []
+        self._fault_id = ''
+    
+    cpdef void add_epsilon_transition(self,State from_state,State to_state):
+        '''
+        Args:
+            from_state (State): origin state
+            to_state (State): destination state
+        
+        Returns:
+            None: adds an epsilon-transition from from_state to to_state
+        '''
+        cdef str f_id = from_state._id
+        cdef str t_id = to_state._id
+        cdef object f_value = from_state._value
+        cdef object t_value = to_state._value
+        cdef bint f_accept = from_state._is_accept
+        cdef bint t_accept = to_state._is_accept
+
+        if not f_id in self._states_by_id:
+            self._states_by_id[f_id] = State(f_id,f_value,f_accept)
+            if isinstance(f_value,set):
+                self._states_by_id[f_id]._value = set(f_value)
+        if not t_id in self._states_by_id:
+            self._states_by_id[t_id] = State(t_id,t_value,t_accept)
+            if isinstance(t_value,set):
+                self._states_by_id[t_id]._value = set(t_value)
+
+        if not f_id in self._epsilons:
+            self._epsilons[f_id] = set()
+        self._epsilons[f_id] = t_id
+    
+    cpdef DFA to_deterministic(self):
+        '''
+        Returns:
+            DFA: the equivalent dfa to this one
+        '''
+        raise NotImplementedError()
