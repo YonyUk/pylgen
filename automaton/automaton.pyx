@@ -462,6 +462,48 @@ cdef class NFA(Automaton):
         self._transitions_added_while_completing = []
         self._fault_id = ''
     
+    cdef State _build_state(self,set[State] states):
+        cdef str state_id
+        cdef State state
+        cdef list[str] ids = []
+        cdef bint is_accept = False # type:ignore
+        cdef set[State] state_value = set(states)
+
+        for state in states:
+            ids.append(state._id)
+            if state._is_accept:
+                is_accept = True # type:ignore
+        
+        ids.sort()
+        state_id = sha256(''.join(ids).encode()).hexdigest()
+        return State(state_id,state_value,is_accept)
+    
+    cdef State _build_new_state(self,State state,Table target_table,set[State] current_states):
+        cdef str symbol
+        cdef State st
+        cdef list[str] ids = [st._id for st in current_states]
+        cdef set[State] state_value = state._value
+        cdef set[State] new_states
+        cdef tuple[str,str] key
+
+        for symbol in self._alphabet:
+            new_states = set()
+            for st in state_value:
+                key = (st._id,symbol)
+                if key in self._trans_func._table:
+                    new_states.update(self.clousure(self.next(st,symbol)))
+            
+            if len(new_states) == 0:
+                continue
+            
+            st = self._build_state(new_states)
+            key = (state._id,symbol)
+            if not key in target_table._table:
+                target_table._table[key] = st._id
+            if not st._id in ids:
+                return st
+        return None # type:ignore
+
     cpdef void add_epsilon_transition(self,State from_state,State to_state):
         '''
         Args:
@@ -496,4 +538,56 @@ cdef class NFA(Automaton):
         Returns:
             DFA: the equivalent dfa to this one
         '''
-        raise NotImplementedError()
+        cdef bint change = True # type:ignore
+        cdef Table table = Table()
+        cdef set[State] new_states = set()
+        cdef State start_state = self._build_state(self.clousure(self._start_state))
+        cdef State state,new_state
+
+        if not self._epsilons:
+            return create_dfa(self.states,self._trans_func,self._start_state._id,self._alphabet)
+
+        new_states.add(start_state)
+
+        while change:
+            change = False # type:ignore
+
+            for state in new_states:
+                new_state = self._build_new_state(state,table,new_states)
+                if new_state:
+                    new_states.add(new_state)
+                    change = True # type:ignore
+                    break
+        
+        return create_dfa(new_states,table,start_state._id,self._alphabet)
+
+cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet):
+    '''
+    Args:
+        states (Set[State]): the states of the automaton
+        transition_function (Table): transition function of the automaton
+        start_id (str): id of the initial state of the automaton
+        alphabet (Set[str]): alphabet of the automaton
+    
+    Returns:
+        DFA: the just created DFA with the given description
+    '''
+    cdef State state,start_state
+
+    for state in states:
+        if state._id == start_id:
+            start_state = state
+            break
+    
+    if not start_state:
+        raise ValueError(f'A initial state is needed, not found any state with given id {start_id}')
+    
+    dfa = DFA(start_id,None,alphabet,start_state._is_accept)
+    dfa._start_state = start_state
+    dfa._current_state = dfa._start_state
+    dfa._states_by_id[start_id] = start_state
+    dfa._trans_func = transition_function
+    for state in states:
+        dfa._states_by_id[state._id] = state
+    dfa._is_complete = len(transition_function._table) == len(states) * len(alphabet) # type:ignore
+    return dfa

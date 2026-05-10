@@ -29,5 +29,10 @@ cdef class DFA(Automaton):
     cpdef void walk(self,str symbol)
 
 cdef class NFA(Automaton):
+    cdef State _build_state(self,set[State] states)
+    cdef State _build_new_state(self,State state,Table target_table,set[State] current_states)
+
     cpdef void add_epsilon_transition(self,State from_state,State to_state)
     cpdef DFA to_deterministic(self)
+
+cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet)
