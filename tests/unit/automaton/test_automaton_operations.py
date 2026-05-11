@@ -2146,3 +2146,427 @@ class TestAutomatonOperations:
 
         assert union_automaton.accept(list(string)) == (alternate_dfa.accept(list(string)) or alternate_a_b_dfa.accept(list(string)))
         assert minimized.accept(list(string)) == union_automaton.accept(list(string))
+    
+    @pytest.mark.parametrize("string",[
+        '00101010010',
+        '0',
+        '00',
+        '00000',
+        '1110',
+        '11101',
+        '',
+        '0010101',
+        '00001',
+    ])
+    def test_automaton_complement_operation_1_1(self,string:str,zero_terminated_dfa:DFA):
+
+        complement_automaton = Automaton.Complement(zero_terminated_dfa)
+
+        assert complement_automaton.accept(list(string)) == (not zero_terminated_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '00101010010',
+        '0',
+        '00',
+        '00000',
+        '1110',
+        '11101',
+        '',
+        '0010101',
+        '00001',
+    ])
+    def test_automaton_complement_operation_1_2(self,string:str,zero_terminated_dfa:DFA):
+
+        complement_automaton = Automaton.Complement(zero_terminated_dfa).minimize()
+
+        assert complement_automaton.accept(list(string)) == (not zero_terminated_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '0010101001',
+        '1',
+        '11',
+        '111111',
+        '0001',
+        '1110',
+        '',
+        '001010',
+        '0000',
+    ])
+    def test_automaton_complement_operation_2_1(self,string:str,one_terminated_dfa:DFA):
+
+        complement_automaton = Automaton.Complement(one_terminated_dfa)
+
+        assert complement_automaton.accept(list(string)) == (not one_terminated_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '0010101001',
+        '1',
+        '11',
+        '111111',
+        '0001',
+        '1110',
+        '',
+        '001010',
+        '0000',
+    ])
+    def test_automaton_complement_operation_2_2(self,string:str,one_terminated_dfa:DFA):
+
+        complement_automaton = Automaton.Complement(one_terminated_dfa).minimize()
+
+        assert complement_automaton.accept(list(string)) == (not one_terminated_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("value",[
+        10,
+        15,
+        7,
+        73,
+        35,
+        24,
+        21,
+        11,
+        20,
+        30,
+        70
+    ])
+    def test_automaton_complement_operation_3_1(self,value:int,five_multiplo_dfa:DFA):
+        
+        string = list(bin(value)[2:])
+
+        complement_automaton = Automaton.Complement(five_multiplo_dfa)
+
+        assert complement_automaton.accept(string) == (not five_multiplo_dfa.accept(string))
+
+    @pytest.mark.parametrize("value",[
+        10,
+        15,
+        7,
+        73,
+        35,
+        24,
+        21,
+        11,
+        20,
+        30,
+        70
+    ])
+    def test_automaton_complement_operation_3_2(self,value:int,five_multiplo_dfa:DFA):
+        
+        string = list(bin(value)[2:])
+
+        complement_automaton = Automaton.Complement(five_multiplo_dfa).minimize()
+
+        assert complement_automaton.accept(string) == (not five_multiplo_dfa.accept(string))
+    
+    @pytest.mark.parametrize("string",[
+        '0101010',
+        '01010101',
+        '0',
+        '1',
+        '10',
+        '01',
+        '010',
+        '101',
+        '1011',
+        '1001',
+        '0001',
+        '1110',
+        '0101010101010101001',
+        '',
+    ])
+    def test_automaton_complement_operation_4_1(self,string:str,alternate_dfa:DFA):
+
+        complement_automaton = Automaton.Complement(alternate_dfa)
+
+        assert complement_automaton.accept(list(string)) == (not alternate_dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '0101010',
+        '01010101',
+        '0',
+        '1',
+        '10',
+        '01',
+        '010',
+        '101',
+        '1011',
+        '1001',
+        '0001',
+        '1110',
+        '0101010101010101001',
+        '',
+    ])
+    def test_automaton_complement_operation_4_2(self,string:str,alternate_dfa:DFA):
+
+        complement_automaton = Automaton.Complement(alternate_dfa).minimize()
+
+        assert complement_automaton.accept(list(string)) == (not alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        'abababa',
+        'abababab',
+        'a',
+        'b',
+        'ba',
+        'ab',
+        'aba',
+        'bab',
+        'babb',
+        'baab',
+        'aaab',
+        'bbba',
+        'abababababababababab'
+    ])
+    def test_automaton_complement_operation_5_1(self,string:str,alternate_a_b_dfa:DFA):
+
+        complement_automaton = Automaton.Complement(alternate_a_b_dfa)
+
+        assert complement_automaton.accept(list(string)) == (not alternate_a_b_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        'abababa',
+        'abababab',
+        'a',
+        'b',
+        'ba',
+        'ab',
+        'aba',
+        'bab',
+        'babb',
+        'baab',
+        'aaab',
+        'bbba',
+        'abababababababababab'
+    ])
+    def test_automaton_complement_operation_5_2(self,string:str,alternate_a_b_dfa:DFA):
+
+        complement_automaton = Automaton.Complement(alternate_a_b_dfa).minimize()
+
+        assert complement_automaton.accept(list(string)) == (not alternate_a_b_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '10',
+        '01',
+        '101',
+        '010',
+        '101010',
+        '10101',
+        '000001',
+        '111110',
+    ])
+    def test_automaton_complement_operation_6_1(self,string:str,nfa_0_1_terminated:NFA):
+
+        complement_automaton = Automaton.Complement(nfa_0_1_terminated)
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        assert complement_automaton.accept(list(string)) == (not dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '10',
+        '01',
+        '101',
+        '010',
+        '101010',
+        '10101',
+        '000001',
+        '111110',
+    ])
+    def test_automaton_complement_operation_6_2(self,string:str,nfa_0_1_terminated:NFA):
+
+        complement_automaton = Automaton.Complement(nfa_0_1_terminated.to_deterministic())
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        assert complement_automaton.accept(list(string)) == (not dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '10',
+        '01',
+        '101',
+        '010',
+        '101010',
+        '10101',
+        '000001',
+        '111110',
+    ])
+    def test_automaton_complement_operation_6_3(self,string:str,nfa_0_1_terminated:NFA):
+
+        complement_automaton = Automaton.Complement(nfa_0_1_terminated.to_deterministic().minimize())
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        assert complement_automaton.accept(list(string)) == (not dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '10',
+        '01',
+        '101',
+        '010',
+        '101010',
+        '10101',
+        '000001',
+        '111110',
+    ])
+    def test_automaton_complement_operation_6_4(self,string:str,nfa_0_1_terminated:NFA):
+
+        complement_automaton = Automaton.Complement(nfa_0_1_terminated)
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        assert complement_automaton.accept(list(string)) == (not dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '10',
+        '01',
+        '101',
+        '010',
+        '101010',
+        '10101',
+        '000001',
+        '111110',
+    ])
+    def test_automaton_complement_operation_6_5(self,string:str,nfa_0_1_terminated:NFA):
+
+        complement_automaton = Automaton.Complement(nfa_0_1_terminated.to_deterministic())
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        assert complement_automaton.accept(list(string)) == (not dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '10',
+        '01',
+        '101',
+        '010',
+        '101010',
+        '10101',
+        '000001',
+        '111110',
+    ])
+    def test_automaton_complement_operation_6_6(self,string:str,nfa_0_1_terminated:NFA):
+
+        complement_automaton = Automaton.Complement(nfa_0_1_terminated.to_deterministic().minimize())
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        assert complement_automaton.accept(list(string)) == (not dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '1'*3,
+        '0'*3,
+        '0101001001',
+        '11010101',
+        '111111110',
+        '00000001'
+    ])
+    def test_automaton_complement_operation_7_1(self,string:str,nfa_zeros_or_ones:NFA):
+
+        complement_automaton = Automaton.Complement(nfa_zeros_or_ones)
+        dfa = nfa_zeros_or_ones.to_deterministic()
+
+        assert complement_automaton.accept(list(string)) == (not dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '1'*3,
+        '0'*3,
+        '0101001001',
+        '11010101',
+        '111111110',
+        '00000001'
+    ])
+    def test_automaton_complement_operation_7_2(self,string:str,nfa_zeros_or_ones:NFA):
+
+        complement_automaton = Automaton.Complement(nfa_zeros_or_ones.to_deterministic())
+        dfa = nfa_zeros_or_ones.to_deterministic()
+
+        assert complement_automaton.accept(list(string)) == (not dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '1'*3,
+        '0'*3,
+        '0101001001',
+        '11010101',
+        '111111110',
+        '00000001'
+    ])
+    def test_automaton_complement_operation_7_3(self,string:str,nfa_zeros_or_ones:NFA):
+
+        complement_automaton = Automaton.Complement(nfa_zeros_or_ones.to_deterministic().minimize())
+        dfa = nfa_zeros_or_ones.to_deterministic()
+
+        assert complement_automaton.accept(list(string)) == (not dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '1'*3,
+        '0'*3,
+        '0101001001',
+        '11010101',
+        '111111110',
+        '00000001'
+    ])
+    def test_automaton_complement_operation_7_4(self,string:str,nfa_zeros_or_ones:NFA):
+
+        complement_automaton = Automaton.Complement(nfa_zeros_or_ones)
+        dfa = nfa_zeros_or_ones.to_deterministic().minimize()
+
+        assert complement_automaton.accept(list(string)) == (not dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '1'*3,
+        '0'*3,
+        '0101001001',
+        '11010101',
+        '111111110',
+        '00000001'
+    ])
+    def test_automaton_complement_operation_7_5(self,string:str,nfa_zeros_or_ones:NFA):
+
+        complement_automaton = Automaton.Complement(nfa_zeros_or_ones.to_deterministic())
+        dfa = nfa_zeros_or_ones.to_deterministic().minimize()
+
+        assert complement_automaton.accept(list(string)) == (not dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '1'*3,
+        '0'*3,
+        '0101001001',
+        '11010101',
+        '111111110',
+        '00000001'
+    ])
+    def test_automaton_complement_operation_7_6(self,string:str,nfa_zeros_or_ones:NFA):
+
+        complement_automaton = Automaton.Complement(nfa_zeros_or_ones.to_deterministic().minimize())
+        dfa = nfa_zeros_or_ones.to_deterministic().minimize()
+
+        assert complement_automaton.accept(list(string)) == (not dfa.accept(list(string)))
