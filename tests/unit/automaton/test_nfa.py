@@ -265,3 +265,22 @@ class TestNFA:
             dfa.restore_to_before_complete()
         
         assert minimized.accept(list(string)) == dfa.accept(list(string))
+    
+    @pytest.mark.parametrize("is_accept,symbol",[
+        (True,'1'),
+        (True,'0'),
+        (False,'0'),
+        (False,'1')
+    ])
+    def test_nfa_add_transition_operator(self,is_accept:bool,symbol:str,nfa:NFA):
+        q0 = State('q0','q0',is_accept)
+
+        nfa += nfa.start_state,symbol,q0
+
+        assert q0 in nfa.states
+        if is_accept:
+            assert q0 in nfa.finals
+        assert nfa.has_transition(nfa.start_state,symbol)
+        assert nfa.next(nfa.start_state,symbol) == q0
+        assert (nfa.start_state.id,symbol) in nfa.transition_function
+        assert nfa.transition_function[(nfa.start_state.id,symbol)] == q0.id
