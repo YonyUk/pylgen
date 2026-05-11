@@ -205,19 +205,22 @@ cdef class Automaton:
         cdef object t_value = to_state._value
         cdef bint f_accept = from_state._is_accept
         cdef bint t_accept = to_state._is_accept
+        cdef State f_state,t_state
 
         cdef tuple[str,str] key = (f_id,symbol)
 
         if not symbol in self._alphabet:
             raise ValueError(f'Symbol {symbol} must be in the alphabet')
         if not f_id in self._states_by_id:
-            self._states_by_id[f_id] = State(f_id,f_value,f_accept)
-            if isinstance(f_value,set):
-                self._states_by_id[f_id]._value = set(f_value)
+            f_state = State(f_id,f_value,f_accept)
+            if isinstance(f_state._value,set):
+                f_state._value = set(f_state._value)
+            self._states_by_id[f_id] = f_state
         if not t_id in self._states_by_id:
+            t_state = State(t_id,t_value,t_accept)
             self._states_by_id[t_id] = State(t_id,t_value,t_accept)
-            if isinstance(t_value,set):
-                self._states_by_id[t_id]._value = set(t_value)
+            if isinstance(t_state._value,set):
+                t_state._value = set(t_state._value)
         self._trans_func._table[key] = t_id
         self._is_complete = len(self._trans_func._table) == len(self._states_by_id) * len(self._alphabet) # type:ignore
     
@@ -714,15 +717,18 @@ cdef class NFA(Automaton):
         cdef object t_value = to_state._value
         cdef bint f_accept = from_state._is_accept
         cdef bint t_accept = to_state._is_accept
+        cdef State f_state,t_state
 
         if not f_id in self._states_by_id:
-            self._states_by_id[f_id] = State(f_id,f_value,f_accept)
-            if isinstance(f_value,set):
-                self._states_by_id[f_id]._value = set(f_value)
+            f_state = State(f_id,f_value,f_accept)
+            if isinstance(f_state._value,set):
+                f_state._value = set(f_state._value)
+            self._states_by_id[f_id] = f_state
         if not t_id in self._states_by_id:
-            self._states_by_id[t_id] = State(t_id,t_value,t_accept)
-            if isinstance(t_value,set):
-                self._states_by_id[t_id]._value = set(t_value)
+            t_state = State(t_id,t_value,t_accept)
+            if isinstance(t_state._value,set):
+                t_state._value = set(t_state._value)
+            self._states_by_id[t_id] = t_state
 
         if not f_id in self._epsilons:
             self._epsilons[f_id] = set()
