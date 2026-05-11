@@ -200,6 +200,17 @@ cdef class Automaton:
         '''
         return _automaton_complement(automaton)
     
+    @staticmethod
+    def Intersection(automatons:Set[Automaton]) -> DFA:
+        '''
+        Args:
+            automatons (Set[Automaton])
+        
+        Returns:
+            DFA: the automaton equivalent to the intersection of all the given automatons
+        '''
+        return _automaton_intersection(automatons)
+    
     cpdef void add_transition(self,State from_state,State to_state,str symbol):
         '''
         Args:
@@ -927,6 +938,15 @@ cdef DFA _automaton_complement(Automaton automaton):
     else:
         result = _nfa_complement(automaton) # type:ignore
     return result
+
+cdef DFA _automaton_intersection(set[Automaton] automatons):
+    cdef set[Automaton] dfas = set()
+    cdef Automaton automaton
+
+    for automaton in automatons:
+        dfas.add(_automaton_complement(automaton))
+    
+    return _automaton_complement(_automaton_union(dfas))
 
 cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet):
     '''
