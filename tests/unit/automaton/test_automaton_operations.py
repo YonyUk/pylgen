@@ -143,3 +143,28 @@ class TestAutomatonOperations:
 
         assert union_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) or one_terminated_dfa.accept(list(string)))
         assert minimized.accept(list(string)) == union_automaton.accept(list(string))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '1'
+        '0',
+        '00',
+        '10',
+        '01',
+        '11',
+        '0000',
+        '1111',
+        '101',
+        '010',
+        '1010',
+        '010101',
+        '11110',
+        '110010'
+    ])
+    def test_automaton_union_operation_2(self,string:str,zero_terminated_dfa:DFA,five_multiplo_dfa:DFA):
+        
+        union_automaton = Automaton.Union({zero_terminated_dfa,five_multiplo_dfa}).to_deterministic()
+        minimized = union_automaton.minimize()
+
+        assert union_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) or five_multiplo_dfa.accept(list(string)))
+        assert minimized.accept(list(string)) == union_automaton.accept(list(string))
