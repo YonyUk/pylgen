@@ -824,10 +824,10 @@ cdef NFA _automaton_union(set[Automaton] automatons):
     cdef Automaton aut
     cdef NFA result
     cdef str copy_state_id,union_start_id,to_id,state_id
-    cdef State start_state,copy_state,from_state,to_state
-    cdef object state_value
+    cdef State start_state,copy_state,from_state,to_state,state
+    cdef object state_value,original_state_value
     cdef dict[str,State] states = {}
-    cdef dict[str,str] old_state_to_new_state_map = {}
+    cdef dict[tuple[str,str],str] old_state_to_new_state_map = {}
     cdef list[str] aut_ids = []
     cdef set[str] alphabet = set()
     cdef tuple[str,str] transition
@@ -835,7 +835,7 @@ cdef NFA _automaton_union(set[Automaton] automatons):
 
     for aut in automatons:
         # updates alphabet
-        alphabet.update(aut.alphabet)
+        alphabet.update(aut._alphabet)
         aut_ids.append(aut.id)
         # copy states
         for state in aut._states_by_id.values():
@@ -846,7 +846,7 @@ cdef NFA _automaton_union(set[Automaton] automatons):
             copy_state_id = sha256(f'{aut.id}-{state._id}'.encode()).hexdigest()
             copy_state = State(copy_state_id,state_value,state._is_accept)
             # creates the map
-            old_state_to_new_state_map[state._id] = copy_state_id
+            old_state_to_new_state_map[(aut.id,state._id)] = copy_state_id
             # maps the new id to teh copy state
             states[copy_state_id] = copy_state
 
@@ -857,18 +857,18 @@ cdef NFA _automaton_union(set[Automaton] automatons):
     for aut in automatons:
         # creates an epsilon transition to each start state of the automaton
         from_state = result._start_state
-        to_state = states[old_state_to_new_state_map[aut._start_state._id]]
+        to_state = states[old_state_to_new_state_map[(aut.id,aut._start_state._id)]]
         result.add_epsilon_transition(from_state,to_state)
         # copy transitions from every automaton
         for transition,to_id in aut._trans_func._table.items():
-            from_state = states[old_state_to_new_state_map[transition[0]]]
-            to_state = states[old_state_to_new_state_map[to_id]]
+            from_state = states[old_state_to_new_state_map[(aut.id,transition[0])]]
+            to_state = states[old_state_to_new_state_map[(aut.id,to_id)]]
             result.add_transition(from_state,to_state,transition[1])
         # copy epsilon transitions
         for state_id,epsilons in aut._epsilons.items():
-            from_state = states[old_state_to_new_state_map[state_id]]
+            from_state = states[old_state_to_new_state_map[(aut.id,state_id)]]
             for to_id in epsilons:
-                to_state = states[old_state_to_new_state_map[to_id]]
+                to_state = states[old_state_to_new_state_map[(aut.id,to_id)]]
                 result.add_epsilon_transition(from_state,to_state)
     
     return result
