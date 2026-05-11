@@ -74,6 +74,41 @@ cdef class Automaton:
         raise ValueError("Can not instance this class")
     
     @property
+    def id(self) -> str:
+        '''
+        Returns:
+            str: the id for this automaton
+        '''
+        cdef str result = ''
+        cdef list[str] transitions_id = []
+        cdef list[str] epsilons_transitions_id = []
+        cdef list[str] states_id
+        cdef tuple[str,str] transition
+        cdef str state_id,to_id,epsilon_transition_id
+        cdef set[str] epsilons
+        cdef State state
+
+        if self._trans_func._table:
+            for transition,to_id in self._trans_func._table.items():
+                transitions_id.append(f'({transition[0]},{transition[1]}) ---> {to_id}')
+        if self._epsilons:
+            for state_id,epsilons in self._epsilons.items():
+                states_id = []
+                for to_id in epsilons:
+                    states_id.append(to_id)
+                states_id.sort()
+                epsilon_transition_id = f'{state_id} --e--> ' + '{' + ','.join(states_id) + '}'
+                epsilons_transitions_id.append(epsilon_transition_id)
+        states_id = []
+        for state in self._states_by_id.values():
+            states_id.append(f'{state._id} ACCEPTING: {state._is_accept}')
+        states_id.sort()
+        epsilons_transitions_id.sort()
+        transitions_id.sort()
+        result = sha256(f"START: {self._start_state._id} STATES: {'-'.join(states_id)} TRANSITIONS: {'-'.join(transitions_id)} EPSILONS: {'-'.join(epsilons_transitions_id)}".encode()).hexdigest()
+        return result
+
+    @property
     def alphabet(self) -> Set[str]:
         '''
         Returns:
@@ -142,6 +177,17 @@ cdef class Automaton:
             Dict[Tuple[str,str],str]: A dictionary representing the transition function of this automaton
         '''
         return self._trans_func.to_dict()
+    
+    @staticmethod
+    def Union(states:Set[Automaton]) -> NFA:
+        '''
+        Args:
+            states (Set[State])
+        
+        Returns:
+            NFA: returns the automaton equivalent to the union of each given automaton
+        '''
+        return _automaton_union(states)
     
     cpdef void add_transition(self,State from_state,State to_state,str symbol):
         '''
@@ -704,6 +750,120 @@ cdef class NFA(Automaton):
                     break
         
         return create_dfa(new_states,table,start_state._id,self._alphabet)
+
+cdef DFA _copy_dfa(DFA dfa):
+    cdef DFA result
+    cdef State state,copy_state
+    cdef str state_id
+    cdef object state_value
+
+    if isinstance(dfa._start_state._value,set):
+        state_value = set(dfa._start_state._value)
+    else:
+        state_value = dfa._start_state._value
+
+    result = DFA(dfa._start_state._id,state_value,set(dfa._alphabet),dfa._start_state._is_accept)
+
+    for state_id,state in dfa._states_by_id.items():
+        if isinstance(state._value,set):
+            state_value = set(state._value)
+        else:
+            state_value = state._value
+        copy_state = State(state_id,state_value,state._is_accept)
+        result._states_by_id[state_id] = copy_state
+    
+    result._start_state = result._states_by_id[dfa._start_state._id]
+    result._current_state = result._start_state
+    result._trans_func._table.update(dfa._trans_func._table)
+    result._is_complete = dfa._is_complete
+    return result
+
+cdef NFA _copy_nfa(NFA nfa):
+    cdef NFA result
+    cdef State state,copy_state
+    cdef str state_id
+    cdef object state_value
+    cdef set[str] epsilons
+    cdef set[State] clousure
+
+    if isinstance(nfa._start_state._value,set):
+        state_value = set(nfa._start_state._value)
+    else:
+        state_value = nfa._start_state._value
+    
+    result = NFA(nfa._start_state._id,state_value,set(nfa._alphabet),nfa._start_state._is_accept)
+
+    for state_id,state in nfa._states_by_id.items():
+        if isinstance(state._value,set):
+            state_value = set(state._value)
+        else:
+            state_value = state._value
+        copy_state = State(state_id,state_value,state._is_accept)
+        result._states_by_id[state_id] = copy_state
+    
+    for state_id,epsilons in nfa._epsilons.items():
+        result._epsilons[state_id] = set(epsilons)
+    
+    for state_id,clousure in nfa._clousures.items():
+        result._clousures[state_id] = set()
+        for state in nfa._clousures[state_id]:
+            result._clousures[state_id].add(result._states_by_id[state._id])
+    
+    result._is_complete = nfa._is_complete
+    return result
+
+cdef NFA _automaton_union(set[Automaton] automatons):
+    cdef Automaton aut
+    cdef NFA result
+    cdef str copy_state_id,union_start_id,to_id,state_id
+    cdef State start_state,copy_state,from_state,to_state
+    cdef object state_value
+    cdef dict[str,State] states = {}
+    cdef dict[str,str] old_state_to_new_state_map = {}
+    cdef list[str] aut_ids = []
+    cdef set[str] alphabet = set()
+    cdef tuple[str,str] transition
+    cdef set[str] epsilons
+
+    for aut in automatons:
+        # updates alphabet
+        alphabet.update(aut.alphabet)
+        aut_ids.append(aut.id)
+        # copy states
+        for state in aut._states_by_id.values():
+            if isinstance(state._value,set):
+                state_value = set(state._value)
+            else:
+                state_value = state._value
+            copy_state_id = sha256(f'{aut.id}-{state._id}'.encode()).hexdigest()
+            copy_state = State(copy_state_id,state_value,state._is_accept)
+            # creates the map
+            old_state_to_new_state_map[state._id] = copy_state_id
+            # maps the new id to teh copy state
+            states[copy_state_id] = copy_state
+
+    aut_ids.sort()
+    union_start_id = sha256(f'UNION-{"-".join(aut_ids)}'.encode()).hexdigest()
+    result = NFA(union_start_id,union_start_id,alphabet)
+
+    for aut in automatons:
+        # creates an epsilon transition to each start state of the automaton
+        from_state = result._start_state
+        to_state = states[old_state_to_new_state_map[aut._start_state._id]]
+        result.add_epsilon_transition(from_state,to_state)
+        # copy transitions from every automaton
+        for transition,to_id in aut._trans_func._table.items():
+            from_state = states[old_state_to_new_state_map[transition[0]]]
+            to_state = states[old_state_to_new_state_map[to_id]]
+            result.add_transition(from_state,to_state,transition[1])
+        # copy epsilon transitions
+        for state_id,epsilons in aut._epsilons.items():
+            from_state = states[old_state_to_new_state_map[state_id]]
+            for to_id in epsilons:
+                to_state = states[old_state_to_new_state_map[to_id]]
+                result.add_epsilon_transition(from_state,to_state)
+    
+    return result
 
 cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet):
     '''

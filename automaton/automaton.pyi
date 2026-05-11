@@ -29,6 +29,9 @@ class Automaton:
     '''
     
     @property
+    def id(self) -> str: ...
+
+    @property
     def alphabet(self) -> Set[str]: ...
     
     @property
@@ -48,6 +51,9 @@ class Automaton:
     
     @property
     def transition_function(self) -> Dict[Tuple[str,str],str]: ...
+
+    @staticmethod
+    def Union(states:Set[Automaton]) -> NFA: ...
     
     def add_transition(self,from_state:State,to_state: State,symbol: str) -> None: ...
     
