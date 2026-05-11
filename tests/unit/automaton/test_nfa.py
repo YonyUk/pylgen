@@ -208,3 +208,60 @@ class TestNFA:
         dfa = nfa_zeros_or_ones.to_deterministic()
 
         assert dfa.accept(list(string)) == (len(set(string)) == 1)
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '10',
+        '01'
+        '101'
+        '010',
+        '101010',
+        '10101'
+        '000001'
+        '111110',
+    ])
+    def test_nfa_to_dfa_minimize_1(self,string:str,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+        minimized = dfa.minimize()
+        was_completed = False
+
+        if not dfa.is_complete:
+            was_completed = True
+            dfa.make_complete()
+        
+        assert len(minimized.states) <= len(dfa.states)
+        
+        if was_completed:
+            dfa.restore_to_before_complete()
+        
+        assert minimized.accept(list(string)) == dfa.accept(list(string))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '1'*3,
+        '0'*3,
+        '0101001001',
+        '11010101',
+        '111111110',
+        '00000001'
+    ])
+    def test_nfa_to_dfa_minimize_2(self,string:str,nfa_zeros_or_ones:NFA):
+        dfa = nfa_zeros_or_ones.to_deterministic()
+        minimized = dfa.minimize()
+        was_completed = False
+
+        if not dfa.is_complete:
+            was_completed = True
+            dfa.make_complete()
+        
+        assert len(minimized.states) <= len(dfa.states)
+        
+        if was_completed:
+            dfa.restore_to_before_complete()
+        
+        assert minimized.accept(list(string)) == dfa.accept(list(string))
