@@ -696,3 +696,159 @@ class TestAutomatonOperations:
 
         assert union_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) or alternate_dfa.accept(list(string)))
         assert minimized.accept(list(string)) == union_automaton.accept(list(string))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '11',
+        '10',
+        '01',
+        '110',
+        '101',
+        '011',
+        '001',
+        '010',
+        '100',
+        '1010',
+        '10101',
+        '11010',
+        '11001',
+        '1111',
+        '0000',
+        '1101',
+        '0010',
+        '00101'
+        '10100',
+        '10101',
+        '11001',
+        '11011',
+        '11101'
+    ])
+    def test_automaton_union_operation_11_1(self,string:str,five_multiplo_dfa:DFA,nfa_0_1_terminated:NFA):
+        
+        union_automaton = Automaton.Union({five_multiplo_dfa,nfa_0_1_terminated}).to_deterministic()
+        minimized = union_automaton.minimize()
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        assert union_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) or dfa.accept(list(string)))
+        assert minimized.accept(list(string)) == union_automaton.accept(list(string))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '11',
+        '10',
+        '01',
+        '110',
+        '101',
+        '011',
+        '001',
+        '010',
+        '100',
+        '1010',
+        '10101',
+        '11010',
+        '11001',
+        '1111',
+        '0000',
+        '1101',
+        '0010',
+        '00101'
+        '10100',
+        '10101',
+        '11001',
+        '11011',
+        '11101'
+    ])
+    def test_automaton_union_operation_11_2(self,string:str,five_multiplo_dfa:DFA,nfa_0_1_terminated:NFA):
+        
+        union_automaton = Automaton.Union({five_multiplo_dfa,nfa_0_1_terminated}).to_deterministic()
+        minimized = union_automaton.minimize()
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        assert union_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) or dfa.accept(list(string)))
+        assert minimized.accept(list(string)) == union_automaton.accept(list(string))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '11',
+        '10',
+        '01',
+        '110',
+        '101',
+        '011',
+        '001',
+        '010',
+        '100',
+        '1010',
+        '10101',
+        '11010',
+        '11001',
+        '1111',
+        '0000',
+        '1101',
+        '0010',
+        '00101'
+        '10100',
+        '10101',
+        '11001',
+        '11011',
+        '11101'
+    ])
+    def test_automaton_union_operation_11_3(self,string:str,five_multiplo_dfa:DFA,nfa_0_1_terminated:NFA):
+        
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        union_automaton = Automaton.Union({five_multiplo_dfa,dfa}).to_deterministic()
+        minimized = union_automaton.minimize()
+
+        assert union_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) or dfa.accept(list(string)))
+        assert minimized.accept(list(string)) == union_automaton.accept(list(string))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '11',
+        '10',
+        '01',
+        '110',
+        '101',
+        '011',
+        '001',
+        '010',
+        '100',
+        '1010',
+        '10101',
+        '11010',
+        '11001',
+        '1111',
+        '0000',
+        '1101',
+        '0010',
+        '00101'
+        '10100',
+        '10101',
+        '11001',
+        '11011',
+        '11101'
+    ])
+    def test_automaton_union_operation_11_4(self,string:str,five_multiplo_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+        
+        union_automaton = Automaton.Union({five_multiplo_dfa,dfa}).to_deterministic()
+        minimized = union_automaton.minimize()
+
+        assert union_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) or dfa.accept(list(string)))
+        assert minimized.accept(list(string)) == union_automaton.accept(list(string))
