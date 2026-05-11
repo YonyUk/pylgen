@@ -600,10 +600,15 @@ cdef class DFA(Automaton):
                         partition[block_idx] = intersection
                         diff = current_partition_item.difference(intersection)
                         partition.append(diff)
-                        if len(diff) <= len(intersection):
+                        if not current_partition_item in queue:
+                            if len(diff) <= len(intersection):
+                                queue.append(diff)
+                            if len(intersection) <= len(diff):
+                                queue.append(intersection)
+                        else:
                             queue.append(diff)
-                        if len(intersection) <= len(diff):
                             queue.append(intersection)
+
                     block_idx += 1
         
         result = self._build_new_dfa(partition)
