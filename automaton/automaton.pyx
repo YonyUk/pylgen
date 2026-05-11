@@ -179,7 +179,7 @@ cdef class Automaton:
         return self._trans_func.to_dict()
     
     @staticmethod
-    def Union(states:Set[Automaton]) -> NFA:
+    def Union(automatons:Set[Automaton]) -> NFA:
         '''
         Args:
             states (Set[State])
@@ -187,7 +187,7 @@ cdef class Automaton:
         Returns:
             NFA: returns the automaton equivalent to the union of each given automaton
         '''
-        return _automaton_union(states)
+        return _automaton_union(automatons)
     
     cpdef void add_transition(self,State from_state,State to_state,str symbol):
         '''
@@ -750,6 +750,14 @@ cdef class NFA(Automaton):
                     break
         
         return create_dfa(new_states,table,start_state._id,self._alphabet)
+    
+    def __iadd__(self,tuple[State,str,State] transition) -> NFA:
+        cdef State from_state = <State>transition[0]
+        cdef State to_state = <State>transition[2]
+        cdef str symbol = <str>transition[1]
+
+        self.add_transition(from_state,to_state,symbol)
+        return self
 
 cdef DFA _copy_dfa(DFA dfa):
     cdef DFA result
