@@ -525,11 +525,16 @@ cdef class DFA(Automaton):
             bool: says when this automaton ends on an accepting state after read all the given string
         '''
         cdef str symbol
+        cdef bint result = self._start_state._is_accept
         for symbol in string:
             self.walk(symbol)
             if self._is_stuck:
-                return False # type:ignore
-        return self._current_state._is_accept
+                result = False # type:ignore
+                break
+            else:
+                result = self._current_state._is_accept
+        self.reset()
+        return result
     
     cpdef DFA minimize(self):
         '''
