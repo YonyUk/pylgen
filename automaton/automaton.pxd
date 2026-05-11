@@ -45,5 +45,8 @@ cdef class NFA(Automaton):
 cdef DFA _copy_dfa(DFA dfa)
 cdef NFA _copy_nfa(NFA nfa)
 cdef NFA _automaton_union(set[Automaton] automatons)
+cdef DFA _dfa_complement(DFA automaton)
+cdef DFA _nfa_complement(NFA automaton)
+cdef DFA _automaton_complement(Automaton automaton)
 
 cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet)

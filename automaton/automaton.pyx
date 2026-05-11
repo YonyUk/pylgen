@@ -189,6 +189,17 @@ cdef class Automaton:
         '''
         return _automaton_union(automatons)
     
+    @staticmethod
+    def Complement(automaton:Automaton) -> DFA:
+        '''
+        Args:
+            automaton (Automaton)
+        
+        Returns:
+            DFA: returns the complement automaton to the given automaton
+        '''
+        return _automaton_complement(automaton)
+    
     cpdef void add_transition(self,State from_state,State to_state,str symbol):
         '''
         Args:
@@ -887,6 +898,34 @@ cdef NFA _automaton_union(set[Automaton] automatons):
                 to_state = states[old_state_to_new_state_map[(aut.id,to_id)]]
                 result.add_epsilon_transition(from_state,to_state)
     
+    return result
+
+cdef DFA _dfa_complement(DFA automaton):
+    cdef DFA result
+    cdef State state
+
+    result = _copy_dfa(automaton)
+
+    if not result.is_complete:
+        result.make_complete()
+    
+    for state in result._states_by_id.values():
+        state._is_accept = not state._is_accept # type:ignore
+    
+    return result
+
+cdef DFA _nfa_complement(NFA automaton):
+    cdef DFA dfa = automaton.to_deterministic().minimize()
+
+    return _dfa_complement(dfa)
+
+cdef DFA _automaton_complement(Automaton automaton):
+    cdef DFA result
+
+    if isinstance(automaton,DFA):
+        result = _dfa_complement(automaton)
+    else:
+        result = _nfa_complement(automaton) # type:ignore
     return result
 
 cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet):

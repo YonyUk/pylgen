@@ -54,6 +54,9 @@ class Automaton:
 
     @staticmethod
     def Union(automatons:Set[Automaton]) -> NFA: ...
+
+    @staticmethod
+    def Complement(automaton:Automaton) -> DFA: ...
     
     def add_transition(self,from_state:State,to_state: State,symbol: str) -> None: ...
     
