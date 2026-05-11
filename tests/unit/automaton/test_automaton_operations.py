@@ -121,6 +121,21 @@ class TestAutomatonOperations:
 
         return aut
     
+    @pytest.fixture
+    def alternate_a_b_dfa(self) -> DFA:
+        aut = DFA('start','start',{'a','b'})
+
+        q0 = State('q0','q0',True)
+        q1 = State('q1','q1',True)
+
+        aut.add_transition(aut.start_state,q0,'a')
+        aut.add_transition(aut.start_state,q1,'b')
+
+        aut.add_transition(q0,q1,'b')
+        aut.add_transition(q1,q0,'a')
+    
+        return aut
+    
     @pytest.mark.parametrize("string",[
         '',
         '0',
@@ -2092,3 +2107,42 @@ class TestAutomatonOperations:
 
         assert union_automaton.accept(input_) == should_accept
         assert minimized.accept(input_) == union_automaton.accept(input_)
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        'a',
+        'b',
+        '00',
+        '11',
+        '01',
+        '10',
+        'aa',
+        'bb',
+        'ab',
+        'ba',
+        '00001',
+        '10000',
+        '01111',
+        '11110',
+        'aaaab',
+        'baaaa',
+        'aaaab',
+        'bbbba',
+        '010101',
+        '101010',
+        'ababab',
+        'bababa',
+        '0101ab01',
+        'abab01abab',
+        '01010ababab0101',
+        'ababab0101abab'
+    ])
+    def test_automaton_union_operation_17(self,string:str,alternate_dfa:DFA,alternate_a_b_dfa:DFA):
+
+        union_automaton = Automaton.Union({alternate_dfa,alternate_a_b_dfa}).to_deterministic()
+        minimized = union_automaton.minimize()
+
+        assert union_automaton.accept(list(string)) == (alternate_dfa.accept(list(string)) or alternate_a_b_dfa.accept(list(string)))
+        assert minimized.accept(list(string)) == union_automaton.accept(list(string))
