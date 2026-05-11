@@ -193,3 +193,105 @@ class TestAutomatonOperations:
 
         assert union_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) or alternate_dfa.accept(list(string)))
         assert minimized.accept(list(string)) == union_automaton.accept(list(string))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '11',
+        '01',
+        '10',
+        '00000001',
+        '11111110',
+        '10101010',
+        '01010101',
+        '1111111',
+        '0000000'
+    ])
+    def test_automaton_union_operation_4_1(self,string:str,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        union_automaton = Automaton.Union({zero_terminated_dfa,nfa_0_1_terminated}).to_deterministic()
+        minimized = union_automaton.minimize()
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        assert union_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) or dfa.accept(list(string)))
+        assert minimized.accept(list(string)) == union_automaton.accept(list(string))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '11',
+        '01',
+        '10',
+        '00000001',
+        '11111110',
+        '10101010',
+        '01010101',
+        '1111111',
+        '0000000'
+    ])
+    def test_automaton_union_operation_4_2(self,string:str,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        union_automaton = Automaton.Union({zero_terminated_dfa,nfa_0_1_terminated}).to_deterministic()
+        minimized = union_automaton.minimize()
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        assert union_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) or dfa.accept(list(string)))
+        assert minimized.accept(list(string)) == union_automaton.accept(list(string))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '11',
+        '01',
+        '10',
+        '00000001',
+        '11111110',
+        '10101010',
+        '01010101',
+        '1111111',
+        '0000000'
+    ])
+    def test_automaton_union_operation_4_3(self,string:str,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        union_automaton = Automaton.Union({zero_terminated_dfa,dfa}).to_deterministic()
+        minimized = union_automaton.minimize()
+
+
+        assert union_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) or dfa.accept(list(string)))
+        assert minimized.accept(list(string)) == union_automaton.accept(list(string))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '11',
+        '01',
+        '10',
+        '00000001',
+        '11111110',
+        '10101010',
+        '01010101',
+        '1111111',
+        '0000000'
+    ])
+    def test_automaton_union_operation_4_4(self,string:str,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+        
+        union_automaton = Automaton.Union({zero_terminated_dfa,nfa_0_1_terminated}).to_deterministic()
+        minimized = union_automaton.minimize()
+
+
+        assert union_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) or dfa.accept(list(string)))
+        assert minimized.accept(list(string)) == union_automaton.accept(list(string))
