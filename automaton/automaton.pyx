@@ -350,6 +350,7 @@ cdef class Automaton:
             for transition in self._transitions_added_while_completing:
                 del self._trans_func._table[transition]
             self._is_complete = False # type:ignore
+            self._transitions_added_while_completing.clear()
 
 cdef class DFA(Automaton):
 
