@@ -2731,7 +2731,6 @@ class TestAutomatonOperations:
         'babababab01ba'
     ])
     def test_automaton_intersection_operation_4_1(self,string:str,zero_terminated_dfa:DFA,alternate_a_b_dfa:DFA):
-
         intersection_automaton = Automaton.Intersection({zero_terminated_dfa,alternate_a_b_dfa})
 
         assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_a_b_dfa.accept(list(string)))
@@ -2750,7 +2749,6 @@ class TestAutomatonOperations:
         'babababab01ba'
     ])
     def test_automaton_intersection_operation_4_2(self,string:str,zero_terminated_dfa:DFA,alternate_a_b_dfa:DFA):
-
         intersection_automaton = Automaton.Intersection({zero_terminated_dfa,alternate_a_b_dfa}).minimize()
 
         assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_a_b_dfa.accept(list(string)))

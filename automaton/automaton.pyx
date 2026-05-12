@@ -940,13 +940,95 @@ cdef DFA _automaton_complement(Automaton automaton):
     return result
 
 cdef DFA _automaton_intersection(set[Automaton] automatons):
-    cdef set[Automaton] dfas = set()
-    cdef Automaton automaton
+    cdef Automaton aut
+    cdef DFA dfa
+    cdef list[DFA] dfa_list = []
+    cdef set[str] alphabet = set()
+    cdef int dfa_count, i
+    cdef str sym, start_id, new_state_id
+    cdef tuple comp_states_tuple, next_states_tuple
+    cdef list[State] comp_states_list, next_states_list
+    cdef State product_state, next_product_state, comp_state, st
+    cdef Table product_transitions = Table()
+    cdef dict[str,State] product_states = {}
+    cdef list[State] worklist = []
+    cdef set[State] new_states_set = set()
+    cdef list[str] compound_ids
+    cdef bint is_accept
 
-    for automaton in automatons:
-        dfas.add(_automaton_complement(automaton))
-    
-    return _automaton_complement(_automaton_union(dfas))
+    if not automatons:
+        raise ValueError("Intersection of empty set of automata is not defined.")
+
+    # convert every automaton to a dfa
+    for aut in automatons:
+        if isinstance(aut, DFA):
+            dfa = _copy_dfa(<DFA>aut)
+        elif isinstance(aut, NFA):
+            dfa = (<NFA>aut).to_deterministic()
+        else:
+            raise TypeError("Unknown automaton type")
+        # updates the alphabet
+        alphabet.update(dfa._alphabet)
+        dfa_list.append(dfa)
+
+    dfa_count = len(dfa_list)
+
+    # complement the automatons with the new alphabet
+    for dfa in dfa_list:
+        dfa._alphabet = set(alphabet)
+        dfa._is_complete = False # type:ignore
+        dfa.make_complete()
+
+    # builds the start state
+    comp_states_list = [dfa._start_state for dfa in dfa_list]
+    comp_states_tuple = tuple(comp_states_list)
+
+    is_accept = True # type:ignore
+    for comp_state in comp_states_list:
+        if not comp_state._is_accept:
+            is_accept = False # type:ignore
+            break
+
+    compound_ids = [f"{dfa_list[i].id}-{(<State>comp_states_list[i])._id}" for i in range(dfa_count)]
+    compound_ids.sort()
+    start_id = sha256(''.join(compound_ids).encode()).hexdigest()
+
+    product_state = State(start_id, comp_states_tuple, is_accept)
+    product_states[start_id] = product_state
+    worklist.append(product_state)
+
+    while worklist:
+        product_state = worklist.pop()
+        comp_states_tuple = <tuple>product_state._value
+
+        for sym in alphabet:
+            next_states_list = []
+            for i in range(dfa_count):
+                comp_state = comp_states_tuple[i]
+                # como el DFA está completo, next nunca lanza KeyError
+                next_states_list.append(dfa_list[i].next(comp_state, sym))
+            next_states_tuple = tuple(next_states_list)
+
+            compound_ids = [f"{dfa_list[i].id}-{(<State>next_states_tuple[i])._id}" for i in range(dfa_count)]
+            compound_ids.sort()
+            new_state_id = sha256(''.join(compound_ids).encode()).hexdigest()
+
+            if new_state_id not in product_states:
+                is_accept = True # type:ignore
+                for st in next_states_tuple:
+                    if not st._is_accept:
+                        is_accept = False # type:ignore
+                        break
+                next_product_state = State(new_state_id, next_states_tuple, is_accept)
+                product_states[new_state_id] = next_product_state
+                worklist.append(next_product_state)
+            else:
+                next_product_state = product_states[new_state_id]
+
+            product_transitions._table[(product_state._id, sym)] = next_product_state._id
+
+    new_states_set = set(product_states.values())
+    return create_dfa(new_states_set, product_transitions, start_id, alphabet)
 
 cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet):
     '''
