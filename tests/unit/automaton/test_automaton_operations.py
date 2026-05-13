@@ -2752,3 +2752,1504 @@ class TestAutomatonOperations:
         intersection_automaton = Automaton.Intersection({zero_terminated_dfa,alternate_a_b_dfa}).minimize()
 
         assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_a_b_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '00',
+        '11',
+        '01',
+        '10',
+        '010101',
+        '10101010',
+        '0000001',
+        '100000',
+        '011111',
+        '1111110'
+    ])
+    def test_automaton_intersection_operation_5_1(self,string:str,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,nfa_0_1_terminated})
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '00',
+        '11',
+        '01',
+        '10',
+        '010101',
+        '10101010',
+        '0000001',
+        '100000',
+        '011111',
+        '1111110'
+    ])
+    def test_automaton_intersection_operation_5_2(self,string:str,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,nfa_0_1_terminated}).minimize()
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '00',
+        '11',
+        '01',
+        '10',
+        '010101',
+        '10101010',
+        '0000001',
+        '100000',
+        '011111',
+        '1111110'
+    ])
+    def test_automaton_intersection_operation_5_3(self,string:str,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,dfa})
+
+        assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '00',
+        '11',
+        '01',
+        '10',
+        '010101',
+        '10101010',
+        '0000001',
+        '100000',
+        '011111',
+        '1111110'
+    ])
+    def test_automaton_intersection_operation_5_4(self,string:str,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,dfa})
+
+        assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '00',
+        '11',
+        '01',
+        '10',
+        '010101',
+        '10101010',
+        '0000001',
+        '100000',
+        '011111',
+        '1111110'
+    ])
+    def test_automaton_intersection_operation_5_5(self,string:str,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '00',
+        '11',
+        '01',
+        '10',
+        '010101',
+        '10101010',
+        '0000001',
+        '100000',
+        '011111',
+        '1111110'
+    ])
+    def test_automaton_intersection_operation_5_6(self,string:str,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '01',
+        '10',
+        '00',
+        '11',
+        '00000',
+        '11110',
+        '000001',
+        '100000',
+        '111111',
+        '0101010',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_6_1(self,string:str,zero_terminated_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,nfa_zeros_or_ones})
+
+        dfa = nfa_zeros_or_ones.to_deterministic()
+
+        assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '01',
+        '10',
+        '00',
+        '11',
+        '00000',
+        '11110',
+        '000001',
+        '100000',
+        '111111',
+        '0101010',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_6_2(self,string:str,zero_terminated_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,nfa_zeros_or_ones}).minimize()
+
+        dfa = nfa_zeros_or_ones.to_deterministic()
+
+        assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '01',
+        '10',
+        '00',
+        '11',
+        '00000',
+        '11110',
+        '000001',
+        '100000',
+        '111111',
+        '0101010',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_6_3(self,string:str,zero_terminated_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        dfa = nfa_zeros_or_ones.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,dfa})
+
+        assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '01',
+        '10',
+        '00',
+        '11',
+        '00000',
+        '11110',
+        '000001',
+        '100000',
+        '111111',
+        '0101010',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_6_4(self,string:str,zero_terminated_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        dfa = nfa_zeros_or_ones.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '01',
+        '10',
+        '00',
+        '11',
+        '00000',
+        '11110',
+        '000001',
+        '100000',
+        '111111',
+        '0101010',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_6_5(self,string:str,zero_terminated_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        dfa = nfa_zeros_or_ones.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,dfa})
+
+        assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '01',
+        '10',
+        '00',
+        '11',
+        '00000',
+        '11110',
+        '000001',
+        '100000',
+        '111111',
+        '0101010',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_6_6(self,string:str,zero_terminated_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        dfa = nfa_zeros_or_ones.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '11',
+        '10',
+        '01',
+        '101',
+        '010',
+        '110',
+        '011',
+        '100',
+        '001',
+        '00001',
+        '10000',
+        '11001',
+        '100011'
+    ])
+    def test_automaton_intersection_operation_7_1(self,string:str,one_terminated_dfa:DFA,five_multiplo_dfa:DFA):
+
+        intersection_automaton = Automaton.Intersection({one_terminated_dfa,five_multiplo_dfa})
+
+        assert intersection_automaton.accept(list(string)) == (one_terminated_dfa.accept(list(string)) and five_multiplo_dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '11',
+        '10',
+        '01',
+        '101',
+        '010',
+        '110',
+        '011',
+        '100',
+        '001',
+        '00001',
+        '10000',
+        '11001',
+        '100011'
+    ])
+    def test_automaton_intersection_operation_7_2(self,string:str,one_terminated_dfa:DFA,five_multiplo_dfa:DFA):
+
+        intersection_automaton = Automaton.Intersection({one_terminated_dfa,five_multiplo_dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (one_terminated_dfa.accept(list(string)) and five_multiplo_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '10',
+        '11',
+        '00',
+        '01',
+        '01001',
+        '101001',
+        '0101010',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_8_1(self,string:str,one_terminated_dfa:DFA,alternate_dfa:DFA):
+
+        intersection_automaton = Automaton.Intersection({one_terminated_dfa,alternate_dfa})
+
+        assert intersection_automaton.accept(list(string)) == (one_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '10',
+        '11',
+        '00',
+        '01',
+        '01001',
+        '101001',
+        '0101010',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_8_2(self,string:str,one_terminated_dfa:DFA,alternate_dfa:DFA):
+
+        intersection_automaton = Automaton.Intersection({one_terminated_dfa,alternate_dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (one_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '01',
+        '00',
+        '11',
+        '10',
+        '0101010',
+        '101010101',
+        'a',
+        'b',
+        'ab',
+        'ba',
+        'aa',
+        'bb',
+        'abababba',
+        'ababababaa',
+        '010101010ab0',
+        '0101010a0b1ba0'
+    ])
+    def test_automaton_intersection_operation_9_1(self,string:str,one_terminated_dfa:DFA,alternate_a_b_dfa:DFA):
+
+        intersection_automaton = Automaton.Intersection({one_terminated_dfa,alternate_a_b_dfa})
+
+        assert intersection_automaton.accept(list(string)) == (one_terminated_dfa.accept(list(string)) and alternate_a_b_dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        '01',
+        '00',
+        '11',
+        '10',
+        '0101010',
+        '101010101',
+        'a',
+        'b',
+        'ab',
+        'ba',
+        'aa',
+        'bb',
+        'abababba',
+        'ababababaa',
+        '010101010ab0',
+        '0101010a0b1ba0'
+    ])
+    def test_automaton_intersection_operation_9_2(self,string:str,one_terminated_dfa:DFA,alternate_a_b_dfa:DFA):
+
+        intersection_automaton = Automaton.Intersection({one_terminated_dfa,alternate_a_b_dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (one_terminated_dfa.accept(list(string)) and alternate_a_b_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '00',
+        '11',
+        '10',
+        '01',
+        '001010',
+        '0010101',
+        '11001',
+        '11101',
+        '1010111',
+        '10010010011'
+    ])
+    def test_automaton_intersection_operation_10_1(self,string,one_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({one_terminated_dfa,nfa_0_1_terminated})
+
+        assert intersection_automaton.accept(list(string)) == (one_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '00',
+        '11',
+        '10',
+        '01',
+        '001010',
+        '0010101',
+        '11001',
+        '11101',
+        '1010111',
+        '10010010011'
+    ])
+    def test_automaton_intersection_operation_10_2(self,string,one_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({one_terminated_dfa,nfa_0_1_terminated}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (one_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '00',
+        '11',
+        '10',
+        '01',
+        '001010',
+        '0010101',
+        '11001',
+        '11101',
+        '1010111',
+        '10010010011'
+    ])
+    def test_automaton_intersection_operation_10_3(self,string,one_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({one_terminated_dfa,dfa})
+
+        assert intersection_automaton.accept(list(string)) == (one_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '00',
+        '11',
+        '10',
+        '01',
+        '001010',
+        '0010101',
+        '11001',
+        '11101',
+        '1010111',
+        '10010010011'
+    ])
+    def test_automaton_intersection_operation_10_4(self,string,one_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({one_terminated_dfa,dfa})
+
+        assert intersection_automaton.accept(list(string)) == (one_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '00',
+        '11',
+        '10',
+        '01',
+        '001010',
+        '0010101',
+        '11001',
+        '11101',
+        '1010111',
+        '10010010011'
+    ])
+    def test_automaton_intersection_operation_10_5(self,string,one_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({one_terminated_dfa,dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (one_terminated_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '11',
+        '01',
+        '10',
+        '101',
+        '010',
+        '00001',
+        '10000',
+        '1010',
+        '10101',
+        '01010',
+        '010101',
+        '10100',
+        '11110',
+        '0111111'
+    ])
+    def test_automaton_intersection_operation_11_1(self,string:str,five_multiplo_dfa:DFA,alternate_dfa:DFA):
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,alternate_dfa})
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '11',
+        '01',
+        '10',
+        '101',
+        '010',
+        '00001',
+        '10000',
+        '1010',
+        '10101',
+        '01010',
+        '010101',
+        '10100',
+        '11110',
+        '0111111'
+    ])
+    def test_automaton_intersection_operation_11_2(self,string:str,five_multiplo_dfa:DFA,alternate_dfa:DFA):
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,alternate_dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        'a',
+        'b',
+        '10',
+        '01',
+        '11',
+        '00',
+        'ab',
+        'ba',
+        'aa',
+        'bb',
+        '01010ab01',
+        'abababab01ab',
+        '00011abb01',
+        'aabbbba0101001ab'
+    ])
+    def test_automaton_intersection_operation_12_1(self,string:str,five_multiplo_dfa:DFA,alternate_a_b_dfa:DFA):
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,alternate_a_b_dfa})
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and alternate_a_b_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '1',
+        '0',
+        'a',
+        'b',
+        '10',
+        '01',
+        '11',
+        '00',
+        'ab',
+        'ba',
+        'aa',
+        'bb',
+        '01010ab01',
+        'abababab01ab',
+        '00011abb01',
+        'aabbbba0101001ab'
+    ])
+    def test_automaton_intersection_operation_12_2(self,string:str,five_multiplo_dfa:DFA,alternate_a_b_dfa:DFA):
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,alternate_a_b_dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and alternate_a_b_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '10',
+        '01',
+        '11',
+        '00',
+        '101',
+        '010',
+        '110',
+        '011',
+        '100',
+        '001',
+        '1010',
+        '11001',
+        '100011'
+    ])
+    def test_automaton_intersection_operation_13_1(self,string:str,five_multiplo_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,nfa_0_1_terminated})
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '10',
+        '01',
+        '11',
+        '00',
+        '101',
+        '010',
+        '110',
+        '011',
+        '100',
+        '001',
+        '1010',
+        '11001',
+        '100011'
+    ])
+    def test_automaton_intersection_operation_13_2(self,string:str,five_multiplo_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,nfa_0_1_terminated}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '10',
+        '01',
+        '11',
+        '00',
+        '101',
+        '010',
+        '110',
+        '011',
+        '100',
+        '001',
+        '1010',
+        '11001',
+        '100011'
+    ])
+    def test_automaton_intersection_operation_13_3(self,string:str,five_multiplo_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,dfa})
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '10',
+        '01',
+        '11',
+        '00',
+        '101',
+        '010',
+        '110',
+        '011',
+        '100',
+        '001',
+        '1010',
+        '11001',
+        '100011'
+    ])
+    def test_automaton_intersection_operation_13_4(self,string:str,five_multiplo_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,dfa})
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '10',
+        '01',
+        '11',
+        '00',
+        '101',
+        '010',
+        '110',
+        '011',
+        '100',
+        '001',
+        '1010',
+        '11001',
+        '100011'
+    ])
+    def test_automaton_intersection_operation_13_5(self,string:str,five_multiplo_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '10',
+        '01',
+        '11',
+        '00',
+        '101',
+        '010',
+        '110',
+        '011',
+        '100',
+        '001',
+        '1010',
+        '11001',
+        '100011'
+    ])
+    def test_automaton_intersection_operation_13_6(self,string:str,five_multiplo_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '11',
+        '00',
+        '10',
+        '01',
+        '010',
+        '101',
+        '1111',
+        '01001'
+    ])
+    def test_automaton_intersection_operation_14_1(self,string:str,five_multiplo_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        dfa = nfa_zeros_or_ones.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,nfa_zeros_or_ones})
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '11',
+        '00',
+        '10',
+        '01',
+        '010',
+        '101',
+        '1111',
+        '01001'
+    ])
+    def test_automaton_intersection_operation_14_2(self,string:str,five_multiplo_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        dfa = nfa_zeros_or_ones.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,nfa_zeros_or_ones}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '11',
+        '00',
+        '10',
+        '01',
+        '010',
+        '101',
+        '1111',
+        '01001'
+    ])
+    def test_automaton_intersection_operation_14_3(self,string:str,five_multiplo_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        dfa = nfa_zeros_or_ones.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,nfa_zeros_or_ones})
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '11',
+        '00',
+        '10',
+        '01',
+        '010',
+        '101',
+        '1111',
+        '01001'
+    ])
+    def test_automaton_intersection_operation_14_4(self,string:str,five_multiplo_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        dfa = nfa_zeros_or_ones.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,dfa})
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '11',
+        '00',
+        '10',
+        '01',
+        '010',
+        '101',
+        '1111',
+        '01001'
+    ])
+    def test_automaton_intersection_operation_14_5(self,string:str,five_multiplo_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        dfa = nfa_zeros_or_ones.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,dfa})
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '11',
+        '00',
+        '10',
+        '01',
+        '010',
+        '101',
+        '1111',
+        '01001'
+    ])
+    def test_automaton_intersection_operation_14_6(self,string:str,five_multiplo_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        dfa = nfa_zeros_or_ones.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '11',
+        '00',
+        '10',
+        '01',
+        '010',
+        '101',
+        '1111',
+        '01001'
+    ])
+    def test_automaton_intersection_operation_14_7(self,string:str,five_multiplo_dfa:DFA,nfa_zeros_or_ones:NFA):
+
+        dfa = nfa_zeros_or_ones.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({five_multiplo_dfa,dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (five_multiplo_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        'a',
+        'b',
+        '00',
+        '01',
+        '0a',
+        '0b',
+        '10',
+        '11',
+        '1a',
+        '1b',
+        'a0',
+        'a1',
+        'a0',
+        'ab',
+        'b0',
+        'b1',
+        'ba',
+        'bb',
+        'a01ba0',
+        '010101ababab0101'
+    ])
+    def test_automaton_intersection_operation_15_1(self,string:str,alternate_dfa:DFA,alternate_a_b_dfa:DFA):
+
+        intersection_automaton = Automaton.Intersection({alternate_dfa,alternate_a_b_dfa})
+
+        assert intersection_automaton.accept(list(string)) == (alternate_dfa.accept(list(string)) and alternate_a_b_dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        'a',
+        'b',
+        '00',
+        '01',
+        '0a',
+        '0b',
+        '10',
+        '11',
+        '1a',
+        '1b',
+        'a0',
+        'a1',
+        'a0',
+        'ab',
+        'b0',
+        'b1',
+        'ba',
+        'bb',
+        'a01ba0',
+        '010101ababab0101'
+    ])
+    def test_automaton_intersection_operation_15_2(self,string:str,alternate_dfa:DFA,alternate_a_b_dfa:DFA):
+
+        intersection_automaton = Automaton.Intersection({alternate_dfa,alternate_a_b_dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (alternate_dfa.accept(list(string)) and alternate_a_b_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '010101',
+        '10101010',
+        '00010',
+        '11101',
+        '0011',
+        '1100',
+        '0111',
+        '1000',
+        '010101010001001',
+        '0010101',
+        '0101010101010101'
+    ])
+    def test_automaton_intersection_operation_16_1(self,string:str,alternate_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({alternate_dfa,nfa_0_1_terminated})
+
+        assert intersection_automaton.accept(list(string)) == (alternate_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '010101',
+        '10101010',
+        '00010',
+        '11101',
+        '0011',
+        '1100',
+        '0111',
+        '1000',
+        '010101010001001',
+        '0010101',
+        '0101010101010101'
+    ])
+    def test_automaton_intersection_operation_16_2(self,string:str,alternate_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({alternate_dfa,nfa_0_1_terminated}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (alternate_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '010101',
+        '10101010',
+        '00010',
+        '11101',
+        '0011',
+        '1100',
+        '0111',
+        '1000',
+        '010101010001001',
+        '0010101',
+        '0101010101010101'
+    ])
+    def test_automaton_intersection_operation_16_3(self,string:str,alternate_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({alternate_dfa,nfa_0_1_terminated})
+
+        assert intersection_automaton.accept(list(string)) == (alternate_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '010101',
+        '10101010',
+        '00010',
+        '11101',
+        '0011',
+        '1100',
+        '0111',
+        '1000',
+        '010101010001001',
+        '0010101',
+        '0101010101010101'
+    ])
+    def test_automaton_intersection_operation_16_4(self,string:str,alternate_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({alternate_dfa,dfa})
+
+        assert intersection_automaton.accept(list(string)) == (alternate_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '010101',
+        '10101010',
+        '00010',
+        '11101',
+        '0011',
+        '1100',
+        '0111',
+        '1000',
+        '010101010001001',
+        '0010101',
+        '0101010101010101'
+    ])
+    def test_automaton_intersection_operation_16_5(self,string:str,alternate_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({alternate_dfa,dfa})
+
+        assert intersection_automaton.accept(list(string)) == (alternate_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '010101',
+        '10101010',
+        '00010',
+        '11101',
+        '0011',
+        '1100',
+        '0111',
+        '1000',
+        '010101010001001',
+        '0010101',
+        '0101010101010101'
+    ])
+    def test_automaton_intersection_operation_16_6(self,string:str,alternate_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({alternate_dfa,dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (alternate_dfa.accept(list(string)) and dfa.accept(list(string)))
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '010101',
+        '10101010',
+        '00010',
+        '11101',
+        '0011',
+        '1100',
+        '0111',
+        '1000',
+        '010101010001001',
+        '0010101',
+        '0101010101010101'
+    ])
+    def test_automaton_intersection_operation_16_7(self,string:str,alternate_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({alternate_dfa,dfa}).minimize()
+
+        assert intersection_automaton.accept(list(string)) == (alternate_dfa.accept(list(string)) and dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '101',
+        '110',
+        '011',
+        '010',
+        '100',
+        '001',
+        '1010',
+        '10101010'
+    ])
+    def test_automaton_intersection_operation_multiple_17_1(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        five_multiplo_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,five_multiplo_dfa,alternate_dfa})
+
+        should_accept = zero_terminated_dfa.accept(list(string))
+        should_accept &= five_multiplo_dfa.accept(list(string))
+        should_accept &= alternate_dfa.accept(list(string))
+
+        assert intersection_automaton.accept(list(string)) == should_accept
+
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '101',
+        '110',
+        '011',
+        '010',
+        '100',
+        '001',
+        '1010',
+        '10101010'
+    ])
+    def test_automaton_intersection_operation_multiple_17_2(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        five_multiplo_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        intersection_automaton = Automaton.Intersection({zero_terminated_dfa,five_multiplo_dfa,alternate_dfa}).minimize()
+
+        should_accept = zero_terminated_dfa.accept(list(string))
+        should_accept &= five_multiplo_dfa.accept(list(string))
+        should_accept &= alternate_dfa.accept(list(string))
+
+        assert intersection_automaton.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '101',
+        '110',
+        '011',
+        '100',
+        '010',
+        '001',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_multiple_18_1(
+        self,
+        string:str,
+        one_terminated_dfa:DFA,
+        five_multiplo_dfa:DFA,
+        alternate_dfa:DFA,
+        nfa_0_1_terminated:NFA
+    ):
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({
+            one_terminated_dfa,
+            five_multiplo_dfa,
+            alternate_dfa,
+            nfa_0_1_terminated
+        })
+
+        should_accept = one_terminated_dfa.accept(list(string))
+        should_accept &= five_multiplo_dfa.accept(list(string))
+        should_accept &= alternate_dfa.accept(list(string))
+        should_accept &= dfa.accept(list(string))
+
+        assert intersection_automaton.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '101',
+        '110',
+        '011',
+        '100',
+        '010',
+        '001',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_multiple_18_2(
+        self,
+        string:str,
+        one_terminated_dfa:DFA,
+        five_multiplo_dfa:DFA,
+        alternate_dfa:DFA,
+        nfa_0_1_terminated:NFA
+    ):
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({
+            one_terminated_dfa,
+            five_multiplo_dfa,
+            alternate_dfa,
+            nfa_0_1_terminated
+        }).minimize()
+
+        should_accept = one_terminated_dfa.accept(list(string))
+        should_accept &= five_multiplo_dfa.accept(list(string))
+        should_accept &= alternate_dfa.accept(list(string))
+        should_accept &= dfa.accept(list(string))
+
+        assert intersection_automaton.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '101',
+        '110',
+        '011',
+        '100',
+        '010',
+        '001',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_multiple_18_3(
+        self,
+        string:str,
+        one_terminated_dfa:DFA,
+        five_multiplo_dfa:DFA,
+        alternate_dfa:DFA,
+        nfa_0_1_terminated:NFA
+    ):
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({
+            one_terminated_dfa,
+            five_multiplo_dfa,
+            alternate_dfa,
+            dfa
+        })
+
+        should_accept = one_terminated_dfa.accept(list(string))
+        should_accept &= five_multiplo_dfa.accept(list(string))
+        should_accept &= alternate_dfa.accept(list(string))
+        should_accept &= dfa.accept(list(string))
+
+        assert intersection_automaton.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '101',
+        '110',
+        '011',
+        '100',
+        '010',
+        '001',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_multiple_18_4(
+        self,
+        string:str,
+        one_terminated_dfa:DFA,
+        five_multiplo_dfa:DFA,
+        alternate_dfa:DFA,
+        nfa_0_1_terminated:NFA
+    ):
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({
+            one_terminated_dfa,
+            five_multiplo_dfa,
+            alternate_dfa,
+            dfa
+        })
+
+        should_accept = one_terminated_dfa.accept(list(string))
+        should_accept &= five_multiplo_dfa.accept(list(string))
+        should_accept &= alternate_dfa.accept(list(string))
+        should_accept &= dfa.accept(list(string))
+
+        assert intersection_automaton.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '101',
+        '110',
+        '011',
+        '100',
+        '010',
+        '001',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_multiple_18_5(
+        self,
+        string:str,
+        one_terminated_dfa:DFA,
+        five_multiplo_dfa:DFA,
+        alternate_dfa:DFA,
+        nfa_0_1_terminated:NFA
+    ):
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        intersection_automaton = Automaton.Intersection({
+            one_terminated_dfa,
+            five_multiplo_dfa,
+            alternate_dfa,
+            dfa
+        }).minimize()
+
+        should_accept = one_terminated_dfa.accept(list(string))
+        should_accept &= five_multiplo_dfa.accept(list(string))
+        should_accept &= alternate_dfa.accept(list(string))
+        should_accept &= dfa.accept(list(string))
+
+        assert intersection_automaton.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '101',
+        '110',
+        '011',
+        '100',
+        '010',
+        '001',
+        '1010101'
+    ])
+    def test_automaton_intersection_operation_multiple_18_6(
+        self,
+        string:str,
+        one_terminated_dfa:DFA,
+        five_multiplo_dfa:DFA,
+        alternate_dfa:DFA,
+        nfa_0_1_terminated:NFA
+    ):
+        dfa = nfa_0_1_terminated.to_deterministic().minimize()
+
+        intersection_automaton = Automaton.Intersection({
+            one_terminated_dfa,
+            five_multiplo_dfa,
+            alternate_dfa,
+            dfa
+        }).minimize()
+
+        should_accept = one_terminated_dfa.accept(list(string))
+        should_accept &= five_multiplo_dfa.accept(list(string))
+        should_accept &= alternate_dfa.accept(list(string))
+        should_accept &= dfa.accept(list(string))
+
+        assert intersection_automaton.accept(list(string)) == should_accept

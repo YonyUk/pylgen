@@ -964,7 +964,7 @@ cdef DFA _automaton_intersection(set[Automaton] automatons):
         if isinstance(aut, DFA):
             dfa = _copy_dfa(<DFA>aut)
         elif isinstance(aut, NFA):
-            dfa = (<NFA>aut).to_deterministic()
+            dfa = (<NFA>aut).to_deterministic().minimize()
         else:
             raise TypeError("Unknown automaton type")
         # updates the alphabet
