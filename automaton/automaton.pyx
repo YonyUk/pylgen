@@ -422,6 +422,20 @@ cdef class Automaton:
                 del self._trans_func._table[transition]
             self._is_complete = False # type:ignore
             self._transitions_added_while_completing.clear()
+    
+    def __or__(self, other: Automaton) -> NFA:
+        '''
+        Returns:
+            NFA: the union between this automaton and other
+        '''
+        return _automaton_union({self,other})
+    
+    def __and__(self,other:Automaton) -> DFA:
+        '''
+        Returns:
+            DFA: the intersection between this automaton and other
+        '''
+        return _automaton_intersection({self,other})
 
 cdef class DFA(Automaton):
 

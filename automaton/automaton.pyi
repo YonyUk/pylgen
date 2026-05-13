@@ -75,6 +75,11 @@ class Automaton:
 
     def restore_to_before_complete(self) -> None: ...
 
+    def __or__(self, other: Automaton) -> NFA: ...
+
+    def __and__(self,other:Automaton) -> DFA: ...
+    
+
 class DFA(Automaton):
 
     def __init__(
