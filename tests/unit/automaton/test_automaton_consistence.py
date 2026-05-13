@@ -1,0 +1,672 @@
+import pytest
+from typing import Set
+
+from automaton import Automaton,DFA,NFA,State
+
+class TestAutomatonConsistence:
+
+    @pytest.fixture
+    def alphabet(self) -> Set[str]:
+        return {'1','0'}
+    
+    @pytest.fixture
+    def zero_terminated_dfa(self,alphabet:Set[str]) -> DFA:
+        aut = DFA('start','start',alphabet)
+
+        q0 = State('q0','q0',True)
+        q1 = State('q1','q1')
+
+        aut.add_transition(aut.start_state,q0,'0')
+        aut.add_transition(aut.start_state,q1,'1')
+
+        aut.add_transition(q0,q1,'1')
+        aut.add_transition(q0,q0,'0')
+        aut.add_transition(q1,q1,'1')
+        aut.add_transition(q1,q0,'0')
+
+        return aut
+    
+    @pytest.fixture
+    def alternate_dfa(self,alphabet:Set[str]) -> DFA:
+        aut = DFA('start','start',alphabet)
+
+        q0 = State('q0','q0',True)
+        q1 = State('q1','q1',True)
+
+        aut.add_transition(aut.start_state,q0,'0')
+        aut.add_transition(aut.start_state,q1,'1')
+
+        aut.add_transition(q0,q1,'1')
+        aut.add_transition(q1,q0,'0')
+
+        return aut
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_1(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa)
+        c_2 = Automaton.Complement(alternate_dfa)
+
+        c = Automaton.Union({c_1,c_2})
+
+        intersection = Automaton.Complement(c)
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_2(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa).minimize()
+        c_2 = Automaton.Complement(alternate_dfa)
+
+        c = Automaton.Union({c_1,c_2})
+
+        intersection = Automaton.Complement(c)
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_3(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa)
+        c_2 = Automaton.Complement(alternate_dfa).minimize()
+
+        c = Automaton.Union({c_1,c_2})
+
+        intersection = Automaton.Complement(c)
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_4(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa)
+        c_2 = Automaton.Complement(alternate_dfa)
+
+        c = Automaton.Union({c_1,c_2}).to_deterministic()
+
+        intersection = Automaton.Complement(c)
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_5(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa)
+        c_2 = Automaton.Complement(alternate_dfa)
+
+        c = Automaton.Union({c_1,c_2}).to_deterministic().minimize()
+
+        intersection = Automaton.Complement(c)
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_6(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa)
+        c_2 = Automaton.Complement(alternate_dfa)
+
+        c = Automaton.Union({c_1,c_2})
+
+        intersection = Automaton.Complement(c).minimize()
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_7(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa).minimize()
+        c_2 = Automaton.Complement(alternate_dfa).minimize()
+
+        c = Automaton.Union({c_1,c_2})
+
+        intersection = Automaton.Complement(c)
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_8(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa).minimize()
+        c_2 = Automaton.Complement(alternate_dfa)
+
+        c = Automaton.Union({c_1,c_2}).to_deterministic()
+
+        intersection = Automaton.Complement(c)
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_9(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa).minimize()
+        c_2 = Automaton.Complement(alternate_dfa)
+
+        c = Automaton.Union({c_1,c_2}).to_deterministic().minimize()
+
+        intersection = Automaton.Complement(c)
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_10(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa).minimize()
+        c_2 = Automaton.Complement(alternate_dfa)
+
+        c = Automaton.Union({c_1,c_2})
+
+        intersection = Automaton.Complement(c).minimize()
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_11(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa).minimize()
+        c_2 = Automaton.Complement(alternate_dfa).minimize()
+
+        c = Automaton.Union({c_1,c_2}).to_deterministic()
+
+        intersection = Automaton.Complement(c)
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_12(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa).minimize()
+        c_2 = Automaton.Complement(alternate_dfa).minimize()
+
+        c = Automaton.Union({c_1,c_2}).to_deterministic().minimize()
+
+        intersection = Automaton.Complement(c)
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_13(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa).minimize()
+        c_2 = Automaton.Complement(alternate_dfa).minimize()
+
+        c = Automaton.Union({c_1,c_2}).to_deterministic()
+
+        intersection = Automaton.Complement(c).minimize()
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '00',
+        '01',
+        '10',
+        '11',
+        '001',
+        '010',
+        '100',
+        '011',
+        '101',
+        '110',
+        '000',
+        '111',
+        '000101010010',
+        '110101100110',
+        '0101010101010',
+        '101010101010101',
+        '010101',
+        '0101010'
+    ])
+    def test_intersection_regular_languages_proof_by_construction_14(
+        self,
+        string:str,
+        zero_terminated_dfa:DFA,
+        alternate_dfa:DFA
+    ):
+        
+        if not zero_terminated_dfa.is_complete:
+            zero_terminated_dfa.make_complete()
+        
+        if not alternate_dfa.is_complete:
+            alternate_dfa.make_complete()
+        
+        c_1 = Automaton.Complement(zero_terminated_dfa).minimize()
+        c_2 = Automaton.Complement(alternate_dfa).minimize()
+
+        c = Automaton.Union({c_1,c_2}).to_deterministic().minimize()
+
+        intersection = Automaton.Complement(c).minimize()
+
+        assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
