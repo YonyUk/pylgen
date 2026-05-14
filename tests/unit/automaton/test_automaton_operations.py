@@ -82,8 +82,9 @@ class TestAutomatonOperations:
     
     @pytest.fixture
     def five_multiplo_dfa(self,alphabet:Set[str]) -> DFA:
-        aut = DFA('q0','q0',alphabet,True)
+        aut = DFA('start','start',alphabet)
 
+        q0 = State('q0','q0',True)
         q1 = State('q1','q1')
         q2 = State('q2','q2')
         q3 = State('q3','q3')
