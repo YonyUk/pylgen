@@ -1078,21 +1078,23 @@ cdef NFA _automaton_concatenation(Automaton first,Automaton second):
     for f_id in first._states_by_id:
         state_id = sha256(f'{first_id}-{f_id}'.encode()).hexdigest()
         old_to_new_map[f_id] = state_id
-        if isinstance(first._states_by_id[f_id]._value,set):
-            state_value = set(first._states_by_id[f_id]._value) # type:ignore
+        from_state = first._states_by_id[f_id]
+        if isinstance(from_state._value,set):
+            state_value = set(from_state._value) # type:ignore
         else:
-            state_value = first._states_by_id[f_id]._value
+            state_value = from_state._value
         states_by_id[state_id] = State(state_id,state_value)
 
     # maps the states from second automaton
     for f_id in second._states_by_id:
         state_id = sha256(f'{second_id}-{f_id}'.encode()).hexdigest()
         old_to_new_map[f_id] = state_id
-        if isinstance(second._states_by_id[f_id]._value,set):
-            state_value = set(second._states_by_id[f_id]._value) # type:ignore
+        from_state = second._states_by_id[f_id]
+        if isinstance(from_state._value,set):
+            state_value = set(from_state._value) # type:ignore
         else:
-            state_value = second._states_by_id[f_id]._value
-        is_accept = second._states_by_id[f_id]._is_accept
+            state_value = from_state._value
+        is_accept = from_state._is_accept
         states_by_id[state_id] = State(state_id,state_value,is_accept)
 
     # makes a epsilon transition from new start to first start state
