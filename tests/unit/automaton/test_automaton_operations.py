@@ -4253,3 +4253,42 @@ class TestAutomatonOperations:
         should_accept &= dfa.accept(list(string))
 
         assert intersection_automaton.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('0',False),
+        ('1',False),
+        ('01',True),
+        ('10',False),
+        ('00',False),
+        ('11',False),
+        ('000',False),
+        ('100',False),
+        ('010',False),
+        ('001',True),
+        ('110',False),
+        ('101',True),
+        ('011',True),
+        ('111',False),
+        ('0000',False),
+        ('1000',False),
+        ('0100',False),
+        ('0010',False),
+        ('0001',True),
+        ('1100',False),
+        ('1010',False),
+        ('1001',True),
+        ('0110',False),
+        ('0101',True),
+        ('0011',True),
+        ('1110',False),
+        ('1101',True),
+        ('1011',True),
+        ('0111',True),
+        ('1111',False)
+    ])
+    def test_automaton_concatenation_operation_19_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,one_terminated_dfa:DFA):
+        
+        conc = Automaton.Concat(zero_terminated_dfa,one_terminated_dfa).to_deterministic()
+
+        assert conc.accept(list(string)) == should_accept
