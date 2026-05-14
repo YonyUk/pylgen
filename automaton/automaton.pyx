@@ -1064,7 +1064,7 @@ cdef NFA _automaton_concatenation(Automaton first,Automaton second):
     cdef NFA result
     cdef tuple[str,str] transition
     cdef dict[str,State] states_by_id = {}
-    cdef dict[str,str] old_to_new_map = {}
+    cdef dict[tuple[str,str],str] old_to_new_map = {}
 
     first_id = first.id
     second_id = second.id
@@ -1077,18 +1077,18 @@ cdef NFA _automaton_concatenation(Automaton first,Automaton second):
     # maps the states from first automaton
     for f_id in first._states_by_id:
         state_id = sha256(f'{first_id}-{f_id}'.encode()).hexdigest()
-        old_to_new_map[f_id] = state_id
+        old_to_new_map[(first_id,f_id)] = state_id
         from_state = first._states_by_id[f_id]
         if isinstance(from_state._value,set):
             state_value = set(from_state._value) # type:ignore
         else:
             state_value = from_state._value
         states_by_id[state_id] = State(state_id,state_value)
-
+    
     # maps the states from second automaton
     for f_id in second._states_by_id:
         state_id = sha256(f'{second_id}-{f_id}'.encode()).hexdigest()
-        old_to_new_map[f_id] = state_id
+        old_to_new_map[(second_id,f_id)] = state_id
         from_state = second._states_by_id[f_id]
         if isinstance(from_state._value,set):
             state_value = set(from_state._value) # type:ignore
@@ -1099,30 +1099,31 @@ cdef NFA _automaton_concatenation(Automaton first,Automaton second):
 
     # makes a epsilon transition from new start to first start state
     from_state = result._start_state
-    to_state = states_by_id[old_to_new_map[first._start_state._id]]
+    to_state = states_by_id[old_to_new_map[(first_id,first._start_state._id)]]
 
     result.add_epsilon_transition(from_state,to_state)
 
     # copy transitions from first automaton
-    for transition,t_id in first._trans_func._table:
+    for transition,t_id in first._trans_func._table.items():
         f_id = <str>transition[0]
         symbol = <str>transition[1]
-        from_state = states_by_id[old_to_new_map[f_id]]
-        to_state = states_by_id[old_to_new_map[t_id]]
+        from_state = states_by_id[old_to_new_map[(first_id,f_id)]]
+        to_state = states_by_id[old_to_new_map[(first_id,t_id)]]
         result.add_transition(from_state,to_state,symbol)
     
     # makes an epsilon transition from every final state of first to second.start_state
-    to_state = states_by_id[old_to_new_map[second._start_state._id]]
+    to_state = states_by_id[old_to_new_map[(second_id,second._start_state._id)]]
     for from_state in first.finals:
-        f_id = old_to_new_map[from_state._id]
+        f_id = old_to_new_map[(first_id,from_state._id)]
         from_state = states_by_id[f_id]
         result.add_epsilon_transition(from_state,to_state)
     
-    for transition,t_id in second._trans_func._table:
+    # copy transitions from second automaton
+    for transition,t_id in second._trans_func._table.items():
         f_id = <str>transition[0]
         symbol = <str>transition[1]
-        from_state = states_by_id[old_to_new_map[f_id]]
-        to_state = states_by_id[old_to_new_map[t_id]]
+        from_state = states_by_id[old_to_new_map[(second_id,f_id)]]
+        to_state = states_by_id[old_to_new_map[(second_id,t_id)]]
         result.add_transition(from_state,to_state,symbol)
 
     return result
