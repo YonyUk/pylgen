@@ -49,5 +49,6 @@ cdef DFA _dfa_complement(DFA automaton)
 cdef DFA _nfa_complement(NFA automaton)
 cdef DFA _automaton_complement(Automaton automaton)
 cdef DFA _automaton_intersection(set[Automaton] automatons)
+cdef NFA _automaton_concatenation(Automaton first,Automaton second)
 
 cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet)

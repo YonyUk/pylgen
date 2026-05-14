@@ -211,6 +211,18 @@ cdef class Automaton:
         '''
         return _automaton_intersection(automatons)
     
+    @staticmethod
+    def Concat(first:Automaton,second:Automaton) -> NFA:
+        '''
+        Args:
+            first (Automaton)
+            second (Automaton)
+        
+        Returns:
+            NFA: the automaton equivalent to concat first followed by second automaton
+        '''
+        return _automaton_concatenation(first,second)
+    
     cpdef void add_transition(self,State from_state,State to_state,str symbol):
         '''
         Args:
@@ -1043,6 +1055,75 @@ cdef DFA _automaton_intersection(set[Automaton] automatons):
 
     new_states_set = set(product_states.values())
     return create_dfa(new_states_set, product_transitions, start_id, alphabet)
+
+cdef NFA _automaton_concatenation(Automaton first,Automaton second):
+    cdef State from_state,to_state
+    cdef str state_id,symbol,f_id,t_id,first_id,second_id
+    cdef object state_value
+    cdef bint is_accept
+    cdef NFA result
+    cdef tuple[str,str] transition
+    cdef dict[str,State] states_by_id = {}
+    cdef dict[str,str] old_to_new_map = {}
+
+    first_id = first.id
+    second_id = second.id
+
+    state_id = sha256(f'CONCAT-{first_id}-{second_id}'.encode()).hexdigest()
+    result = NFA(state_id,state_id,first.alphabet.union(second.alphabet),first._start_state._is_accept)
+    
+    states_by_id[state_id] = result._start_state
+
+    # maps the states from first automaton
+    for f_id in first._states_by_id:
+        state_id = sha256(f'{first_id}-{f_id}'.encode()).hexdigest()
+        old_to_new_map[f_id] = state_id
+        if isinstance(first._states_by_id[f_id]._value,set):
+            state_value = set(first._states_by_id[f_id]._value) # type:ignore
+        else:
+            state_value = first._states_by_id[f_id]._value
+        states_by_id[state_id] = State(state_id,state_value)
+
+    # maps the states from second automaton
+    for f_id in second._states_by_id:
+        state_id = sha256(f'{second_id}-{f_id}'.encode()).hexdigest()
+        old_to_new_map[f_id] = state_id
+        if isinstance(second._states_by_id[f_id]._value,set):
+            state_value = set(second._states_by_id[f_id]._value) # type:ignore
+        else:
+            state_value = second._states_by_id[f_id]._value
+        is_accept = second._states_by_id[f_id]._is_accept
+        states_by_id[state_id] = State(state_id,state_value,is_accept)
+
+    # makes a epsilon transition from new start to first start state
+    from_state = result._start_state
+    to_state = states_by_id[old_to_new_map[first._start_state._id]]
+
+    result.add_epsilon_transition(from_state,to_state)
+
+    # copy transitions from first automaton
+    for transition,t_id in first._trans_func._table:
+        f_id = <str>transition[0]
+        symbol = <str>transition[1]
+        from_state = states_by_id[old_to_new_map[f_id]]
+        to_state = states_by_id[old_to_new_map[t_id]]
+        result.add_transition(from_state,to_state,symbol)
+    
+    # makes an epsilon transition from every final state of first to second.start_state
+    to_state = states_by_id[old_to_new_map[second._start_state._id]]
+    for from_state in first.finals:
+        f_id = old_to_new_map[from_state._id]
+        from_state = states_by_id[f_id]
+        result.add_epsilon_transition(from_state,to_state)
+    
+    for transition,t_id in second._trans_func._table:
+        f_id = <str>transition[0]
+        symbol = <str>transition[1]
+        from_state = states_by_id[old_to_new_map[f_id]]
+        to_state = states_by_id[old_to_new_map[t_id]]
+        result.add_transition(from_state,to_state,symbol)
+
+    return result
 
 cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet):
     '''
