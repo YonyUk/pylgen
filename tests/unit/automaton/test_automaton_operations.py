@@ -90,14 +90,17 @@ class TestAutomatonOperations:
         q3 = State('q3','q3')
         q4 = State('q4','q4')
 
-        aut.add_transition(aut.start_state,aut.start_state,'0')
+        aut.add_transition(aut.start_state,q0,'0')
         aut.add_transition(aut.start_state,q1,'1')
+
+        aut.add_transition(q0,q0,'0')
+        aut.add_transition(q0,q1,'1')
 
         aut.add_transition(q1,q2,'0')
         aut.add_transition(q1,q3,'1')
 
         aut.add_transition(q2,q4,'0')
-        aut.add_transition(q2,aut.start_state,'1')
+        aut.add_transition(q2,q0,'1')
 
         aut.add_transition(q3,q1,'0')
         aut.add_transition(q3,q2,'1')

@@ -375,7 +375,11 @@ cdef class Automaton:
                             loop_state_clousure.add(self._states_by_id[inner_loop_state_id])
                             new_states_to_check.append(self._states_by_id[inner_loop_state_id])
                         
+                        # create the clousure computation instance
                         stack_head = (loop_state,loop_state_clousure,0,new_states_to_check)
+                        # updates the top of the stack
+                        stack[-1] = (current_state, current_clousure, idx, states_to_check)
+                        # push the new instance
                         stack.append(stack_head)
                         in_progress.add(loop_state_id)
                         entered = True # type:ignore
@@ -385,7 +389,7 @@ cdef class Automaton:
                 # adds the states on the clousure of loop_state
                 current_clousure.update(self._clousures[loop_state_id])
                 # advance the idx counter in 1
-                stack_head = (current_state,current_state,idx + 1,states_to_check)
+                stack_head = (current_state,current_clousure,idx + 1,states_to_check)
             
             if not entered:
                 self._clousures[current_state._id] = current_clousure
