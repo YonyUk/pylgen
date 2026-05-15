@@ -1062,7 +1062,7 @@ cdef DFA _automaton_intersection(set[Automaton] automatons):
 
 cdef NFA _automaton_concatenation(Automaton first,Automaton second):
     cdef State from_state,to_state
-    cdef str state_id,symbol,f_id,t_id,first_id,second_id
+    cdef str state_id,symbol,f_id,t_id,first_id,second_id,new_from_id,new_to_id
     cdef object state_value
     cdef bint is_accept
     cdef NFA result
@@ -1115,6 +1115,19 @@ cdef NFA _automaton_concatenation(Automaton first,Automaton second):
         to_state = states_by_id[old_to_new_map[(first_id,t_id)]]
         result.add_transition(from_state,to_state,symbol)
     
+    # copy epsilons transitions from first automaton
+    for f_id in first._epsilons:
+        new_from_id = old_to_new_map[(first_id,f_id)]
+        if not new_from_id in result._epsilons:
+            if not new_from_id in result._states_by_id:
+                result._states_by_id[new_from_id] = states_by_id[new_from_id]
+            result._epsilons[new_from_id] = set()
+        for t_id in first._epsilons[f_id]:
+            new_to_id = old_to_new_map[(first_id,t_id)]
+            if not new_to_id in result._states_by_id:
+                result._states_by_id[new_to_id] = states_by_id[new_to_id]
+            result._epsilons[new_from_id].add(new_to_id)
+    
     # makes an epsilon transition from every final state of first to second.start_state
     to_state = states_by_id[old_to_new_map[(second_id,second._start_state._id)]]
     for from_state in first.finals:
@@ -1129,6 +1142,19 @@ cdef NFA _automaton_concatenation(Automaton first,Automaton second):
         from_state = states_by_id[old_to_new_map[(second_id,f_id)]]
         to_state = states_by_id[old_to_new_map[(second_id,t_id)]]
         result.add_transition(from_state,to_state,symbol)
+    
+    # copy epsilons transitions from second automaton
+    for f_id in second._epsilons:
+        new_from_id = old_to_new_map[(second_id,f_id)]
+        if not new_from_id in result._epsilons:
+            if not new_from_id in result._states_by_id:
+                result._states_by_id[new_from_id] = states_by_id[new_from_id]
+            result._epsilons[new_from_id] = set()
+        for t_id in second._epsilons[f_id]:
+            new_to_id = old_to_new_map[(second_id,t_id)]
+            if not new_to_id in result._states_by_id:
+                result._states_by_id[new_to_id] = states_by_id[new_to_id]
+            result._epsilons[new_from_id].add(new_to_id)
 
     return result
 
