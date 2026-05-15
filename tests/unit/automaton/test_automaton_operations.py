@@ -4577,3 +4577,243 @@ class TestAutomatonOperations:
         conc = Automaton.Concat(zero_terminated_dfa,alternate_a_b_dfa).to_deterministic().minimize()
 
         assert conc.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',False),
+        ('10',False),
+        ('11',False),
+        ('000',False),
+        ('001',True),
+        ('010',False),
+        ('100',False),
+        ('011',False),
+        ('101',False),
+        ('110',False),
+        ('111',False),
+        ('0000',False),
+        ('0001',True),
+        ('0010',False),
+        ('0100',False),
+        ('1000',False),
+        ('0011',False),
+        ('0101',True),
+        ('1001',True),
+        ('0110',False),
+        ('0111',False),
+        ('1010',False),
+        ('1011',False),
+        ('1101',False),
+        ('1111',False),
+        ('0101010001',True),
+        ('1111011001',True),
+        ('1111100101',True)
+    ])
+    def test_automaton_concatenation_operation_23_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated).to_deterministic()
+
+        assert conc.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',False),
+        ('10',False),
+        ('11',False),
+        ('000',False),
+        ('001',True),
+        ('010',False),
+        ('100',False),
+        ('011',False),
+        ('101',False),
+        ('110',False),
+        ('111',False),
+        ('0000',False),
+        ('0001',True),
+        ('0010',False),
+        ('0100',False),
+        ('1000',False),
+        ('0011',False),
+        ('0101',True),
+        ('1001',True),
+        ('0110',False),
+        ('0111',False),
+        ('1010',False),
+        ('1011',False),
+        ('1101',False),
+        ('1111',False),
+        ('0101010001',True),
+        ('1111011001',True),
+        ('1111100101',True)
+    ])
+    def test_automaton_concatenation_operation_23_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated).to_deterministic().minimize()
+
+        assert conc.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',False),
+        ('10',False),
+        ('11',False),
+        ('000',False),
+        ('001',True),
+        ('010',False),
+        ('100',False),
+        ('011',False),
+        ('101',False),
+        ('110',False),
+        ('111',False),
+        ('0000',False),
+        ('0001',True),
+        ('0010',False),
+        ('0100',False),
+        ('1000',False),
+        ('0011',False),
+        ('0101',True),
+        ('1001',True),
+        ('0110',False),
+        ('0111',False),
+        ('1010',False),
+        ('1011',False),
+        ('1101',False),
+        ('1111',False),
+        ('0101010001',True),
+        ('1111011001',True),
+        ('1111100101',True)
+    ])
+    def test_automaton_concatenation_operation_23_3(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated.to_deterministic()).to_deterministic()
+
+        assert conc.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',False),
+        ('10',False),
+        ('11',False),
+        ('000',False),
+        ('001',True),
+        ('010',False),
+        ('100',False),
+        ('011',False),
+        ('101',False),
+        ('110',False),
+        ('111',False),
+        ('0000',False),
+        ('0001',True),
+        ('0010',False),
+        ('0100',False),
+        ('1000',False),
+        ('0011',False),
+        ('0101',True),
+        ('1001',True),
+        ('0110',False),
+        ('0111',False),
+        ('1010',False),
+        ('1011',False),
+        ('1101',False),
+        ('1111',False),
+        ('0101010001',True),
+        ('1111011001',True),
+        ('1111100101',True)
+    ])
+    def test_automaton_concatenation_operation_23_4(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated.to_deterministic()).to_deterministic().minimize()
+
+        assert conc.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',False),
+        ('10',False),
+        ('11',False),
+        ('000',False),
+        ('001',True),
+        ('010',False),
+        ('100',False),
+        ('011',False),
+        ('101',False),
+        ('110',False),
+        ('111',False),
+        ('0000',False),
+        ('0001',True),
+        ('0010',False),
+        ('0100',False),
+        ('1000',False),
+        ('0011',False),
+        ('0101',True),
+        ('1001',True),
+        ('0110',False),
+        ('0111',False),
+        ('1010',False),
+        ('1011',False),
+        ('1101',False),
+        ('1111',False),
+        ('0101010001',True),
+        ('1111011001',True),
+        ('1111100101',True)
+    ])
+    def test_automaton_concatenation_operation_23_5(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated.to_deterministic().minimize()).to_deterministic()
+
+        assert conc.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',False),
+        ('10',False),
+        ('11',False),
+        ('000',False),
+        ('001',True),
+        ('010',False),
+        ('100',False),
+        ('011',False),
+        ('101',False),
+        ('110',False),
+        ('111',False),
+        ('0000',False),
+        ('0001',True),
+        ('0010',False),
+        ('0100',False),
+        ('1000',False),
+        ('0011',False),
+        ('0101',True),
+        ('1001',True),
+        ('0110',False),
+        ('0111',False),
+        ('1010',False),
+        ('1011',False),
+        ('1101',False),
+        ('1111',False),
+        ('0101010001',True),
+        ('1111011001',True),
+        ('1111100101',True)
+    ])
+    def test_automaton_concatenation_operation_23_6(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+
+        conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated.to_deterministic().minimize()).to_deterministic().minimize()
+
+        assert conc.accept(list(string)) == should_accept
