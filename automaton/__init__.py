@@ -12,9 +12,9 @@ def _to_graph(automaton:Automaton) -> nx.DiGraph:
         f,symbol = transition
         if not (f,destination) in G.edges:
             G.add_edge(f,destination)
-            G.edges[f,destination]["label"] = transition[1]
+            G.edges[f,destination]["label"] = symbol
         else:
-            G.edges[f,destination]["label"] += f',{transition[1]}'
+            G.edges[f,destination]["label"] += f',{symbol}'
     
     for origin,destinations in epsilon_transitions.items():
         for destination in destinations:
