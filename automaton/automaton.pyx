@@ -178,6 +178,56 @@ cdef class Automaton:
         '''
         return self._trans_func.to_dict()
     
+    @property
+    def is_empty(self) -> bool:
+        cdef State start = self._start_state
+        cdef list[State] stack = []
+        cdef str symbol
+        cdef tuple[str,str] transition
+        cdef set[State] seen = set()
+        cdef State current_state,to_state
+
+        stack.extend(self.clousure(start))
+
+        while stack:
+            current_state = stack.pop(0)
+            if not current_state in seen:
+                seen.add(current_state)
+            if current_state._is_accept:
+                return True
+            for symbol in self._alphabet:
+                transition = (current_state._id,symbol)
+                if transition in self._trans_func._table:
+                    for to_state in self.clousure(self.next(current_state,symbol)):
+                        if not to_state in seen:
+                            stack.append(to_state)
+        
+        return False
+    
+    @property
+    def is_finite(self) -> bool:
+        cdef State start = self._start_state
+        cdef list[State] stack = []
+        cdef str symbol
+        cdef tuple[str,str] transition
+        cdef set[State] seen = set()
+        cdef State current_state,to_state
+
+        stack.extend(self.clousure(start))
+
+        while stack:
+            current_state = stack.pop(0)
+            if not current_state in seen:
+                seen.add(current_state)
+            for symbol in self._alphabet:
+                transition = (current_state._id,symbol)
+                if transition in self._trans_func._table:
+                    for to_state in self.clousure(self.next(current_state,symbol)):
+                        if to_state in seen:
+                            return False
+                        stack.append(to_state)
+        return True
+    
     @staticmethod
     def Union(automatons:Set[Automaton]) -> NFA:
         '''
@@ -482,7 +532,7 @@ cdef class Automaton:
                 del self._trans_func._table[transition]
             self._is_complete = False # type:ignore
             self._transitions_added_while_completing.clear()
-    
+
     def __or__(self, other: Automaton) -> NFA:
         '''
         Returns:
