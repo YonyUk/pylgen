@@ -206,27 +206,84 @@ cdef class Automaton:
     
     @property
     def is_finite(self) -> bool:
-        cdef State start = self._start_state
-        cdef list[State] stack = []
+        cdef set[State] reachable_from_start = set()
+        cdef set[State] can_reach_accept = set()
+        cdef list[State] stack
+        cdef State st, to_st
         cdef str symbol
-        cdef tuple[str,str] transition
-        cdef set[State] seen = set()
-        cdef State current_state,to_state
+        cdef dict[State, set[State]] rev_graph = {}
+        cdef set[State] subgraph_states = reachable_from_start.intersection(can_reach_accept)
+        cdef dict[State, list[State]] adj = {}
+        cdef set[State] visited = set()
+        cdef set[State] recursion_stack = set()
 
-        stack.extend(self.clousure(start))
-
+        # reachables states from start state
+        stack = list(self.clousure(self._start_state))
         while stack:
-            current_state = stack.pop(0)
-            if not current_state in seen:
-                seen.add(current_state)
+            st = stack.pop()
+            if st in reachable_from_start:
+                continue
+            reachable_from_start.add(st)
+            # Para cada símbolo, agregar los destinos (con clausura)
             for symbol in self._alphabet:
-                transition = (current_state._id,symbol)
-                if transition in self._trans_func._table:
-                    for to_state in self.clousure(self.next(current_state,symbol)):
-                        if to_state in seen:
-                            return False
-                        stack.append(to_state)
-        return True
+                if self.has_transition(st, symbol):
+                    to_st = self.next(st, symbol)
+                    for to_st in self.clousure(to_st):
+                        if to_st not in reachable_from_start:
+                            stack.append(to_st)
+
+        # states that cant arrive to an accepting state
+        for st in self.states:
+            rev_graph[st] = set()
+        for st in self.states:
+            for symbol in self._alphabet:
+                if self.has_transition(st, symbol):
+                    to_st = self.next(st, symbol)
+                    # Para cada estado en la clausura de to_st
+                    for clo_st in self.clousure(to_st):
+                        rev_graph[clo_st].add(st)
+
+        # BFS
+        stack = list(self.finals)
+        while stack:
+            st = stack.pop()
+            if st in can_reach_accept:
+                continue
+            can_reach_accept.add(st)
+            for pred in rev_graph.get(st, []):
+                if pred not in can_reach_accept:
+                    stack.append(pred)
+
+        
+        # check is there is a cycle in the intersection of reachable states and states that can arrive to an
+        # accepting state
+        for st in subgraph_states:
+            adj[st] = []
+            for symbol in self._alphabet:
+                if self.has_transition(st, symbol):
+                    to_st = self.next(st, symbol)
+                    for clo_st in self.clousure(to_st):
+                        if clo_st in subgraph_states:
+                            adj[st].append(clo_st)
+
+        # DFS to detect cycles
+        def has_cycle(node):
+            visited.add(node)
+            recursion_stack.add(node)
+            for neighbor in adj.get(node, []):
+                if neighbor not in visited:
+                    if has_cycle(neighbor):
+                        return True
+                elif neighbor in recursion_stack:
+                    return True
+            recursion_stack.remove(node)
+            return False
+
+        for st in subgraph_states:
+            if st not in visited:
+                if has_cycle(st):
+                    return False # finite language
+        return True # infinite language
     
     @staticmethod
     def Union(automatons:Set[Automaton]) -> NFA:

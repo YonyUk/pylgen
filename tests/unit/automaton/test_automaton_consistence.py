@@ -42,8 +42,8 @@ class TestAutomatonConsistence:
         return aut
     
     @pytest.fixture
-    def empyt_dfa_1(self):
-        aut = DFA('start','start',{'0','1'})
+    def empyt_dfa_1(self,alphabet:Set[str]) -> DFA:
+        aut = DFA('start','start',alphabet)
 
         q0 = State('q0','q0')
 
@@ -51,6 +51,43 @@ class TestAutomatonConsistence:
         aut.add_transition(q0,q0,'1')
         return aut
     
+    @pytest.fixture
+    def no_empty_nfa(self,alphabet:Set[str]) -> NFA:
+        aut = NFA('start','start',alphabet)
+
+        q0 = State('q0','q0')
+        q1 = State('q1','q1')
+
+        q2 = State('q2','q2',True)
+
+        aut.add_transition(aut.start_state,q0,'0')
+        aut.add_transition(aut.start_state,q1,'1')
+
+        aut.add_epsilon_transition(aut.start_state,q2)
+        return aut
+
+    @pytest.fixture
+    def finite_dfa_1(self,alphabet:Set[str]) -> DFA:
+        aut = DFA('start','start',alphabet)
+
+        q0 = State('q0','q0')
+        q1 = State('q1','q1',True)
+
+        aut.add_transition(aut.start_state,q0,'0')
+        aut.add_transition(q0,q1,'1')
+        return aut
+    
+    @pytest.fixture
+    def finite_dfa_2(self,alphabet:Set[str]) -> DFA:
+        aut = DFA('start','start',alphabet)
+
+        q0 = State('q0','q0')
+        q1 = State('q1','q1',True)
+
+        aut.add_transition(aut.start_state,q0,'1')
+        aut.add_transition(q0,q1,'0')
+        return aut
+
     @pytest.mark.parametrize("string",[
         '',
         '0',
@@ -681,7 +718,20 @@ class TestAutomatonConsistence:
 
         assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
     
-    def test_is_empty_method(self,zero_terminated_dfa:DFA,empyt_dfa_1:DFA):
+    def test_is_empty_method(self,zero_terminated_dfa:DFA,empyt_dfa_1:DFA,no_empty_nfa:NFA):
 
         assert not zero_terminated_dfa.is_empty
         assert empyt_dfa_1.is_empty
+        assert not no_empty_nfa.is_empty
+    
+    def test_is_finite_method(self,zero_terminated_dfa:DFA,finite_dfa_1:DFA,finite_dfa_2:DFA):
+
+        assert not zero_terminated_dfa.is_finite
+        assert finite_dfa_1.is_finite
+        assert finite_dfa_2.is_finite
+
+        uni = Automaton.Union({finite_dfa_1,finite_dfa_2})
+
+        assert uni.is_finite
+        assert uni.to_deterministic().is_finite
+        assert uni.to_deterministic().minimize().is_finite
