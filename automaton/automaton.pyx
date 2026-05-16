@@ -612,6 +612,13 @@ cdef class Automaton:
             DFA: the intersection between this automaton and other
         '''
         return _automaton_intersection({self,other})
+    
+    def __add__(self,other:Automaton) -> NFA:
+        '''
+        Returns:
+            NFA: the concatenation of this automaton with other
+        '''
+        return _automaton_concatenation(self,other)
 
 cdef class DFA(Automaton):
 

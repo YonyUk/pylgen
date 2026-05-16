@@ -100,6 +100,7 @@ class Automaton:
 
     def __and__(self,other:Automaton) -> DFA: ...
     
+    def __add__(self,other:Automaton) -> NFA: ...
 
 class DFA(Automaton):
 
