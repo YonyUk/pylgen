@@ -232,7 +232,7 @@ cdef class Automaton:
         Returns:
             NFA: the automaton equivalent to L(automaton)* language
         '''
-        return _automaton_clousure(automaton,False) # type:ignore
+        return _automaton_clousure(automaton,0)
     
     @staticmethod
     def PositiveClousure(automaton:Automaton) -> NFA:
@@ -243,7 +243,18 @@ cdef class Automaton:
         Returns:
             NFA: the automaton equivalent to L(automaton)+ language
         '''
-        return _automaton_clousure(automaton,True) # type:ignore
+        return _automaton_clousure(automaton,1)
+    
+    @staticmethod
+    def Optional(automaton:Automaton) -> NFA:
+        '''
+        Args:
+            automaton (Automaton)
+        
+        Returns:
+            NFA: the automaton equivalent to L(automaton)? language
+        '''
+        return _automaton_clousure(automaton,2)
     
     cpdef void add_transition(self,State from_state,State to_state,str symbol):
         '''
@@ -1180,7 +1191,12 @@ cdef NFA _automaton_concatenation(Automaton first,Automaton second):
 
     return result
 
-cdef NFA _automaton_clousure(Automaton automaton, bint positive):
+cdef NFA _automaton_clousure(Automaton automaton, int type_):
+    '''
+    type_ = 0: Kleene Star clousure
+    type_ = 1: Positive Clousure
+    type_ = 2: Optional
+    '''
     cdef set[State] new_states = set()
     cdef dict[str,State] states_by_id = {}
     cdef str symbol,from_id,to_id
@@ -1199,7 +1215,7 @@ cdef NFA _automaton_clousure(Automaton automaton, bint positive):
             copy_state = State(from_id,state_value,state._is_accept)
         states_by_id[from_id] = copy_state
 
-    result = NFA(f'{aut_id}-kleene-star',f'{aut_id}-kleene-star',automaton._alphabet,not positive) # type:ignore
+    result = NFA(f'{aut_id}-kleene-star',f'{aut_id}-kleene-star',automaton._alphabet,type_ == 0 or type_ == 2) # type:ignore
 
     # copy transitions
     for transition,to_id in automaton._trans_func._table.items():
@@ -1221,12 +1237,13 @@ cdef NFA _automaton_clousure(Automaton automaton, bint positive):
     state = states_by_id[automaton._start_state._id]
     result.add_epsilon_transition(result._start_state,state)
 
-    # makes epsilon transition from finals states to the new start
-    for state in automaton.finals:
-        result.add_epsilon_transition(state,result._start_state)
+    if not type_ == 2:
+        # makes epsilon transition from finals states to the new start
+        for state in automaton.finals:
+            result.add_epsilon_transition(state,result._start_state)
     
     return result
-
+    
 cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet):
     '''
     Args:
