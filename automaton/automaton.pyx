@@ -232,7 +232,18 @@ cdef class Automaton:
         Returns:
             NFA: the automaton equivalent to L(automaton)* language
         '''
-        return _automaton_kleene_star(automaton)
+        return _automaton_clousure(automaton,False) # type:ignore
+    
+    @staticmethod
+    def PositiveClousure(automaton:Automaton) -> NFA:
+        '''
+        Args:
+            automaton (Automaton)
+        
+        Returns:
+            NFA: the automaton equivalent to L(automaton)+ language
+        '''
+        return _automaton_clousure(automaton,True) # type:ignore
     
     cpdef void add_transition(self,State from_state,State to_state,str symbol):
         '''
@@ -1169,7 +1180,7 @@ cdef NFA _automaton_concatenation(Automaton first,Automaton second):
 
     return result
 
-cdef NFA _automaton_kleene_star(Automaton automaton):
+cdef NFA _automaton_clousure(Automaton automaton, bint positive):
     cdef set[State] new_states = set()
     cdef dict[str,State] states_by_id = {}
     cdef str symbol,from_id,to_id
@@ -1188,7 +1199,7 @@ cdef NFA _automaton_kleene_star(Automaton automaton):
             copy_state = State(from_id,state_value,state._is_accept)
         states_by_id[from_id] = copy_state
 
-    result = NFA(f'{aut_id}-kleene-star',f'{aut_id}-kleene-star',automaton._alphabet,True) # type:ignore
+    result = NFA(f'{aut_id}-kleene-star',f'{aut_id}-kleene-star',automaton._alphabet,not positive) # type:ignore
 
     # copy transitions
     for transition,to_id in automaton._trans_func._table.items():
