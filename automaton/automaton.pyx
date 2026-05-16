@@ -194,7 +194,7 @@ cdef class Automaton:
             if not current_state in seen:
                 seen.add(current_state)
             if current_state._is_accept:
-                return True
+                return False
             for symbol in self._alphabet:
                 transition = (current_state._id,symbol)
                 if transition in self._trans_func._table:
@@ -202,7 +202,7 @@ cdef class Automaton:
                         if not to_state in seen:
                             stack.append(to_state)
         
-        return False
+        return True
     
     @property
     def is_finite(self) -> bool:
