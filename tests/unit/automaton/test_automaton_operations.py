@@ -5387,3 +5387,33 @@ class TestAutomatonOperations:
         kleene = Automaton.PositiveClousure(hi_dfa).to_deterministic().minimize()
 
         assert kleene.accept(list(string)) == should_accept
+
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('h',False),
+        ('hi',True),
+        ('i',False),
+        ('hih',False),
+        ('hihi',False),
+        ('hii',False)
+    ])
+    def test_automaton_optional_clousure_operation_1(self,string:str,should_accept:bool,hi_dfa:DFA):
+
+        opt = Automaton.Optional(hi_dfa).to_deterministic()
+
+        assert opt.accept(list(string)) == should_accept
+
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('h',False),
+        ('hi',True),
+        ('i',False),
+        ('hih',False),
+        ('hihi',False),
+        ('hii',False)
+    ])
+    def test_automaton_optional_clousure_operation_2(self,string:str,should_accept:bool,hi_dfa:DFA):
+
+        opt = Automaton.Optional(hi_dfa).to_deterministic().minimize()
+
+        assert opt.accept(list(string)) == should_accept
