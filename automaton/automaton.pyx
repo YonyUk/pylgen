@@ -179,6 +179,20 @@ cdef class Automaton:
         return self._trans_func.to_dict()
     
     @property
+    def epsilon_transitions(self) -> Dict[str,Set[str]]:
+        '''
+        Returns:
+            Dict[str,Set[str]]: the epsilon-transitions defined inside this automaton
+        '''
+        cdef dict[str,set[str]] result = {}
+        cdef str state_id
+
+        for state_id in self._epsilons:
+            result[state_id] = set(self._epsilons[state_id])
+        
+        return result
+    
+    @property
     def is_empty(self) -> bool:
         '''
         Returns:
