@@ -256,6 +256,17 @@ cdef class Automaton:
         '''
         return _automaton_clousure(automaton,2)
     
+    @staticmethod
+    def Reverse(automaton:Automaton) -> NFA:
+        '''
+        Args:
+            automaton (Automaton)
+        
+        Returns:
+            NFA: the automaton equivalent to reverse of L(automaton)
+        '''
+        return _automaton_reverse(automaton)
+    
     cpdef void add_transition(self,State from_state,State to_state,str symbol):
         '''
         Args:
@@ -1241,6 +1252,78 @@ cdef NFA _automaton_clousure(Automaton automaton, int type_):
         # makes epsilon transition from finals states to the new start
         for state in automaton.finals:
             result.add_epsilon_transition(state,result._start_state)
+    
+    return result
+
+cdef NFA _automaton_reverse(Automaton automaton):
+    cdef NFA result
+    cdef dict[str,State] states_by_id = {}
+    cdef dict[tuple[str,str],set[State]] preimage_by_state = {}
+    cdef dict[str,set[State]] epsilon_preimage_by_state = {}
+    cdef str state_id,f_id,t_id,symbol
+    cdef State state,copy_state,temp_state
+    cdef tuple[str,str] transition
+    cdef tuple[str,str] key
+    cdef object state_value
+    cdef set[State] preimage
+
+    # copy the states
+    for state_id,state in automaton._states_by_id.items():
+        if isinstance(state._value,set):
+            copy_state = State(state_id,set(state._value))
+        else:
+            copy_state = State(state_id,state._value)
+        if copy_state._id == automaton._start_state._id:
+            copy_state._is_accept = True # type:ignore
+        states_by_id[state_id] = copy_state
+    
+    # build the preimages
+    for transition,t_id in automaton._trans_func._table.items():
+        f_id = <str>transition[0]
+        symbol = <str>transition[1]
+        key = (symbol,t_id)
+        if not key in preimage_by_state:
+            preimage_by_state[key] = {states_by_id[f_id]}
+        else:
+            preimage_by_state[key].add(states_by_id[f_id])
+    
+    for state_id in automaton._epsilons:
+        for t_id in automaton._epsilons[state_id]:
+            if not t_id in epsilon_preimage_by_state:
+                epsilon_preimage_by_state[t_id] = {states_by_id[state_id]}
+            else:
+                epsilon_preimage_by_state[t_id].add(states_by_id[state_id])
+    
+    result = NFA(f'{automaton.id}-reverse',f'{automaton.id}-reverse',automaton._alphabet)
+
+    # makes epsilon transition to every final state
+    for state in automaton.finals:
+        copy_state = states_by_id[state._id]
+        result.add_epsilon_transition(result._start_state,copy_state)
+    
+    # invert transitions
+    for key,preimage in preimage_by_state.items():
+        f_id = <str>key[1]
+        symbol = <str>key[0]
+        state = states_by_id[f_id]
+        # if there is only one element in the preimage
+        if len(preimage) == 1:
+            # adds the inverted transition
+            copy_state = states_by_id[preimage.pop()._id]
+            result.add_transition(state,copy_state,symbol)
+        else:
+            # adds a aux state
+            temp_state = State(f'{f_id}-temp',f'{f_id}-temp')
+            # makes a transition to this one
+            result.add_transition(state,temp_state,symbol)
+            # adds epsilon transitions for every state in the preimage
+            for copy_state in preimage:
+                result.add_epsilon_transition(temp_state,copy_state)
+    
+    for f_id,preimage in epsilon_preimage_by_state.items():
+        state = states_by_id[f_id]
+        for copy_state in preimage:
+            result.add_epsilon_transition(state,copy_state)
     
     return result
     
