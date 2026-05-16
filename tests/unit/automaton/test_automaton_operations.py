@@ -5417,3 +5417,255 @@ class TestAutomatonOperations:
         opt = Automaton.Optional(hi_dfa).to_deterministic().minimize()
 
         assert opt.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string",[
+        'ih',
+        'i',
+        'h',
+        ''
+    ])
+    def test_automaton_reverse_operation_1(self,string:str,hi_dfa:DFA):
+
+        rev = Automaton.Reverse(hi_dfa).to_deterministic()
+        a = list(string)
+        b = list(string)
+        b.reverse()
+        assert rev.accept(a) == hi_dfa.accept(b)
+    
+    @pytest.mark.parametrize("string",[
+        'ih',
+        'i',
+        'h',
+        ''
+    ])
+    def test_automaton_reverse_operation_2(self,string:str,hi_dfa:DFA):
+
+        rev = Automaton.Reverse(hi_dfa).to_deterministic().minimize()
+        a = list(string)
+        b = list(string)
+        b.reverse()
+        assert rev.accept(a) == hi_dfa.accept(b)
+
+    @pytest.mark.parametrize("string",[
+        '011010010',
+        '100101001',
+        '',
+        '1',
+        '0',
+        '000001',
+        '100000',
+        '110',
+        '00101'
+    ])
+    def test_automaton_reverse_operation_3(self,string:str,zero_terminated_dfa:DFA):
+
+        rev = Automaton.Reverse(zero_terminated_dfa).to_deterministic()
+        a = list(string)
+        b = list(string)
+        b.reverse()
+        assert rev.accept(a) == zero_terminated_dfa.accept(b)
+    
+    @pytest.mark.parametrize("string",[
+        '011010010',
+        '100101001',
+        '',
+        '1',
+        '0',
+        '000001',
+        '100000',
+        '110',
+        '00101'
+    ])
+    def test_automaton_reverse_operation_4(self,string:str,zero_terminated_dfa:DFA):
+
+        rev = Automaton.Reverse(zero_terminated_dfa).to_deterministic().minimize()
+        a = list(string)
+        b = list(string)
+        b.reverse()
+        assert rev.accept(a) == zero_terminated_dfa.accept(b)
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '01',
+        '10',
+        '11',
+        '101',
+        '1010',
+        '1111',
+        '10100',
+        '11001',
+        '1001',
+        '111',
+        '001010'
+    ])
+    def test_automaton_reverse_operation_5(self,string:str,five_multiplo_dfa:DFA):
+        
+        rev = Automaton.Reverse(five_multiplo_dfa).to_deterministic()
+        a = list(string)
+        b = list(string)
+        b.reverse()
+        assert rev.accept(b) == five_multiplo_dfa.accept(a)
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '0',
+        '1',
+        '01',
+        '10',
+        '11',
+        '101',
+        '1010',
+        '1111',
+        '10100',
+        '11001',
+        '1001',
+        '111',
+        '001010'
+    ])
+    def test_automaton_reverse_operation_6(self,string:str,five_multiplo_dfa:DFA):
+        
+        rev = Automaton.Reverse(five_multiplo_dfa).to_deterministic().minimize()
+        a = list(string)
+        b = list(string)
+        b.reverse()
+        assert rev.accept(b) == five_multiplo_dfa.accept(a)
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '01',
+        '10',
+        '00',
+        '11',
+        '100101010',
+        '01010011101',
+        '1111100',
+        '000001010',
+        '10001010',
+        '1100010101'
+    ])
+    def test_automaton_reverse_operation_7(self,string:str,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        rev = Automaton.Reverse(nfa_0_1_terminated).to_deterministic()
+        a = list(string)
+        b = list(string)
+        b.reverse()
+        assert rev.accept(a) == dfa.accept(b)
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '01',
+        '10',
+        '00',
+        '11',
+        '100101010',
+        '01010011101',
+        '1111100',
+        '000001010',
+        '10001010',
+        '1100010101'
+    ])
+    def test_automaton_reverse_operation_8(self,string:str,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        rev = Automaton.Reverse(nfa_0_1_terminated).to_deterministic().minimize()
+        a = list(string)
+        b = list(string)
+        b.reverse()
+        assert rev.accept(a) == dfa.accept(b)
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '01',
+        '10',
+        '00',
+        '11',
+        '100101010',
+        '01010011101',
+        '1111100',
+        '000001010',
+        '10001010',
+        '1100010101'
+    ])
+    def test_automaton_reverse_operation_9(self,string:str,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        rev = Automaton.Reverse(dfa).to_deterministic()
+        a = list(string)
+        b = list(string)
+        b.reverse()
+        assert rev.accept(a) == dfa.accept(b)
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '01',
+        '10',
+        '00',
+        '11',
+        '100101010',
+        '01010011101',
+        '1111100',
+        '000001010',
+        '10001010',
+        '1100010101'
+    ])
+    def test_automaton_reverse_operation_10(self,string:str,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        rev = Automaton.Reverse(dfa).to_deterministic().minimize()
+        a = list(string)
+        b = list(string)
+        b.reverse()
+        assert rev.accept(a) == dfa.accept(b)
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '01',
+        '10',
+        '00',
+        '11',
+        '100101010',
+        '01010011101',
+        '1111100',
+        '000001010',
+        '10001010',
+        '1100010101'
+    ])
+    def test_automaton_reverse_operation_11(self,string:str,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        rev = Automaton.Reverse(dfa.minimize()).to_deterministic()
+        a = list(string)
+        b = list(string)
+        b.reverse()
+        assert rev.accept(a) == dfa.accept(b)
+    
+    @pytest.mark.parametrize("string",[
+        '',
+        '01',
+        '10',
+        '00',
+        '11',
+        '100101010',
+        '01010011101',
+        '1111100',
+        '000001010',
+        '10001010',
+        '1100010101'
+    ])
+    def test_automaton_reverse_operation_12(self,string:str,nfa_0_1_terminated:NFA):
+
+        dfa = nfa_0_1_terminated.to_deterministic()
+
+        rev = Automaton.Reverse(dfa.minimize()).to_deterministic().minimize()
+        a = list(string)
+        b = list(string)
+        b.reverse()
+        assert rev.accept(a) == dfa.accept(b)

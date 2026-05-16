@@ -1309,7 +1309,7 @@ cdef NFA _automaton_reverse(Automaton automaton):
         # if there is only one element in the preimage
         if len(preimage) == 1:
             # adds the inverted transition
-            copy_state = states_by_id[preimage.pop()._id]
+            copy_state = preimage.pop()
             result.add_transition(state,copy_state,symbol)
         else:
             # adds a aux state
