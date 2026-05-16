@@ -53,6 +53,9 @@ class Automaton:
     def transition_function(self) -> Dict[Tuple[str,str],str]: ...
 
     @property
+    def epsilon_transitions(self) -> Dict[str,Set[str]]: ...
+
+    @property
     def is_empty(self) -> bool: ...
 
     @property
