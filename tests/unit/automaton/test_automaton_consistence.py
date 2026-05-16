@@ -27,6 +27,21 @@ class TestAutomatonConsistence:
         return aut
     
     @pytest.fixture
+    def zero_terminated_alternate_dfa(self,alphabet:Set[str]) -> DFA:
+        aut = DFA('start','start',alphabet)
+
+        q0 = State('q0','q0',True)
+        q1 = State('q1','q1')
+
+        aut.add_transition(aut.start_state,q0,'0')
+        aut.add_transition(aut.start_state,q1,'1')
+
+        aut.add_transition(q0,q1,'1')
+        aut.add_transition(q1,q0,'0')
+
+        return aut
+
+    @pytest.fixture
     def alternate_dfa(self,alphabet:Set[str]) -> DFA:
         aut = DFA('start','start',alphabet)
 
@@ -735,3 +750,9 @@ class TestAutomatonConsistence:
         assert uni.is_finite
         assert uni.to_deterministic().is_finite
         assert uni.to_deterministic().minimize().is_finite
+    
+    def test_subset_consistency(self,zero_terminated_dfa:DFA,zero_terminated_alternate_dfa:DFA):
+
+        inter = Automaton.Intersection({zero_terminated_alternate_dfa,Automaton.Complement(zero_terminated_dfa)})
+
+        assert inter.is_empty
