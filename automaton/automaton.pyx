@@ -1508,3 +1508,9 @@ cpdef DFA get_word_automaton(str word):
         last_state = current_state
     
     return result
+
+cpdef NFA get_words_automaton(list[str] words):
+    cdef str word
+    cdef set[Automaton] dfas = {get_word_automaton(word) for word in words }
+
+    return Automaton.Union(dfas)

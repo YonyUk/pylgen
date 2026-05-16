@@ -55,3 +55,4 @@ cdef NFA _automaton_reverse(Automaton automaton)
 
 cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet)
 cpdef DFA get_word_automaton(str word)
+cpdef NFA get_words_automaton(list[str] words)
