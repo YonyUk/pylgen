@@ -4291,7 +4291,7 @@ class TestAutomatonOperations:
         ('0111',True),
         ('1111',False)
     ])
-    def test_automaton_concatenation_operation_19_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,one_terminated_dfa:DFA):
+    def test_automaton_concatenation_operation_1_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,one_terminated_dfa:DFA):
         
         conc = Automaton.Concat(zero_terminated_dfa,one_terminated_dfa).to_deterministic()
 
@@ -4330,7 +4330,7 @@ class TestAutomatonOperations:
         ('0111',True),
         ('1111',False)
     ])
-    def test_automaton_concatenation_operation_19_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,one_terminated_dfa:DFA):
+    def test_automaton_concatenation_operation_1_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,one_terminated_dfa:DFA):
         
         conc = Automaton.Concat(zero_terminated_dfa,one_terminated_dfa).to_deterministic().minimize()
 
@@ -4369,7 +4369,7 @@ class TestAutomatonOperations:
         ('1110',False),
         ('1111',False)
     ])
-    def test_automaton_concatenation_operation_20_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,five_multiplo_dfa:DFA):
+    def test_automaton_concatenation_operation_2_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,five_multiplo_dfa:DFA):
 
         conc = Automaton.Concat(zero_terminated_dfa,five_multiplo_dfa).to_deterministic()
         
@@ -4408,7 +4408,7 @@ class TestAutomatonOperations:
         ('1110',False),
         ('1111',False)
     ])
-    def test_automaton_concatenation_operation_20_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,five_multiplo_dfa:DFA):
+    def test_automaton_concatenation_operation_2_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,five_multiplo_dfa:DFA):
 
         conc = Automaton.Concat(zero_terminated_dfa,five_multiplo_dfa).to_deterministic().minimize()
         
@@ -4447,7 +4447,7 @@ class TestAutomatonOperations:
         ('1110',False),
         ('1111',False)
     ])
-    def test_automaton_concatenation_operation_21_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,alternate_dfa:DFA):
+    def test_automaton_concatenation_operation_3_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,alternate_dfa:DFA):
 
         conc = Automaton.Concat(zero_terminated_dfa,alternate_dfa).to_deterministic()
 
@@ -4486,7 +4486,7 @@ class TestAutomatonOperations:
         ('1110',False),
         ('1111',False)
     ])
-    def test_automaton_concatenation_operation_21_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,alternate_dfa:DFA):
+    def test_automaton_concatenation_operation_3_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,alternate_dfa:DFA):
 
         conc = Automaton.Concat(zero_terminated_dfa,alternate_dfa).to_deterministic().minimize()
 
@@ -4529,7 +4529,7 @@ class TestAutomatonOperations:
         ('0000ababab',True),
         ('0000aabb',False)
     ])
-    def test_automaton_concatenation_operation_22_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,alternate_a_b_dfa:DFA):
+    def test_automaton_concatenation_operation_4_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,alternate_a_b_dfa:DFA):
         
         conc = Automaton.Concat(zero_terminated_dfa,alternate_a_b_dfa).to_deterministic()
 
@@ -4572,7 +4572,7 @@ class TestAutomatonOperations:
         ('0000ababab',True),
         ('0000aabb',False)
     ])
-    def test_automaton_concatenation_operation_22_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,alternate_a_b_dfa:DFA):
+    def test_automaton_concatenation_operation_4_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,alternate_a_b_dfa:DFA):
         
         conc = Automaton.Concat(zero_terminated_dfa,alternate_a_b_dfa).to_deterministic().minimize()
 
@@ -4612,7 +4612,7 @@ class TestAutomatonOperations:
         ('1111011001',True),
         ('1111100101',True)
     ])
-    def test_automaton_concatenation_operation_23_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+    def test_automaton_concatenation_operation_5_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
 
         conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated).to_deterministic()
 
@@ -4652,7 +4652,7 @@ class TestAutomatonOperations:
         ('1111011001',True),
         ('1111100101',True)
     ])
-    def test_automaton_concatenation_operation_23_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+    def test_automaton_concatenation_operation_5_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
 
         conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated).to_deterministic().minimize()
 
@@ -4692,7 +4692,7 @@ class TestAutomatonOperations:
         ('1111011001',True),
         ('1111100101',True)
     ])
-    def test_automaton_concatenation_operation_23_3(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+    def test_automaton_concatenation_operation_5_3(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
 
         conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated.to_deterministic()).to_deterministic()
 
@@ -4732,7 +4732,7 @@ class TestAutomatonOperations:
         ('1111011001',True),
         ('1111100101',True)
     ])
-    def test_automaton_concatenation_operation_23_4(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+    def test_automaton_concatenation_operation_5_4(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
 
         conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated.to_deterministic()).to_deterministic().minimize()
 
@@ -4772,7 +4772,7 @@ class TestAutomatonOperations:
         ('1111011001',True),
         ('1111100101',True)
     ])
-    def test_automaton_concatenation_operation_23_5(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+    def test_automaton_concatenation_operation_5_5(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
 
         conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated.to_deterministic().minimize()).to_deterministic()
 
@@ -4812,7 +4812,7 @@ class TestAutomatonOperations:
         ('1111011001',True),
         ('1111100101',True)
     ])
-    def test_automaton_concatenation_operation_23_6(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
+    def test_automaton_concatenation_operation_5_6(self,string:str,should_accept:bool,zero_terminated_dfa:DFA,nfa_0_1_terminated:NFA):
 
         conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated.to_deterministic().minimize()).to_deterministic().minimize()
 
@@ -4828,8 +4828,239 @@ class TestAutomatonOperations:
         ('11',False),
         ('010101010111110',True)
     ])
-    def test_automaton_kleene_star_operation_24_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA):
+    def test_automaton_kleene_star_operation_1_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA):
 
         kleene = Automaton.KleeneStar(zero_terminated_dfa).to_deterministic()
+
+        assert kleene.accept(list(string)) == should_accept
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',True),
+        ('1',False),
+        ('00',True),
+        ('01',False),
+        ('10',True),
+        ('11',False),
+        ('010101010111110',True)
+    ])
+    def test_automaton_kleene_star_operation_1_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA):
+
+        kleene = Automaton.KleeneStar(zero_terminated_dfa).to_deterministic().minimize()
+
+        assert kleene.accept(list(string)) == should_accept
+
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',False),
+        ('1',True),
+        ('00',False),
+        ('01',True),
+        ('10',False),
+        ('11',True),
+        ('01001011001001',True)
+    ])
+    def test_automaton_kleene_star_operation_2_1(self,string:str,should_accept:bool,one_terminated_dfa:DFA):
+
+        kleene = Automaton.KleeneStar(one_terminated_dfa).to_deterministic()
+
+        assert kleene.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',False),
+        ('1',True),
+        ('00',False),
+        ('01',True),
+        ('10',False),
+        ('11',True),
+        ('01001011001001',True)
+    ])
+    def test_automaton_kleene_star_operation_2_2(self,string:str,should_accept:bool,one_terminated_dfa:DFA):
+
+        kleene = Automaton.KleeneStar(one_terminated_dfa).to_deterministic()
+
+        assert kleene.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',True),
+        ('1',False),
+        ('00',True),
+        ('01',False),
+        ('10',False),
+        ('11',False),
+        ('1010',True),
+        ('1011010',True),
+        ('10101111',True)
+    ])
+    def test_automaton_kleene_star_operation_3_1(self,string:str,should_accept:bool,five_multiplo_dfa:DFA):
+
+        kleene = Automaton.KleeneStar(five_multiplo_dfa).to_deterministic()
+
+        assert kleene.accept(list(string)) == should_accept
+
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',True),
+        ('1',False),
+        ('00',True),
+        ('01',False),
+        ('10',False),
+        ('11',False),
+        ('1010',True),
+        ('1011010',True),
+        ('10101111',True)
+    ])
+    def test_automaton_kleene_star_operation_3_2(self,string:str,should_accept:bool,five_multiplo_dfa:DFA):
+
+        kleene = Automaton.KleeneStar(five_multiplo_dfa).to_deterministic().minimize()
+
+        assert kleene.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',True),
+        ('1',True),
+        ('00',True),
+        ('01',True),
+        ('10',True),
+        ('11',True),
+        ('111111111',True),
+        ('000000000',True)
+    ])
+    def test_automaton_kleene_star_operation_4_1(self,string:str,should_accept:bool,alternate_dfa:DFA):
+
+        kleene = Automaton.KleeneStar(alternate_dfa).to_deterministic()
+
+        assert kleene.accept(list(string)) == should_accept
+
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',True),
+        ('1',True),
+        ('00',True),
+        ('01',True),
+        ('10',True),
+        ('11',True),
+        ('111111111',True),
+        ('000000000',True)
+    ])
+    def test_automaton_kleene_star_operation_4_2(self,string:str,should_accept:bool,alternate_dfa:DFA):
+
+        kleene = Automaton.KleeneStar(alternate_dfa).to_deterministic()
+
+        assert kleene.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',True),
+        ('10',False),
+        ('11',False),
+        ('0010100101',True),
+        ('111111111101',True),
+        ('00000000',False),
+        ('00000101010111101',True)
+    ])
+    def test_automaton_kleene_star_operation_5_1(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
+
+        kleene = Automaton.KleeneStar(nfa_0_1_terminated).to_deterministic()
+
+        assert kleene.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',True),
+        ('10',False),
+        ('11',False),
+        ('0010100101',True),
+        ('111111111101',True),
+        ('00000000',False),
+        ('00000101010111101',True)
+    ])
+    def test_automaton_kleene_star_operation_5_2(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
+
+        kleene = Automaton.KleeneStar(nfa_0_1_terminated).to_deterministic().minimize()
+
+        assert kleene.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',True),
+        ('10',False),
+        ('11',False),
+        ('0010100101',True),
+        ('111111111101',True),
+        ('00000000',False),
+        ('00000101010111101',True)
+    ])
+    def test_automaton_kleene_star_operation_5_3(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
+
+        kleene = Automaton.KleeneStar(nfa_0_1_terminated.to_deterministic()).to_deterministic()
+
+        assert kleene.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',True),
+        ('10',False),
+        ('11',False),
+        ('0010100101',True),
+        ('111111111101',True),
+        ('00000000',False),
+        ('00000101010111101',True)
+    ])
+    def test_automaton_kleene_star_operation_5_4(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
+
+        kleene = Automaton.KleeneStar(nfa_0_1_terminated.to_deterministic()).to_deterministic().minimize()
+
+        assert kleene.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',True),
+        ('10',False),
+        ('11',False),
+        ('0010100101',True),
+        ('111111111101',True),
+        ('00000000',False),
+        ('00000101010111101',True)
+    ])
+    def test_automaton_kleene_star_operation_5_5(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
+
+        kleene = Automaton.KleeneStar(nfa_0_1_terminated.to_deterministic().minimize()).to_deterministic()
+
+        assert kleene.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',True),
+        ('10',False),
+        ('11',False),
+        ('0010100101',True),
+        ('111111111101',True),
+        ('00000000',False),
+        ('00000101010111101',True)
+    ])
+    def test_automaton_kleene_star_operation_5_6(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
+
+        kleene = Automaton.KleeneStar(nfa_0_1_terminated.to_deterministic().minimize()).to_deterministic().minimize()
 
         assert kleene.accept(list(string)) == should_accept
