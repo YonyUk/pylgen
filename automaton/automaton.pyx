@@ -223,6 +223,17 @@ cdef class Automaton:
         '''
         return _automaton_concatenation(first,second)
     
+    @staticmethod
+    def KleenStar(automaton:Automaton) -> NFA:
+        '''
+        Args:
+            automaton (Automaton)
+        
+        Returns:
+            NFA: the automaton equivalent to L(automaton)* language
+        '''
+        return _automaton_kleene_star(automaton)
+    
     cpdef void add_transition(self,State from_state,State to_state,str symbol):
         '''
         Args:
@@ -1156,6 +1167,49 @@ cdef NFA _automaton_concatenation(Automaton first,Automaton second):
                 result._states_by_id[new_to_id] = states_by_id[new_to_id]
             result._epsilons[new_from_id].add(new_to_id)
 
+    return result
+
+cdef NFA _automaton_kleene_star(Automaton automaton):
+    cdef set[State] new_states = set()
+    cdef dict[str,State] states_by_id = {}
+    cdef str symbol,from_id,to_id
+    cdef object state_value
+    cdef State state,copy_state
+    cdef NFA result
+    cdef tuple[str,str] transition
+    cdef str aut_id = automaton.id
+    
+    # copy the states
+    for from_id,state in automaton._states_by_id.items():
+        state_value = state._value
+        if isinstance(state_value,set):
+            copy_state = State(from_id,set(state_value),state._is_accept)
+        else:
+            copy_state = State(from_id,state_value,state._is_accept)
+        states_by_id[from_id] = copy_state
+
+    result = NFA(f'{aut_id}-kleene-star',f'{aut_id}-kleene-star',automaton._alphabet,True) # type:ignore
+
+    # copy transitions
+    for transition,to_id in automaton._trans_func._table.items():
+        from_id = <str>transition[0]
+        symbol = <str>transition[1]
+        state = states_by_id[from_id]
+        copy_state = states_by_id[to_id]
+
+        result.add_transition(state,copy_state,symbol)
+    
+    # copy epsilon transitions
+    for from_id in automaton._epsilons:
+        state = states_by_id[from_id]
+        for to_id in automaton._epsilons[from_id]:
+            copy_state = states_by_id[to_id]
+            result.add_epsilon_transition(state,copy_state)
+    
+    # makes epsilon transition from finals states to the new start
+    for state in automaton.finals:
+        result.add_epsilon_transition(state,result._start_state)
+    
     return result
 
 cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet):
