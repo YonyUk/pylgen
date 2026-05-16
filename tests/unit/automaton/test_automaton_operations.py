@@ -4817,3 +4817,19 @@ class TestAutomatonOperations:
         conc = Automaton.Concat(zero_terminated_dfa,nfa_0_1_terminated.to_deterministic().minimize()).to_deterministic().minimize()
 
         assert conc.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('0',True),
+        ('1',False),
+        ('00',True),
+        ('01',False),
+        ('10',True),
+        ('11',False),
+        ('010101010111110',True)
+    ])
+    def test_automaton_kleene_star_operation_24_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA):
+
+        kleene = Automaton.KleenStar(zero_terminated_dfa).to_deterministic()
+
+        assert kleene.accept(list(string)) == should_accept
