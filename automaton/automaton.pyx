@@ -224,7 +224,7 @@ cdef class Automaton:
         return _automaton_concatenation(first,second)
     
     @staticmethod
-    def KleenStar(automaton:Automaton) -> NFA:
+    def KleeneStar(automaton:Automaton) -> NFA:
         '''
         Args:
             automaton (Automaton)
@@ -1206,6 +1206,10 @@ cdef NFA _automaton_kleene_star(Automaton automaton):
             copy_state = states_by_id[to_id]
             result.add_epsilon_transition(state,copy_state)
     
+    # makes epsilon transition from result start state to automaton start state
+    state = states_by_id[automaton._start_state._id]
+    result.add_epsilon_transition(result._start_state,state)
+
     # makes epsilon transition from finals states to the new start
     for state in automaton.finals:
         result.add_epsilon_transition(state,result._start_state)

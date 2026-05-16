@@ -4830,6 +4830,6 @@ class TestAutomatonOperations:
     ])
     def test_automaton_kleene_star_operation_24_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA):
 
-        kleene = Automaton.KleenStar(zero_terminated_dfa).to_deterministic()
+        kleene = Automaton.KleeneStar(zero_terminated_dfa).to_deterministic()
 
         assert kleene.accept(list(string)) == should_accept
