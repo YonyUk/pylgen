@@ -1494,3 +1494,17 @@ cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,se
         dfa._states_by_id[state._id] = state
     dfa._is_complete = len(transition_function._table) == len(states) * len(alphabet) # type:ignore
     return dfa
+
+cpdef DFA get_word_automaton(str word):
+    cdef DFA result = DFA('start','start',set(word))
+    cdef State last_state,current_state
+    cdef int idx
+
+    last_state = result._start_state
+
+    for idx in range(len(word)):
+        current_state = State(f'{idx}-{word[idx]}',f'{idx}-{word[idx]}',idx == len(word) - 1) # type:ignore
+        result.add_transition(last_state,current_state,word[idx])
+        last_state = current_state
+    
+    return result

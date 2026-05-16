@@ -1,4 +1,4 @@
-from .automaton import State,Automaton,DFA,NFA
+from .automaton import State,Automaton,DFA,NFA,create_dfa,get_word_automaton
 import networkx as nx
 from nx_vis_visualizer import nx_to_vis
 
