@@ -22,6 +22,13 @@ automaton_extensions = Extension(
     ]
 )
 
+attributed_grammar_extensions = Extension(
+    name='grammar.attributed_grammar',
+    sources=[
+        'grammar/attributed_grammar.pyx'
+    ]
+)
+
 setup(
     ext_modules=cythonize(common_extensions),
     language_level=3
@@ -34,5 +41,10 @@ setup(
 
 setup(
     ext_modules=cythonize(automaton_extensions),
+    language_level=3
+)
+
+setup(
+    ext_modules=cythonize(attributed_grammar_extensions),
     language_level=3
 )
