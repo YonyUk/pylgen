@@ -1,4 +1,4 @@
-from typing import List
+from typing import List,Tuple
 from hashlib import sha256
 from common.types cimport Symbol
 
@@ -55,3 +55,33 @@ cdef class Production:
         for i in range(8):
             h = (h << 8) | digest[i]
         return h # type:ignore
+
+cdef class ProductionsSet:
+
+    def __init__(self):
+        self._productions = {}
+    
+    @property
+    def productions(self) -> List[List[Symbol]]:
+        cdef list[list[Symbol]] result = []
+        cdef list[Symbol] production
+
+        for production in self._productions.values():
+            result.append(production.copy())
+        
+        return result
+    
+    def __iadd__(self,production:Tuple[Symbol,...]):
+        cdef Symbol symbol
+        cdef list[str] p_ids = []
+        cdef str p_id
+
+        for symbol in production:
+            p_ids.append(symbol._symbol)
+        
+        p_id = ','.join(p_ids)
+
+        if not p_id in self._productions:
+            self._productions[p_id] = list(production)
+        
+        return self
