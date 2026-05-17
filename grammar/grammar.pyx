@@ -40,11 +40,13 @@ cdef class Production:
         return self._id
     
     def __eq__(self, o) -> bool:
+        cdef Production other
         if not isinstance(o,Production):
             return False
-        if o.head != self.head:
+        other = o
+        if other._head != self._head:
             return False
-        return self._production == o._production
+        return self._production == other._production
     
     def __hash__(self) -> int:
         cdef bytes digest = sha256(self._id.encode()).digest()
