@@ -46,7 +46,12 @@ cdef class Symbol:
         return other._symbol == self._symbol and other._is_terminal == self._is_terminal and other._is_epsilon == self._is_epsilon
     
     def __hash__(self) -> int:
-        raise NotImplementedError()
+        cdef bytes digest = sha256(f'{self._symbol}-{self._is_terminal}-{self._is_epsilon}'.encode()).digest()
+        cdef long long h = 0 # type:ignore
+        cdef int i
+        for i in range(8):
+            h = (h << 8) | digest[i]
+        return h # type:ignore
 
 cdef class AST:
     '''
