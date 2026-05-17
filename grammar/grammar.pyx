@@ -196,4 +196,7 @@ cdef class Grammar:
             if not symbol in self._terminals:
                 self._terminals.add(symbol)
         
+        for symbol in p._non_terminals:
+            if not symbol in self._non_terminals:
+                self._non_terminals.add(symbol)
         self._productions[h] = productions
