@@ -1,4 +1,5 @@
 from typing import List,Callable
+from hashlib import sha256
 
 from common.types cimport Symbol
 
@@ -24,6 +25,10 @@ cdef class AttributedProduction:
         self._reductor = reductor
     
     @property
+    def id(self) -> str:
+        return str(self)
+
+    @property
     def head(self) -> Symbol:
         return self._head
     
@@ -42,3 +47,16 @@ cdef class AttributedProduction:
     
     def __repr__(self) -> str:
         return str(self)
+    
+    def __eq__(self, o) -> bool:
+        if not isinstance(o,AttributedProduction):
+            return False
+        return str(self) == str(o)
+    
+    def __hash__(self) -> int:
+        cdef bytes digest = sha256(str(self).encode()).digest()
+        cdef long long h = 0 # type:ignore
+        cdef int i
+        for i in range(8):
+            h = (h << 8) | digest[i]
+        return h # type:ignore
