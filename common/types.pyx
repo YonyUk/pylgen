@@ -41,9 +41,11 @@ cdef class Symbol:
         return str(self)
     
     def __eq__(self,other) -> bool:
+        cdef Symbol o
         if not isinstance(other,Symbol):
             return False
-        return other._symbol == self._symbol and other._is_terminal == self._is_terminal and other._is_epsilon == self._is_epsilon
+        o = other
+        return o._symbol == self._symbol and o._is_terminal == self._is_terminal and o._is_epsilon == self._is_epsilon
     
     def __hash__(self) -> int:
         cdef bytes digest = sha256(f'{self._symbol}-{self._is_terminal}-{self._is_epsilon}'.encode()).digest()
