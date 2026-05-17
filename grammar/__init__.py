@@ -1,1 +1,1 @@
-from .attributed_grammar import AttributedProduction
+from .grammar import Production

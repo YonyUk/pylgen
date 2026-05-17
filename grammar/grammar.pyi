@@ -1,27 +1,24 @@
-from typing import List,Callable
+from typing import List
 
 from common.types import Symbol
 
-class AttributedProduction:
+class Production:
 
-    def __init__(self,head:Symbol,production:List[Symbol],reductor:Callable): ...
+    def __init__(self,head:Symbol,production:List[Symbol]): ...
     
     @property
     def id(self) -> str: ...
-
+    
     @property
     def head(self) -> Symbol: ...
     
     @property
     def production(self) -> List[Symbol]: ...
     
-    @property
-    def reductor(self) -> Callable: ...
-    
     def __str__(self) -> str: ...
     
     def __repr__(self) -> str: ...
-
+    
     def __eq__(self, o) -> bool: ...
-
+    
     def __hash__(self) -> int: ...

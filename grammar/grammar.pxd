@@ -1,6 +1,6 @@
 from common.types cimport Symbol
 
-cdef class AttributedProduction:
+cdef class Production:
     cdef Symbol _head
     cdef list[Symbol] _production
-    cdef object _reductor
+    cdef str _id
