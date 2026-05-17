@@ -1,3 +1,5 @@
+from hashlib import sha256
+
 cdef class Symbol:
     '''
     Class that represents a grammar symbol
@@ -37,6 +39,14 @@ cdef class Symbol:
     
     def __repr__(self) -> str:
         return str(self)
+    
+    def __eq__(self,other) -> bool:
+        if not isinstance(other,Symbol):
+            return False
+        return other._symbol == self._symbol and other._is_terminal == self._is_terminal and other._is_epsilon == self._is_epsilon
+    
+    def __hash__(self) -> int:
+        raise NotImplementedError()
 
 cdef class AST:
     '''
