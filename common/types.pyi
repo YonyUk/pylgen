@@ -15,6 +15,10 @@ class Symbol:
     
     def __repr__(self) -> str: ...
 
+    def __eq__(self, other) -> bool: ...
+
+    def __hash__(self) -> int: ...
+
 class AST:
     '''
     Abstract Syntax Tree class
