@@ -103,6 +103,8 @@ cdef class Grammar:
             ValueError("start_symbol can't be terminal")
         '''
         self._start_symbol = start_symbol
+        if self._start_symbol._is_terminal:
+            raise ValueError("start_symbol can't be terminal")
         self._non_terminals = {self._start_symbol}
         self._terminals = set()
         self._firsts = {}

@@ -14,7 +14,7 @@ class TestProduction:
 
         prod = Production(A,[B,c,d])
 
-        assert prod.id == f'{A} -> {B},{c},{d}'
+        assert prod.id == f'{A} -> {B} {c} {d}'
         assert prod.head == A
         assert prod.production == [B,c,d]
 
