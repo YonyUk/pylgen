@@ -37,3 +37,38 @@ cdef class Symbol:
     
     def __repr__(self) -> str:
         return str(self)
+
+cdef class AST:
+    '''
+    Abstract Syntax Tree class
+    '''
+    def __init__(self,Symbol symbol,int line,int column):
+        '''
+        Args:
+            symbol (Symbol): internal symbol of this ast
+            line (int): line in the source code where this ast is located
+            column (int): column in the source code where this ast is located
+        '''
+        self._symbol = symbol
+        if line < 0 or column < 0:
+            raise ValueError('line and column must be non-negative values')
+        self._line = line
+        self._column = column
+    
+    @property
+    def symbol(self) -> Symbol:
+        return self._symbol
+    
+    @property
+    def line(self) -> int:
+        return self._line
+    
+    @property
+    def column(self) -> int:
+        return self._column
+    
+    def __str__(self) -> str:
+        return self._symbol._symbol
+    
+    def __repr__(self) -> str:
+        return str(self)
