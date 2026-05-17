@@ -10,9 +10,14 @@ cdef class Symbol:
             is_terminal (bool): says if this symbol is a terminal symbol
             is_epsilon (bool): says if this symbol is the epsilon symbol.
                 A symbol only can be epsilon if is a terminal symbol
+        
+        Raises:
+            ValueError('A symbol only can be epsilon if its a terminal symbol')
         '''
         self._symbol = symbol
         self._is_terminal = is_terminal
+        if is_epsilon and not is_terminal:
+            raise ValueError('A symbol only can be epsilon if its a terminal symbol')
         self._is_epsilon = is_epsilon
     
     @property
