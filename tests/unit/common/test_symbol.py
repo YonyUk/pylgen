@@ -21,3 +21,19 @@ class TestSymbol:
             assert symbol.symbol == 'Symbol'
             assert symbol.is_terminal == is_terminal
             assert symbol.is_epsilon == is_epsilon
+    
+    @pytest.mark.parametrize("symbol_1,symbol_2,are_equals",[
+        (Symbol('A'),Symbol('A'),True),
+        (Symbol('A'),Symbol('B'),False),
+        (Symbol('A'),Symbol('A',True),False),
+        (Symbol('A',True),Symbol('A',True),True),
+        (Symbol('A',True),Symbol('A'),False),
+        (Symbol('A',True),Symbol('B',True),False),
+        (Symbol('A',True),Symbol('A',True,True),False),
+        (Symbol('A',True,True),Symbol('A',True),False),
+        (Symbol('A',True,True),Symbol('B',True,True),False),
+        (Symbol('A',True,True),Symbol('A',True,True),True)
+    ])
+    def test_symbol_equality(self,symbol_1:Symbol,symbol_2:Symbol,are_equals:bool):
+
+        assert (symbol_1 == symbol_2) == are_equals
