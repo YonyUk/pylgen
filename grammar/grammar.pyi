@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from common.types import Symbol
 
@@ -22,3 +22,12 @@ class Production:
     def __eq__(self, o) -> bool: ...
     
     def __hash__(self) -> int: ...
+
+class ProductionsSet:
+
+    def __init__(self): ...
+    
+    @property
+    def productions(self) -> List[List[Symbol]]: ...
+    
+    def __iadd__(self,production:Tuple[Symbol,...]) -> ProductionsSet: ...

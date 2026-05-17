@@ -71,7 +71,7 @@ cdef class ProductionsSet:
         
         return result
     
-    def __iadd__(self,production:Tuple[Symbol,...]):
+    def __iadd__(self,production:Tuple[Symbol,...]) -> ProductionsSet:
         cdef Symbol symbol
         cdef list[str] p_ids = []
         cdef str p_id
