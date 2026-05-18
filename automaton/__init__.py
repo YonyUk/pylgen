@@ -80,7 +80,8 @@ def draw_automaton(automaton:Automaton,filename:str | None=None,**kwargs) -> Non
         filename = f'automaton-{automaton.id}'
     
     net = Network(directed=True,height='100vh',width='100%',bgcolor='white',select_menu=select_menu,filter_menu=filter_menu)
-    net.show_buttons(filter_=filters)
+    if filters:
+        net.show_buttons(filter_=filters)
 
     for node_id,node_attrs in G.nodes(data=True):
 
