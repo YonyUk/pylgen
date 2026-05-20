@@ -109,9 +109,11 @@ cdef class Grammar:
         self._non_terminals = { self._start_symbol }
         self._terminals = { self._end_symbol }
         self._firsts = { self._start_symbol: set() }
-        self._follows = { self._start_symbol: set() }
+        self._follows = { self._start_symbol: { self._end_symbol } }
         self._productions = {}
-        self._initialized = False # type:ignore
+        self._firsts_computed = False # type:ignore
+        self._follows_computed = False # type:ignore
+        self._symbols = { start_symbol, self._end_symbol }
     
     @property
     def id(self) -> str:
@@ -167,6 +169,10 @@ cdef class Grammar:
     def non_terminals(self) -> Set[Symbol]:
         return set(self._non_terminals)
     
+    @property
+    def symbols(self) -> Set[Symbol]:
+        return set(self._symbols)
+
     @property
     def start_symbol(self) -> Symbol:
         return self._start_symbol
@@ -227,17 +233,41 @@ cdef class Grammar:
                     if idx == len(production) and epsilon and not self._epsilon in self._firsts[non_terminal]:
                         self._firsts[non_terminal].add(self._epsilon)
                         change = True # type:ignore
-        self._initialized = True # type:ignore
+        self._firsts_computed = True # type:ignore
 
-    # cdef void _make_follows(self,str end_symbol):
-    #     cdef bint change = True # type:ignore
-    #     cdef Production production
-    #     cdef set[Production] productions
-    #     self._follows[self._start_symbol] = {Symbol(end_symbol,True)} # type:ignore
+    cdef void _make_follows(self):
+        cdef bint change = True # type:ignore
+        cdef ProductionsSet productions
+        cdef list[Symbol] production
+        cdef Symbol head,symbol,p_symbol
+        cdef set[Symbol] first
+        cdef int idx
         
-    #     while change:
-    #         change = False # type:ignore
-    #         for production in self.
+        while change:
+            change = False # type:ignore
+            for head,productions in self._productions.items():
+                for production in productions._productions.values():
+                    idx = 0
+                    while idx < len(production) - 1:
+                        first = self.first(production[idx + 1:])
+                        for symbol in first.difference({self._epsilon}):
+                            if symbol not in self._follows[production[idx]]:
+                                self._follows[production[idx]].add(symbol)
+                                change = True # type:ignore
+                        if self._epsilon in first:
+                            for symbol in self._follows[head]:
+                                if not symbol in self._follows[production[idx]]:
+                                    self._follows[production[idx]].add(symbol)
+                                    change = True # type:ignore
+                        idx += 1
+                    p_symbol = production[idx]
+                    if not p_symbol._is_terminal:
+                        for symbol in self._follows[head]:
+                            if not symbol in self._follows[p_symbol]:
+                                self._follows[p_symbol].add(symbol)
+                                change = True # type:ignore
+
+        self._follows_computed = True # type:ignore
     
     cpdef set[Symbol] first(self,list[Symbol] production):
         cdef set[Symbol] result = set()
@@ -245,7 +275,7 @@ cdef class Grammar:
         cdef int idx = 0
         cdef Symbol symbol
 
-        if not self._initialized:
+        if not self._firsts_computed:
             self._make_firsts()
 
         while derives_in_epsilon and idx < len(production):
@@ -261,6 +291,13 @@ cdef class Grammar:
             result.add(self._epsilon)
         
         return result
+
+    cpdef set[Symbol] follow(self,Symbol symbol):
+        if not symbol in self._symbols:
+            raise ValueError(f'Symbol {symbol} not present in grammar')
+        if not self._follows_computed:
+            self._make_follows()
+        return self._follows[symbol]
 
     def __getitem__(self,head:Symbol) -> ProductionsSet:
         cdef Symbol h = head
@@ -289,6 +326,7 @@ cdef class Grammar:
                 if not symbol in self._terminals:
                     self._terminals.add(symbol)
                     self._firsts[symbol] = { symbol }
+                    self._follows[symbol] = set()
                     if symbol._is_epsilon:
                         if not self._epsilon:
                             self._epsilon = symbol
@@ -299,6 +337,9 @@ cdef class Grammar:
                     self._non_terminals.add(symbol)
                     self._firsts[symbol] = set()
                     self._follows[symbol] = set()
+            
+            if not symbol in self._symbols:
+                self._symbols.add(symbol)
 
         self._productions[h] = productions
 
@@ -306,4 +347,5 @@ cdef class Grammar:
             self._productions_by_symbol[h] = set()
         
         self._productions_by_symbol[h].add(Production(h,p._last_production_added))
-        self._initialized = False # type:ignore
+        self._firsts_computed = False # type:ignore
+        self._follows_computed = False # type:ignore

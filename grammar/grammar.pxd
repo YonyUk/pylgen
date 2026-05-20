@@ -19,12 +19,15 @@ cdef class Grammar:
     cdef dict[Symbol,set[Symbol]] _follows,_firsts
     cdef dict[Symbol,ProductionsSet] _productions
     cdef dict[Symbol,set[Production]] _productions_by_symbol
-    cdef bint _initialized
+    cdef bint _firsts_computed
+    cdef bint _follows_computed
     cdef Symbol _epsilon
     cdef set[Production] _productions_cache
+    cdef set[Symbol] _symbols
 
     cdef bint _derives_in_epsilon(self,Symbol symbol)
     cdef void _make_firsts(self)
-    # cdef void _make_follows(self,str end_symbol)
+    cdef void _make_follows(self)
 
     cpdef set[Symbol] first(self,list[Symbol] production)
+    cpdef set[Symbol] follow(self,Symbol symbol)
