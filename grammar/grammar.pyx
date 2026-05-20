@@ -183,6 +183,39 @@ cdef class Grammar:
     def end_symbol(self) -> Symbol:
         return self._end_symbol
     
+    @staticmethod
+    def IsLeftRegular(g:Grammar) -> bool:
+        '''
+        Args:
+            g (Grammar)
+            
+        Returns:
+            bool: says if the given grammar is left-regular
+        '''
+        return _is_left_regular(g) # type:ignore
+    
+    @staticmethod
+    def IsRightRegular(g:Grammar) -> bool:
+        '''
+        Args:
+            g (Grammar)
+            
+        Returns:
+            bool: says if the given grammar is right-regular
+        '''
+        return _is_right_regular(g) # type:ignore
+    
+    @staticmethod
+    def IsRegular(g:Grammar) -> bool:
+        '''
+        Args:
+            g (Grammar)
+            
+        Returns:
+            bool: says if the given grammar is regular
+        '''
+        return _is_left_regular(g) or _is_right_regular(g) # type:ignore
+
     cdef bint _derives_in_epsilon(self,Symbol symbol):
         cdef Symbol sym
 
@@ -417,3 +450,35 @@ cdef class Grammar:
                     self._follows[h].clear()
         self._firsts_computed = False # type:ignore
         self._follows_computed = False # type:ignore
+
+cdef bint _is_left_regular(Grammar g):
+    cdef ProductionsSet productions
+    cdef list[Symbol] production
+
+    for productions in g._productions.values():
+        for production in productions._productions.values():
+            if len(production) > 2:
+                return False # type:ignore
+            if len(production) == 2:
+                if (<Symbol>production[0])._is_terminal:
+                    return False # type:ignore
+                if not (<Symbol>production[1])._is_terminal:
+                    return False # type:ignore
+    
+    return True # type:ignore
+
+cdef bint _is_right_regular(Grammar g):
+    cdef ProductionsSet productions
+    cdef list[Symbol] production
+
+    for productions in g._productions.values():
+        for production in productions._productions.values():
+            if len(production) > 2:
+                return False # type:ignore
+            if len(production) == 2:
+                if not (<Symbol>production[0])._is_terminal:
+                    return False # type:ignore
+                if (<Symbol>production[1])._is_terminal:
+                    return False # type:ignore
+    
+    return True # type:ignore
