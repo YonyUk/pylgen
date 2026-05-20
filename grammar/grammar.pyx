@@ -397,7 +397,10 @@ cdef class Grammar:
                 if not symbol in self._non_terminals:
                     self._non_terminals.add(symbol)
                     self._firsts[symbol] = set()
-                    self._follows[symbol] = set()
+                    if symbol == self._start_symbol:
+                        self._follows[symbol] = { self._end_symbol }
+                    else:
+                        self._follows[symbol] = set()
                 else:
                     if self._firsts_computed:
                         self._firsts[symbol].clear()
