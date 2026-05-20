@@ -1,10 +1,45 @@
+from typing import Tuple
+
 import pytest
 
-from grammar.grammar import Grammar
+from grammar.grammar import Grammar,SymbolNotPresentInGrammarException
 from common.types import Symbol
 
 class TestGrammar:
 
+    @pytest.fixture
+    def G1(self):
+        '''
+        E -> T X
+
+        X -> + T X
+
+        X -> ε
+
+        T -> ( E )
+
+        T -> n
+        '''
+        E = Symbol('E')
+        X = Symbol('X')
+        T = Symbol('T')
+        plus = Symbol('+',True)
+        n = Symbol('n',True)
+        lparen = Symbol('(',True)
+        rparen = Symbol(')',True)
+        eps = Symbol(chr(949),True,True) # ε symbol
+
+        g = Grammar(E,'$')
+        g[E] += T,X
+
+        g[X] += plus,T,X
+        g[X] += eps,
+
+        g[T] += lparen,E,rparen
+        g[T] += n,
+
+        return g,(E,T,X,plus,n,lparen,rparen,eps)
+    
     def test_grammar_initialization(self):
         E = Symbol('E')
         G = Grammar(E)
@@ -118,3 +153,52 @@ class TestGrammar:
         assert T in G.symbols
         assert plus in G.symbols
         assert n in G.symbols
+    
+    def test_grammar_raises_head_terminal_not_allowed(self):
+        E = Symbol('E')
+        end = Symbol('end',True)
+
+        G = Grammar(E)
+
+        with pytest.raises(ValueError,match="head can't be a terminal symbol"):
+            G[end] += E,end
+    
+    def test_grammar_bad_initialization(self):
+        end = Symbol('end',True)
+
+        with pytest.raises(ValueError,match="start_symbol can't be terminal"):
+            G = Grammar(end)
+    
+    def test_grammar_unique_epsilon_symbol(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        eps1 = Symbol('eps1',True,True)
+        eps2 = Symbol('eps2',True,True)
+
+        G = Grammar(E)
+        G[E] += T,eps1
+
+        with pytest.raises(ValueError,match='Only can exists one epsilon symbol'):
+            G[E] += T,eps2
+    
+    def test_grammar_first_1(self,G1:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(E,T,X,plus,n,lparen,rparen,eps) = G1
+
+        # terminals
+        assert G.first([plus]) == { plus }
+        assert G.first([n]) == { n }
+        assert G.first([lparen]) == { lparen }
+        assert G.first([rparen]) == { rparen }
+
+        # non-terminals
+        assert G.first([E]) == { n, lparen }
+        assert G.first([T]) == { n, lparen }
+        assert G.first([X]) == { plus, eps }
+
+        # symbols sequence
+        assert G.first([T,X]) == { n, lparen }
+        assert G.first([X,T]) == { plus, n, lparen }
+    
+        # symbol not present in grammar
+        with pytest.raises(SymbolNotPresentInGrammarException):
+            G.first([Symbol('Unknown')])

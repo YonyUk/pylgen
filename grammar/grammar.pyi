@@ -2,6 +2,10 @@ from typing import List, Set, Tuple
 
 from common.types import Symbol
 
+class SymbolNotPresentInGrammarException(Exception):
+    
+    def __init__(self,symbol:Symbol,*args) -> None: ...
+
 class Production:
 
     def __init__(self,head:Symbol,production:List[Symbol]): ...
