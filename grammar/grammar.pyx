@@ -179,6 +179,10 @@ cdef class Grammar:
     def start_symbol(self) -> Symbol:
         return self._start_symbol
     
+    @property
+    def end_symbol(self) -> Symbol:
+        return self._end_symbol
+    
     cdef bint _derives_in_epsilon(self,Symbol symbol):
         cdef Symbol sym
 
