@@ -374,7 +374,7 @@ cdef class Grammar:
         else:
             if self._firsts_computed:
                 self._firsts[h].clear()
-            elif self._follows_computed:
+            if self._follows_computed:
                 if h == self._start_symbol:
                     self._follows[h] = { self._end_symbol }
                 else:
