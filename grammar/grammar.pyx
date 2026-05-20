@@ -2,9 +2,6 @@ from typing import List,Tuple,Set
 from hashlib import sha256
 from common.types cimport Symbol
 
-cdef class GrammarNotInitializedException(Exception):
-    pass
-
 cdef class SymbolNotPresentInGrammarException(Exception):
     
     def __init__(self, Symbol symbol,*args: object) -> None:
@@ -69,8 +66,7 @@ cdef class ProductionsSet:
 
     def __init__(self):
         self._productions = {}
-        self._non_terminals = set()
-        self._terminals = set()
+        self._last_production_added = []
     
     @property
     def productions(self) -> List[List[Symbol]]:
@@ -84,26 +80,20 @@ cdef class ProductionsSet:
     
     def __iadd__(self,production:Tuple[Symbol,...]) -> ProductionsSet:
         cdef Symbol symbol
-        cdef list[str] p_ids = []
+        cdef list[str] p_ids = [symbol._symbol for symbol in production]
         cdef str p_id
-
-        for symbol in production:
-            if symbol._is_terminal and not symbol in self._terminals:
-                self._terminals.add(symbol)
-            elif not symbol._is_terminal and not symbol in self._non_terminals:
-                self._non_terminals.add(symbol)
-            p_ids.append(symbol._symbol)
         
         p_id = ','.join(p_ids)
 
         if not p_id in self._productions:
             self._productions[p_id] = list(production)
-        
+
+        self._last_production_added = self._productions[p_id]
         return self
 
 cdef class Grammar:
 
-    def __init__(self,Symbol start_symbol):
+    def __init__(self,Symbol start_symbol,str end_symbol = '\x00'):
         '''
         Args:
             start_symbol (Symbol): initial symbol of this grammar
@@ -112,10 +102,12 @@ cdef class Grammar:
             ValueError("start_symbol can't be terminal")
         '''
         self._start_symbol = start_symbol
+        self._productions_by_symbol = {}
+        self._end_symbol = Symbol(end_symbol,True) # type:ignore
         if self._start_symbol._is_terminal:
             raise ValueError("start_symbol can't be terminal")
-        self._non_terminals = {self._start_symbol}
-        self._terminals = set()
+        self._non_terminals = { self._start_symbol }
+        self._terminals = { self._end_symbol }
         self._firsts = { self._start_symbol: set() }
         self._follows = { self._start_symbol: set() }
         self._productions = {}
@@ -128,16 +120,16 @@ cdef class Grammar:
             str: the id of this grammar
         '''
         cdef Symbol head
-        cdef ProductionsSet productions
-        cdef list[Symbol] production
+        cdef set[Production] productions
+        cdef Production production
         cdef list[str] productions_ids = []
         cdef list[str] terminals_ids = []
         cdef list[str] non_terminals_ids = []
 
-        for head,productions in self._productions.items():
-            for production in productions._productions.values():
-                productions_ids.append(Production(head,production).id)
-        
+        for productions in self._productions_by_symbol.values():
+            for production in productions:
+                productions_ids.append(production._id)
+
         for head in self._terminals:
             if head._is_epsilon:
                 terminals_ids.append(f'EPSILON-SYMBOL-{head._symbol}')
@@ -160,13 +152,10 @@ cdef class Grammar:
             Set[Production]: all the productions inside this grammar
         '''
         cdef set[Production] result = set()
-        cdef Symbol head
-        cdef ProductionsSet productions
-        cdef list[Symbol] production
+        cdef set[Production] productions
 
-        for head,productions in self._productions.items():
-            for production in productions._productions.values():
-                result.add(Production(head,production))
+        for productions in self._productions_by_symbol.values():
+            result.update(productions)
         
         return result
     
@@ -238,10 +227,17 @@ cdef class Grammar:
                     if idx == len(production) and epsilon and not self._epsilon in self._firsts[non_terminal]:
                         self._firsts[non_terminal].add(self._epsilon)
                         change = True # type:ignore
-
-    cpdef void initialize(self,str end_symbol):
-        self._make_firsts()
         self._initialized = True # type:ignore
+
+    # cdef void _make_follows(self,str end_symbol):
+    #     cdef bint change = True # type:ignore
+    #     cdef Production production
+    #     cdef set[Production] productions
+    #     self._follows[self._start_symbol] = {Symbol(end_symbol,True)} # type:ignore
+        
+    #     while change:
+    #         change = False # type:ignore
+    #         for production in self.
     
     cpdef set[Symbol] first(self,list[Symbol] production):
         cdef set[Symbol] result = set()
@@ -250,7 +246,7 @@ cdef class Grammar:
         cdef Symbol symbol
 
         if not self._initialized:
-            raise GrammarNotInitializedException()
+            self._make_firsts()
 
         while derives_in_epsilon and idx < len(production):
             if not production[idx] in self._terminals and not production[idx] in self._non_terminals:
@@ -288,19 +284,26 @@ cdef class Grammar:
             self._firsts[h] = set()
             self._follows[h] = set()
         
-        for symbol in p._terminals:
-            if not symbol in self._terminals:
-                self._terminals.add(symbol)
-                self._firsts[symbol] = { symbol }
-                if symbol._is_epsilon:
-                    if not self._epsilon:
-                        self._epsilon = symbol
-                    elif self._epsilon != symbol:
-                        raise ValueError('Only can exists one epsilon symbol')
-        
-        for symbol in p._non_terminals:
-            if not symbol in self._non_terminals:
-                self._non_terminals.add(symbol)
-                self._firsts[symbol] = set()
-                self._follows[symbol] = set()
+        for symbol in p._last_production_added:
+            if symbol._is_terminal:
+                if not symbol in self._terminals:
+                    self._terminals.add(symbol)
+                    self._firsts[symbol] = { symbol }
+                    if symbol._is_epsilon:
+                        if not self._epsilon:
+                            self._epsilon = symbol
+                        elif self._epsilon != symbol:
+                            raise ValueError('Only can exists one epsilon symbol')
+            else:
+                if not symbol in self._non_terminals:
+                    self._non_terminals.add(symbol)
+                    self._firsts[symbol] = set()
+                    self._follows[symbol] = set()
+
         self._productions[h] = productions
+
+        if not h in self._productions_by_symbol:
+            self._productions_by_symbol[h] = set()
+        
+        self._productions_by_symbol[h].add(Production(h,p._last_production_added))
+        self._initialized = False # type:ignore
