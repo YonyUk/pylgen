@@ -202,3 +202,22 @@ class TestGrammar:
         # symbol not present in grammar
         with pytest.raises(SymbolNotPresentInGrammarException):
             G.first([Symbol('Unknown')])
+    
+    def test_grammar_follow_1(self,G1:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(E,T,X,plus,n,lparen,rparen,eps) = G1
+
+        # follow(E) = { $, ) }
+        follow = G.follow(E)
+        assert follow == { G.end_symbol, rparen }
+
+        # follow(X) = { $, ) }
+        follow = G.follow(X)
+        assert follow == { G.end_symbol, rparen }
+
+        # follow(T) = { $, ), + }
+        follow = G.follow(T)
+        assert follow == { G.end_symbol, rparen, plus }
+
+        # symbol not present in grammar
+        with pytest.raises(SymbolNotPresentInGrammarException):
+            G.follow(Symbol('Unknown'))
