@@ -322,6 +322,16 @@ cdef class Grammar:
         return self._follows[symbol]
 
     def __getitem__(self,head:Symbol) -> ProductionsSet:
+        '''
+        Args:
+            head (Symbol): head of some production
+        
+        Returns:
+            ProductionsSet: the productions for the given symbol
+        
+        Raises:
+            ValueError("head can't be a terminal symbol")
+        '''
         cdef Symbol h = head
         if h._is_terminal:
             raise ValueError("head can't be a terminal symbol")
@@ -331,6 +341,21 @@ cdef class Grammar:
         return ProductionsSet()
     
     def __setitem__(self,head:Symbol,productions:ProductionsSet) -> None:
+        '''
+        Args:
+            head (Symbol): head of the production to add
+            productions (ProductionsSet): set of productions of the given symbol head
+        
+        Description:
+            Set the productions of the given head symbol
+        
+        Returns:
+            None
+        
+        Raises:
+            ValueError("head can't be a terminal symbol") if head is a terminal symbol
+            ValueError('Only can exists one epsilon symbol') if a different epsilon symbol is provided
+        '''
         cdef Symbol symbol
         cdef ProductionsSet p = productions
         cdef Symbol h = head
