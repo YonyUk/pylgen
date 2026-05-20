@@ -215,6 +215,17 @@ cdef class Grammar:
             bool: says if the given grammar is regular
         '''
         return _is_left_regular(g) or _is_right_regular(g) # type:ignore
+    
+    @staticmethod
+    def AugmentGrammar(g:Grammar) -> Grammar:
+        '''
+        Args:
+            g (Grammar)
+        
+        Returns:
+            Grammar: the augmented grammar
+        '''
+        return _augment_grammar(g)
 
     cdef bint _derives_in_epsilon(self,Symbol symbol):
         cdef Symbol sym
@@ -482,3 +493,17 @@ cdef bint _is_right_regular(Grammar g):
                     return False # type:ignore
     
     return True # type:ignore
+
+cdef Grammar _augment_grammar(Grammar g):
+    cdef Symbol new_start = Symbol(f'NEW-START-{g.id}') # type:ignore
+    cdef Symbol nt = g._end_symbol
+    cdef list[Symbol] production
+    cdef Grammar result = Grammar(new_start,nt._symbol)
+
+    result[new_start] += g._start_symbol,
+
+    for nt in g._non_terminals:
+        for production in (<ProductionsSet>g[nt])._productions.values():
+            result[nt] += tuple(production)
+    
+    return result
