@@ -97,6 +97,8 @@ cdef class Grammar:
         '''
         Args:
             start_symbol (Symbol): initial symbol of this grammar
+            end_symbol (str): symbol that will be used for denote the end of the stack
+                used only for compilers
         
         Raises:
             ValueError("start_symbol can't be terminal")
@@ -270,6 +272,16 @@ cdef class Grammar:
         self._follows_computed = True # type:ignore
     
     cpdef set[Symbol] first(self,list[Symbol] production):
+        '''
+        Args:
+            production (List[Symbol]):
+        
+        Returns:
+            Set[Symbol]: the first-set for the given sequence of symbols
+        
+        Raises:
+            SymbolNotPresentInGrammarException if there is a symbol that is not present in the grammar
+        '''
         cdef set[Symbol] result = set()
         cdef bint derives_in_epsilon = True # type:ignore
         cdef int idx = 0
@@ -279,7 +291,7 @@ cdef class Grammar:
             self._make_firsts()
 
         while derives_in_epsilon and idx < len(production):
-            if not production[idx] in self._terminals and not production[idx] in self._non_terminals:
+            if not production[idx] in self._symbols:
                 raise SymbolNotPresentInGrammarException(production[idx])
             for symbol in self._firsts[production[idx]]:
                 if not symbol._is_epsilon and not symbol in result:
@@ -293,8 +305,18 @@ cdef class Grammar:
         return result
 
     cpdef set[Symbol] follow(self,Symbol symbol):
+        '''
+        Args:
+            symbol (Symbol):
+        
+        Returns:
+            Set[Symbol]: the follow-set for the given symbol
+        
+        Raises:
+            SymbolNotPresentInGrammarException if the symbol is not present in the grammar
+        '''
         if not symbol in self._symbols:
-            raise ValueError(f'Symbol {symbol} not present in grammar')
+            raise SymbolNotPresentInGrammarException(symbol)
         if not self._follows_computed:
             self._make_follows()
         return self._follows[symbol]
