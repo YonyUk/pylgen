@@ -371,6 +371,14 @@ cdef class Grammar:
             self._non_terminals.add(h)
             self._firsts[h] = set()
             self._follows[h] = set()
+        else:
+            if self._firsts_computed:
+                self._firsts[h].clear()
+            elif self._follows_computed:
+                if h == self._start_symbol:
+                    self._follows[h] = { self._end_symbol }
+                else:
+                    self._follows[h].clear()
         
         for symbol in p._last_production_added:
             if symbol._is_terminal:
@@ -383,11 +391,21 @@ cdef class Grammar:
                             self._epsilon = symbol
                         elif self._epsilon != symbol:
                             raise ValueError('Only can exists one epsilon symbol')
+                elif self._follows_computed:
+                    self._follows[symbol].clear()
             else:
                 if not symbol in self._non_terminals:
                     self._non_terminals.add(symbol)
                     self._firsts[symbol] = set()
                     self._follows[symbol] = set()
+                else:
+                    if self._firsts_computed:
+                        self._firsts[symbol].clear()
+                    if self._follows_computed:
+                        if symbol == self._start_symbol:
+                            self._follows[symbol] = { self._end_symbol }
+                        else:
+                            self._follows.clear()
             
             if not symbol in self._symbols:
                 self._symbols.add(symbol)
