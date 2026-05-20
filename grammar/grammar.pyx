@@ -371,14 +371,6 @@ cdef class Grammar:
             self._non_terminals.add(h)
             self._firsts[h] = set()
             self._follows[h] = set()
-        else:
-            if self._firsts_computed:
-                self._firsts[h].clear()
-            if self._follows_computed:
-                if h == self._start_symbol:
-                    self._follows[h] = { self._end_symbol }
-                else:
-                    self._follows[h].clear()
         
         for symbol in p._last_production_added:
             if symbol._is_terminal:
@@ -391,8 +383,6 @@ cdef class Grammar:
                             self._epsilon = symbol
                         elif self._epsilon != symbol:
                             raise ValueError('Only can exists one epsilon symbol')
-                elif self._follows_computed:
-                    self._follows[symbol].clear()
             else:
                 if not symbol in self._non_terminals:
                     self._non_terminals.add(symbol)
@@ -401,14 +391,6 @@ cdef class Grammar:
                         self._follows[symbol] = { self._end_symbol }
                     else:
                         self._follows[symbol] = set()
-                else:
-                    if self._firsts_computed:
-                        self._firsts[symbol].clear()
-                    if self._follows_computed:
-                        if symbol == self._start_symbol:
-                            self._follows[symbol] = { self._end_symbol }
-                        else:
-                            self._follows.clear()
             
             if not symbol in self._symbols:
                 self._symbols.add(symbol)
@@ -418,6 +400,20 @@ cdef class Grammar:
         if not h in self._productions_by_symbol:
             self._productions_by_symbol[h] = set()
         
+        
         self._productions_by_symbol[h].add(Production(h,p._last_production_added))
+        # reset the computation of first and follows
+        if self._firsts_computed:
+            for h in self._firsts:
+                if h._is_terminal:
+                    self._firsts[h] = { h }
+                else:
+                    self._firsts[h].clear()
+        if self._follows_computed:
+            for h in self._follows:
+                if h == self._start_symbol:
+                    self._follows[h] = { self._end_symbol }
+                else:
+                    self._follows[h].clear()
         self._firsts_computed = False # type:ignore
         self._follows_computed = False # type:ignore

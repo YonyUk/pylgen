@@ -8,7 +8,7 @@ from common.types import Symbol
 class TestGrammar:
 
     @pytest.fixture
-    def G1(self):
+    def G1(self) -> Tuple[Grammar,Tuple[Symbol,...]]:
         '''
         E -> T X
 
@@ -40,6 +40,162 @@ class TestGrammar:
 
         return g,(E,T,X,plus,n,lparen,rparen,eps)
     
+    # LR clasic grammar
+    @pytest.fixture
+    def G2(self) -> Tuple[Grammar,Tuple[Symbol,...]]:
+        '''
+        E -> E + T | T
+
+        T -> n | ( E )
+        '''
+        E = Symbol('E')
+        T = Symbol('T')
+
+        plus = Symbol('+',True)
+        lparen = Symbol('(',True)
+        rparen = Symbol(')',True)
+        n = Symbol('n',True)
+
+        g = Grammar(E,'$')
+
+        g[E] += E,plus,T
+        g[E] += T,
+    
+        g[T] += lparen,E,rparen
+        g[T] += n,
+
+        return g,(E,T,plus,lparen,rparen,n)
+
+    # grammar with multiple ε-derivations in sequence
+    @pytest.fixture
+    def G3(self) -> Tuple[Grammar,Tuple[Symbol,...]]:
+        '''
+        S -> A B C
+
+        A -> a | ε
+
+        B -> b | ε
+
+        C -> c | ε
+        '''
+
+        S = Symbol('S')
+        A = Symbol('A')
+        B = Symbol('B')
+        C = Symbol('C')
+
+        a = Symbol('a',True)
+        b = Symbol('b',True)
+        c = Symbol('c',True)
+        eps = Symbol('ε',True,True)
+
+        g = Grammar(S,'$')
+
+        g[S] += A,B,C
+        
+        g[A] += a,
+        g[A] += eps,
+
+        g[B] += b,
+        g[B] += eps,
+
+        g[C] += c,
+        g[C] += eps,
+
+        return g,(S,A,B,C,a,b,c,eps)
+
+    # grammar with n-direct ε-derivation
+    @pytest.fixture
+    def G4(self) -> Tuple[Grammar,Tuple[Symbol,...]]:
+        '''
+        S -> A
+
+        A -> B
+
+        B -> a | ε
+        '''
+        S = Symbol('S')
+        A = Symbol('A')
+        B = Symbol('B')
+
+        a = Symbol('a',True)
+        eps = Symbol('ε',True,True)
+
+        g = Grammar(S,'$')
+
+        g[S] += A,
+
+        g[A] += B,
+    
+        g[B] += a,
+        g[B] += eps,
+
+        return g,(S,A,B,a,eps)
+
+    # grammar with a symbol repeated twice in the same derivation
+    @pytest.fixture
+    def G5(self) -> Tuple[Grammar,Tuple[Symbol,...]]:
+        '''
+        S -> A a A
+
+        A -> b | c
+        '''
+
+        S = Symbol('S')
+        A = Symbol('A')
+
+        a = Symbol('a',True)
+        b = Symbol('b',True)
+        c = Symbol('c',True)
+
+        g = Grammar(S,'$')
+
+        g[S] += A,a,A
+
+        g[A] += b,
+        g[A] += c,
+
+        return g,(S,A,a,b,c)
+
+    # ciclic grammar
+    @pytest.fixture
+    def G6(self) -> Tuple[Grammar,Tuple[Symbol,...]]:
+        '''
+        A -> B
+
+        A -> a
+
+        B -> A
+        '''
+        A = Symbol('A')
+        B = Symbol('B')
+
+        a = Symbol('a',True)
+
+        g = Grammar(A,'$')
+
+        g[A] += B,
+        g[A] += a,
+
+        g[B] += A,
+
+        return g,(A,B,a)
+
+    # simple terminal grammar
+    @pytest.fixture
+    def G7(self) -> Tuple[Grammar,Tuple[Symbol,...]]:
+        '''
+        S -> a
+        '''
+        S = Symbol('S')
+        a = Symbol('a',True)
+
+        g = Grammar(S,'$')
+
+        g[S] += a,
+
+        return g,(S,a)
+
     def test_grammar_initialization(self):
         E = Symbol('E')
         G = Grammar(E)
@@ -181,7 +337,7 @@ class TestGrammar:
         with pytest.raises(ValueError,match='Only can exists one epsilon symbol'):
             G[E] += T,eps2
     
-    def test_grammar_first_1(self,G1:Tuple[Grammar,Tuple[Symbol,...]]):
+    def test_grammar_first(self,G1:Tuple[Grammar,Tuple[Symbol,...]]):
         G,(E,T,X,plus,n,lparen,rparen,eps) = G1
 
         # terminals
@@ -203,7 +359,7 @@ class TestGrammar:
         with pytest.raises(SymbolNotPresentInGrammarException):
             G.first([Symbol('Unknown')])
     
-    def test_grammar_follow_1(self,G1:Tuple[Grammar,Tuple[Symbol,...]]):
+    def test_grammar_follow(self,G1:Tuple[Grammar,Tuple[Symbol,...]]):
         G,(E,T,X,plus,n,lparen,rparen,eps) = G1
 
         # follow(E) = { $, ) }
@@ -221,3 +377,82 @@ class TestGrammar:
         # symbol not present in grammar
         with pytest.raises(SymbolNotPresentInGrammarException):
             G.follow(Symbol('Unknown'))
+    ################################################################
+    # more tests for first and follow
+    ################################################################
+    def test_grammar_1(self,G2:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(E,T,plus,lparen,rparen,n) = G2
+
+        # first(E) = first(T) = { n, ( }
+        assert G.first([E]) == { n, lparen }
+        assert G.first([T]) == { n, lparen }
+        # first( + T ) = { + }
+        assert G.first([plus,T]) == { plus }
+        # follow(E) = follow(T) = { $, +, ) }
+        assert G.follow(E) == { G.end_symbol, plus, rparen }
+        assert G.follow(T) == { G.end_symbol, plus, rparen }
+    
+    def test_grammar_2(self,G3:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(S,A,B,C,a,b,c,eps) = G3
+
+        # first(S) = { a, b, c, ε }
+        assert G.first([S]) == { a, b, c, eps}
+        # first(A) = { a, ε }
+        assert G.first([A]) == { a, eps }
+        # first(B) = { b, ε }
+        assert G.first([B]) == { b, eps }
+        # first(C) = { c, ε }
+        assert G.first([C]) == { c, eps }
+        # first( A B ) = { a, b, ε }
+        assert G.first([A,B]) == { a, b, eps }
+        # first( B C ) = { b, c, eps}
+
+        # follow(A) = { b, c, $ }
+        assert G.follow(A) == { b, c, G.end_symbol }
+        # follow(B) = { c, $ }
+        assert G.follow(B) == { c, G.end_symbol }
+        # follow(C) = { $ }
+        assert G.follow(C) == { G.end_symbol }
+    
+    def test_grammar_3(self,G4:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(S,A,B,a,eps) = G4
+
+        # first(S) = first(A) = first(B) = { a, ε }
+        assert G.first([S]) == { a, eps }
+        assert G.first([A]) == { a, eps }
+        assert G.first([B]) == { a, eps }
+
+        # follow(S) = follow(A) = follow(B) = { $ }
+        assert G.follow(S) == { G.end_symbol }
+        assert G.follow(A) == { G.end_symbol }
+        assert G.follow(B) == { G.end_symbol }
+    
+    def test_grammar_4(self,G5:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(S,A,a,b,c) = G5
+
+        # first(S) = first(A) = { b, c }
+        assert G.first([S]) == { b, c }
+        assert G.first([A]) == { b, c }
+        # follow(A) = { a, $ }
+        assert G.follow(A) == { a, G.end_symbol }
+
+    def test_grammar_5(self,G6:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(A,B,a) = G6
+
+        # first(A) = first(B) = { a }
+        assert G.first([A]) == { a }
+        assert G.first([B]) == { a }
+
+        # follow(A) = follow(B) = { $ }
+        assert G.follow(A) == { G.end_symbol }
+        assert G.follow(B) == { G.end_symbol }
+    
+    def test_grammar_6(self,G7:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(S,a) = G7
+
+        # first(S) = { a }
+        assert G.first([S]) == { a }
+        # follow(S) = { $ }
+        assert G.follow(S) == { G.end_symbol }
+        # follow(a) = ∅
+        assert len(G.follow(a)) == 0
