@@ -35,3 +35,4 @@ cdef class Grammar:
 cdef bint _is_left_regular(Grammar g)
 cdef bint _is_right_regular(Grammar g)
 cdef Grammar _augment_grammar(Grammar g)
+cdef Grammar _reverse_grammar(Grammar g)

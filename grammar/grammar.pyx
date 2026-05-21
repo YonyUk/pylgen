@@ -226,6 +226,17 @@ cdef class Grammar:
             Grammar: the augmented grammar
         '''
         return _augment_grammar(g)
+    
+    @staticmethod
+    def Reverse(g:Grammar) -> Grammar:
+        '''
+        Args:
+            g (Grammar):
+        
+        Returns:
+            Grammar: the grammar equivalent to the reversed language of the given grammar
+        '''
+        return _reverse_grammar(g)
 
     cdef bint _derives_in_epsilon(self,Symbol symbol):
         cdef Symbol sym
@@ -505,5 +516,19 @@ cdef Grammar _augment_grammar(Grammar g):
     for nt in g._non_terminals:
         for production in (<ProductionsSet>g[nt])._productions.values():
             result[nt] += tuple(production)
+    
+    return result
+
+cdef Grammar _reverse_grammar(Grammar g):
+    cdef Grammar result = Grammar(g._start_symbol)
+    cdef Symbol nt
+    cdef ProductionsSet productions
+    cdef list[Symbol] symbols,reversed
+
+    for nt,productions in g._productions.items():
+        for symbols in productions._productions.values():
+            reversed = list(symbols)
+            reversed.reverse()
+            result[nt] += tuple(reversed)
     
     return result
