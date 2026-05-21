@@ -1,6 +1,9 @@
 from Cython.Build import cythonize
 from setuptools import Extension,setup
 
+###################################################################################
+#                                  COMON 
+###################################################################################
 common_extensions = Extension(
     name="common.table",
     sources=[
@@ -14,17 +17,30 @@ common_types_extensions = Extension(
         'common/types.pyx'
     ]
 )
-
+###################################################################################
+#                                  AUTOMATON
+###################################################################################
 automaton_extensions = Extension(
     name="automaton.automaton",
     sources=[
         "automaton/automaton.pyx"
     ]
 )
-
+###################################################################################
+#                                  GRAMMAR
+###################################################################################
 grammar_extension = Extension(
     name='grammar.grammar',
     sources=['grammar/grammar.pyx']
+)
+###################################################################################
+#                                  REGEX
+###################################################################################
+regex_extensions = Extension(
+    name='regex.engine',
+    sources=[
+        'regex/engine.pyx'
+    ]
 )
 
 setup(
@@ -44,5 +60,10 @@ setup(
 
 setup(
     ext_modules=cythonize(grammar_extension),
+    language_level=3
+)
+
+setup(
+    ext_modules=cythonize(regex_extensions),
     language_level=3
 )
