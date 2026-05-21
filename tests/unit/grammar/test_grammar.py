@@ -2,7 +2,7 @@ from typing import Tuple
 
 import pytest
 
-from grammar.grammar import Grammar,SymbolNotPresentInGrammarException
+from grammar.grammar import Grammar,SymbolNotPresentInGrammarException,Production
 from common.types import Symbol
 
 class TestGrammar:
@@ -195,6 +195,43 @@ class TestGrammar:
         g[S] += a,
 
         return g,(S,a)
+
+    # left-regular grammar
+    @pytest.fixture
+    def G8(self) -> Tuple[Grammar,Tuple[Symbol,...]]:
+        '''
+        S -> A a | a
+        
+        S -> B b | b
+        
+        A -> A a | B | ε
+
+        B -> B b | A | ε
+        '''
+        S = Symbol('S')
+        A = Symbol('A')
+        B = Symbol('B')
+
+        a = Symbol('a',True)
+        b = Symbol('b',True)
+        eps = Symbol('ε',True,True)
+
+        g = Grammar(S)
+
+        g[S] += A,a
+        g[S] += B,b
+        g[S] += a,
+        g[S] += b,
+
+        g[A] += A,a
+        g[A] += B,
+        g[A] += eps,
+
+        g[B] += B,b
+        g[B] += A,
+        g[B] += eps,
+    
+        return g,(S,A,B,a,b,eps)
 
     def test_grammar_initialization(self):
         E = Symbol('E')
@@ -456,3 +493,101 @@ class TestGrammar:
         assert G.follow(S) == { G.end_symbol }
         # follow(a) = ∅
         assert len(G.follow(a)) == 0
+    
+    @pytest.mark.parametrize("g",[
+        G1,
+        G2,
+        G3,
+        G4,
+        G5,
+        G6,
+        G7,
+        G8
+    ])
+    def test_augment_grammar(self,g):
+        G,_ = g._get_wrapped_function()(self)
+
+        A = Grammar.AugmentGrammar(G)
+
+        g_prods = G.productions
+        a_prods = A.productions
+        assert g_prods.issubset(a_prods)
+        prod = Production(A.start_symbol,[G.start_symbol])
+        assert prod in a_prods
+
+    @pytest.mark.parametrize("g",[
+        G1,
+        G2,
+        G3,
+        G4,
+        G5,
+        G6,
+        G7,
+        G8
+    ])
+    def test_reverse_grammar(self,g):
+        G,_ = g._get_wrapped_function()(self)
+
+        R = Grammar.Reverse(G)
+
+        R_prods = R.productions
+
+        for p in G.productions:
+            np = p.production
+            np.reverse()
+            pr = Production(p.head,np)
+            assert pr in R_prods
+
+    def test_grammar_regularity_1(self,G8:Tuple[Grammar,Tuple[Symbol,...]]):
+        GL,_ = G8
+
+        GR = Grammar.Reverse(GL)
+        
+        assert Grammar.IsRegular(GL)
+        assert Grammar.IsLeftRegular(GL)
+        assert not Grammar.IsRightRegular(GL)
+
+        assert Grammar.IsRegular(GR)
+        assert Grammar.IsRightRegular(GR)
+        assert not Grammar.IsLeftRegular(GR)
+    
+    def test_grammar_regularity_2(self,G4:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,_ = G4
+
+        assert Grammar.IsLeftRegular(G)
+        assert Grammar.IsRightRegular(G)
+        assert Grammar.IsRegular(G)
+    
+    def test_grammar_regularity_3(self,G6:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,_ = G6
+
+        assert Grammar.IsLeftRegular(G)
+        assert Grammar.IsRightRegular(G)
+        assert Grammar.IsRegular(G)
+    
+    def test_grammar_regularity_4(self,G7:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,_ = G7
+
+        assert Grammar.IsLeftRegular(G)
+        assert Grammar.IsRightRegular(G)
+        assert Grammar.IsRegular(G)
+    
+    def test_grammar_irregularity_1(self,G1:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,_ = G1
+        
+        assert not Grammar.IsRegular(G)
+    
+    def test_grammar_irregularity_2(self,G2:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,_ = G2
+
+        assert not Grammar.IsRegular(G)
+    
+    def test_grammar_irregularity_3(self,G3:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,_ = G3
+
+        assert not Grammar.IsRegular(G)
+    
+    def test_grammar_irregularity_4(self,G5:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,_ = G5
+
+        assert not Grammar.IsRegular(G)
