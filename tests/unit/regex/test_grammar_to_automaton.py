@@ -287,9 +287,9 @@ class TestGrammarToAutomaton:
         '''
         S → A b | B a
         
-        A → a A | a
+        A → A a | a
         
-        B → b B | b
+        B → B b | b
         
         L(G) = { aⁿb | n≥1 } U { bᵐa | m≥1 }
         '''
@@ -305,10 +305,10 @@ class TestGrammarToAutomaton:
         G[S] += A,b
         G[S] += B,a
 
-        G[A] += a,A
+        G[A] += A,a
         G[A] += a,
 
-        G[B] += b,B
+        G[B] += B,b
         G[B] += b,
 
         return G
@@ -670,7 +670,7 @@ class TestGrammarToAutomaton:
     @pytest.fixture
     def G26(self) -> Grammar:
         '''
-        S -> 
+        S -> A
 
         A -> S
 
@@ -743,3 +743,523 @@ class TestGrammarToAutomaton:
         G[B] += b,
 
         return G
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('a',True),
+        ('a',True),
+        ('aabababbabbab',True),
+        ('bababbababbabaa',True),
+        ('aaaaaaaaaaaaaa',True),
+        ('bbbbbbbbbbbbbbbb',True),
+        ('aaaaaaaaaab',True),
+        ('bbbbbbbbbbbbbbbbbba',True),
+        ('a0a',False),
+        ('b0b',False)
+    ])
+    def test_grammar_to_automaton_1(self,string:str,should_accept:bool,G1:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G1)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('a',True),
+        ('a',True),
+        ('aabababbabbab',True),
+        ('bababbababbabaa',True),
+        ('aaaaaaaaaaaaaa',True),
+        ('bbbbbbbbbbbbbbbb',True),
+        ('aaaaaaaaaab',True),
+        ('bbbbbbbbbbbbbbbbbba',True),
+        ('a0a',False),
+        ('b0b',False)
+    ])
+    def test_grammar_to_automaton_2(self,string:str,should_accept:bool,G2:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G2)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('a',False),
+        ('b',False),
+        ('ababbab',False),
+        ('babbab',False),
+        ('aaaab',False),
+        ('bbbbbba',False)
+    ])
+    def test_grammar_to_automaton_3(self,string:str,should_accept:bool,G3:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G3)
+
+        assert aut.accept(list(string)) == should_accept
+
+    def test_grammar_to_automaton_4(self,G4:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G4)
+
+        assert aut.is_empty
+    
+    def test_grammar_to_automaton_5(self,G5:Grammar):
+        
+        aut = RegexEngine.GetAutomaton(G5)
+
+        assert aut.is_empty
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('c',False),
+        ('b',False),
+        ('ab',False),
+        ('ac',True),
+        ('bc',False),
+        ('abbbbbbc',True),
+        ('abc',True)
+    ])
+    def test_grammar_to_automaton_6(self,string:str,should_accept:bool,G6:Grammar):
+        
+        aut = RegexEngine.GetAutomaton(G6)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('c',False),
+        ('b',False),
+        ('ab',False),
+        ('ac',True),
+        ('bc',False),
+        ('abbbbbbc',True),
+        ('abc',True)
+    ])
+    def test_grammar_to_automaton_7(self,string:str,should_accept:bool,G7:Grammar):
+        
+        aut = RegexEngine.GetAutomaton(G7)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('b',True),
+        ('ab',True),
+        ('aaaaab',True),
+        ('aab',True)
+    ])
+    def test_grammar_to_automaton_8(self,string:str,should_accept:bool,G8:Grammar):
+        
+        aut = RegexEngine.GetAutomaton(G8)
+
+        assert aut.accept(list(string)) == should_accept
+
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('b',True),
+        ('ab',True),
+        ('aaaaab',True),
+        ('aab',True)
+    ])
+    def test_grammar_to_automaton_9(self,string:str,should_accept:bool,G9:Grammar):
+        
+        aut = RegexEngine.GetAutomaton(G9)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('a',False),
+        ('b',False),
+        ('aa',True),
+        ('bb',True),
+        ('ab',True),
+        ('aaa',False),
+        ('aab',False),
+        ('aba',False),
+        ('baa',False),
+        ('abb',False),
+        ('bab',False),
+        ('bba',False),
+        ('bbb',False),
+        ('aaaa',True),
+        ('aaab',True),
+        ('aaba',True),
+        ('abaa',True),
+        ('baaa',True),
+        ('aabb',True),
+        ('abab',True),
+        ('baab',True),
+        ('abba',True),
+        ('baba',True),
+        ('bbaa',True),
+        ('abbb',True),
+        ('babb',True),
+        ('bbab',True),
+        ('bbba',True),
+        ('bbbb',True)
+    ])
+    def test_grammar_to_automaton_10(self,string:str,should_accept:bool,G10:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G10)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('a',False),
+        ('b',False),
+        ('aa',True),
+        ('bb',True),
+        ('ab',True),
+        ('aaa',False),
+        ('aab',False),
+        ('aba',False),
+        ('baa',False),
+        ('abb',False),
+        ('bab',False),
+        ('bba',False),
+        ('bbb',False),
+        ('aaaa',True),
+        ('aaab',True),
+        ('aaba',True),
+        ('abaa',True),
+        ('baaa',True),
+        ('aabb',True),
+        ('abab',True),
+        ('baab',True),
+        ('abba',True),
+        ('baba',True),
+        ('bbaa',True),
+        ('abbb',True),
+        ('babb',True),
+        ('bbab',True),
+        ('bbba',True),
+        ('bbbb',True)
+    ])
+    def test_grammar_to_automaton_11(self,string:str,should_accept:bool,G11:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G11)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('b',False),
+        ('ab',True),
+        ('aba',False),
+        ('aab',True),
+        ('baa',False),
+        ('bba',True),
+        ('bab',False),
+        ('aaaaaaab',True),
+        ('bbbbbbbbbba',True),
+        ('aaaaabbbbb',False),
+        ('bbbbbbaaaaaaa',False),
+        ('ababababab',False),
+        ('aaab',True),
+        ('bbbba',True)
+    ])
+    def test_grammar_to_automaton_12(self,string:str,should_accept:bool,G12:Grammar):
+        
+        aut = RegexEngine.GetAutomaton(G12)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('b',False),
+        ('ab',True),
+        ('aba',False),
+        ('aab',True),
+        ('baa',False),
+        ('bba',True),
+        ('bab',False),
+        ('aaaaaaab',True),
+        ('bbbbbbbbbba',True),
+        ('aaaaabbbbb',False),
+        ('bbbbbbaaaaaaa',False),
+        ('ababababab',False),
+        ('aaab',True),
+        ('bbbba',True)
+    ])
+    def test_grammar_to_automaton_13(self,string:str,should_accept:bool,G13:Grammar):
+        
+        aut = RegexEngine.GetAutomaton(G13)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('a',False),
+        ('b',False),
+        ('ab',False),
+        ('aa',False),
+        ('ba',False),
+        ('bb',False),
+        ('aaa',False),
+        ('aab',False),
+        ('aba',True),
+        ('baa',False),
+        ('abb',False),
+        ('bab',False),
+        ('bba',False),
+        ('bbb',False),
+        ('abaaba',True),
+        ('ababa',False),
+        ('ababababababa',False),
+        ('abaabaabaaba',True)
+    ])
+    def test_grammar_to_automaton_14(self,string:str,should_accept:bool,G14:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G14)
+
+        assert aut.accept(list(string)) == should_accept
+
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('a',False),
+        ('b',False),
+        ('ab',False),
+        ('aa',False),
+        ('ba',False),
+        ('bb',False),
+        ('aaa',False),
+        ('aab',False),
+        ('aba',True),
+        ('baa',False),
+        ('abb',False),
+        ('bab',False),
+        ('bba',False),
+        ('bbb',False),
+        ('abaaba',True),
+        ('ababa',False),
+        ('ababababababa',False),
+        ('abaabaabaaba',True)
+    ])
+    def test_grammar_to_automaton_15(self,string:str,should_accept:bool,G15:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G15)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('b',True),
+        ('aa',False),
+        ('ab',True),
+        ('ba',False),
+        ('bb',False),
+        ('c',False),
+        ('abc',False),
+        ('aaaaaac',False),
+        ('aaaaaabc',False),
+        ('aaaaaab',True)
+    ])
+    def test_grammar_to_automaton_16(self,string:str,should_accept:bool,G16:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G16)
+
+        assert aut.accept(list(string)) == should_accept
+
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('b',True),
+        ('aa',False),
+        ('ab',False),
+        ('ba',True),
+        ('bb',False),
+        ('bac',False),
+        ('bc',False),
+        ('baaaaa',True),
+        ('baaaac',False)
+    ])
+    def test_grammar_to_automaton_17(self,string:str,should_accept:bool,G17:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G17)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('b',False),
+        ('c',False),
+        ('ab',False),
+        ('ac',True),
+        ('bc',False),
+        ('abc',True),
+        ('adc',False),
+        ('abbbbbbc',True),
+        ('abbbbbbdc',False)
+    ])
+    def test_grammar_to_automaton_18(self,string:str,should_accept:bool,G18:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G18)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('b',False),
+        ('c',False),
+        ('ab',False),
+        ('ac',True),
+        ('bc',False),
+        ('abc',True),
+        ('adc',False),
+        ('abbbbbbc',True),
+        ('abbbbbbdc',False)
+    ])
+    def test_grammar_to_automaton_19(self,string:str,should_accept:bool,G19:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G19)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('c',False),
+        ('b',False),
+        ('ab',False),
+        ('ac',True),
+        ('bc',False),
+        ('abbbbbbc',True),
+        ('abc',True)
+    ])
+    def test_grammar_to_automaton_20(self,string:str,should_accept:bool,G20:Grammar):
+        
+        aut = RegexEngine.GetAutomaton(G20)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('c',False),
+        ('b',False),
+        ('ab',False),
+        ('ac',True),
+        ('bc',False),
+        ('abbbbbbc',True),
+        ('abc',True)
+    ])
+    def test_grammar_to_automaton_21(self,string:str,should_accept:bool,G21:Grammar):
+        
+        aut = RegexEngine.GetAutomaton(G21)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('b',True),
+        ('ab',True),
+        ('aaaaab',True),
+        ('aab',True)
+    ])
+    def test_grammar_to_automaton_22(self,string:str,should_accept:bool,G22:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G22)
+
+        assert aut.accept(list(string)) == should_accept
+
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('b',True),
+        ('ab',True),
+        ('aaaaab',True),
+        ('aab',True)
+    ])
+    def test_grammar_to_automaton_23(self,string:str,should_accept:bool,G23:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G23)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('a',False),
+        ('b',False),
+        ('aa',False),
+        ('ab',True),
+        ('ba',False),
+        ('bb',False),
+        ('aba',False),
+        ('abab',True),
+        ('ababababababab',True),
+        ('ababababababa',False)
+    ])
+    def test_grammar_to_automaton_24(self,string:str,should_accept:bool,G24:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G24)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',True),
+        ('a',False),
+        ('b',False),
+        ('aa',False),
+        ('ab',True),
+        ('ba',False),
+        ('bb',False),
+        ('aba',False),
+        ('abab',True),
+        ('ababababababab',True),
+        ('ababababababa',False)
+    ])
+    def test_grammar_to_automaton_25(self,string:str,should_accept:bool,G25:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G25)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    def test_grammar_to_automaton_26(self,G26:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G26)
+
+        assert aut.is_empty
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('b',True),
+        ('aa',False),
+        ('ab',True),
+        ('ba',False),
+        ('bb',False),
+        ('aaaaaab',True)
+    ])
+    def test_grammar_to_automaton_27(self,string:str,should_accept:bool,G27:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G27)
+
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('a',False),
+        ('b',True),
+        ('aa',False),
+        ('ab',False),
+        ('ba',True),
+        ('bb',False),
+        ('baaaaa',True),
+    ])
+    def test_grammar_to_automaton_28(self,string:str,should_accept:bool,G28:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G28)
+
+        assert aut.accept(list(string)) == should_accept
