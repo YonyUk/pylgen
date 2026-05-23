@@ -1,4 +1,4 @@
-from typing import List, Set, Tuple
+from typing import Dict, List, Set, Tuple
 
 from common.types import Symbol
 
@@ -79,6 +79,8 @@ class Grammar:
     def first(self,production:List[Symbol]) -> Set[Symbol]: ...
 
     def follow(self,symbol:Symbol) -> Set[Symbol]: ...
+
+    def to_dict(self) -> Dict: ...
 
     def __getitem__(self,head:Symbol) -> ProductionsSet: ...
     
