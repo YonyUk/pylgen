@@ -28,6 +28,7 @@ cdef class Grammar:
     cdef bint _derives_in_epsilon(self,Symbol symbol)
     cdef void _make_firsts(self)
     cdef void _make_follows(self)
+    cdef void _add_production(self,Symbol head,list[Symbol] production)
 
     cpdef set[Symbol] first(self,list[Symbol] production)
     cpdef set[Symbol] follow(self,Symbol symbol)

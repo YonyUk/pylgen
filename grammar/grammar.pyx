@@ -506,6 +506,60 @@ cdef class Grammar:
             result['epsilon'] = self._epsilon._symbol
 
         return result
+    
+    cdef void _add_production(self,Symbol head,list[Symbol] production):
+        cdef Symbol symbol
+
+        if head._is_terminal:
+            raise ValueError('head can not be a terminal symbol')
+        
+        if not head in self._non_terminals:
+            self._non_terminals.add(head)
+            self._firsts[head] = set()
+            self._follows[head] = set()
+            self._productions[head] = ProductionsSet()
+        
+        for symbol in production:
+            if symbol._is_terminal:
+                if not symbol in self._terminals:
+                    self._terminals.add(symbol)
+                    self._firsts[symbol] = { symbol }
+                    self._follows[symbol] = set()
+                    if symbol._is_epsilon:
+                        if not self._epsilon:
+                            self._epsilon = symbol
+                        elif self._epsilon != symbol:
+                            raise ValueError('Only can exists one epsilon symbol')
+            else:
+                if not symbol in self._non_terminals:
+                    self._non_terminals.add(symbol)
+                    self._firsts[symbol] = set()
+                    if symbol == self._start_symbol:
+                        self._follows[symbol] = { self._end_symbol }
+                    else:
+                        self._follows[symbol] = set()
+            
+            if not symbol in self._symbols:
+                self._symbols.add(symbol)
+
+        if not head in self._productions_by_symbol:
+            self._productions_by_symbol[head] = set()
+        
+        self._productions_by_symbol[head].add(Production(head,production))
+        if self._firsts_computed:
+            for symbol in self._firsts:
+                if symbol._is_terminal:
+                    self._firsts[symbol] = { symbol }
+                else:
+                    self._firsts[symbol].clear()
+        if self._follows_computed:
+            for symbol in self._follows:
+                if symbol == self._start_symbol:
+                    self._follows[symbol] = { self._end_symbol }
+                else:
+                    self._follows[symbol].clear()
+        self._firsts_computed = False # type:ignore
+        self._follows_computed = False # type:ignore
 
 cdef bint _is_left_regular(Grammar g):
     cdef ProductionsSet productions
