@@ -5,7 +5,7 @@ from common.types cimport Symbol
 cdef class RegexEngine:
     
     @staticmethod
-    def get_automaton(g:Grammar) -> DFA:
+    def GetAutomaton(g:Grammar) -> DFA:
         '''
         Args:
             g (Grammar)
