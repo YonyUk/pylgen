@@ -502,6 +502,9 @@ cdef class Grammar:
 
         result['productiones'] = _productions
 
+        if self._epsilon:
+            result['epsilon'] = self._epsilon._symbol
+
         return result
 
 cdef bint _is_left_regular(Grammar g):
