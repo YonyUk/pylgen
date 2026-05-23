@@ -31,6 +31,7 @@ cdef class Grammar:
 
     cpdef set[Symbol] first(self,list[Symbol] production)
     cpdef set[Symbol] follow(self,Symbol symbol)
+    cpdef dict to_dict(self)
 
 cdef bint _is_left_regular(Grammar g)
 cdef bint _is_right_regular(Grammar g)

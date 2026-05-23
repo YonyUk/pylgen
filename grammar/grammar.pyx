@@ -472,6 +472,37 @@ cdef class Grammar:
                     self._follows[h].clear()
         self._firsts_computed = False # type:ignore
         self._follows_computed = False # type:ignore
+    
+    cpdef dict to_dict(self):
+        cdef dict result = {}
+        cdef list[str] _terminals = []
+        cdef list[str] _non_terminals = []
+        cdef dict[str,list[list[str]]] _productions = {}
+        cdef Symbol symbol,sym
+        cdef set[Production] prods
+        cdef Production prod
+        cdef list[str] prod_str
+
+        for symbol in self._terminals:
+            _terminals.append(symbol._symbol)
+        
+        for symbol in self._non_terminals:
+            _non_terminals.append(symbol._symbol)
+        
+        for symbol,prods in self._productions_by_symbol.items():
+            _productions[symbol._symbol] = []
+            for prod in prods:
+                prod_str = []
+                for sym in prod._production:
+                    prod_str.append(sym._symbol)
+                _productions[symbol._symbol].append(prod_str)
+        
+        result['terminals'] = _terminals
+        result['non-terminals'] = _non_terminals
+
+        result['productiones'] = _productions
+
+        return result
 
 cdef bint _is_left_regular(Grammar g):
     cdef ProductionsSet productions
