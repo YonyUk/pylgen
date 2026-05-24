@@ -1,3 +1,5 @@
+from common.enums import TokenType
+
 class Symbol:
 
     def __init__(self,symbol:str,is_terminal:bool = False,is_epsilon:bool = False): ...
@@ -37,3 +39,13 @@ class AST:
     def __str__(self) -> str: ...
     
     def __repr__(self) -> str: ...
+
+class Token(AST):
+
+    def __init__(self,text:str, type_:TokenType, symbol: Symbol, line: int, column: int): ...    
+    
+    @property
+    def text(self) -> str: ...
+    
+    @property
+    def type(self) -> TokenType: ...
