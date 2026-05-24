@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, Set
 
 from common.types import Symbol
 
@@ -24,4 +24,18 @@ class LR0Item:
 
     def __eq__(self, __o: object) -> bool: ...
 
+    def __hash__(self) -> int: ...
+
+class LR0State:
+
+    def __init__(self,items:Set[LR0Item]): ...
+    
+    @property
+    def id(self) -> str: ...
+
+    @property
+    def items(self) -> Set[LR0Item]: ...
+    
+    def __eq__(self, __o: object) -> bool: ...
+    
     def __hash__(self) -> int: ...

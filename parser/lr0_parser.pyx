@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence,Set
 from hashlib import sha256
 
 from common.types cimport Symbol
@@ -52,6 +52,43 @@ cdef class LR0Item:
         cdef long long h = 0 # type:ignore
         cdef int i
 
+        for i in range(8):
+            h = (h << 8) | digest[i]
+        
+        return h # type:ignore
+
+cdef class LR0State:
+
+    def __init__(self,items:Set[LR0Item]):
+        cdef list[str] ids = []
+        cdef LR0Item item
+        for item in items:
+            ids.append(str(item))
+        ids.sort()
+        self._id = sha256('-'.join(ids).encode()).hexdigest()
+        self._items = items.copy()
+    
+    @property
+    def id(self) -> str:
+        return self._id
+
+    @property
+    def items(self) -> Set[LR0Item]:
+        return self._items.copy()
+    
+    def __eq__(self, __o: object) -> bool:
+        cdef LR0State other
+
+        if not isinstance(__o,LR0State):
+            return False
+        other = __o
+        return self._id == other._id
+    
+    def __hash__(self) -> int:
+        cdef bytes digest = sha256(self._id.encode()).digest()
+        cdef long long h = 0 # type:ignore
+        cdef int i
+        
         for i in range(8):
             h = (h << 8) | digest[i]
         
