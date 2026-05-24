@@ -232,6 +232,31 @@ class TestGrammar:
         g[B] += eps,
     
         return g,(S,A,B,a,b,eps)
+    
+    @pytest.fixture
+    def G9(self) -> Grammar:
+        '''
+        S -> 0 S | 1 A
+
+        A -> 0 S | 1 A | ε
+        '''
+        S = Symbol('S')
+        A = Symbol('A')
+
+        _0 = Symbol('0',True)
+        _1 = Symbol('1',True)
+        eps = Symbol('epsilon',True,True)
+
+        G = Grammar(S)
+
+        G[S] += _0,S
+        G[S] += _1,A
+
+        G[A] += _0,S
+        G[A] += _1,A
+        G[A] += eps,
+    
+        return G
 
     def test_grammar_initialization(self):
         E = Symbol('E')
@@ -591,3 +616,9 @@ class TestGrammar:
         G,_ = G5
 
         assert not Grammar.IsRegular(G)
+    
+    def test_grammar_regularity_5(self,G9:Grammar):
+
+        assert Grammar.IsRegular(G9)
+        assert Grammar.IsRightRegular(G9)
+        assert not Grammar.IsLeftRegular(G9)
