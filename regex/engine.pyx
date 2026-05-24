@@ -27,9 +27,7 @@ cdef class RegexEngine:
         Returns:
             Grammar: the equivalent grammar to the given automaton
         '''
-        if isinstance(automaton,DFA):
-            return _get_grammar_from_dfa(automaton)
-        raise NotImplementedError()
+        return _get_grammar(automaton)
 
 cdef DFA _left_regular_automaton(Grammar g):
     cdef NFA result
@@ -204,7 +202,7 @@ cdef DFA _get_automaton(Grammar g):
     
     return _right_regular_automaton(g)
 
-cdef Grammar _get_grammar_from_dfa(DFA dfa):
+cdef Grammar _get_grammar(Automaton automaton):
     cdef Grammar result
     cdef dict[str,Symbol] symbols = {}
     cdef State state
@@ -213,19 +211,19 @@ cdef Grammar _get_grammar_from_dfa(DFA dfa):
     cdef Symbol epsilon = Symbol('epsilon',True,True) # type:ignore
     cdef Symbol head,terminal,non_terminal
 
-    for state in dfa._states_by_id.values():
-        if state == dfa._start_state:
+    for state in automaton._states_by_id.values():
+        if state == automaton._start_state:
             f_id = 'S'
         else:
             f_id = f'A{len(symbols)}'
         symbols[state._id] = Symbol(f_id) # type:ignore
 
-    for symbol in dfa._alphabet:
+    for symbol in automaton._alphabet:
         symbols[symbol] = Symbol(symbol,True) # type:ignore
     
-    result = Grammar(symbols[dfa._start_state._id]) # type:ignore
+    result = Grammar(symbols[automaton._start_state._id]) # type:ignore
     
-    for transition,t_id in dfa._trans_func._table.items():
+    for transition,t_id in automaton._trans_func._table.items():
         f_id = <str>transition[0]
         symbol = <str>transition[1]
         head = symbols[f_id]
@@ -233,7 +231,13 @@ cdef Grammar _get_grammar_from_dfa(DFA dfa):
         non_terminal = symbols[t_id]
         result._add_production(head,[terminal,non_terminal])
     
-    for state in dfa._states_by_id.values():
+    for f_id in automaton._epsilons:
+        for t_id in automaton._epsilons[f_id]:
+            head = symbols[f_id]
+            non_terminal = symbols[t_id]
+            result._add_production(head,[non_terminal])
+
+    for state in automaton._states_by_id.values():
         if state._is_accept:
             head = symbols[state._id]
             result._add_production(head,[epsilon])
