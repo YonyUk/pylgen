@@ -1,0 +1,23 @@
+from typing import Sequence
+
+from common.types import Symbol
+
+class LR0Item:
+
+    def __init__(self,head:Symbol,left:Sequence[Symbol],right:Sequence[Symbol]): ...
+    
+    @property
+    def id(self) -> str: ...
+    
+    @property
+    def head(self) -> Symbol: ...
+    
+    @property
+    def left(self) -> list[Symbol]: ...
+
+    @property
+    def right(self) -> list[Symbol]: ...
+
+    def __str__(self) -> str: ...
+
+    def __repr__(self) -> str: ...

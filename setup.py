@@ -42,6 +42,15 @@ regex_extensions = Extension(
         'regex/engine.pyx'
     ]
 )
+###################################################################################
+#                                  REGEX
+###################################################################################
+parser_lr0_extensions = Extension(
+    name='parser.lr0_parser',
+    sources=[
+        'parser/lr0_parser.pyx'
+    ]
+)
 
 setup(
     ext_modules=cythonize(common_extensions),
@@ -65,5 +74,10 @@ setup(
 
 setup(
     ext_modules=cythonize(regex_extensions),
+    language_level=3
+)
+
+setup(
+    ext_modules=cythonize(parser_lr0_extensions),
     language_level=3
 )
