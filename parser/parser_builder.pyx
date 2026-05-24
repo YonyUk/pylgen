@@ -2,8 +2,8 @@ from typing import Set
 from hashlib import sha256
 
 from common.types cimport Symbol
-from grammar.grammar cimport Grammar,Production
-from .lr0_parser cimport LR0Item
+from grammar.grammar cimport Grammar,Production,_augment_grammar
+from .lr0_parser cimport LR0Item,LR0State
 
 _clousures:dict[tuple[str,str],set[LR0Item]] = {}
 
@@ -36,6 +36,17 @@ cdef class ParserBuilder:
             Set[LR0Item]: The next state for the given state and the symbol x
         '''
         return _goto(items,x,g)
+    
+    @staticmethod
+    def get_canonical_lr0_states(g:Grammar) -> Set[LR0State]:
+        '''
+        Args:
+            g (Grammar)
+        
+        Returns:
+            Set[LR0State]: the set of lr0 states canonical
+        '''
+        return _get_canonical_lr0_states(g)
 
 cdef set[LR0Item] _clousure(set[LR0Item] items,Grammar g):
     cdef LR0Item item,new_item
@@ -85,5 +96,31 @@ cdef set[LR0Item] _goto(set[LR0Item] items,Symbol x,Grammar g):
         if len(item._right) > 0 and item._right[0] == x:
             new_item = LR0Item(item._head,item._left + [x],item._right[1:]) # type:ignore
             result.update(_clousure({new_item},g))
+    
+    return result
+
+cdef set[LR0State] _get_canonical_lr0_states(Grammar g):
+    cdef Grammar augmented = _augment_grammar(g)
+    cdef LR0Item start = LR0Item(augmented._start_symbol,[],[g._start_symbol]) # type:ignore
+    cdef LR0State state,new_state
+    cdef set[LR0State] result = { LR0State(_clousure({start},augmented)) } # type:ignore
+    cdef set[LR0State] copy
+    cdef set[LR0Item] items
+    cdef bint change = True # type:ignore
+    cdef Symbol symbol
+
+    while change:
+        change = False # type:ignore
+        copy = result.copy()
+
+        for state in copy:
+            for symbol in g._symbols:
+                if symbol == augmented._end_symbol: continue
+                items = _goto(state._items,symbol,augmented)
+                if len(items) > 0:
+                    new_state = LR0State(items) # type:ignore
+                    if not new_state in result:
+                        change = True # type:ignore
+                        result.add(new_state)
     
     return result

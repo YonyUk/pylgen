@@ -2,7 +2,7 @@ from typing import Set
 
 from common.types import Symbol
 from grammar.grammar import Grammar
-from .lr0_parser import LR0Item
+from .lr0_parser import LR0Item,LR0State
 
 class ParserBuilder:
 
@@ -14,3 +14,6 @@ class ParserBuilder:
 
     @staticmethod
     def goto(items:Set[LR0Item],x:Symbol,g:Grammar) -> Set[LR0Item]: ...
+
+    @staticmethod
+    def get_canonical_lr0_states(g:Grammar) -> Set[LR0State]: ...
