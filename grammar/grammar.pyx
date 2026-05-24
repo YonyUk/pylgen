@@ -131,31 +131,7 @@ cdef class Grammar:
         Returns:
             str: the id of this grammar
         '''
-        cdef Symbol head
-        cdef set[Production] productions
-        cdef Production production
-        cdef list[str] productions_ids = []
-        cdef list[str] terminals_ids = []
-        cdef list[str] non_terminals_ids = []
-
-        for productions in self._productions_by_symbol.values():
-            for production in productions:
-                productions_ids.append(production._id)
-
-        for head in self._terminals:
-            if head._is_epsilon:
-                terminals_ids.append(f'EPSILON-SYMBOL-{head._symbol}')
-            else:
-                terminals_ids.append(head._symbol)
-        
-        for head in self._non_terminals:
-            non_terminals_ids.append(head._symbol)
-        
-        productions_ids.sort()
-        terminals_ids.sort()
-        non_terminals_ids.sort()
-
-        return sha256(f"START-SYMBOL: {self._start_symbol} PRODUCTIONS: {'-'.join(productions_ids)} TERMINALS: {'-'.join(terminals_ids)} NON-TERMINALS: {'-'.join(non_terminals_ids)}".encode()).hexdigest()
+        return self._id()
 
     @property
     def productions(self) -> Set[Production]:
@@ -337,6 +313,33 @@ cdef class Grammar:
                                 change = True # type:ignore
 
         self._follows_computed = True # type:ignore
+    
+    cdef str _id(self):
+        cdef Symbol head
+        cdef set[Production] productions
+        cdef Production production
+        cdef list[str] productions_ids = []
+        cdef list[str] terminals_ids = []
+        cdef list[str] non_terminals_ids = []
+
+        for productions in self._productions_by_symbol.values():
+            for production in productions:
+                productions_ids.append(production._id)
+
+        for head in self._terminals:
+            if head._is_epsilon:
+                terminals_ids.append(f'EPSILON-SYMBOL-{head._symbol}')
+            else:
+                terminals_ids.append(head._symbol)
+        
+        for head in self._non_terminals:
+            non_terminals_ids.append(head._symbol)
+        
+        productions_ids.sort()
+        terminals_ids.sort()
+        non_terminals_ids.sort()
+
+        return sha256(f"START-SYMBOL: {self._start_symbol} PRODUCTIONS: {'-'.join(productions_ids)} TERMINALS: {'-'.join(terminals_ids)} NON-TERMINALS: {'-'.join(non_terminals_ids)}".encode()).hexdigest()
     
     cpdef set[Symbol] first(self,list[Symbol] production):
         '''
