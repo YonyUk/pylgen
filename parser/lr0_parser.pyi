@@ -32,6 +32,9 @@ class LR0State:
     
     @property
     def id(self) -> str: ...
+
+    @property
+    def items(self) -> Set[LR0Item]: ...
     
     def __eq__(self, __o: object) -> bool: ...
     

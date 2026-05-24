@@ -71,6 +71,10 @@ cdef class LR0State:
     @property
     def id(self) -> str:
         return self._id
+
+    @property
+    def items(self) -> Set[LR0Item]:
+        return self._items.copy()
     
     def __eq__(self, __o: object) -> bool:
         cdef LR0State other
