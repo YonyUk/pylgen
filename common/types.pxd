@@ -1,3 +1,5 @@
+from common.enums import TokenType
+
 cdef class Symbol:
 
     cdef str _symbol
@@ -8,3 +10,7 @@ cdef class AST:
     cdef Symbol _symbol
     cdef int _line
     cdef int _column
+
+cdef class Token(AST):
+    cdef str _text
+    cdef object _type

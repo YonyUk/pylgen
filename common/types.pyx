@@ -1,4 +1,5 @@
 from hashlib import sha256
+from common.enums import TokenType
 
 cdef class Symbol:
     '''
@@ -89,3 +90,18 @@ cdef class AST:
     
     def __repr__(self) -> str:
         return str(self)
+
+cdef class Token(AST):
+
+    def __init__(self,text:str, type_:TokenType, symbol: Symbol, line: int, column: int):
+        super().__init__(symbol, line, column)
+        self._text = text
+        self._type = type_
+    
+    @property
+    def text(self) -> str:
+        return self._text
+    
+    @property
+    def type(self) -> TokenType:
+        return self._type # type:ignore
