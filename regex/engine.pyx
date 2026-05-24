@@ -1,4 +1,4 @@
-from automaton.automaton cimport NFA,DFA,State
+from automaton.automaton cimport NFA,DFA,State,Automaton
 from grammar.grammar cimport Grammar,_is_left_regular,_is_right_regular,ProductionsSet
 from common.types cimport Symbol
 
@@ -17,6 +17,19 @@ cdef class RegexEngine:
             ValueError('g must be a regular grammar')
         '''
         return _get_automaton(g)
+    
+    @staticmethod
+    def GetGrammar(automaton:Automaton) -> Grammar:
+        '''
+        Args:
+            automaton (Automaton)
+        
+        Returns:
+            Grammar: the equivalent grammar to the given automaton
+        '''
+        if isinstance(automaton,DFA):
+            return _get_grammar_from_dfa(automaton)
+        raise NotImplementedError()
 
 cdef DFA _left_regular_automaton(Grammar g):
     cdef NFA result
@@ -190,3 +203,39 @@ cdef DFA _get_automaton(Grammar g):
         return _left_regular_automaton(g)
     
     return _right_regular_automaton(g)
+
+cdef Grammar _get_grammar_from_dfa(DFA dfa):
+    cdef Grammar result
+    cdef dict[str,Symbol] symbols = {}
+    cdef State state
+    cdef str symbol,f_id,t_id
+    cdef tuple[str,str] transition
+    cdef Symbol epsilon = Symbol('epsilon',True,True) # type:ignore
+    cdef Symbol head,terminal,non_terminal
+
+    for state in dfa._states_by_id.values():
+        if state == dfa._start_state:
+            f_id = 'S'
+        else:
+            f_id = f'A{len(symbols)}'
+        symbols[state._id] = Symbol(f_id) # type:ignore
+
+    for symbol in dfa._alphabet:
+        symbols[symbol] = Symbol(symbol,True) # type:ignore
+    
+    result = Grammar(symbols[dfa._start_state._id]) # type:ignore
+    
+    for transition,t_id in dfa._trans_func._table.items():
+        f_id = <str>transition[0]
+        symbol = <str>transition[1]
+        head = symbols[f_id]
+        terminal = symbols[symbol]
+        non_terminal = symbols[t_id]
+        result._add_production(head,[terminal,non_terminal])
+    
+    for state in dfa._states_by_id.values():
+        if state._is_accept:
+            head = symbols[state._id]
+            result._add_production(head,[epsilon])
+    
+    return result
