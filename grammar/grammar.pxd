@@ -12,6 +12,8 @@ cdef class ProductionsSet:
     cdef dict[str,list[Symbol]] _productions
     cdef list[Symbol] _last_production_added
 
+    cdef void _add_production(self,list[Symbol] production)
+
 cdef class Grammar:
     cdef Symbol _start_symbol
     cdef Symbol _end_symbol

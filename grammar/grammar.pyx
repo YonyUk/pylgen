@@ -78,12 +78,20 @@ cdef class ProductionsSet:
         
         return result
     
+    cdef void _add_production(self,list[Symbol] production):
+        cdef Symbol symbol
+        cdef list[str] p_ids = [symbol._symbol for symbol in production]
+        cdef str p_id = ','.join(p_ids)
+
+        if not p_id in self._productions:
+            self._productions[p_id] = production.copy()
+        
+        self._last_production_added = self._productions[p_id]
+    
     def __iadd__(self,production:Tuple[Symbol,...]) -> ProductionsSet:
         cdef Symbol symbol
         cdef list[str] p_ids = [symbol._symbol for symbol in production]
-        cdef str p_id
-        
-        p_id = ','.join(p_ids)
+        cdef str p_id = ','.join(p_ids)
 
         if not p_id in self._productions:
             self._productions[p_id] = list(production)
@@ -517,6 +525,7 @@ cdef class Grammar:
             self._non_terminals.add(head)
             self._firsts[head] = set()
             self._follows[head] = set()
+        if not head in self._productions:
             self._productions[head] = ProductionsSet()
         
         for symbol in production:
@@ -546,6 +555,8 @@ cdef class Grammar:
             self._productions_by_symbol[head] = set()
         
         self._productions_by_symbol[head].add(Production(head,production))
+        self._productions[head]._add_production(production)
+
         if self._firsts_computed:
             for symbol in self._firsts:
                 if symbol._is_terminal:
