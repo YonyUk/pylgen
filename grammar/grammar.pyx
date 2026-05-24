@@ -608,7 +608,7 @@ cdef bint _is_right_regular(Grammar g):
     return True # type:ignore
 
 cdef Grammar _augment_grammar(Grammar g):
-    cdef Symbol new_start = Symbol(f'NEW-START-{g.id}') # type:ignore
+    cdef Symbol new_start = Symbol(f"{g._start_symbol}'") # type:ignore
     cdef Symbol nt = g._end_symbol
     cdef list[Symbol] production
     cdef Grammar result = Grammar(new_start,nt._symbol)
