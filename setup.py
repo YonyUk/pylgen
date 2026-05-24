@@ -58,6 +58,13 @@ parser_lalr_extensions = Extension(
     ]
 )
 
+parser_builder_extensions = Extension(
+    name='parser.parser_builder',
+    sources=[
+        'parser/parser_builder.pyx'
+    ]
+)
+
 setup(
     ext_modules=cythonize(common_extensions),
     language_level=3
@@ -87,7 +94,8 @@ setup(
     ext_modules=cythonize(parser_lr0_extensions),
     language_level=3
 )
+
 setup(
-    ext_modules=cythonize(parser_lalr_extensions),
+    ext_modules=cythonize(parser_builder_extensions),
     language_level=3
 )
