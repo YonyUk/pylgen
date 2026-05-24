@@ -116,7 +116,7 @@ cdef set[LR0State] _get_canonical_lr0_states(Grammar g):
         for state in copy:
             for symbol in g._symbols:
                 if symbol == augmented._end_symbol: continue
-                items = _goto(state._items,symbol,augmented)
+                items = _goto(state._items,symbol,g)
                 if len(items) > 0:
                     new_state = LR0State(items) # type:ignore
                     if not new_state in result:
