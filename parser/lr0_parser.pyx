@@ -1,4 +1,5 @@
 from typing import Sequence
+from hashlib import sha256
 
 from common.types cimport Symbol
 
@@ -38,3 +39,20 @@ cdef class LR0Item:
     
     def __repr__(self) -> str:
         return str(self)
+    
+    def __eq__(self, __o: object) -> bool:
+        cdef LR0Item other
+        if not isinstance(__o,LR0Item):
+            return False
+        other = __o
+        return self._head == other._head and self._left == other._left and self._right == other._right
+    
+    def __hash__(self) -> int:
+        cdef bytes digest = sha256(self.id.encode()).digest()
+        cdef long long h = 0 # type:ignore
+        cdef int i
+
+        for i in range(8):
+            h = (h << 8) | digest[i]
+        
+        return h # type:ignore
