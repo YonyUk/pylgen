@@ -31,6 +31,7 @@ cdef class Grammar:
     cdef void _make_firsts(self)
     cdef void _make_follows(self)
     cdef void _add_production(self,Symbol head,list[Symbol] production)
+    cdef str _id(self)
 
     cpdef set[Symbol] first(self,list[Symbol] production)
     cpdef set[Symbol] follow(self,Symbol symbol)
