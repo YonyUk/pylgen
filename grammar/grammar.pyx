@@ -555,7 +555,7 @@ cdef class Grammar:
             self._productions_by_symbol[head] = set()
         
         self._productions_by_symbol[head].add(Production(head,production))
-        self._productions[head]._add_production(production)
+        (<ProductionsSet>self._productions[head])._add_production(production)
 
         if self._firsts_computed:
             for symbol in self._firsts:
