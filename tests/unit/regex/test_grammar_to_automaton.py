@@ -744,6 +744,31 @@ class TestGrammarToAutomaton:
 
         return G
     
+    @pytest.fixture
+    def G29(self) -> Grammar:
+        '''
+        S -> 0 S | 1 A
+
+        A -> 0 S | 1 A | ε
+        '''
+        S = Symbol('S')
+        A = Symbol('A')
+
+        _0 = Symbol('0',True)
+        _1 = Symbol('1',True)
+        eps = Symbol('epsilon',True,True)
+
+        G = Grammar(S)
+
+        G[S] += _0,S
+        G[S] += _1,A
+
+        G[A] += _0,S
+        G[A] += _1,A
+        G[A] += eps,
+    
+        return G
+    
     @pytest.mark.parametrize("string,should_accept",[
         ('',True),
         ('a',True),
@@ -1262,4 +1287,21 @@ class TestGrammarToAutomaton:
 
         aut = RegexEngine.GetAutomaton(G28)
 
+        assert aut.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('0',False),
+        ('1',True),
+        ('01',True),
+        ('010',False),
+        ('0010101001001',True),
+        ('0100101010010',False),
+        ('0000001',True),
+        ('011111111',True),
+        ('0001111111110',False)
+    ])
+    def test_grammar_to_automaton_29(self,string:str,should_accept:bool,G29:Grammar):
+
+        aut = RegexEngine.GetAutomaton(G29)
         assert aut.accept(list(string)) == should_accept
