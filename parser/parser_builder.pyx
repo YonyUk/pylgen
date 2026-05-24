@@ -22,19 +22,20 @@ cdef class ParserBuilder:
         Returns:
             Set[LR0Item]: the clousure of the given set
         '''
-        cdef LR0Item item
-        cdef str set_id
-        cdef list[str] ids = []
-        cdef tuple[str,str] key
-        for item in items:
-            ids.append(str(item))
-        ids.sort()
+        return _clousure(items,g)
+    
+    @staticmethod
+    def goto(items:Set[LR0Item],x:Symbol,g:Grammar) -> Set[LR0Item]:
+        '''
+        Args:
+            items (Set[LR0Item])
+            x (Symbol)
+            g (Grammar)
         
-        set_id = sha256('-'.join(ids).encode()).hexdigest()
-        key = (g._id(),set_id)
-        if not key in _clousures:
-            _clousures[key] = _clousure(items,g)
-        return _clousures[key]
+        Returns:
+            Set[LR0Item]: The next state for the given state and the symbol x
+        '''
+        return _goto(items,x,g)
 
 cdef set[LR0Item] _clousure(set[LR0Item] items,Grammar g):
     cdef LR0Item item,new_item
@@ -43,7 +44,20 @@ cdef set[LR0Item] _clousure(set[LR0Item] items,Grammar g):
     cdef set[LR0Item] result = items.copy()
     cdef set[LR0Item] copy
     cdef bint change = True # type:ignore
+    cdef str set_id
+    cdef list[str] ids = []
+    cdef tuple[str,str] key
 
+    for item in items:
+        ids.append(str(item))
+    ids.sort()
+    
+    set_id = sha256('-'.join(ids).encode()).hexdigest()
+    key = (g._id(),set_id)
+    # checks for a precomputed value
+    if key in _clousures:
+        return _clousures[key]
+    
     while change:
         change = False # type:ignore
         
@@ -58,5 +72,18 @@ cdef set[LR0Item] _clousure(set[LR0Item] items,Grammar g):
                         if not new_item in result:
                             change = True # type:ignore
                             result.add(new_item)
+    
+    _clousures[key] = result
+    return result
+
+cdef set[LR0Item] _goto(set[LR0Item] items,Symbol x,Grammar g):
+    cdef Symbol head
+    cdef LR0Item item,new_item
+    cdef set[LR0Item] result = set()
+
+    for item in items:
+        if len(item._right) > 0 and item._right[0] == x:
+            new_item = LR0Item(item._head,item._left + [x],item._right[1:]) # type:ignore
+            result.update(_clousure({new_item},g))
     
     return result
