@@ -119,6 +119,7 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
     cdef set[LALRItem] result = items.copy()
     cdef set[LALRItem] copy
     cdef bint change = True # type:ignore
+    cdef bint exists = False # type:ignore
     cdef str set_id
     cdef list[str] ids = []
     cdef tuple[str,str] key
@@ -150,6 +151,7 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
                     for production in g._productions_by_symbol[head]:
                         new_item = LALRItem(head,[],production._production) # type:ignore
                         kernel = (new_item._head,tuple(new_item._left),tuple(new_item._right))
+                        exists = kernel in item_by_kernel # type:ignore
                         new_item = item_by_kernel.get(kernel,new_item)
                         for lookahead_symbol in item._lookaheads:
                             first = g.first(item._right[1:] + [lookahead_symbol])
@@ -157,8 +159,7 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
                                 if not new_lookahead in new_item._lookaheads:
                                     new_item._lookaheads.add(new_lookahead)
                                     change = True # type:ignore
-                        if not new_item in result:
-                            change = True # type:ignore
+                        if not exists:
                             result.add(new_item)
                         item_by_kernel[kernel] = new_item
     return result
