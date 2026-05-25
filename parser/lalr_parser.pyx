@@ -5,9 +5,9 @@ from parser.lr0_parser cimport LR0Item
 
 cdef class LALRItem(LR0Item):
     
-    def __init__(self, head: Symbol, left: Sequence[Symbol], right: Sequence[Symbol]):
+    def __init__(self, head: Symbol, left: Sequence[Symbol], right: Sequence[Symbol],lookaheads:Set[Symbol]=set()):
         super().__init__(head, left, right)
-        self._lookaheads = set()
+        self._lookaheads = lookaheads.copy()
     
     @property
     def lookaheads(self) -> Set[Symbol]:
