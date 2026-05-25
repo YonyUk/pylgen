@@ -22,7 +22,7 @@ cdef class LALRItem(LR0Item):
         right_l = [sym._symbol for sym in self._right]
         left = ' '.join(left_l)
         right = ' '.join(right_l)
-        return f'{self._head} -> {left} ◦ {right} f{self._lookaheads}'
+        return f'{self._head} -> {left} ◦ {right} {self._lookaheads}'
     
     def __repr__(self) -> str:
         return str(self)
