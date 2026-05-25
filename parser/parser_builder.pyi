@@ -17,3 +17,6 @@ class ParserBuilder:
 
     @staticmethod
     def get_canonical_lr0_states(g:Grammar) -> Set[LR0State]: ...
+
+    @staticmethod
+    def get_kernel_items(state:LR0State, start:Symbol) -> Set[LR0Item]: ...

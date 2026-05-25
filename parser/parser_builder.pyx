@@ -47,6 +47,19 @@ cdef class ParserBuilder:
             Set[LR0State]: the set of lr0 states canonical
         '''
         return _get_canonical_lr0_states(g)
+    
+    @staticmethod
+    def get_kernel_items(state:LR0State, start:Symbol) -> Set[LR0Item]:
+        '''
+        Args:
+            state (LR0State)
+            start (Symbol): start symbol of the grammar
+                this is to accept the item S' -> . S
+        
+        Returns:
+            Set[LR0Item]: the items kernel of the given state
+        '''
+        return _get_kernel_items(state,start)
 
 cdef set[LR0Item] _clousure(set[LR0Item] items,Grammar g):
     cdef LR0Item item,new_item
@@ -122,5 +135,17 @@ cdef set[LR0State] _get_canonical_lr0_states(Grammar g):
                     if not new_state in result:
                         change = True # type:ignore
                         result.add(new_state)
+    
+    return result
+
+cdef set[LR0Item] _get_kernel_items(LR0State state,Symbol start):
+    cdef LR0Item item
+    cdef set[LR0Item] result = set()
+
+    for item in state._items:
+        if item._head == start and len(item._left) == 0:
+            result.add(item)
+        if len(item._left) > 0:
+            result.add(item)
     
     return result

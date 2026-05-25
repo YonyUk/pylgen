@@ -8,3 +8,4 @@ cdef class ParserBuilder:
 cdef set[LR0Item] _clousure(set[LR0Item] items,Grammar g)
 cdef set[LR0Item] _goto(set[LR0Item] items,Symbol x,Grammar g)
 cdef set[LR0State] _get_canonical_lr0_states(Grammar g)
+cdef set[LR0Item] _get_kernel_items(LR0State state,Symbol start)
