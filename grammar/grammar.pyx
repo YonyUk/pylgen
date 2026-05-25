@@ -118,7 +118,7 @@ cdef class Grammar:
             raise ValueError("start_symbol can't be terminal")
         self._non_terminals = { self._start_symbol }
         self._terminals = { self._end_symbol }
-        self._firsts = { self._start_symbol: set() }
+        self._firsts = { self._start_symbol: set(), self._end_symbol: { self._end_symbol } }
         self._follows = { self._start_symbol: { self._end_symbol } }
         self._productions = {}
         self._firsts_computed = False # type:ignore
