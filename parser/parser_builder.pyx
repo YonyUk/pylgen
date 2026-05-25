@@ -50,6 +50,19 @@ cdef class ParserBuilder:
         return _goto_lr0(items,x,g)
     
     @staticmethod
+    def goto_lalr(items:Set[LALRItem],x:Symbol,g:Grammar) -> Set[LALRItem]:
+        '''
+        Args:
+            items (Set[LALRItem])
+            x (Symbol)
+            g (Grammar)
+        
+        Returns:
+            Set[LALRItem]: The next state for the given state and the symbol x
+        '''
+        return _goto_lalr(items,x,g)
+    
+    @staticmethod
     def get_canonical_lr0_states(g:Grammar) -> Set[LR0State]:
         '''
         Args:
@@ -174,6 +187,17 @@ cdef set[LR0Item] _goto_lr0(set[LR0Item] items,Symbol x,Grammar g):
             new_item = LR0Item(item._head,item._left + [x],item._right[1:]) # type:ignore
             result.update(_clousure_lr0({new_item},g))
     
+    return result
+
+cdef set[LALRItem] _goto_lalr(set[LALRItem] items,Symbol x,Grammar g):
+    cdef Symbol head
+    cdef LALRItem item,new_item
+    cdef set[LALRItem] result = set()
+
+    for item in items:
+        new_item = LALRItem(item._head,item._left + [x],item._right[1:],item._lookaheads.copy()) # type:ignore
+        result.update(_clousure_lalr({new_item},g))
+
     return result
 
 cdef set[LR0State] _get_canonical_lr0_states(Grammar g):

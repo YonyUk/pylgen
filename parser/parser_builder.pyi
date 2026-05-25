@@ -20,6 +20,9 @@ class ParserBuilder:
     def goto_lr0(items:Set[LR0Item],x:Symbol,g:Grammar) -> Set[LR0Item]: ...
 
     @staticmethod
+    def goto_lalr(items:Set[LALRItem],x:Symbol,g:Grammar) -> Set[LALRItem]: ...
+
+    @staticmethod
     def get_canonical_lr0_states(g:Grammar) -> Set[LR0State]: ...
 
     @staticmethod
