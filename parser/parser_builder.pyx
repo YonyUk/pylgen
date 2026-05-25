@@ -118,7 +118,7 @@ cdef set[LR0State] _get_canonical_lr0_states(Grammar g):
                 if symbol == augmented._end_symbol: continue
                 items = _goto(state._items,symbol,g)
                 if len(items) > 0:
-                    new_state = LR0State(items) # type:ignore
+                    new_state = LR0State(items,len(result)) # type:ignore
                     if not new_state in result:
                         change = True # type:ignore
                         result.add(new_state)
