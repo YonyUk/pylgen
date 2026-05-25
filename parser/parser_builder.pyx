@@ -115,15 +115,20 @@ cdef set[LR0Item] _clousure_lr0(set[LR0Item] items,Grammar g):
 cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
     cdef LALRItem item,new_item
     cdef Production production
-    cdef Symbol head,lookahead_symbol
+    cdef Symbol head,lookahead_symbol,new_lookahead
     cdef set[LALRItem] result = items.copy()
     cdef set[LALRItem] copy
     cdef bint change = True # type:ignore
     cdef str set_id
     cdef list[str] ids = []
     cdef tuple[str,str] key
+    cdef tuple[Symbol,tuple,tuple] kernel
+    cdef dict[tuple[Symbol,tuple,tuple],LALRItem] item_by_kernel = {}
+    cdef set[Symbol] first
 
     for item in items:
+        kernel = (item._head,tuple(item._left),tuple(item._right))
+        item_by_kernel[kernel] = item
         ids.append(str(item))
     ids.sort()
 
@@ -144,12 +149,18 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
                 if not head._is_terminal:
                     for production in g._productions_by_symbol[head]:
                         new_item = LALRItem(head,[],production._production) # type:ignore
+                        kernel = (new_item._head,tuple(new_item._left),tuple(new_item._right))
+                        new_item = item_by_kernel.get(kernel,new_item)
                         for lookahead_symbol in item._lookaheads:
-                            new_item._lookaheads.update(g.first(item._right[1:] + [lookahead_symbol]))
+                            first = g.first(item._right[1:] + [lookahead_symbol])
+                            for new_lookahead in first:
+                                if not new_lookahead in new_item._lookaheads:
+                                    new_item._lookaheads.add(new_lookahead)
+                                    change = True # type:ignore
                         if not new_item in result:
                             change = True # type:ignore
                             result.add(new_item)
-    
+                        item_by_kernel[kernel] = new_item
     return result
 
 cdef set[LR0Item] _goto_lr0(set[LR0Item] items,Symbol x,Grammar g):
