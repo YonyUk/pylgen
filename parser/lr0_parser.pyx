@@ -59,7 +59,7 @@ cdef class LR0Item:
 
 cdef class LR0State:
 
-    def __init__(self,items:Set[LR0Item]):
+    def __init__(self,items:Set[LR0Item],index:int=0):
         cdef list[str] ids = []
         cdef LR0Item item
         for item in items:
@@ -67,10 +67,15 @@ cdef class LR0State:
         ids.sort()
         self._id = sha256('-'.join(ids).encode()).hexdigest()
         self._items = items.copy()
+        self._index = index
     
     @property
     def id(self) -> str:
         return self._id
+    
+    @property
+    def index(self) -> int:
+        return self._index
 
     @property
     def items(self) -> Set[LR0Item]:

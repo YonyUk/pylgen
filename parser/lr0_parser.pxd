@@ -8,3 +8,4 @@ cdef class LR0Item:
 cdef class LR0State:
     cdef set[LR0Item] _items
     cdef str _id
+    cdef int _index
