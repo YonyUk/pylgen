@@ -2,9 +2,35 @@ from typing import Dict, Set, Tuple
 
 from common.types import Symbol
 from common.table import Table
-from grammar.grammar import Grammar
+from grammar.grammar import Grammar,Production
 from .lr0_parser import LR0Item,LR0State
 from .lalr_parser import LALRItem,LALRState
+
+class ParserBuildingConflictException(Exception):
+    pass
+
+class LALRParserBuildingConflictException(ParserBuildingConflictException):
+
+    def __init__(self,state:LALRState,symbol:Symbol): ...
+    
+    @property
+    def state(self) -> LALRState: ...
+    
+    @property
+    def symbol(self) -> Symbol: ...
+
+class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
+    pass
+
+class LALRReduceReduceConflictException(LALRParserBuildingConflictException):
+
+    def __init__(self, state: LALRState, symbol: Symbol,old:Production,new_:Production): ...
+    
+    @property
+    def old(self) -> Production: ...
+    
+    @property
+    def new_(self) -> Production: ...
 
 class ParserBuilder:
 
@@ -37,3 +63,6 @@ class ParserBuilder:
 
     @staticmethod
     def get_canonical_lalr_states(g:Grammar) -> set[LALRState]: ...
+
+    @staticmethod
+    def get_lalr_goto_action_tables(g:Grammar) -> Tuple[Set[LALRState],Table,Table]: ...

@@ -9,6 +9,41 @@ from .lalr_parser cimport LALRState
 
 _clousures:dict[tuple[str,str],set[LR0Item] | set[LALRItem]] = {}
 
+cdef class ParserBuildingConflictException(Exception):
+    pass
+
+cdef class LALRParserBuildingConflictException(ParserBuildingConflictException):
+
+    def __init__(self,state:LALRState,symbol:Symbol):
+        self._state = state
+        self._symbol = symbol
+    
+    @property
+    def state(self) -> LALRState:
+        return self._state
+    
+    @property
+    def symbol(self) -> Symbol:
+        return self._symbol
+
+cdef class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
+    pass
+
+cdef class LALRReduceReduceConflictException(LALRParserBuildingConflictException):
+
+    def __init__(self, state: LALRState, symbol: Symbol,old:Production,new_:Production):
+        super().__init__(state, symbol)
+        self._new = new_
+        self._old = old
+    
+    @property
+    def old(self) -> Production:
+        return self._old
+    
+    @property
+    def new_(self) -> Production:
+        return self._new
+
 cdef class ParserBuilder:
 
     @staticmethod
@@ -126,6 +161,17 @@ cdef class ParserBuilder:
             Set[LALRState]: the set of lr0 states canonical
         '''
         return _get_canonical_lalr_states(g)
+    
+    @staticmethod
+    def get_lalr_goto_action_tables(g:Grammar) -> Tuple[Set[LALRState],Table,Table]:
+        '''
+        Args:
+            g (Grammar)
+        
+        Returns:
+            Tuple[Set[LALRState],Table,Table]: the states and the tables GOTO and ACTION
+        '''
+        return _get_goto_action_tables_lalr(g)
 
 cdef set[LR0Item] _clousure_lr0(set[LR0Item] items,Grammar g):
     cdef LR0Item item,new_item
@@ -433,3 +479,74 @@ cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
                     result.add(new_state)
 
     return result
+
+cdef tuple[set[LALRState],Table,Table] _get_goto_action_tables_lalr(Grammar g):
+    cdef set[LALRState] states = _get_canonical_lalr_states(g)
+    cdef Table goto = Table()
+    cdef Table action = Table()
+    cdef LALRState state,next_state
+    cdef Symbol symbol
+    cdef set[LALRItem] items
+    cdef LALRItem item
+    cdef dict[str,LALRState] states_by_id = {}
+    cdef tuple[str,str] transition
+    cdef Production production_to_reduce,production
+    cdef str _action
+    cdef set[Production] productions
+
+    for state in states:
+        states_by_id[state._id] = state
+
+    for state in states:
+        for symbol in g._symbols:
+            items = _goto_lalr(state._items,symbol,g)
+            if len(items) == 0:
+                continue
+            next_state = LALRState(items) # type:ignore
+            next_state = states_by_id[next_state._id]
+            transition = (f'I{state._index}',symbol._symbol)
+            goto._table[transition] = f'I{next_state._index}'
+    
+    for state in states:
+        for item in state._items:
+            if len(item._right) > 0 and (<Symbol>item._right[0])._is_terminal:
+                transition = (f'I{state._index}',(<Symbol>item._right[0])._symbol)
+                if transition in action._table:
+                    _action = action._table[transition]
+                    if not _action.startswith('SHIFT'):
+                        raise LALRShiftReduceConflictException(state,item._right[0])
+                action._table[transition] = f'SHIFT {goto._table[transition]}'
+            elif len(item._right) == 0:
+                if item._head in g._non_terminals:
+                    for production in g._productions_by_symbol[item._head]:
+                        if production._production == item._left:
+                            production_to_reduce = production
+                            break
+                    for symbol in item._lookaheads:
+                        transition = (f'I{state._index}',symbol._symbol)
+                        if transition in action._table:
+                            _action = action._table[transition]
+                            if not _action.startswith('REDUCE'):
+                                raise LALRShiftReduceConflictException(state,symbol)
+                            _action = _action[_action.index(' ') + 1:]
+                            if production_to_reduce._id != _action:
+                                for productions in g._productions_by_symbol.values():
+                                    for production in productions:
+                                        if production._id == _action:
+                                            raise LALRReduceReduceConflictException(state,symbol,production,production_to_reduce)
+                        action._table[transition] = f'REDUCE {production_to_reduce._id}'
+                else:
+                    transition = (f'I{state._index}',(<Symbol>g._end_symbol)._symbol)
+                    if transition in action._table:
+                            _action = action._table[transition]
+                            if not _action.startswith('REDUCE'):
+                                raise LALRShiftReduceConflictException(state,symbol)
+                            _action = _action[_action.index(' ') + 1:]
+                            if production_to_reduce._id != _action:
+                                for productions in g._productions_by_symbol.values():
+                                    for production in productions:
+                                        if production._id == _action:
+                                            raise LALRReduceReduceConflictException(state,symbol,production,production_to_reduce)
+                    action._table[transition] = 'ACCEPT'
+
+    return states,goto,action
