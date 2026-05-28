@@ -343,11 +343,16 @@ cdef set[LALRItem] _get_kernel_items_lalr(LALRState state,Grammar g):
 
 cdef tuple[dict[tuple[Symbol,tuple,tuple],dict[Symbol,tuple[Symbol,tuple,tuple]]],set[LALRItem]] _build_lookaheads_propagation_edges(LALRItem initial_item,Grammar g):
     cdef dict[tuple[Symbol,tuple,tuple],dict[Symbol,tuple[Symbol,tuple,tuple]]] result = {}
-    cdef set[LALRItem] kernel_items = set()
-    cdef set[LALRItem] kernel_items_copy
+    cdef dict[tuple[LR0State,Symbol],set[LALRItem]] kernel_items = {}
+    cdef dict[tuple[LR0State,Symbol],set[LALRItem]] kernel_items_copy
     cdef LALRItem item,origin,destination
+    cdef set[LALRItem] items
     cdef bint change = True # type:ignore
     cdef tuple[Symbol,tuple,tuple] origin_key,destination_key
+    cdef LR0Item lr0_item
+    cdef tuple[LR0State,Symbol] key
+    cdef set[LR0Item] lr0_items
+    cdef LR0State lr0_state
 
     if initial_item._head._is_terminal:
         raise ValueError('head must be a non-terminal')
@@ -358,27 +363,37 @@ cdef tuple[dict[tuple[Symbol,tuple,tuple],dict[Symbol,tuple[Symbol,tuple,tuple]]
     if len(initial_item._left) > 0:
         raise ValueError('initial item is expected to be S\' -> ◦ S, where S\' is the new start symbol for the grammar augmented')
 
-    kernel_items.add(initial_item)
-
+    kernel_items[()] = { initial_item }
     for item in _clousure_lalr({initial_item},g):
         if len(item._left) > 0:
-            kernel_items.add(item)
+            kernel_items[()].add(item)
     
     while change:
         change = False # type:ignore
         kernel_items_copy = kernel_items.copy()
 
-        for item in kernel_items_copy:
+        for items in kernel_items_copy.values():
             # for each kernel item
-            for origin in _clousure_lalr({item},g):
+            lr0_items = set()
+            for item in items:
+                lr0_items.add(LR0Item(item._head,item._left,item._right)) # type:ignore
+            lr0_state = LR0State(_clousure_lr0(lr0_items,g)) # type:ignore
+            for origin in _clousure_lalr(items,g):
                 if len(origin._right) > 0:
                     # gets the clousure and if it can propagate lookaheads
                     origin_key = (origin._head,tuple(origin._left),tuple(origin._right))
                     destination = LALRItem(origin._head,origin._left + [origin._right[0]],origin._right[1:]) # type:ignore
                     destination_key = (destination._head,tuple(destination._left),tuple(destination._right))
-                    # if kernel item not in kernel_items
-                    if not destination in kernel_items:
-                        kernel_items.add(destination)
+                    key = (lr0_state,origin._right[0])
+                    # if there is not transition from origin with current symbol
+                    if not key in kernel_items:
+                        # creates the transition representing the new state after move from
+                        # current state with the current symbol
+                        kernel_items[key] = set()
+                    # if this kernel item is not in the next state after move by current symbol
+                    # adds the kernel item
+                    if not destination in kernel_items[key]:
+                        kernel_items[key].add(destination)
                         change = True # type:ignore
                     # if there is a new propagation edge
                     if not origin_key in result:
@@ -387,7 +402,7 @@ cdef tuple[dict[tuple[Symbol,tuple,tuple],dict[Symbol,tuple[Symbol,tuple,tuple]]
                         result[origin_key][origin._right[0]] = destination_key
                         change = True # type:ignore
     
-    return result,kernel_items
+    return result,kernel_items.values()
 
 cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
     cdef Grammar augmented = _augment_grammar(g)
@@ -451,6 +466,9 @@ cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
                         change = True # type:ignore
                         destination_lookahead.add(lookahead)
                 lookaheads[destination_key] = destination_lookahead
+        
+        t = '\n'.join([f'{v}' for v in lookaheads.items()])
+        input(f'{t}\n')
 
     change = True # type:ignore
     # adds initial state
