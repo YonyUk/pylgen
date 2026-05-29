@@ -10,6 +10,8 @@ cdef class ParserBuildingConflictException(Exception):
 cdef class LALRParserBuildingConflictException(ParserBuildingConflictException):
     cdef LALRState _state
     cdef Symbol _symbol
+    cdef LALRState _next
+    cdef Production _production
 
 cdef class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
     pass

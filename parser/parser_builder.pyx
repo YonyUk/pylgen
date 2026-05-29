@@ -28,7 +28,19 @@ cdef class LALRParserBuildingConflictException(ParserBuildingConflictException):
         return self._symbol
 
 cdef class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
-    pass
+    
+    def __init__(self, state: LALRState, symbol: Symbol,next_state:LALRState,production:Production):
+        super().__init__(state, symbol)
+        self._next = next_state
+        self._production = production
+    
+    @property
+    def next_state(self) -> LALRState:
+        return self._next
+    
+    @property
+    def production(self) -> Production:
+        return self._production
 
 cdef class LALRReduceReduceConflictException(LALRParserBuildingConflictException):
 
@@ -459,7 +471,7 @@ cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
                     if not lookahead_symbol in lookaheads[key_to]:
                         change = True # type:ignore
                         lookaheads[key_to].add(lookahead_symbol)
-                        
+
     # build lalr states
     for lr0_state in lr0_states:
         lalr_items = set()
@@ -520,7 +532,8 @@ cdef tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],
                         action_value = action[key]
                         action_type = action_value[0]
                         if action_type != f'{BottomUpParserAction.SHIFT}':
-                            raise LALRShiftReduceConflictException(key[0],symbol)
+                            reduction = action_value[1]
+                            raise LALRShiftReduceConflictException(key[0],symbol,states_by_kernel[next_state],reduction)
                 action[key] = action_value
             else:
                 lookahead_key = (states_by_kernel[lr0_state],lr0_item)
@@ -534,7 +547,7 @@ cdef tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],
                         action_value = action[key]
                         action_type = action_value[0]
                         if action_type != f'{BottomUpParserAction.REDUCE}':
-                            raise LALRShiftReduceConflictException(key[0],symbol)
+                            raise LALRShiftReduceConflictException(key[0],symbol,action_value[1],reduction)
                         if action_value[1] != reduction:
                             raise LALRReduceReduceConflictException(key[0],symbol,action_value[1],reduction)
                     else:

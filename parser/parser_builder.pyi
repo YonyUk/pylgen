@@ -20,7 +20,14 @@ class LALRParserBuildingConflictException(ParserBuildingConflictException):
     def symbol(self) -> Symbol: ...
 
 class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
-    pass
+    
+    def __init__(self, state: LALRState, symbol: Symbol,next_state:LALRState,production:Production): ...
+    
+    @property
+    def next_state(self) -> LALRState: ...
+    
+    @property
+    def production(self) -> Production: ...
 
 class LALRReduceReduceConflictException(LALRParserBuildingConflictException):
 
