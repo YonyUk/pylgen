@@ -1,4 +1,4 @@
-from typing import Set,Tuple
+from typing import Set,Tuple,Dict
 from hashlib import sha256
 
 from common.types cimport Symbol
@@ -136,43 +136,27 @@ cdef class ParserBuilder:
         return _get_kernel_items_lalr(state,g)
     
     @staticmethod
-    def build_lookaheads_propagation_edges(initial_item:LALRItem,g:Grammar) -> Tuple[dict[tuple[Symbol,tuple,tuple],dict[Symbol,tuple[Symbol,tuple,tuple]]],set[LALRItem]]:
+    def build_lookaheads_propagation_edges(g:Grammar) -> Tuple[Dict[LR0State,Dict[Tuple[LR0Item,Symbol],Tuple[LR0State,Set[LR0Item]]]],Set[LR0State]]:
         '''
         Args:
-            initial_item (LALRItem): initial item to start the building
             g (Grammar)
-        
-        Raises:
-            ValueError('head must be a non-terminal')
-            ValueError('head of initial item can not be in g.non_terminals')
-        
+
         Returns:
-            Table: the propagation's edges
+            Tuple[Dict[LR0State,Dict[Tuple[LR0Item,Symbol],Tuple[LR0State,set[LR0Item]]]],Set[LR0State]]: the propagation edges and the lr0 states
         '''
-        return _build_lookaheads_propagation_edges(initial_item,g)
+        return _build_lookaheads_propagation_edges(g)
     
     @staticmethod
-    def get_canonical_lalr_states(g:Grammar) -> set[LALRState]:
+    def get_canonical_lalr_states(g:Grammar) -> Set[LALRState]:
         '''
         Args:
             g (Grammar)
         
         Returns:
-            Set[LALRState]: the set of lr0 states canonical
+            Set[LALRState]: canonical states for LALR(1) parser
         '''
         return _get_canonical_lalr_states(g)
     
-    @staticmethod
-    def get_lalr_goto_action_tables(g:Grammar) -> Tuple[Set[LALRState],Table,Table]:
-        '''
-        Args:
-            g (Grammar)
-        
-        Returns:
-            Tuple[Set[LALRState],Table,Table]: the states and the tables GOTO and ACTION
-        '''
-        return _get_goto_action_tables_lalr(g)
-
 cdef set[LR0Item] _clousure_lr0(set[LR0Item] items,Grammar g):
     cdef LR0Item item,new_item
     cdef Production production
@@ -243,7 +227,6 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
         change = False # type:ignore
 
         copy = result.copy()
-
         for item in copy:
             if len(item._right) > 0:
                 # I = [A -> α . B β] { a }
@@ -263,6 +246,7 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
                                     change = True # type:ignore
                         if not exists:
                             result.add(new_item)
+                            change = True # type:ignore
                         item_by_kernel[kernel] = new_item
     _clousures[key] = result
     return result
@@ -341,230 +325,141 @@ cdef set[LALRItem] _get_kernel_items_lalr(LALRState state,Grammar g):
     
     return result
 
-cdef tuple[dict[tuple[Symbol,tuple,tuple],dict[Symbol,tuple[Symbol,tuple,tuple]]],set[LALRItem]] _build_lookaheads_propagation_edges(LALRItem initial_item,Grammar g):
-    cdef dict[tuple[Symbol,tuple,tuple],dict[Symbol,tuple[Symbol,tuple,tuple]]] result = {}
-    cdef dict[tuple[LR0State,Symbol],set[LALRItem]] kernel_items = {}
-    cdef dict[tuple[LR0State,Symbol],set[LALRItem]] kernel_items_copy
-    cdef LALRItem item,origin,destination
-    cdef set[LALRItem] items
-    cdef bint change = True # type:ignore
-    cdef tuple[Symbol,tuple,tuple] origin_key,destination_key
-    cdef LR0Item lr0_item
-    cdef tuple[LR0State,Symbol] key
-    cdef set[LR0Item] lr0_items
-    cdef LR0State lr0_state
+cdef tuple[dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,set[LR0Item]]]],set[LR0State]] _build_lookaheads_propagation_edges(Grammar g):
+    cdef set[LR0State] states = _get_canonical_lr0_states(g)
+    cdef dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,set[LR0Item]]]] result = {}
+    cdef dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,set[LR0Item]]]] copy
+    cdef LR0State state,next_state,next_state_copy
+    cdef LR0Item item,next_item
+    cdef set[LR0Item] kernel_items
+    cdef tuple[LR0Item,Symbol] edge
+    cdef set[LR0Item] clousure
 
-    if initial_item._head._is_terminal:
-        raise ValueError('head must be a non-terminal')
+    for state in states:
+        kernel_items = _get_kernel_items_lr0(state,g)
+        result[LR0State(kernel_items,state._index)] = {} # type:ignore
     
-    if initial_item._head in g._non_terminals:
-        raise ValueError('head of initial item can not be in g.non_terminals')
-
-    if len(initial_item._left) > 0:
-        raise ValueError('initial item is expected to be S\' -> ◦ S, where S\' is the new start symbol for the grammar augmented')
-
-    kernel_items[()] = { initial_item }
-    for item in _clousure_lalr({initial_item},g):
-        if len(item._left) > 0:
-            kernel_items[()].add(item)
+    for state in result:
+        clousure = _clousure_lr0(state._items,g)
+        for item in clousure:
+            if len(item._right) > 0:
+                next_state_copy = LR0State(_goto_lr0(clousure,item._right[0],g)) # type:ignore
+                next_state = LR0State(_get_kernel_items_lr0(next_state_copy,g)) # type:ignore
+                edge = (item,item._right[0])
+                if not edge in result[state]:
+                    result[state][edge] = (next_state_copy,set())
+                for next_item in next_state._items:
+                    if not next_item in result[state][edge]:
+                        result[state][edge][1].add(next_item) # type:ignore
     
-    while change:
-        change = False # type:ignore
-        kernel_items_copy = kernel_items.copy()
+    copy = result.copy()
+    for state in copy:
+        if not result[state]:
+            del result[state]
 
-        for items in kernel_items_copy.values():
-            # for each kernel item
-            lr0_items = set()
-            for item in items:
-                lr0_items.add(LR0Item(item._head,item._left,item._right)) # type:ignore
-            lr0_state = LR0State(_clousure_lr0(lr0_items,g)) # type:ignore
-            for origin in _clousure_lalr(items,g):
-                if len(origin._right) > 0:
-                    # gets the clousure and if it can propagate lookaheads
-                    origin_key = (origin._head,tuple(origin._left),tuple(origin._right))
-                    destination = LALRItem(origin._head,origin._left + [origin._right[0]],origin._right[1:]) # type:ignore
-                    destination_key = (destination._head,tuple(destination._left),tuple(destination._right))
-                    key = (lr0_state,origin._right[0])
-                    # if there is not transition from origin with current symbol
-                    if not key in kernel_items:
-                        # creates the transition representing the new state after move from
-                        # current state with the current symbol
-                        kernel_items[key] = set()
-                    # if this kernel item is not in the next state after move by current symbol
-                    # adds the kernel item
-                    if not destination in kernel_items[key]:
-                        kernel_items[key].add(destination)
-                        change = True # type:ignore
-                    # if there is a new propagation edge
-                    if not origin_key in result:
-                        result[origin_key] = {}
-                    if not origin._right[0] in result[origin_key]:
-                        result[origin_key][origin._right[0]] = destination_key
-                        change = True # type:ignore
-    
-    return result,kernel_items.values()
+    return result,states
 
 cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
-    cdef Grammar augmented = _augment_grammar(g)
-    cdef LALRItem initial_item = LALRItem(augmented._start_symbol,[],[g._start_symbol],{g._end_symbol}) # type:ignore
-    cdef dict[tuple[Symbol,tuple,tuple],dict[Symbol,tuple[Symbol,tuple,tuple]]] propagation_edges
-    cdef set[LALRItem] kernel_items
+    cdef set[LR0State] lr0_states
+    cdef dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,set[LR0Item]]]] propagation_edges
     cdef bint change = True # type:ignore
+    cdef dict[tuple[LR0State,LR0Item],set[Symbol]] lookaheads = {}
+    cdef LR0State lr0_state,lr0_state_to
+    cdef LR0Item lr0_item,lr0_item_to
+    cdef set[LR0Item] lr0_kernel_items
+    cdef LALRState lalr_state
+    cdef LALRItem lalr_item
+    cdef set[LALRItem] lalr_items
+    cdef set[Symbol] lookahead_set
+    cdef tuple[LR0State,LR0Item] key,key_to
+    cdef Symbol lookahead_symbol
     cdef set[LALRState] result = set()
-    cdef set[LALRState] copy
-    cdef LALRState state,new_state
-    cdef dict[tuple[Symbol,tuple,tuple],set[Symbol]] lookaheads = {}
-    cdef set[Symbol] origin_lookahead,destination_lookahead
-    cdef tuple[Symbol,tuple,tuple] origin_key,destination_key
-    cdef LALRItem item
-    cdef set[LALRItem] items
-    cdef Symbol lookahead,symbol
 
-    # gets the propagation edges and the kernel items
-    propagation_edges,kernel_items = _build_lookaheads_propagation_edges(initial_item,g)
+    # make the propagation edges
+    propagation_edges,lr0_states = _build_lookaheads_propagation_edges(g)
 
     # initialize lookaheads
-    for item in kernel_items:
-        origin_key = (item._head,tuple(item._left),tuple(item._right))
-        lookaheads[origin_key] = set()
+    for lr0_state in lr0_states:
 
-    # first state for initialize lookaheads sets
-    state = LALRState(_clousure_lalr({initial_item},g)) # type:ignore
+        # gets kernel items
+        lr0_kernel_items = _get_kernel_items_lr0(lr0_state,g)
+        if len(lr0_kernel_items) == 1:
+            lr0_item = next(iter(lr0_kernel_items))
+            # if is the initial item S' -> ∘ S
+            # compute the lookaheads
+            if lr0_item._head not in g._non_terminals and len(lr0_item._left) == 0:
+                lalr_item = LALRItem(lr0_item._head,[],[g._start_symbol],{g._end_symbol}) # type:ignore
+                lalr_state = LALRState(_clousure_lalr({lalr_item},g)) # type:ignore
+            else:
+                # lets the lookaheads empty
+                lalr_item = LALRItem(lr0_item._head,lr0_item._left,lr0_item._right) # type:ignore
+                lalr_state = LALRState(_clousure_lalr({lalr_item},g),lr0_state._index) # type:ignore
+        else:
+            lalr_items = set()
+            for lr0_item in lr0_kernel_items:
+                lalr_item = LALRItem(lr0_item._head,lr0_item._left,lr0_item._right) # type:ignore
+                lalr_items.add(lalr_item)
+            lalr_state = LALRState(_clousure_lalr(lalr_items,g),lr0_state._index) # type:ignore
 
-    # updates initial lookaheads
-    for item in state._items:
-        origin_key = (item._head,tuple(item._left),tuple(item._right))
-        lookaheads[origin_key] = item._lookaheads
-
-    # iterate until fixed point is reached
+        # sets the lookahead initial value
+        for lalr_item in lalr_state._items:
+            lr0_item = LR0Item(lalr_item._head,lalr_item._left,lalr_item._right) # type:ignore
+            key = (lr0_state,lr0_item)
+            lookaheads[key] = lalr_item._lookaheads
+        
+    # iterate until a fixed point is reached
     while change:
         change = False # type:ignore
 
         # generate espontaneous lookaheads
-        for item in kernel_items:
-            origin_key = (item._head,tuple(item._left),tuple(item._right))
-            item._lookaheads = lookaheads[origin_key]
-            items = _clousure_lalr({item},g)
-            for item in items:
-                if origin_key in propagation_edges:
-                    lookaheads[origin_key] = item._lookaheads
-        
-        # for each propagation edge
-        for origin_key in propagation_edges:
-            if not origin_key in lookaheads:
-                lookaheads[origin_key] = set()
-            origin_lookahead = lookaheads[origin_key]
-            if len(origin_lookahead) == 0:
-                continue
-            # propagate lookaheads
-            for destination_key in propagation_edges[origin_key].values():
-                if not destination_key in lookaheads:
-                    lookaheads[destination_key] = set()
-                destination_lookahead = lookaheads[destination_key]
-                for lookahead in origin_lookahead:
-                    if not lookahead in destination_lookahead:
+        for lr0_state in lr0_states:
+            lr0_kernel_items = _get_kernel_items_lr0(lr0_state,g)
+            lalr_items = set()
+            # create the equivalent LALRState with the current lookahead set
+            for lr0_item in lr0_kernel_items:
+                key = (lr0_state,lr0_item)
+                lookahead_set = lookaheads[key]
+                lalr_item = LALRItem(lr0_item._head,lr0_item._left,lr0_item._right,lookahead_set) # type:ignore
+                lalr_items.add(lalr_item)
+            # make the state with the clousure, generating espontaneous lookaheads
+            lalr_state = LALRState(_clousure_lalr(lalr_items,g),lr0_state._index) # type:ignore
+            # update the lookaheads
+            for lalr_item in lalr_state._items:
+                lr0_item = LR0Item(lalr_item._head,lalr_item._left,lalr_item._right) # type:ignore
+                key = (lr0_state,lr0_item)
+                if not key in lookaheads:
+                    lookaheads[key] = set()
+                lookahead_set = lalr_item._lookaheads
+                for lookahead_symbol in lookahead_set:
+                    if not lookahead_symbol in lookaheads[key]:
                         change = True # type:ignore
-                        destination_lookahead.add(lookahead)
-                lookaheads[destination_key] = destination_lookahead
+                        lookaheads[key].add(lookahead_symbol)
         
-        t = '\n'.join([f'{v}' for v in lookaheads.items()])
-        input(f'{t}\n')
-
-    change = True # type:ignore
-    # adds initial state
-    origin_key = (initial_item._head,tuple(initial_item._left),tuple(initial_item._right))
-    initial_item._lookaheads = lookaheads[origin_key]
-    state = LALRState(_clousure_lalr({initial_item},g)) # type:ignore
-    result.add(state)
+        # propagate lookaheads
+        for lr0_state in propagation_edges:
+            for (lr0_item,_),(lr0_state_to,lr0_kernel_items) in propagation_edges[lr0_state].items(): # type:ignore
+                # edge that propagate lookaheads
+                lr0_state = LR0State(_clousure_lr0(lr0_state._items,g),lr0_state._index) # type:ignore
+                key = (lr0_state,lr0_item)
+                if len(lookaheads[key]) == 0: continue
+                lr0_state_to = LR0State(_clousure_lr0(lr0_state_to._items,g),lr0_state_to._index) # type:ignore
+                for lr0_item_to in lr0_kernel_items:
+                    # items that receive lookaheads with this edge
+                    key_to = (lr0_state_to,lr0_item_to)
+                    for lookahead_symbol in lookaheads[key]:
+                        if not lookahead_symbol in lookaheads[key_to]:
+                            change = True # type:ignore
+                            lookaheads[key_to].add(lookahead_symbol)
     
-    # build states
-    while change:
-        change = False # type:ignore
-        copy = result.copy()
-        for state in copy:
-            for symbol in g._symbols:
-                if symbol == g._end_symbol: continue
-                items = _goto_lalr(state._items,symbol,g)
-                if len(items) == 0: continue
-                for item in items:
-                    # sets the lookaheads
-                    origin_key = (item._head,tuple(item._left),tuple(item._right))
-                    item._lookaheads = lookaheads[origin_key]
-                new_state = LALRState(items,len(result)) # type:ignore
-                # adds the new state
-                if not new_state in result:
-                    change = True # type:ignore
-                    result.add(new_state)
-
+    # build lalr states
+    for lr0_state in lr0_states:
+        lalr_items = set()
+        for lr0_item in lr0_state._items:
+            key = (lr0_state,lr0_item)
+            lookahead_set = lookaheads[key]
+            lalr_item = LALRItem(lr0_item._head,lr0_item._left,lr0_item._right,lookahead_set) # type:ignore
+            lalr_items.add(lalr_item)
+        lalr_state = LALRState(lalr_items,lr0_state._index) # type:ignore
+        result.add(lalr_state)
+    
     return result
-
-cdef tuple[set[LALRState],Table,Table] _get_goto_action_tables_lalr(Grammar g):
-    cdef set[LALRState] states = _get_canonical_lalr_states(g)
-    cdef Table goto = Table()
-    cdef Table action = Table()
-    cdef LALRState state,next_state
-    cdef Symbol symbol
-    cdef set[LALRItem] items
-    cdef LALRItem item
-    cdef dict[str,LALRState] states_by_id = {}
-    cdef tuple[str,str] transition
-    cdef Production production_to_reduce,production
-    cdef str _action
-    cdef set[Production] productions
-
-    for state in states:
-        states_by_id[state._id] = state
-
-    for state in states:
-        for symbol in g._symbols:
-            items = _goto_lalr(state._items,symbol,g)
-            if len(items) == 0:
-                continue
-            next_state = LALRState(items) # type:ignore
-            next_state = states_by_id[next_state._id]
-            transition = (f'I{state._index}',symbol._symbol)
-            goto._table[transition] = f'I{next_state._index}'
-    
-    for state in states:
-        for item in state._items:
-            if len(item._right) > 0 and (<Symbol>item._right[0])._is_terminal:
-                transition = (f'I{state._index}',(<Symbol>item._right[0])._symbol)
-                if transition in action._table:
-                    _action = action._table[transition]
-                    if not _action.startswith('SHIFT'):
-                        raise LALRShiftReduceConflictException(state,item._right[0])
-                action._table[transition] = f'SHIFT {goto._table[transition]}'
-            elif len(item._right) == 0:
-                if item._head in g._non_terminals:
-                    for production in g._productions_by_symbol[item._head]:
-                        if production._production == item._left:
-                            production_to_reduce = production
-                            break
-                    for symbol in item._lookaheads:
-                        transition = (f'I{state._index}',symbol._symbol)
-                        if transition in action._table:
-                            _action = action._table[transition]
-                            if not _action.startswith('REDUCE'):
-                                raise LALRShiftReduceConflictException(state,symbol)
-                            _action = _action[_action.index(' ') + 1:]
-                            if production_to_reduce._id != _action:
-                                for productions in g._productions_by_symbol.values():
-                                    for production in productions:
-                                        if production._id == _action:
-                                            raise LALRReduceReduceConflictException(state,symbol,production,production_to_reduce)
-                        action._table[transition] = f'REDUCE {production_to_reduce._id}'
-                else:
-                    transition = (f'I{state._index}',(<Symbol>g._end_symbol)._symbol)
-                    if transition in action._table:
-                            _action = action._table[transition]
-                            if not _action.startswith('REDUCE'):
-                                raise LALRShiftReduceConflictException(state,symbol)
-                            _action = _action[_action.index(' ') + 1:]
-                            if production_to_reduce._id != _action:
-                                for productions in g._productions_by_symbol.values():
-                                    for production in productions:
-                                        if production._id == _action:
-                                            raise LALRReduceReduceConflictException(state,symbol,production,production_to_reduce)
-                    action._table[transition] = 'ACCEPT'
-
-    return states,goto,action
