@@ -1,5 +1,6 @@
 from typing import Set,Tuple,Dict
 from hashlib import sha256
+from parser.bottom_up_parser_actions import BottomUpParserAction
 
 from common.types cimport Symbol
 from common.table cimport Table
@@ -136,7 +137,7 @@ cdef class ParserBuilder:
         return _get_kernel_items_lalr(state,g)
     
     @staticmethod
-    def build_lookaheads_propagation_edges(g:Grammar) -> Tuple[Dict[LR0State,Dict[Tuple[LR0Item,Symbol],Tuple[LR0State,Set[LR0Item]]]],Set[LR0State]]:
+    def build_lookaheads_propagation_edges(g:Grammar) -> Tuple[Dict[LR0State,Dict[Tuple[LR0Item,Symbol],Tuple[LR0State,LR0Item]]],Set[LR0State]]:
         '''
         Args:
             g (Grammar)
@@ -157,6 +158,18 @@ cdef class ParserBuilder:
         '''
         return _get_canonical_lalr_states(g)
     
+    @staticmethod
+    def get_goto_action_tables_lalr(g:Grammar) -> Tuple[Dict[Tuple[LALRState,Symbol],LALRState],dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]]]:
+        '''
+        Args:
+            g (Grammar)
+        
+        Returns:
+            Tuple[Dict[Tuple[LALRState,Symbol],LALRState],dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]]]:
+                The ACTION and GOTO tables for a LALR(1) parser from the given grammar in a tuple (GOTO,ACTION)
+        '''
+        return _get_goto_action_tables_lalr(g)
+
 cdef set[LR0Item] _clousure_lr0(set[LR0Item] items,Grammar g):
     cdef LR0Item item,new_item
     cdef Production production
@@ -209,7 +222,7 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
     cdef tuple[str,str] key
     cdef tuple[Symbol,tuple,tuple] kernel
     cdef dict[tuple[Symbol,tuple,tuple],LALRItem] item_by_kernel = {}
-    cdef set[Symbol] first
+    cdef set[Symbol] first,current_lookaheads
 
     for item in items:
         kernel = (item._head,tuple(item._left),tuple(item._right))
@@ -238,12 +251,14 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
                         exists = kernel in item_by_kernel # type:ignore
                         new_item = item_by_kernel.get(kernel,new_item)
                         # [B -> . γ ] b ∈ first(β a)
+                        current_lookaheads = new_item._lookaheads.copy()
                         for lookahead_symbol in item._lookaheads:
                             first = g.first(item._right[1:] + [lookahead_symbol])
                             for new_lookahead in first:
-                                if not new_lookahead in new_item._lookaheads:
-                                    new_item._lookaheads.add(new_lookahead)
+                                if not new_lookahead in current_lookaheads:
+                                    current_lookaheads.add(new_lookahead)
                                     change = True # type:ignore
+                        new_item._lookaheads = current_lookaheads
                         if not exists:
                             result.add(new_item)
                             change = True # type:ignore
@@ -325,11 +340,11 @@ cdef set[LALRItem] _get_kernel_items_lalr(LALRState state,Grammar g):
     
     return result
 
-cdef tuple[dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,set[LR0Item]]]],set[LR0State]] _build_lookaheads_propagation_edges(Grammar g):
+cdef tuple[dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]],set[LR0State]] _build_lookaheads_propagation_edges(Grammar g):
     cdef set[LR0State] states = _get_canonical_lr0_states(g)
-    cdef dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,set[LR0Item]]]] result = {}
-    cdef dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,set[LR0Item]]]] copy
-    cdef LR0State state,next_state,next_state_copy
+    cdef dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]] result = {}
+    cdef dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]] copy
+    cdef LR0State state,next_state
     cdef LR0Item item,next_item
     cdef set[LR0Item] kernel_items
     cdef tuple[LR0Item,Symbol] edge
@@ -343,14 +358,10 @@ cdef tuple[dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,set[LR0Item]]
         clousure = _clousure_lr0(state._items,g)
         for item in clousure:
             if len(item._right) > 0:
-                next_state_copy = LR0State(_goto_lr0(clousure,item._right[0],g)) # type:ignore
-                next_state = LR0State(_get_kernel_items_lr0(next_state_copy,g)) # type:ignore
+                next_state = LR0State(_goto_lr0(clousure,item._right[0],g)) # type:ignore
                 edge = (item,item._right[0])
                 if not edge in result[state]:
-                    result[state][edge] = (next_state_copy,set())
-                for next_item in next_state._items:
-                    if not next_item in result[state][edge]:
-                        result[state][edge][1].add(next_item) # type:ignore
+                    result[state][edge] = (next_state,LR0Item(item._head,item._left + [item._right[0]],item._right[1:])) # type:ignore
     
     copy = result.copy()
     for state in copy:
@@ -361,7 +372,7 @@ cdef tuple[dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,set[LR0Item]]
 
 cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
     cdef set[LR0State] lr0_states
-    cdef dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,set[LR0Item]]]] propagation_edges
+    cdef dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]] propagation_edges
     cdef bint change = True # type:ignore
     cdef dict[tuple[LR0State,LR0Item],set[Symbol]] lookaheads = {}
     cdef LR0State lr0_state,lr0_state_to
@@ -437,20 +448,18 @@ cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
         
         # propagate lookaheads
         for lr0_state in propagation_edges:
-            for (lr0_item,_),(lr0_state_to,lr0_kernel_items) in propagation_edges[lr0_state].items(): # type:ignore
+            for (lr0_item,_),(lr0_state_to,lr0_item_to) in propagation_edges[lr0_state].items(): # type:ignore
                 # edge that propagate lookaheads
                 lr0_state = LR0State(_clousure_lr0(lr0_state._items,g),lr0_state._index) # type:ignore
                 key = (lr0_state,lr0_item)
                 if len(lookaheads[key]) == 0: continue
                 lr0_state_to = LR0State(_clousure_lr0(lr0_state_to._items,g),lr0_state_to._index) # type:ignore
-                for lr0_item_to in lr0_kernel_items:
-                    # items that receive lookaheads with this edge
-                    key_to = (lr0_state_to,lr0_item_to)
-                    for lookahead_symbol in lookaheads[key]:
-                        if not lookahead_symbol in lookaheads[key_to]:
-                            change = True # type:ignore
-                            lookaheads[key_to].add(lookahead_symbol)
-    
+                key_to = (lr0_state_to,lr0_item_to)
+                for lookahead_symbol in lookaheads[key]:
+                    if not lookahead_symbol in lookaheads[key_to]:
+                        change = True # type:ignore
+                        lookaheads[key_to].add(lookahead_symbol)
+                        
     # build lalr states
     for lr0_state in lr0_states:
         lalr_items = set()
@@ -463,3 +472,73 @@ cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
         result.add(lalr_state)
     
     return result
+
+cdef tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],tuple]] _get_goto_action_tables_lalr(Grammar g):
+    cdef dict[tuple[LALRState,Symbol],LALRState] goto = {}
+    cdef dict[tuple[LALRState,Symbol],tuple] action = {}
+    cdef set[LALRState] states = _get_canonical_lalr_states(g)
+    cdef dict[LR0State,LALRState] states_by_kernel = {}
+    cdef dict[tuple[LALRState,LR0Item],set[Symbol]] lookaheads_by_kernel_item = {}
+    cdef tuple[LALRState,LR0Item] lookahead_key
+    cdef dict[LR0Item,Production] productions_by_kernel_item = {}
+    cdef LR0Item lr0_item
+    cdef LALRItem lalr_item
+    cdef set[LR0Item] lr0_kernel
+    cdef LALRState lalr_state
+    cdef LR0State lr0_state,next_state
+    cdef Symbol symbol
+    cdef tuple[LALRState,Symbol] key
+    cdef tuple action_value
+    cdef str action_type
+    cdef Production reduction
+
+    # build mapping of lalr states by kernel
+    for lalr_state in states:
+        lr0_kernel = set()
+        for lalr_item in lalr_state._items:
+            lr0_item = LR0Item(lalr_item._head,lalr_item._left,lalr_item._right) # type:ignore
+            lr0_kernel.add(lr0_item)
+            lookahead_key = (lalr_state,lr0_item)
+            lookaheads_by_kernel_item[lookahead_key] = lalr_item._lookaheads
+            if len(lr0_item._right) == 0 and lr0_item._head in g._non_terminals:
+                for reduction in g._productions_by_symbol[lalr_item._head]:
+                    if reduction._head == lr0_item._head and reduction._production == lr0_item._left:
+                        productions_by_kernel_item[lr0_item] = reduction
+                        break
+        states_by_kernel[LR0State(lr0_kernel,lalr_state._index)] = lalr_state # type:ignore
+    
+    for lr0_state in states_by_kernel:
+        for lr0_item in lr0_state._items:
+            if len(lr0_item._right) > 0:
+                symbol = lr0_item._right[0]
+                next_state = LR0State(_goto_lr0(lr0_state._items,symbol,g)) # type:ignore
+                key = (states_by_kernel[lr0_state],symbol)
+                goto[key] = states_by_kernel[next_state]
+                action_value = (f'{BottomUpParserAction.SHIFT}',states_by_kernel[next_state])
+                if symbol._is_terminal:
+                    if key in action:
+                        action_value = action[key]
+                        action_type = action_value[0]
+                        if action_type != f'{BottomUpParserAction.SHIFT}':
+                            raise LALRShiftReduceConflictException(key[0],symbol)
+                action[key] = action_value
+            else:
+                lookahead_key = (states_by_kernel[lr0_state],lr0_item)
+                for symbol in lookaheads_by_kernel_item[lookahead_key]:
+                    key = (lookahead_key[0],symbol)
+                    if symbol == g._end_symbol and lr0_item._head not in g._non_terminals:
+                        action[key] = (f'{BottomUpParserAction.ACCEPT}',None)
+                        continue
+                    reduction = productions_by_kernel_item[lr0_item]
+                    if key in action:
+                        action_value = action[key]
+                        action_type = action_value[0]
+                        if action_type != f'{BottomUpParserAction.REDUCE}':
+                            raise LALRShiftReduceConflictException(key[0],symbol)
+                        if action_value[1] != reduction:
+                            raise LALRReduceReduceConflictException(key[0],symbol,action_value[1],reduction)
+                    else:
+                        action_value = (f'{BottomUpParserAction.REDUCE}',reduction)
+                        action[key] = action_value
+    
+    return goto,action
