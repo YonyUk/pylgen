@@ -6,8 +6,8 @@ from common.types import Symbol
 from grammar.grammar import Grammar
 from parser.parser_builder import ParserBuilder
 from parser.bottom_up_parser_actions import BottomUpParserAction
-from parser.lr0_parser import LR0Item
-from parser.lalr_parser import LALRItem
+from parser.lr0_parser import LR0Item,LR0State
+from parser.lalr_parser import LALRItem,LALRState
 
 class TestParserBuilder:
 
@@ -531,3 +531,95 @@ class TestParserBuilder:
             elif it.head == B:
                 assert len(it.left) == 0 and it.right == [b] and it.lookaheads == {plus,G.end_symbol}
     
+    def test_get_canonical_lr0_states_1(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+
+        G = Grammar(S,'$')
+        G_ = Grammar.AugmentGrammar(G)
+
+        G[S] += a,
+
+        states = ParserBuilder.get_canonical_lr0_states(G)
+
+        assert len(states) == 3
+
+        i0 = LR0State({
+            LR0Item(G_.start_symbol,[],[S]),
+            LR0Item(S,[],[a])
+        })
+
+        i1 = LR0State({
+            LR0Item(G_.start_symbol,[S],[])
+        })
+
+        i2 = LR0State({
+            LR0Item(S,[a],[])
+        })
+
+        assert states == { i0,i1,i2 }
+    
+    def test_get_canonical_lr0_states_2(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        id_ = Symbol('id',True)
+        plus = Symbol('+',True)
+
+        G = Grammar(E,'$')
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += id_,
+        
+        G_ = Grammar.AugmentGrammar(G)
+
+        states = ParserBuilder.get_canonical_lr0_states(G)
+
+        i0 = LR0State({
+            LR0Item(Symbol("E'"),[],[E]),
+            LR0Item(E,[],[E,plus,T]),
+            LR0Item(E,[],[T]),
+            LR0Item(T,[],[id_])
+        })
+
+        i1 = LR0State({
+            LR0Item(Symbol("E'"),[E],[]),
+            LR0Item(E,[E],[plus,T])
+        })
+
+        i2 = LR0State({
+            LR0Item(E,[T],[])
+        })
+
+        i3 = LR0State({
+            LR0Item(T,[id_],[])
+        })
+
+        i4 = LR0State({
+            LR0Item(E,[E,plus],[T]),
+            LR0Item(T,[],[id_])
+        })
+
+        i5 = LR0State({
+            LR0Item(E,[E,plus,T],[])
+        })
+
+        assert states == { i0,i1,i2,i3,i4,i5 }
+    
+    def test_get_canonical_lr0_states_3(self):
+        S = Symbol('S')
+        A = Symbol('A')
+        B = Symbol('B')
+
+        a = Symbol('a',True)
+        b = Symbol('b',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += A,b
+        G[A] += a,
+
+        states = ParserBuilder.get_canonical_lr0_states(G)
+        for state in states:
+            for item in state.items:
+                assert B != item.head and B not in item.left and not B in item.right
