@@ -3,8 +3,8 @@ from datetime import datetime
 
 import pytest
 from common.types import Symbol
-from grammar.grammar import Grammar
-from parser.parser_builder import ParserBuilder
+from grammar.grammar import Grammar, Production
+from parser.parser_builder import LALRReduceReduceConflictException, LALRShiftReduceConflictException, ParserBuilder
 from parser.bottom_up_parser_actions import BottomUpParserAction
 from parser.lr0_parser import LR0Item,LR0State
 from parser.lalr_parser import LALRItem,LALRState
@@ -811,3 +811,71 @@ class TestParserBuilder:
 
         edges,_ = ParserBuilder.build_lookaheads_propagation_edges(G)
         assert len(edges) == 1
+    
+    def test_goto_action_tables_1(self,classic_lalr_1_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(S,L,R,mul,id_,eq,end_symbol) = classic_lalr_1_grammar
+
+        ParserBuilder.clear_cache()
+        goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
+        states = ParserBuilder.get_canonical_lalr_states(G)
+
+        accept_state = None
+        for state in states:
+            if any(
+                map(
+                    lambda item:item.head not in G.non_terminals and len(item.right) == 0 and item.left == [G.start_symbol],
+                    state.items
+                )
+            ):
+                accept_state = state
+                break
+        
+        assert (accept_state,G.end_symbol) in action
+        assert action[(accept_state,G.end_symbol)][0] == BottomUpParserAction.ACCEPT # type: ignore
+
+        for state in states:
+            if any(
+                map(
+                    lambda item: item.head==S and item.left == [R] and len(item.right) == 0,
+                    state.items
+                )
+            ):
+                assert action[(state,G.end_symbol)][0] == BottomUpParserAction.REDUCE
+                assert action[((state,G.end_symbol))][1] == Production(S,[R])
+            
+            elif len(state.items) == 2:
+                if any(
+                    map(
+                        lambda item: item.head == R and item.left == [L] and len(item.right) == 0,
+                        state.items
+                    )
+                ):
+                    assert action[(state,eq)][0] == BottomUpParserAction.SHIFT
+                    assert action[(state,G.end_symbol)][0] == BottomUpParserAction.REDUCE
+                    assert action[(state,G.end_symbol)][1] == Production(R,[L])
+            
+            elif len(state.items) == 1:
+                item = next(iter(state.items))
+                if item.head == R and item.left == [L] and len(item.right) == 0:
+                    for sym in {G.end_symbol,eq}:
+                        assert action[(state,sym)][0] == BottomUpParserAction.REDUCE
+                        assert action[(state,sym)][1] == Production(R,[L])
+    
+    def test_goto_action_tables_2(self):
+        E = Symbol('E')
+        plus = Symbol('+',True)
+        id_ = Symbol('id',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,E
+        G[E] += id_,
+
+        with pytest.raises(LALRShiftReduceConflictException):
+            _,_ = ParserBuilder.get_goto_action_tables_lalr(G)
+    
+    def test_goto_action_tables_3(self,conflict_reduce_reduce_lalr_1_grammar_1:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,_ = conflict_reduce_reduce_lalr_1_grammar_1
+
+        with pytest.raises(LALRReduceReduceConflictException):
+            _,_ = ParserBuilder.get_goto_action_tables_lalr(G)
