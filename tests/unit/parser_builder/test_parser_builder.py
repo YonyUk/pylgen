@@ -673,3 +673,74 @@ class TestParserBuilder:
         assert i3_kernel in kernels
         assert i4_kernel in kernels
         assert i5_kernel in kernels
+    
+    def test_get_canonical_lalr_states_1(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        F = Symbol('F')
+
+        plus = Symbol('+',True)
+        mul = Symbol('*',True)
+        lp = Symbol('(',True)
+        rp = Symbol(')',True)
+        id_ = Symbol('id',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += T,mul,F
+        G[T] += F,
+
+        G[F] += lp,E,rp
+        G[F] += id_,
+
+        states = ParserBuilder.get_canonical_lalr_states(G)
+
+        initial_item = list(filter(lambda state:state.index==0,states))[0]
+
+        found_e_t = False
+        found_t_t = False
+
+        for state in states:
+            for item in state.items:
+                if item.head == E and item.left == [T] and len(item.right) == 0:
+                    if item.lookaheads == {plus,rp,G.end_symbol}:
+                        found_e_t = True
+                elif item.head == T and item.left == [T] and item.right == [mul,F]:
+                    if item.lookaheads == { mul,plus,rp,G.end_symbol}:
+                        found_t_t = True
+        
+        assert found_t_t and found_e_t
+        for item in initial_item.items:
+            if item.head not in G.non_terminals and len(item.left) == 0 and item.right == [E]:
+                assert item.lookaheads == { G.end_symbol }
+                break
+    
+    def test_get_canonical_lalr_states_2(self):
+        S = Symbol('S')
+        A = Symbol('A')
+
+        a = Symbol('a',True)
+        b = Symbol('b',True)
+        c = Symbol('c',True)
+        d = Symbol('d',True)
+        e = Symbol('e',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += a,A,d
+        G[S] += b,A,e
+
+        G[A] += c,
+
+        states = ParserBuilder.get_canonical_lalr_states(G)
+        for state in states:
+            kernel = ParserBuilder.get_kernel_items_lalr(state,G)
+            if len(kernel) == 1:
+                item = next(iter(kernel))
+                if item.head == A and len(item.right) == 0 and item.left == [c]:
+                    assert item.lookaheads == { e,d }
+                    break
+    
