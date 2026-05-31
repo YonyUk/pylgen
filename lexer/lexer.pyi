@@ -1,4 +1,4 @@
-from typing import Any, Callable, Tuple
+from typing import Any, Callable, Iterable, Tuple
 
 from automaton.automaton import Automaton,DFA
 from common.types import Symbol, Token
@@ -16,7 +16,9 @@ class BaseLexer:
 
     @property
     def dfa(self) -> DFA: ...
-
+    @property
+    def tokens(self) -> Iterable[Token]: ...
+    
     def load_text(self,text:str): ...
 
     def initialize(self): ...
