@@ -744,3 +744,35 @@ class TestParserBuilder:
                     assert item.lookaheads == { e,d }
                     break
     
+    def test_get_kernel_items_lalr(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        
+        plus = Symbol('+',True)
+        mul = Symbol('*',True)
+        id_ = Symbol('id',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += T,mul,id_
+        G[T] += id_,
+
+        states = ParserBuilder.get_canonical_lalr_states(G)
+
+        target = None
+        for state in states:
+            kernels = ParserBuilder.get_kernel_items_lalr(state,G)
+            if any(map(lambda item:item.head == E and item.left == [T] and len(item.right) == 0,kernels)):
+                target = state
+                break
+        
+        assert target is not None
+        kernels = ParserBuilder.get_kernel_items_lalr(target,G)
+        for item in kernels:
+            if item.head == E and item.left == [T]:
+                assert item.lookaheads == { plus, G.end_symbol }
+            elif item.head == T and item.left == [T]:
+                assert mul in item.lookaheads
