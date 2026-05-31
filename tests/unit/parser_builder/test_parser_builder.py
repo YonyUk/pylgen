@@ -385,3 +385,149 @@ class TestParserBuilder:
         assert t1 < t0
         assert clousure1 == clousure2
    
+    def test_lr0_goto_1(self):
+        E = Symbol('E')
+        T = Symbol('T')
+
+        plus = Symbol('+',True)
+        id_ = Symbol('id',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += id_,
+
+        item = LALRItem(T,[id_],[])
+
+        goto = ParserBuilder.goto_lr0({item},plus,G)
+        assert len(goto) == 0
+    
+    def test_lr0_goto_2(self):
+        E = Symbol('E')
+        T = Symbol('T')
+
+        plus = Symbol('+',True)
+        id_ = Symbol('id',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += id_,
+
+        item = LR0Item(T,[],[id_])
+        goto = ParserBuilder.goto_lr0({item},id_,G)
+
+        expected = { LR0Item(T,[id_],[]) }
+
+        assert goto == expected
+    
+    def test_lr0_goto_3(self):
+        E = Symbol('E')
+        T = Symbol('T')
+
+        plus = Symbol('+',True)
+        id_ = Symbol('id',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += id_,
+
+        item = LR0Item(Symbol("E'"),[],[E])
+        goto = ParserBuilder.goto_lr0({item},E,G)
+
+        expected = { LR0Item(Symbol("E'"),[E],[]) }
+
+        assert goto == expected
+    
+    def test_lalr_goto_1(self):
+        E = Symbol('E')
+        T = Symbol('T')
+
+        plus = Symbol('+',True)
+        id_ = Symbol('id',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += id_,
+
+        item = LALRItem(T,[id_],[],{ plus,G.end_symbol })
+        goto = ParserBuilder.goto_lalr({item},Symbol('*',True),G)
+        assert len(goto) == 0
+    
+    def test_lalr_goto_2(self):
+        E = Symbol('E')
+        T = Symbol('T')
+
+        plus = Symbol('+',True)
+        id_ = Symbol('id',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += id_,
+
+        item = LALRItem(T,[],[id_],{ plus, G.end_symbol })
+        goto = ParserBuilder.goto_lalr({item},id_,G)
+
+        expected = LALRItem(T,[id_],[],{plus,G.end_symbol})
+        assert goto == { expected }
+    
+    def test_lalr_goto_3(self):
+        E = Symbol('E')
+        T = Symbol('T')
+
+        plus = Symbol('+',True)
+        id_ = Symbol('id',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += id_,
+
+        item = LALRItem(Symbol("E'"),[],[E],{G.end_symbol})
+        goto = ParserBuilder.goto_lalr({item},E,G)
+
+        expected = LALRItem(Symbol("E'"),[E],[],{G.end_symbol})
+
+        assert goto == { expected }
+    
+    def test_lalr_goto_4(self):
+        S = Symbol('S')
+        A = Symbol('A')
+        B = Symbol('B')
+
+        a = Symbol('a',True)
+        b = Symbol('b',True)
+        plus = Symbol('+',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += A,B
+        G[A] += a,
+        G[B] += b,
+        G[S] += plus,
+
+        item = LALRItem(S,[],[A,B],{plus,G.end_symbol})
+        goto = ParserBuilder.goto_lalr({item},A,G)
+
+        assert len(goto) == 2
+        for it in goto:
+            if it.head == S:
+                assert it.left == [A] and it.right == [B] and it.lookaheads == {plus,G.end_symbol}
+            elif it.head == B:
+                assert len(it.left) == 0 and it.right == [b] and it.lookaheads == {plus,G.end_symbol}
+    
