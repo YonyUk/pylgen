@@ -7,7 +7,7 @@ import networkx as nx
 from html.parser import HTMLParser
 
 from pyvis.network import Network
-from .automaton import Automaton
+from automaton.automaton import Automaton
 
 class ResourceEmbedder(HTMLParser):
 
