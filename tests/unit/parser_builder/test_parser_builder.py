@@ -2,6 +2,7 @@ from typing import Tuple
 from datetime import datetime
 
 import pytest
+import time
 from common.types import Symbol
 from grammar.grammar import Grammar, Production
 from parser.parser_builder import LALRReduceReduceConflictException, LALRShiftReduceConflictException, ParserBuilder
@@ -960,3 +961,112 @@ class TestParserBuilder:
         cl1 = ParserBuilder.clousure_lr0({item2},G1)
         cl2 = ParserBuilder.clousure_lr0({item2},G2)
         assert cl1 is not cl2
+    
+    def test_cyclic_grammar(self):
+        A = Symbol('A')
+        B = Symbol('B')
+
+        G = Grammar(A,'$')
+
+        G[A] += B,
+        G[B] += A,
+
+        states = ParserBuilder.get_canonical_lr0_states(G)
+        assert len(states) > 0
+        states = ParserBuilder.get_canonical_lalr_states(G)
+        assert len(states) > 0
+    
+    def test_duplicated_productions(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += a,
+        G[S] += a,
+
+        states = ParserBuilder.get_canonical_lr0_states(G)
+        assert len(states) == 3
+        states = ParserBuilder.get_canonical_lalr_states(G)
+        assert len(states) == 3
+    
+    def test_unused_terminals(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+        b = Symbol('b',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += a,
+
+        states = ParserBuilder.get_canonical_lr0_states(G)
+
+        for state in states:
+            for item in state.items:
+                assert b not in item.right
+
+        states = ParserBuilder.get_canonical_lalr_states(G)
+
+        for state in states:
+            for item in state.items:
+                assert b not in item.right
+
+    def test_performance_lr0_1(self):
+        S = Symbol('S')
+        G = Grammar(S,'$')
+
+        symbols = [Symbol(f'N{i}') for i in range(50)]
+        id_ = Symbol('id',True)
+        G[S] += symbols[0],
+
+        for i in range(49):
+            G[symbols[i]] += symbols[i + 1],
+            G[symbols[i]] += id_,
+
+        G[symbols[49]] += id_,
+
+        start_time = time.time()
+        states = ParserBuilder.get_canonical_lr0_states(G)
+        elapsed = time.time() - start_time
+        assert len(states) > 0
+        assert elapsed < 2.0
+
+    def test_performance_lalr_1(self):
+        S = Symbol('S')
+        G = Grammar(S,'$')
+
+        symbols = [Symbol(f'N{i}') for i in range(50)]
+        id_ = Symbol('id',True)
+        G[S] += symbols[0],
+
+        for i in range(49):
+            G[symbols[i]] += symbols[i + 1],
+            G[symbols[i]] += id_,
+
+        G[symbols[49]] += id_,
+
+        start_time = time.time()
+        states = ParserBuilder.get_canonical_lalr_states(G)
+        elapsed = time.time() - start_time
+        assert len(states) > 0
+        assert elapsed < 2.0
+    
+    def test_performance_lalr_2(self):
+        S = Symbol('S')
+        G = Grammar(S,'$')
+
+        symbols = [Symbol(f'N{i}') for i in range(50)]
+        id_ = Symbol('id',True)
+        G[S] += symbols[0],
+
+        for i in range(49):
+            G[symbols[i]] += symbols[i + 1],
+
+        G[symbols[49]] += id_,
+
+        start_time = time.time()
+        goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
+        elapsed = time.time() - start_time
+        assert len(goto) > 0
+        assert len(action) > 0
+        assert elapsed < 2.0
