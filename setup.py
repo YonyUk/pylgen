@@ -64,6 +64,15 @@ parser_builder_extensions = Extension(
         'parser/parser_builder.pyx'
     ]
 )
+###################################################################################
+#                                  LEXER
+###################################################################################
+lexer_extensions = Extension(
+    name='lexer.lexer',
+    sources=[
+        'lexer/lexer.pyx'
+    ]
+)
 
 setup(
     ext_modules=cythonize(common_extensions),
@@ -102,5 +111,10 @@ setup(
 
 setup(
     ext_modules=cythonize(parser_builder_extensions),
+    language_level=3
+)
+
+setup(
+    ext_modules=cythonize(lexer_extensions),
     language_level=3
 )
