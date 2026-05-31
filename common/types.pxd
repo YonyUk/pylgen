@@ -1,5 +1,3 @@
-from common.enums import TokenType
-
 cdef class Symbol:
 
     cdef str _symbol
