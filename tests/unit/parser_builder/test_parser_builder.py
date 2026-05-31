@@ -623,3 +623,53 @@ class TestParserBuilder:
         for state in states:
             for item in state.items:
                 assert B != item.head and B not in item.left and not B in item.right
+    
+    def test_get_kernel_items_lr0(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        id_ = Symbol('id',True)
+        plus = Symbol('+',True)
+
+        G = Grammar(E,'$')
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += id_,
+        
+        G_ = Grammar.AugmentGrammar(G)
+
+        states = ParserBuilder.get_canonical_lr0_states(G)
+
+        i0_kernel = {
+            LR0Item(Symbol("E'"),[],[E])
+        }
+
+        i1_kernel = {
+            LR0Item(Symbol("E'"),[E],[]),
+            LR0Item(E,[E],[plus,T])
+        }
+
+        i2_kernel = {
+            LR0Item(E,[T],[])
+        }
+
+        i3_kernel = {
+            LR0Item(T,[id_],[])
+        }
+
+        i4_kernel = {
+            LR0Item(E,[E,plus],[T])
+        }
+
+        i5_kernel = {
+            LR0Item(E,[E,plus,T],[])
+        }
+
+        kernels = [ ParserBuilder.get_kernel_items_lr0(state,G) for state in states ]
+
+        assert i0_kernel in kernels
+        assert i1_kernel in kernels
+        assert i2_kernel in kernels
+        assert i3_kernel in kernels
+        assert i4_kernel in kernels
+        assert i5_kernel in kernels
