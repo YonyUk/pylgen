@@ -1,2 +1,1 @@
 from .automaton import State,Automaton,DFA,NFA,create_dfa,get_word_automaton,get_words_automaton
-from .visual import draw_automaton
