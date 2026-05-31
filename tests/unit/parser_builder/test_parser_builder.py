@@ -815,7 +815,6 @@ class TestParserBuilder:
     def test_goto_action_tables_1(self,classic_lalr_1_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
         G,(S,L,R,mul,id_,eq,end_symbol) = classic_lalr_1_grammar
 
-        ParserBuilder.clear_cache()
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
         states = ParserBuilder.get_canonical_lalr_states(G)
 
@@ -879,3 +878,85 @@ class TestParserBuilder:
 
         with pytest.raises(LALRReduceReduceConflictException):
             _,_ = ParserBuilder.get_goto_action_tables_lalr(G)
+    
+    def test_cache_clousure_lr0(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += a,
+
+        item = LR0Item(S,[],[a])
+
+        cl1 = ParserBuilder.clousure_lr0({item},G)
+        cl2 = ParserBuilder.clousure_lr0({item},G)
+
+        assert cl1 is cl2
+    
+    def test_cache_clousure_lalr(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += a,
+
+        item = LALRItem(S,[],[a],{G.end_symbol})
+
+        cl1 = ParserBuilder.clousure_lalr({item},G)
+        cl2 = ParserBuilder.clousure_lalr({item},G)
+
+        assert cl1 is cl2
+    
+    def test_clear_cache_clousure_1(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += a,
+
+        item = LR0Item(S,[],[a])
+
+        cl1 = ParserBuilder.clousure_lr0({item},G)
+        ParserBuilder.clear_cache()
+        cl2 = ParserBuilder.clousure_lr0({item},G)
+        assert cl1 is not cl2
+    
+    def test_clear_cache_clousure_2(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += a,
+
+        item = LALRItem(S,[],[a],{G.end_symbol})
+
+        cl1 = ParserBuilder.clousure_lalr({item},G)
+        ParserBuilder.clear_cache()
+        cl2 = ParserBuilder.clousure_lalr({item},G)
+
+        assert cl1 is not cl2
+    
+    def test_cache_different_grammars_lr0(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+        b = Symbol('b',True)
+
+        G1 = Grammar(S,'$')
+        G2 = Grammar(S,'$')
+
+        G1[S] += a,
+
+        G2[S] += b,
+
+        item1 = LR0Item(S,[],[a])
+        item2 = LR0Item(S,[],[b])
+        cl1 = ParserBuilder.clousure_lr0({item1},G1)
+        cl2 = ParserBuilder.clousure_lr0({item1},G2)
+        assert cl1 is not cl2
+        cl1 = ParserBuilder.clousure_lr0({item2},G1)
+        cl2 = ParserBuilder.clousure_lr0({item2},G2)
+        assert cl1 is not cl2
