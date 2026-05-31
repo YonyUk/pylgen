@@ -94,3 +94,6 @@ cdef class BaseLexer:
         self._text = text
         self._text_position_pointer = 0
         self._text_readed = ''
+    
+    def __setitem__(self,key:Tuple[int,object],automaton:Automaton):
+        self._add_token(key[0],key[1],automaton)
