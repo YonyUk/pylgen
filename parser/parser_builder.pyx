@@ -8,7 +8,8 @@ from grammar.grammar cimport Grammar,Production,_augment_grammar
 from .lr0_parser cimport LR0Item,LR0State
 from .lalr_parser cimport LALRState
 
-_clousures:dict[tuple[str,str],set[LR0Item] | set[LALRItem]] = {}
+_clousures:dict[tuple[str,str],set[LR0Item]] = {}
+_clousures_lalr:dict[tuple[str,str],set[LALRItem]] = {}
 
 cdef class ParserBuildingConflictException(Exception):
     pass
@@ -62,6 +63,7 @@ cdef class ParserBuilder:
     @staticmethod
     def clear_cache() -> None:
         _clousures.clear()
+        _clousures_lalr.clear()
 
     @staticmethod
     def clousure_lr0(items:Set[LR0Item],g:Grammar) -> Set[LR0Item]:
@@ -245,8 +247,8 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
     set_id = sha256('-'.join(ids).encode()).hexdigest()
     key = (g._id(),set_id)
     # checks for a precomputed value
-    if key in _clousures:
-        return _clousures[key] # type:ignore
+    if key in _clousures_lalr:
+        return _clousures_lalr[key] # type:ignore
     
     while change:
         change = False # type:ignore
@@ -275,7 +277,7 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
                             result.add(new_item)
                             change = True # type:ignore
                         item_by_kernel[kernel] = new_item
-    _clousures[key] = result
+    _clousures_lalr[key] = result
     return result
 
 cdef set[LR0Item] _goto_lr0(set[LR0Item] items,Symbol x,Grammar g):
