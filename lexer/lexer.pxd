@@ -19,11 +19,14 @@ cdef class BaseLexer:
     cdef DFA _dfa
     cdef object _get_symbol_function
     cdef dict[str,set[object]] _types_by_state
+    cdef Token _current_token
 
     cdef Token _get_token(self,str text,int line,int column)
     cdef void _add_token(self,int priority,object type_,Automaton automaton)
     cdef Symbol _get_symbol(self,object type_,str text)
     cdef set[object] _get_dfa_state_values(self,State state)
+    cdef bint _move_next(self)
+    cdef Token _current(self)
 
     cpdef void initialize(self)
     cpdef void load_text(self,str text)

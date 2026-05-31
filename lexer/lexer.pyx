@@ -1,4 +1,4 @@
-from typing import Tuple,Callable,Any
+from typing import Tuple,Callable,Any,Iterable
 
 from automaton.automaton cimport Automaton,DFA,State,_automaton_union
 from common.types cimport Token,Symbol
@@ -30,6 +30,12 @@ cdef class BaseLexer:
             raise LexerNotInitializedException()
         return self._dfa
     
+    @property
+    def tokens(self) -> Iterable[Token]:
+        self.initialize()
+        while self._move_next():
+            yield self._current_token
+    
     cdef set[object] _get_dfa_state_values(self,State state):
         cdef list[tuple[int,list[object]]] stack
         cdef list[object] current_set
@@ -59,6 +65,8 @@ cdef class BaseLexer:
         return result
 
     cdef Symbol _get_symbol(self,object type_,str text):
+        if not issubclass(type(type_),TokenType):
+            raise ValueError('type_ must be a subclass of TokenType')
         return self._get_symbol_function(type_,text) # type:ignore
 
     cdef Token _get_token(self,str text,int line,int column):
@@ -73,6 +81,51 @@ cdef class BaseLexer:
         
         return Token('',TokenType.GARBAGE,Symbol('GARBAGE'),-1,-1) # type:ignore
     
+    cdef bint _move_next(self):
+        cdef tuple[str,str] transition
+
+        if not self._initialized:
+            raise LexerNotInitializedException()
+        
+        # restart the pointer and text readed
+        self._text_position_pointer = 0
+        self._text_readed = ''
+        # restart the dfa
+        self._dfa.reset()
+
+        # if rest text to read
+        if len(self._text) > 0:
+            # checks if the dfa has a transition
+            transition = (self._dfa._current_state._id,self._text[self._text_position_pointer])
+            while transition in self._dfa._trans_func._table:
+                # advance the dfa one step
+                self._dfa.walk(self._text[self._text_position_pointer])
+                # updates line and column values
+                if self._text[self._text_position_pointer] == '\n':
+                    self._line += 1
+                    self._column = 1
+                # updates the text readed and the pointer
+                self._text_readed += self._text[self._text_position_pointer]
+                self._text_position_pointer += 1
+                # if the pointer reach to the end of the text, stop
+                if self._text_position_pointer >= len(self._text):
+                    break
+                # updates the value of the transition
+                transition = (self._dfa._current_state._id,self._text[self._text_position_pointer])
+            
+            # if the dfa was not advanced
+            if self._text_position_pointer == 0:
+                self._text_readed = self._text[0]
+                self._text = self._text[1:]
+            else:
+                self._text = self._text[self._text_position_pointer:]
+            self._current_token = self._get_token(self._text_readed,self._line,self._column)
+            return True # type:ignore
+        return False # type:ignore
+    
+    cdef Token _current(self):
+        return self._current_token
+    
     cpdef void initialize(self):
         cdef State state
         if len(self._automatons) == 0:
@@ -84,6 +137,8 @@ cdef class BaseLexer:
             self._initialized = True # type:ignore
 
     cdef void _add_token(self,int priority,object type_,Automaton automaton):
+        if not issubclass(type(type_),TokenType):
+            raise ValueError('type_ must be subclass of TokenType')
         if not type_ in self._priorites.values():
             self._priorites[priority] = type_
             self._automatons.add(automaton)
