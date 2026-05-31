@@ -776,3 +776,38 @@ class TestParserBuilder:
                 assert item.lookaheads == { plus, G.end_symbol }
             elif item.head == T and item.left == [T]:
                 assert mul in item.lookaheads
+        
+    def test_build_propagation_edges_1(self):
+        E = Symbol('E')
+        T = Symbol('T')
+
+        plus = Symbol('+',True)
+        id_ = Symbol('id',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += id_,
+
+        edges,lr0_states = ParserBuilder.build_lookaheads_propagation_edges(G)
+
+        for state in edges:
+            for (item,sym),(next_state_full,dest_item) in edges[state].items():
+                expected = LR0Item(item.head,item.left + [sym],item.right[1:])
+                assert dest_item.head == expected.head
+                assert dest_item.left == expected.left
+                assert dest_item.right == expected.right
+                assert expected in ParserBuilder.get_kernel_items_lr0(next_state_full,G)
+    
+    def test_build_propagation_edges_2(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += a,
+
+        edges,_ = ParserBuilder.build_lookaheads_propagation_edges(G)
+        assert len(edges) == 1
