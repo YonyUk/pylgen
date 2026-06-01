@@ -1,5 +1,6 @@
 from typing import Dict, List, Tuple
 from datetime import datetime
+from random import choice, randint, random
 
 import pytest
 import time
@@ -94,6 +95,25 @@ class TestParserBuilder:
 
         return G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,G.end_symbol)
     
+    def generate_valid_tokens_string(self,g:Grammar):
+        symbol = g.start_symbol
+        tokens:List[Symbol] = [symbol]
+        while symbol:
+            index = tokens.index(symbol)
+            options = g[symbol].productions
+            red = min(options,key=lambda symbols:len(symbols))
+            if random() < .5:
+                selected = red
+            else:
+                selected = choice(options)
+            tokens = tokens[:index] + selected + tokens[index+1:]
+            symbol = None
+            for s in tokens:
+                if not s.is_terminal:
+                    symbol = s
+                    break
+        return tokens
+
     def simulate_parsing(self,tokens:List[Symbol],goto:Dict[Tuple[LALRState,Symbol],LALRState],action:Dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]]) -> bool:
         '''
         simulate the parsing and return True if the sequence of tokens was successfully parsed, False otherwise
@@ -1145,3 +1165,25 @@ class TestParserBuilder:
         # ( id )
         tokens = [lp,id_,rp,end_symbol]
         assert self.simulate_parsing(tokens,goto,action)
+    
+    def test_goto_action_tables_correctness_2(self,arithmetic_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
+
+        goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
+        for _ in range(100):
+            tokens = self.generate_valid_tokens_string(G) + [end_symbol]
+            assert self.simulate_parsing(tokens,goto,action)
+            index = randint(0,len(tokens) - 1)
+            tokens.insert(index,tokens[index])
+            assert not self.simulate_parsing(tokens,goto,action)
+    
+    def test_goto_action_tables_correctness_3(self,classic_lalr_1_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,_ = classic_lalr_1_grammar
+
+        goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
+        for _ in range(100):
+            tokens = self.generate_valid_tokens_string(G) + [G.end_symbol]
+            assert self.simulate_parsing(tokens,goto,action)
+            index = randint(0,len(tokens) - 1)
+            tokens.insert(index,tokens[index])
+            assert not self.simulate_parsing(tokens,goto,action)
