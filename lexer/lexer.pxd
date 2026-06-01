@@ -20,6 +20,7 @@ cdef class BaseLexer:
     cdef object _get_symbol_function
     cdef dict[str,set[object]] _types_by_state
     cdef Token _current_token
+    cdef DFA _ignore
 
     cdef Token _get_token(self,str text,int line,int column)
     cdef void _add_token(self,int priority,object type_,Automaton automaton)
