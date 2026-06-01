@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Dict, List, Tuple
 from datetime import datetime
 
 import pytest
@@ -94,6 +94,51 @@ class TestParserBuilder:
 
         return G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,G.end_symbol)
     
+    def simulate_parsing(self,tokens:List[Symbol],goto:Dict[Tuple[LALRState,Symbol],LALRState],action:Dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]]) -> bool:
+        '''
+        simulate the parsing and return True if the sequence of tokens was successfully parsed, False otherwise
+        '''
+        stack = []
+        stack_states = []
+        initial_state = list(filter(lambda t:t[0].index == 0,goto.keys()))[0][0]
+        while len(stack) > 0 or len(tokens) > 0:
+            state = initial_state
+            stack_states = [state]
+            for symbol in stack:
+                if not (state,symbol) in action:
+                    break
+                act = action[(state,symbol)]
+                if act[0] == BottomUpParserAction.SHIFT:
+                    state = goto[(state,symbol)]
+                    stack_states.append(state)
+                elif act[0] == BottomUpParserAction.REDUCE and len(tokens) > 0:
+                    break
+            if len(tokens) == 0 or not (state,tokens[0]) in action:
+                break
+            act = action[(state,tokens[0])]
+            while act[0] == BottomUpParserAction.REDUCE:
+                p:Production = act[1] # type: ignore
+                stack = stack[:-1*len(p.production)] + [p.head]
+                stack_states = stack_states[:-1*len(p.production)]
+                state = stack_states[-1]
+                if not (state,stack[-1]) in action:
+                    break
+                act = action[(state,stack[-1])]
+                if act[0] != BottomUpParserAction.SHIFT:
+                    break
+                state = goto[(state,stack[-1])]
+                stack_states.append(state)
+                if not (state,tokens[0]) in action:
+                    break
+                act = action[(state,tokens[0])]
+            if act[0] == BottomUpParserAction.SHIFT:
+                stack.append(tokens[0])
+                stack_states.append(state)
+            if act[0] == BottomUpParserAction.ACCEPT:
+                return True
+            tokens.pop(0)
+        return False
+
     def test_lr0_clousure_1(self):
         clousure = ParserBuilder.clousure_lr0(set(),Grammar(Symbol('S')))
         assert len(clousure) == 0
@@ -1070,3 +1115,33 @@ class TestParserBuilder:
         assert len(goto) > 0
         assert len(action) > 0
         assert elapsed < 2.0
+    
+    def test_goto_action_tables_correctness_1(self,arithmetic_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
+
+        goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
+
+        # id
+        tokens = [id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id + id
+        tokens = [id_,plus,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id - id
+        tokens = [id_,minus,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id % id
+        tokens = [id_,mod,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id * id
+        tokens = [id_,mul,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id / id
+        tokens = [id_,div,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id ** id
+        tokens = [id_,exp,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # ( id )
+        tokens = [lp,id_,rp,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
