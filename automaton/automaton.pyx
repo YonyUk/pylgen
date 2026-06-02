@@ -1496,6 +1496,13 @@ cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,se
     return dfa
 
 cpdef DFA get_word_automaton(str word):
+    '''
+    Args:
+        word (str)
+       
+    Returns:
+        DFA: the dfa that accepts only the given word
+    '''
     cdef DFA result = DFA('start','start',set(word))
     cdef State last_state,current_state
     cdef int idx
@@ -1510,7 +1517,68 @@ cpdef DFA get_word_automaton(str word):
     return result
 
 cpdef NFA get_words_automaton(list[str] words):
+    '''
+    Args:
+        words (list[str])
+    
+    Returns:
+        NFA: the nfa that accepts only the given words
+    '''
     cdef str word
     cdef set[Automaton] dfas = {get_word_automaton(word) for word in words }
 
-    return Automaton.Union(dfas)
+    return _automaton_union(dfas)
+
+cpdef DFA get_word_automaton_with_value(str word,object value,bint only_finals=False): # type:ignore
+    '''
+    Args:
+        word (str)
+        value (object): the value of the states
+        only_finals (bool): if True, only the finals states will have the given value
+    
+    Returns:
+        DFA: the dfa that accepts only the given word
+    '''
+    cdef DFA result
+    cdef State last_state,current_state
+    cdef int idx
+    cdef object value_
+
+    if not only_finals:
+        result = DFA('start',value,set(word))
+    else:
+        result = DFA('start','start',set(word))
+    
+    last_state = result._start_state
+
+    for idx in range(len(word)):
+        if only_finals:
+            if idx < len(word) - 1:
+                value_ = f'{idx}-{word[idx]}'
+            else:
+                value_ = value
+        else:
+            value_ = value
+        current_state = State(f'{idx}-{word[idx]}',value_,idx == len(word) - 1) # type:ignore
+        result.add_transition(last_state,current_state,word[idx])
+        last_state = current_state
+    
+    return result
+
+cpdef NFA get_words_automaton_with_value(list[str] words,object value,bint only_finals=False): # type:ignore
+    '''
+    Args:
+        words (list[str])
+        value (object): the value of the states
+        only_finals (bool): if True, only the finals states will have the given value
+    
+    Returns:
+        DFA: the dfa that accepts only the given words
+    '''
+    cdef str word
+    cdef set[Automaton] dfas = { get_word_automaton_with_value(word,value,only_finals) for word in words }
+    cdef NFA result = _automaton_union(dfas)
+
+    if not only_finals:
+        result._start_state._value = value
+    return result
