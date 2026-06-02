@@ -33,7 +33,7 @@ cdef class DFA(Automaton):
 
     cpdef bint accept(self,list[str] string)
     cpdef void walk(self,str symbol)
-    cpdef DFA minimize(self)
+    cpdef DFA minimize(self,list[set[State]] initial_partition=*)
 
 cdef class NFA(Automaton):
     cdef State _build_state(self,set[State] states)

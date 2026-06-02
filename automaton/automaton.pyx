@@ -772,8 +772,13 @@ cdef class DFA(Automaton):
         self.reset()
         return result
     
-    cpdef DFA minimize(self):
+    cpdef DFA minimize(self,list[set[State]] initial_partition=[]):
         '''
+        Args:
+            initial_partition (List[Set[State]]): the initial partition for the minimization process
+
+            !!!WARNING: the dfa must be complete before use this option, otherwise the behavior is unpredictible
+            
         Returns:
             DFA: a minimized dfa equivalent to this (this process is done with the Hopcroft's algortihm)
         '''
@@ -797,18 +802,23 @@ cdef class DFA(Automaton):
             was_completed = True # type:ignore
             self.make_complete()
         
-        finals = self.finals
-        not_finals = self.states.difference(finals)
+        if len(initial_partition) == 0:
+            finals = self.finals
+            not_finals = self.states.difference(finals)
 
-        partition.append(finals)
-        partition.append(not_finals)
+            partition.append(finals)
+            partition.append(not_finals)
 
-        # puts into the queue the set with smaller size, if both has the same size,
-        # puts both sets
-        if len(finals) <= len(not_finals):
-            queue.append(finals)
-        if len(not_finals) <= len(finals):
-            queue.append(not_finals)
+            # puts into the queue the set with smaller size, if both has the same size,
+            # puts both sets
+            if len(finals) <= len(not_finals):
+                queue.append(finals)
+            if len(not_finals) <= len(finals):
+                queue.append(not_finals)
+        else:
+            partition = initial_partition.copy()
+            for current_block in initial_partition:
+                queue.append(current_block)
         
         while queue:
 

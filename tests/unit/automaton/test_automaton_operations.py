@@ -1,7 +1,8 @@
 import pytest
 from typing import Set
 
-from automaton import Automaton,NFA,DFA,State
+from automaton import Automaton,NFA,DFA,State, create_dfa
+from common.table import Table
 
 class TestAutomatonOperations:
 
@@ -5669,3 +5670,115 @@ class TestAutomatonOperations:
         b = list(string)
         b.reverse()
         assert rev.accept(a) == dfa.accept(b)
+    
+    def test_automaton_minimize_operation_with_initial_partition_1(self):
+        q0_1 = State('q0','q0')
+        q0_2 = State('q0','q0')
+        q1 = State('q1','q1',True)
+        q2 = State('q2','q2',True)
+
+        t1 = Table()
+        t2 = Table()
+
+        t1['q0','0'] = 'q1'
+        t2['q0','1'] = 'q2'
+
+        aut1 = create_dfa({q0_1,q1},t1,'q0',{'0'})
+        aut2 = create_dfa({q0_2,q2},t2,'q0',{'1'})
+
+        aut = aut1 | aut2
+
+        dfa = aut.to_deterministic()
+        minimized1 = dfa.minimize()
+        dfa.make_complete()
+        i = []
+        for s in dfa.finals:
+            i.append({s})
+        not_finals = dfa.states.difference(dfa.finals)
+        i.append(not_finals)
+        minimized2 = dfa.minimize(i)
+        dfa.restore_to_before_complete()
+
+        # q1 and q2 are in the same partition
+        for state in minimized1.states:
+            q1_is = False
+            q2_is = False
+            values = list(state.value)
+            for s in values:
+                if not isinstance(s.value,set): continue
+                if any(
+                    map(
+                        lambda st:st.value==q1.value,
+                        s.value
+                    )
+                ):
+                    q1_is = True
+                if any(
+                    map(
+                        lambda st:st.value==q2.value,
+                        s.value
+                    )
+                ):
+                    q2_is = True
+            if q2_is or q1_is:
+                assert q1_is and q2_is
+        
+        # q1 and q2 aren't in the same partition
+        for state in minimized2.states:
+            q1_is = False
+            q2_is = False
+            values = list(state.value)
+            for s in values:
+                if not isinstance(s.value,set): continue
+                if any(
+                    map(
+                        lambda st:st.value==q1.value,
+                        s.value
+                    )
+                ):
+                    q1_is = True
+                if any(
+                    map(
+                        lambda st:st.value==q2.value,
+                        s.value
+                    )
+                ):
+                    q2_is = True
+            assert not (q1_is and q2_is)
+    
+    def test_automaton_minimize_operation_with_initial_partition_2(self):
+        q0 = State('q0','q0')
+        q1 = State('q1','q1')
+        q2 = State('q2','q2',True)
+        q3 = State('q3','q3',True)
+
+        t = Table()
+
+        t['q0','a'] = 'q1'
+        t['q1','b'] = 'q2'
+        t['q1','c'] = 'q3'
+
+        aut = create_dfa({q0,q1,q2,q3},t,'q0',{'a','b','c'})
+
+        minimized1 = aut.minimize()
+        
+        for state in minimized1.states:
+            if q2 in state.value:
+                assert q3 in state.value
+            if q3 in state.value:
+                assert q2 in state.value
+        
+        aut.make_complete()
+        i = []
+        for s in aut.finals:
+            i.append({s})
+        not_finals = aut.states.difference(aut.finals)
+        i.append(not_finals)
+        minimized2 = aut.minimize(i)
+        aut.restore_to_before_complete()
+
+        for state in minimized2.states:
+            if q2 in state.value:
+                assert q3 not in state.value
+            if q3 in state.value:
+                assert q2 not in state.value
