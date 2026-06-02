@@ -146,10 +146,29 @@ cdef class BaseLexer:
     
     cpdef void initialize(self):
         cdef State state
+        cdef DFA dfa
+        cdef list[set[State]] initial_partition = []
+        cdef set[State] not_finals = set()
+
         if len(self._automatons) == 0:
             raise LexerNotTokensProvidedException()
         if not self._initialized:
-            self._dfa = _automaton_union(self._automatons).to_deterministic().minimize()
+            # creates the dfa
+            dfa = _automaton_union(self._automatons).to_deterministic()
+            # make it complete
+            dfa.make_complete()
+            # creates the initial_partition
+            for state in dfa._states_by_id.values():
+                if state._is_accept:
+                    # adds a set with this state separated
+                    initial_partition.append({state})
+                else:
+                    # append it to the not_finals section
+                    not_finals.add(state)
+            # sets the initial partition
+            initial_partition.append(not_finals)
+            # minimize the dfa
+            self._dfa = dfa.minimize(initial_partition)
             for state in self._dfa._states_by_id.values():
                 self._types_by_state[state._id] = self._get_dfa_state_values(state)
             self._initialized = True # type:ignore
