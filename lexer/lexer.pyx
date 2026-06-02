@@ -1,6 +1,6 @@
 from typing import Tuple,Callable,Any,Iterable
 
-from automaton.automaton cimport Automaton,DFA,State,_automaton_union
+from automaton.automaton cimport Automaton,DFA,NFA,State,_automaton_union
 from common.types cimport Token,Symbol
 from common.enums import TokenType
 
@@ -50,7 +50,9 @@ cdef class BaseLexer:
         cdef State current_state
 
         if not isinstance(state._value,set):
-            return { state._value }
+            if issubclass(type(state._value),TokenType) and state._is_accept:
+                return { state._value }
+            return set()
         
         stack = [(0,list(state._value))]
 
@@ -59,6 +61,8 @@ cdef class BaseLexer:
             last_index,current_set = stack[-1] # type:ignore
             for current_index in range(last_index,len(current_set)):
                 current_state = current_set[current_index] # type:ignore
+                if not current_state._is_accept:
+                    continue
                 if isinstance(current_state._value,set):
                     entered = True # type:ignore
                     stack[-1] = (current_index + 1,current_set)
@@ -178,7 +182,10 @@ cdef class BaseLexer:
             raise ValueError('type_ must be subclass of TokenType')
         if not type_ in self._priorites.values():
             self._priorites[priority] = type_
-            self._automatons.add(automaton)
+            if isinstance(automaton,NFA):
+                self._automatons.add(automaton.to_deterministic().minimize())
+            elif isinstance(automaton,DFA):
+                self._automatons.add(automaton.minimize())
     
     cpdef void load_text(self,str text):
         self._column = 1
