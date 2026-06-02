@@ -156,3 +156,27 @@ class TestIntegrationBaseLexer:
         for i in range(len(tokens)):
             assert tokens[i].column == pos[i][0]
             assert tokens[i].line == pos[i][1]
+    
+    def test_lexer_tokenization_3(self,keyword_nfa:NFA,ignore_dfa:DFA):
+        lexer = BaseLexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.KEYWORD] = keyword_nfa
+        lexer.initialize()
+
+        text = '''print input
+len input print
+'''
+
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        pos = [
+            (1,1),
+            (7,1),
+            (1,2),
+            (5,2),
+            (11,2)
+        ]
+        assert len(tokens) == 5
+        assert all(map(lambda token:token.type==TokenTypeTestEnum.KEYWORD,tokens))
+        for i in range(len(tokens)):
+            assert tokens[i].column == pos[i][0]
+            assert tokens[i].line == pos[i][1]
