@@ -774,6 +774,11 @@ cdef class DFA(Automaton):
     
     cpdef DFA minimize(self,list[set[State]] initial_partition=[]):
         '''
+        Args:
+            initial_partition (List[Set[State]]): the initial partition for the minimization process
+
+            !!!WARNING: the dfa must be complete before use this option, otherwise the behavior is unpredictible
+            
         Returns:
             DFA: a minimized dfa equivalent to this (this process is done with the Hopcroft's algortihm)
         '''
@@ -811,6 +816,7 @@ cdef class DFA(Automaton):
             if len(not_finals) <= len(finals):
                 queue.append(not_finals)
         else:
+            partition = initial_partition.copy()
             for current_block in initial_partition:
                 queue.append(current_block)
         
