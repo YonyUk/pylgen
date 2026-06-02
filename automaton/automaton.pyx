@@ -1577,5 +1577,8 @@ cpdef NFA get_words_automaton_with_value(list[str] words,object value,bint only_
     '''
     cdef str word
     cdef set[Automaton] dfas = { get_word_automaton_with_value(word,value,only_finals) for word in words }
+    cdef NFA result = _automaton_union(dfas)
 
-    return _automaton_union(dfas)
+    if not only_finals:
+        result._start_state._value = value
+    return result
