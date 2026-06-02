@@ -1,4 +1,5 @@
-from typing import Tuple,Callable,Any,Iterable
+from typing import Tuple,Callable,Any,Iterable,get_type_hints
+import inspect
 
 from automaton.automaton cimport Automaton,DFA,NFA,State,_automaton_union
 from common.types cimport Token,Symbol
@@ -23,6 +24,16 @@ cdef class BaseLexer:
         self._automatons = set()
         if not get_symbol_function:
             raise ValueError('get_symbol_function can not be None')
+        hints = get_type_hints(get_symbol_function)
+        sig = inspect.signature(get_symbol_function)
+        params = list(sig.parameters.values())
+        if len(params) != 2:
+            raise ValueError('Invalid signature of function get_symbol_function')
+        if params[0].annotation is not inspect.Parameter.empty and not issubclass(params[0].annotation,TokenType):
+            raise ValueError('Invalid signature of function get_symbol_function')
+        if params[1].annotation is not inspect.Parameter.empty and params[1].annotation != str:
+            raise ValueError('Invalid signature of function get_symbol_function')
+        self._enum_type = params[0].annotation
         self._get_symbol_function = get_symbol_function
         self._types_by_state = {}
         self._ignore = ignore_pattern
@@ -178,8 +189,8 @@ cdef class BaseLexer:
             self._initialized = True # type:ignore
 
     cdef void _add_token(self,int priority,object type_,Automaton automaton):
-        if not issubclass(type(type_),TokenType):
-            raise ValueError('type_ must be subclass of TokenType')
+        if not isinstance(type_,self._enum_type):
+            raise ValueError(f'type_ must be a member of {self._enum_type}')
         if not type_ in self._priorites.values():
             self._priorites[priority] = type_
             if isinstance(automaton,NFA):
