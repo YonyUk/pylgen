@@ -235,7 +235,6 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             TokenTypeTestEnum.VARIABLE
         ]
         assert len(tokens) == 7
-        breakpoint()
         for index,token in enumerate(tokens):
             assert token.type == types[index]
             match_:re.Match = re.search(token.text,text) # type: ignore
