@@ -8,6 +8,7 @@ from html.parser import HTMLParser
 
 from pyvis.network import Network
 from automaton.automaton import Automaton
+from lexer.lexer import BaseLexer
 
 class ResourceEmbedder(HTMLParser):
 
@@ -201,3 +202,25 @@ def draw_automaton(automaton:Automaton,filename:str | None=None,show:bool=True,c
     
     if show:
         webbrowser.open(output_path,2)
+
+def draw_lexer(lexer:BaseLexer,filename:str|None=None,show:bool=True,cache_file:str|None=None,**kwargs) -> None:
+    '''
+    Args:
+        lexer (BaseLexer): lexer to draw
+        filename (str): filename of the output file with the automaton drawed
+        interactive (bool): tells if the graphic is interactive (nx-vis-visualizer in web),
+            or a figure of matplotlib
+        
+        kwargs (dict): optional values
+            physics:bool
+            select_menu:bool
+            filter_menu:bool
+            nodes:bool
+            edges:bool
+            as_tree:bool
+
+    Returns:
+        None: creates an interactive graphic showing the automaton equivalent to the given lexer. This function
+        is equivalent to call draw_automaton(lexer.dfa)
+    '''
+    draw_automaton(lexer.dfa,filename,show,cache_file,**kwargs)
