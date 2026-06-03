@@ -16,7 +16,11 @@ class MyValidTokenType(TokenType):
 class TestBaseLexer:
 
     def test_base_lexer_creation(self):
-        lexer = BaseLexer(lambda t,tx:Symbol('$'),DFA('0','0',{''}))
+
+        def get_symbol_function(t:MyValidTokenType,tx:str) -> Symbol:
+            return Symbol('$',True)
+        
+        lexer = BaseLexer(get_symbol_function,DFA('0','0',{''}))
 
         with pytest.raises(LexerNotTokensProvidedException):
             lexer.initialize()
@@ -36,19 +40,22 @@ class TestBaseLexer:
         def invalid_get_symbol_1(t:Any,tx:Any) -> Any:
             return Symbol('$',True)
         
-        def invalid_get_symbol_2(t:MyInvalidTokenType,tx:Any):
+        def invalid_get_symbol_2(t:MyInvalidTokenType,tx:Any) -> Any:
             return Symbol('$',True)
 
-        def invalid_get_symbol_3(t:MyValidTokenType,tx:Any):
+        def invalid_get_symbol_3(t:MyValidTokenType,tx:Any) -> Any:
             return Symbol('$',True)
         
-        def invalid_get_symbol_4(t:MyInvalidTokenType,tx:str):
+        def invalid_get_symbol_4(t:MyInvalidTokenType,tx:str) -> Any:
             return Symbol('$',True)
 
-        def invalid_get_symbol_5(t:Any,tx:str):
+        def invalid_get_symbol_5(t:Any,tx:str) -> Any:
             return Symbol('$',True)
 
-        def valid_get_symbol(t:MyValidTokenType,tx:str):
+        def invalid_get_symbol_6(t:MyValidTokenType,tx:str) -> Any:
+            return Symbol('$',True)
+
+        def valid_get_symbol(t:MyValidTokenType,tx:str) -> Symbol:
             return Symbol('$',True)
 
         with pytest.raises(ValueError,match='get_symbol_function can not be None'):
@@ -69,11 +76,14 @@ class TestBaseLexer:
         with pytest.raises(ValueError,match='Invalid signature of function get_symbol_function'):
             lexer = BaseLexer(invalid_get_symbol_5,DFA('0','0',{''}))
         
+        with pytest.raises(ValueError,match='Invalid signature of function get_symbol_function'):
+            lexer = BaseLexer(invalid_get_symbol_6,DFA('0','0',{''}))
+        
         lexer = BaseLexer(valid_get_symbol,DFA('0','0',{''}))
     
     def test_base_lexer_tokens_adding(self):
 
-        def valid_get_symbol(t:MyValidTokenType,tx:str):
+        def valid_get_symbol(t:MyValidTokenType,tx:str) -> Symbol:
             return Symbol('$',True)
         
         lexer = BaseLexer(valid_get_symbol,DFA('0','0',{''}))
