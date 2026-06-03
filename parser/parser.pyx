@@ -1,12 +1,7 @@
 import inspect
-from typing import Iterable,Any,Callable,List
+from typing import Iterable,Callable,List
 from common.types cimport Token,AST,Symbol
 from grammar.grammar cimport Production
-
-cdef class ReductorWrapper:
-    
-    def __call__(self, list[AST] asts) -> AST:
-        return self._func(asts) # type:ignore
 
 cdef class Parser:
 
@@ -38,9 +33,7 @@ cdef class BottomUpParser(Parser):
         self._reductor_by_production = {}
 
     cdef void _set_reductor(self,Production production,object reductor): # type:ignore
-        cdef ReductorWrapper wrapper = ReductorWrapper()
-        wrapper._func = reductor # type:ignore
-        self._reductor_by_production[production] = wrapper
+        self._reductor_by_production[production] = reductor
     
     def __setitem__(self,production:Production,reductor:Callable[[List[AST]],AST]):
         sig = inspect.signature(reductor)
