@@ -3,6 +3,7 @@ from grammar.grammar cimport Production
     
 cdef class Parser:
     cdef AST _ast
+    cdef bint _parsed
 
     cdef void _try_parse(self,Token token)
 
@@ -10,5 +11,8 @@ cdef class BottomUpParser(Parser):
     cdef dict[Production,object] _reductor_by_production
     cdef dict[tuple[str,Symbol],str] _goto_table
     cdef dict[tuple[str,Symbol],tuple[str,object]] _action_table
+    cdef list[AST] _stack
+    cdef list[str] _stack_states
+    cdef str _start_state
 
     cdef void _set_reductor(self,Production production,object reductor)

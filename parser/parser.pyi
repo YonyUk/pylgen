@@ -1,9 +1,6 @@
-from typing import Any, Callable, Dict, Iterable, List, Tuple
+from typing import Callable, Dict, Iterable, List, Tuple
 from common.types import Token,AST,Symbol
 from grammar.grammar import Production
-
-from .parser_type import ParserType
-from .lalr_parser import LALRState
 
 class Parser:
 
@@ -11,6 +8,6 @@ class Parser:
 
 class BottomUpParser(Parser):
 
-    def __init__(self,goto_table:Dict[Tuple[str,Symbol],tuple[str,Any]],action_table:Dict[Tuple[str,Symbol],tuple[str,Any]]): ...
+    def __init__(self,goto_table:Dict[Tuple[str,Symbol],str],action_table:Dict[Tuple[str,Symbol],tuple[str,str | Production]]): ...
 
     def __setitem__(self,production:Production,reductor:Callable[[List[AST]],AST]): ...
