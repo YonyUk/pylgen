@@ -1,4 +1,4 @@
-from typing import Tuple,Callable,Any,Iterable,get_type_hints
+from typing import Tuple,Callable,Any,Iterable
 import inspect
 
 from automaton.automaton cimport Automaton,DFA,NFA,State,_automaton_union
@@ -24,7 +24,6 @@ cdef class BaseLexer:
         self._automatons = set()
         if not get_symbol_function:
             raise ValueError('get_symbol_function can not be None')
-        hints = get_type_hints(get_symbol_function)
         sig = inspect.signature(get_symbol_function)
         params = list(sig.parameters.values())
         if len(params) != 2:
