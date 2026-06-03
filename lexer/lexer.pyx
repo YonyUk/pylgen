@@ -32,6 +32,8 @@ cdef class BaseLexer:
             raise ValueError('Invalid signature of function get_symbol_function')
         if params[1].annotation is not inspect.Parameter.empty and params[1].annotation != str:
             raise ValueError('Invalid signature of function get_symbol_function')
+        if sig.return_annotation != Symbol:
+            raise ValueError('Invalid signature of function get_symbol_function')
         self._enum_type = params[0].annotation
         self._get_symbol_function = get_symbol_function
         self._types_by_state = {}
