@@ -164,6 +164,11 @@ cdef class BaseLexer:
         cdef DFA dfa
         cdef list[set[State]] initial_partition = []
         cdef set[State] not_finals = set()
+        cdef State inner_state1,inner_state2
+        cdef dict[tuple,set[State]] states_by_type_value = {}
+        cdef set state_value_key
+        cdef tuple key
+        cdef set[State] state_set
 
         if len(self._automatons) == 0:
             raise LexerNotTokensProvidedException()
@@ -174,13 +179,31 @@ cdef class BaseLexer:
             dfa.make_complete()
             # creates the initial_partition
             for state in dfa._states_by_id.values():
+                # if is an accepting state
                 if state._is_accept:
-                    # adds a set with this state separated
-                    initial_partition.append({state})
+                    # for the key of the dictionary
+                    state_value_key = set()
+                    # looks for each token type in the state
+                    for inner_state1 in state._value: # type:ignore
+                        if isinstance(inner_state1._value,set):
+                            for inner_state2 in inner_state1._value:
+                                if isinstance(inner_state2._value,self._enum_type): # type:ignore
+                                    state_value_key.add(inner_state2._value)
+                        elif isinstance(inner_state1._value,self._enum_type): # type:ignore
+                            state_value_key.add(inner_state1._value)
+                    # sets all the states with the same token types inside into the
+                    # same set of states, this leads to a more refined partition, due
+                    # to the fact that the states with the same token types set, are essentially
+                    # equals
+                    key = tuple(state_value_key)
+                    if not key in states_by_type_value:
+                        states_by_type_value[key] = set()
+                    states_by_type_value[key].add(state)
                 else:
-                    # append it to the not_finals section
                     not_finals.add(state)
-            # sets the initial partition
+            
+            for state_set in states_by_type_value.values():
+                initial_partition.append(state_set)
             initial_partition.append(not_finals)
             # minimize the dfa
             self._dfa = dfa.minimize(initial_partition)
@@ -189,14 +212,14 @@ cdef class BaseLexer:
             self._initialized = True # type:ignore
 
     cdef void _add_token(self,int priority,object type_,Automaton automaton):
-        if not isinstance(type_,self._enum_type):
+        if not isinstance(type_,self._enum_type): # type:ignore
             raise ValueError(f'type_ must be a member of {self._enum_type}')
         if not type_ in self._priorites.values():
             self._priorites[priority] = type_
             if isinstance(automaton,NFA):
-                self._automatons.add(automaton.to_deterministic().minimize())
+                self._automatons.add(automaton.to_deterministic())
             elif isinstance(automaton,DFA):
-                self._automatons.add(automaton.minimize())
+                self._automatons.add(automaton)
     
     cpdef void load_text(self,str text):
         self._column = 1
