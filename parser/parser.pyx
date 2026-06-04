@@ -70,7 +70,7 @@ cdef class BottomUpParser(Parser):
             self._stack = self._stack[:-1*len(p._production)] + [new_ast]
             self._stack_states = self._stack_states[:-1*len(p._production)]
             state = self._stack_states[-1]
-            key = (state,self._stack[-1]._symbol)
+            key = (state,(<AST>self._stack[-1])._symbol)
             if not key in self._action_table:
                 raise ValueError('Parsing error')
             current_action = self._action_table[key]
@@ -83,6 +83,7 @@ cdef class BottomUpParser(Parser):
                 raise ValueError('Parsing error')
             current_action = self._action_table[key]
         if current_action[0] == BottomUpParserAction.SHIFT:
+            state = self._goto_table[key]
             self._stack.append(token)
             self._stack_states.append(state)
         if current_action[0] == BottomUpParserAction.ACCEPT:
