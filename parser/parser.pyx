@@ -29,6 +29,9 @@ cdef class Parser:
 
     cdef void _try_parse(self,Token token):
         raise NotImplementedError()
+    
+    cpdef void reset(self):
+        raise NotImplementedError()
 
 cdef class BottomUpParser(Parser):
 
@@ -44,7 +47,7 @@ cdef class BottomUpParser(Parser):
         self._reductor_by_production = {}
         self._stack_states = [start_state]
         self._stack = []
-        self._start_state
+        self._start_state = start_state
         self._parsed = False # type:ignore
 
     cdef void _set_reductor(self,Production production,object reductor): # type:ignore
@@ -89,6 +92,11 @@ cdef class BottomUpParser(Parser):
         if current_action[0] == BottomUpParserAction.ACCEPT:
             self._parsed = True # type:ignore
             self._ast = self._stack[-1]
+
+    cpdef void reset(self):
+        self._parsed = False # type:ignore
+        self._stack = []
+        self._stack_states = [self._start_state]
 
     def __setitem__(self,production:Production,reductor:Callable[[List[AST]],AST]):
         sig = inspect.signature(reductor)

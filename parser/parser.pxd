@@ -6,6 +6,7 @@ cdef class Parser:
     cdef bint _parsed
 
     cdef void _try_parse(self,Token token)
+    cpdef void reset(self)
 
 cdef class BottomUpParser(Parser):
     cdef dict[Production,object] _reductor_by_production
