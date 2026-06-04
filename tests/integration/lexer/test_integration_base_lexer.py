@@ -15,7 +15,7 @@ class TokenTypeTestEnum(TokenType):
     VARIABLE = 'VARIABLE'
     GARBAGE = 'GARBAGE'
 
-def get_symbol_function(type_:TokenTypeTestEnum,text:str):
+def get_symbol_function(type_:TokenTypeTestEnum,text:str) -> Symbol:
     if type_ == TokenTypeTestEnum.NUMBER:
         return Symbol('number',True)
     if type_ == TokenTypeTestEnum.VARIABLE:
