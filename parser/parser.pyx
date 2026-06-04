@@ -94,6 +94,10 @@ cdef class BottomUpParser(Parser):
             self._ast = self._stack[-1]
 
     cpdef void reset(self):
+        '''
+        Description:
+            reset the parser to it's initial state to parse tokens again 
+        '''
         self._parsed = False # type:ignore
         self._stack = []
         self._stack_states = [self._start_state]
