@@ -1,12 +1,13 @@
 from typing import Set,Tuple,Dict
 from hashlib import sha256
-from parser.bottom_up_parser_actions import BottomUpParserAction
 
 from common.types cimport Symbol
-from common.table cimport Table
 from grammar.grammar cimport Grammar,Production,_augment_grammar
+from .parser cimport Parser,BottomUpParser
+from .parser_type import ParserType
 from .lr0_parser cimport LR0Item,LR0State
 from .lalr_parser cimport LALRState
+from .bottom_up_parser_actions import BottomUpParserAction
 
 _clousures:dict[tuple[str,str],set[LR0Item]] = {}
 _clousures_lalr:dict[tuple[str,str],set[LALRItem]] = {}
@@ -183,6 +184,21 @@ cdef class ParserBuilder:
                 The ACTION and GOTO tables for a LALR(1) parser from the given grammar in a tuple (GOTO,ACTION)
         '''
         return _get_goto_action_tables_lalr(g)
+    
+    @staticmethod
+    def build_parser(g:Grammar,type_:ParserType) -> Parser:
+        '''
+        Args:
+            g (Grammar)
+            type_ (ParserType)
+        
+        Returns:
+            Parser: a parser builded for the given grammar
+        '''
+        if type_ == ParserType.LALR1:
+            return _build_lalr_parser(g)
+        raise NotImplementedError()
+
 
 cdef set[LR0Item] _clousure_lr0(set[LR0Item] items,Grammar g):
     cdef LR0Item item,new_item
@@ -557,3 +573,55 @@ cdef tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],
                         action[key] = action_value
     
     return goto,action
+
+cdef dict[tuple[str,Symbol],str] _plain_goto_table_lalr(dict[tuple[LALRState,Symbol],LALRState] table):
+    cdef dict[tuple[str,Symbol],str] result = {}
+    cdef LALRState from_state,to_state
+    cdef Symbol symbol
+    cdef tuple[LALRState,Symbol] key
+    cdef tuple[str,Symbol] new_key
+
+    for key,to_state in table.items():
+        from_state = <LALRState>key[0]
+        symbol = <Symbol>key[1]
+        new_key = (f'I{from_state._index}',symbol)
+        result[new_key] = f'I{to_state._index}'
+
+    return result
+
+cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_lalr(dict[tuple[LALRState,Symbol],tuple] table):
+    cdef dict[tuple[str,Symbol],tuple[str,object]] result = {}
+    cdef LALRState from_state,to_state
+    cdef Symbol symbol
+    cdef tuple[LALRState,Symbol] key
+    cdef tuple value,new_value
+    cdef tuple[str,Symbol] new_key
+    cdef Production production
+
+    for key,value in table.items():
+        from_state = <LALRState>key[0]
+        symbol = <Symbol>key[1]
+        new_key = (f'I{from_state._index}',symbol)
+        if value[0] == BottomUpParserAction.SHIFT:
+            to_state = <LALRState>value[1]
+            new_value = (value[0],f'I{to_state._index}')
+        else:
+            new_value = (value[0],value[1])
+        result[new_key] = new_value
+    
+    return result
+
+cdef BottomUpParser _build_lalr_parser(Grammar g):
+    cdef dict[tuple[LALRState,Symbol],LALRState] goto_table
+    cdef dict[tuple[LALRState,Symbol],tuple] action_table
+    cdef dict[tuple[str,Symbol],str] plain_goto_table
+    cdef dict[tuple[str,Symbol],tuple[str,object]] plain_action_table
+    cdef BottomUpParser result
+
+    goto_table,action_table = _get_goto_action_tables_lalr(g)
+
+    plain_goto_table = _plain_goto_table_lalr(goto_table)
+    plain_action_table = _plain_action_table_lalr(action_table)
+
+    result = BottomUpParser('I0',plain_goto_table,plain_action_table) # type:ignore
+    return result

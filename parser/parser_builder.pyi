@@ -5,6 +5,8 @@ from common.table import Table
 from grammar.grammar import Grammar,Production
 from .lr0_parser import LR0Item,LR0State
 from .lalr_parser import LALRItem,LALRState
+from .parser import Parser
+from .parser_type import ParserType
 
 class ParserBuildingConflictException(Exception):
     pass
@@ -73,3 +75,6 @@ class ParserBuilder:
 
     @staticmethod
     def get_goto_action_tables_lalr(g:Grammar) -> Tuple[Dict[Tuple[LALRState,Symbol],LALRState],dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]]]: ...
+
+    @staticmethod
+    def build_parser(g:Grammar,type_:ParserType) -> Parser: ...
