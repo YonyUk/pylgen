@@ -197,7 +197,7 @@ class TestIntegrationBottomUpParser:
         tokens = [lp_token,number1,plus_token,number2,rp_token,mul_token,number3,end]
 
         parser.reset()
-        breakpoint()        
+
         ast = parser.parse(tokens)
         assert ast.symbol == E
         assert ast.line == mul_token.line and ast.column == mul_token.column
