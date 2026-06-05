@@ -1,5 +1,5 @@
 import inspect
-from typing import Iterable,Callable,List
+from typing import Iterable,Callable,List,Tuple,Dict
 from common.types cimport Token,AST,Symbol
 from grammar.grammar cimport Production
 from parser.bottom_up_parser_actions import BottomUpParserAction
@@ -30,8 +30,24 @@ cdef class Parser:
     cdef void _try_parse(self,Token token):
         raise NotImplementedError()
     
+    @property
+    def parse_tree_data(self) -> Tuple[List[Tuple[str,str]],Dict[str,Symbol]]:
+        '''
+        Returns:
+            Tuple[List[Tuple[str,str]],Dict[str,Symbol]]: the necessary data to build the parse tree
+        '''
+        if self._parsed:
+            return self._parse_tree_edges,self._symbol_by_parse_tree_node
+        raise ValueError('Nothing parsed yet')
+
     cpdef void reset(self):
-        raise NotImplementedError()
+        '''
+        Description:
+            reset the parser to it's initial state to parse tokens again 
+        '''
+        self._parsed = False # type:ignore
+        self._symbol_by_parse_tree_node.clear()
+        self._parse_tree_edges.clear()
 
 cdef class BottomUpParser(Parser):
 
@@ -50,6 +66,8 @@ cdef class BottomUpParser(Parser):
         self._stack_ast = []
         self._start_state = start_state
         self._parsed = False # type:ignore
+        self._parse_tree_edges = []
+        self._symbol_by_parse_tree_node = {}
 
     cdef void _set_reductor(self,Production production,object reductor): # type:ignore
         self._reductor_by_production[production] = reductor
@@ -58,7 +76,10 @@ cdef class BottomUpParser(Parser):
         cdef tuple[str,object] current_action
         cdef str state = self._stack_states[-1]
         cdef tuple[str,Symbol] key = (state,token._symbol)
-        cdef AST new_ast
+        cdef AST new_ast,loop_ast
+        cdef str parse_tree_node_id_from,parse_tree_node_id_to
+        cdef tuple[str,str] parse_tree_node_edge
+        cdef int idx
 
         if self._parsed:
             raise ValueError('Parsing error')
@@ -71,6 +92,17 @@ cdef class BottomUpParser(Parser):
         while current_action[0] == BottomUpParserAction.REDUCE:
             p:Production = current_action[1] # type:ignore
             new_ast = self._reductor_by_production[p](self._stack_ast[-1*len(p._production):]) # type:ignore
+            # build the parse tree
+            parse_tree_node_id_from = f'{p._head}-{new_ast._line}-{new_ast._column}'
+            for idx in range(len(p._production)):
+                loop_ast = self._stack_ast[idx - len(p._production)]
+                # adds the edge from the new symbol to 
+                parse_tree_node_id_to = f'{self._stack[idx - len(p._production)]}-{loop_ast._line}-{loop_ast._column}'
+                parse_tree_node_edge = (parse_tree_node_id_from,parse_tree_node_id_to)
+                self._parse_tree_edges.append(parse_tree_node_edge)
+            # adds the symbol of the origin node for the new edge
+            self._symbol_by_parse_tree_node[parse_tree_node_id_from] = new_ast._symbol
+            
             self._stack = self._stack[:-1*len(p._production)] + [p._head]
             self._stack_states = self._stack_states[:-1*len(p._production)]
             self._stack_ast = self._stack_ast[:-1*len(p._production)] + [new_ast]
@@ -89,6 +121,9 @@ cdef class BottomUpParser(Parser):
             current_action = self._action_table[key]
         if current_action[0] == BottomUpParserAction.SHIFT:
             state = self._goto_table[key]
+            # adds a new symbol node to the parse tree
+            parse_tree_node_id_from = f'{token._symbol}-{token._line}-{token._column}'
+            self._symbol_by_parse_tree_node[parse_tree_node_id_from] = token._symbol
             self._stack.append(token._symbol)
             self._stack_ast.append(token)
             self._stack_states.append(state)
@@ -101,7 +136,7 @@ cdef class BottomUpParser(Parser):
         Description:
             reset the parser to it's initial state to parse tokens again 
         '''
-        self._parsed = False # type:ignore
+        super().reset()
         self._stack.clear()
         self._stack_ast.clear()
         self._stack_states = [self._start_state]
