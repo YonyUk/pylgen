@@ -122,7 +122,7 @@ cdef class BaseLexer:
             current_symbol = self._text[self._text_position_pointer]
             # checks for a transition
             transition = (self._dfa._current_state._id,current_symbol)
-            while transition in self._dfa._trans_func._table and self._dfa._trans_func._table[transition] != self._fault_state._id:
+            while transition in self._dfa._trans_func._table and (not self._fault_state or self._dfa._trans_func._table[transition] != self._fault_state._id):
                 # advance the dfa one step
                 self._dfa.walk(current_symbol)
                 # updates the text readed
