@@ -2,14 +2,17 @@ import urllib.request
 import pickle
 import os
 import webbrowser
-from typing import Dict
+from typing import Any, Dict
 import networkx as nx
 from html.parser import HTMLParser
+import json
 
 from pyvis.network import Network
 from automaton.automaton import Automaton
 from lexer.lexer import BaseLexer
 from common.types import AST
+
+CACHE_FILE:str | None = None
 
 class ResourceEmbedder(HTMLParser):
 
@@ -117,12 +120,20 @@ def _to_graph(automaton:Automaton) -> nx.DiGraph:
     
     return G
 
+def _is_json_serializable(obj:Any) -> bool:
+    try:
+        s = json.dumps(obj)
+        return True
+    except Exception:
+        return False
+
 def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
     G = nx.DiGraph()
 
     stack = [(ast_root,list(filter(lambda _attr:not _attr.startswith('_'),dir(ast_root))),0,0)]
     asts = {}
     asts_levels = {}
+    ast_attrs = {}
     while stack:
         entered = False
         ast,attrs,index,level = stack[-1]
@@ -138,6 +149,20 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
                     asts[f'{attr.line}-{attr.column}'] = attr
                 if not f'{attr.line}-{attr.column}' in asts_levels:
                     asts_levels[f'{attr.line}-{attr.column}'] = level + 1
+                if not f'{ast.line}-{ast.column}' in ast_attrs:
+                    ast_attrs[f'{ast.line}-{ast.column}'] = list(
+                        filter(
+                            lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast.__getattribute__(_attr)),
+                            dir(ast)
+                        )
+                    )
+                if not f'{attr.line}-{attr.column}' in ast_attrs:
+                    ast_attrs[f'{attr.line}-{attr.column}'] = list(
+                        filter(
+                            lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(attr.__getattribute__(_attr)),
+                            dir(attr)
+                        )
+                    )
                 stack[-1] = ast,attrs,i + 1,level
                 top = attr,list(filter(lambda _attr:not _attr.startswith('_'),dir(attr))),0,level + 1
                 stack.append(top)
@@ -149,7 +174,7 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
     for node in G.nodes:
         n = asts[node]
         level = asts_levels[node]
-        attrs = list(filter(lambda _attr:not _attr.startswith('_') and _attr != 'symbol',dir(n)))
+        attrs = ast_attrs[node]
         G.nodes[node]['label'] = n.symbol.symbol
         title = '\n'.join([f'{attr}: {n.__getattribute__(attr)}' for attr in attrs if not isinstance(n.__getattribute__(attr),AST)])
         G.nodes[node]['title'] = title
@@ -157,20 +182,29 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
     
     return G
 
-def draw_automaton(automaton:Automaton,filename:str | None=None,show:bool=True,cache_file:str|None=None,**kwargs) -> None:
+def draw_automaton(automaton:Automaton,**kwargs) -> None:
     '''
     Args:
         automaton (Automaton): automaton to draw
-        filename (str): filename of the output file with the automaton drawed
-        interactive (bool): tells if the graphic is interactive (nx-vis-visualizer in web),
-            or a figure of matplotlib
         
         kwargs (dict): optional values
-            physics:bool
-            select_menu:bool
-            filter_menu:bool
+
+            filename:str filename of the output file with the automaton drawed
+            
+            show:bool tells if the result will be opened after created
+            
+            cache:bool tells if the cache will be used
+            
+            physics:bool tells if show physics controls
+            
+            select_menu:bool tells if show select menu controls
+            
+            filter_menu:bool tells if show filter menu controls
+            
             nodes:bool
+            
             edges:bool
+            
             as_tree:bool
 
     Returns:
@@ -186,13 +220,22 @@ def draw_automaton(automaton:Automaton,filename:str | None=None,show:bool=True,c
     filter_menu = kwargs.get('filter_menu',False)
     if not isinstance(filter_menu,bool):
         raise ValueError('filter_menu argument must be a boolean value')
-    nodes = kwargs.get('filter_menu',False)
+    nodes = kwargs.get('nodes',False)
     if not isinstance(nodes,bool):
         raise ValueError('nodes argument must be a boolean value')
-    edges = kwargs.get('filter_menu',False)
+    edges = kwargs.get('edges',False)
     if not isinstance(edges,bool):
         raise ValueError('edges argument must be a boolean value')
     as_tree = kwargs.get('as_tree',False)
+    filename = kwargs.get('filename',f'automaton-{automaton.id}')
+    if not isinstance(filename,str):
+        raise ValueError('filename must be an string value')
+    show = kwargs.get('show',False)
+    if not isinstance(show,bool):
+        raise ValueError('edges argument must be a boolean value')
+    cache = kwargs.get('cache',False)
+    if not isinstance(cache,bool):
+        raise ValueError('edges argument must be a boolean value')
 
     if physics:
         filters.append('physics')
@@ -202,8 +245,6 @@ def draw_automaton(automaton:Automaton,filename:str | None=None,show:bool=True,c
         filters.append('edges')
 
     G = _to_graph(automaton)
-    if not filename:
-        filename = f'automaton-{automaton.id}'
     
     net = Network(directed=True,height='100vh',width='100%',bgcolor='white',select_menu=select_menu,filter_menu=filter_menu,layout=as_tree)
     if filters:
@@ -224,16 +265,18 @@ def draw_automaton(automaton:Automaton,filename:str | None=None,show:bool=True,c
         net.add_edge(u,v,label=label,dashes=dashes)
     
     output_path = f'{filename}.html'
-    if cache_file:
+    if cache:
+        if not CACHE_FILE:
+            raise ValueError('cache file not set')
         cache = {}
-        if os.path.exists(cache_file):
-            with open(cache_file,'rb') as f:
+        if os.path.exists(CACHE_FILE):
+            with open(CACHE_FILE,'rb') as f:
                 cache = pickle.load(f)
         html = net.generate_html(output_path)
         embedder = ResourceEmbedder(cache)
         embedder.feed(html)
-        if not os.path.exists(cache_file):
-            with open(cache_file,'wb') as f:
+        if not os.path.exists(CACHE_FILE):
+            with open(CACHE_FILE,'wb') as f:
                 pickle.dump(cache,f)
         html = embedder.output
         with open(output_path,'w',encoding='utf-8') as f:
@@ -244,41 +287,57 @@ def draw_automaton(automaton:Automaton,filename:str | None=None,show:bool=True,c
     if show:
         webbrowser.open(output_path,2)
 
-def draw_lexer(lexer:BaseLexer,filename:str|None=None,show:bool=True,cache_file:str|None=None,**kwargs) -> None:
+def draw_lexer(lexer:BaseLexer,**kwargs) -> None:
     '''
     Args:
-        lexer (BaseLexer): lexer to draw
-        filename (str): filename of the output file with the automaton drawed
-        interactive (bool): tells if the graphic is interactive (nx-vis-visualizer in web),
-            or a figure of matplotlib
+        automaton (Automaton): automaton to draw
         
         kwargs (dict): optional values
-            physics:bool
-            select_menu:bool
-            filter_menu:bool
+
+            filename:str filename of the output file with the lexer-automaton drawed
+            
+            show:bool tells if the result will be opened after created
+            
+            cache:bool tells if the cache will be used
+            
+            physics:bool tells if show physics controls
+            
+            select_menu:bool tells if show select menu controls
+            
+            filter_menu:bool tells if show filter menu controls
+            
             nodes:bool
+            
             edges:bool
+            
             as_tree:bool
 
     Returns:
-        None: creates an interactive graphic showing the automaton equivalent to the given lexer. This function
-        is equivalent to call draw_automaton(lexer.dfa)
+        None: creates an interactive graphic showing the automaton
     '''
-    draw_automaton(lexer.dfa,filename,show,cache_file,**kwargs)
+    draw_automaton(lexer.dfa,**kwargs)
 
-def draw_ast(ast:AST,filename:str|None=None,show:bool=True,cache_file:str|None=None,**kwargs) -> None:
+def draw_ast(ast:AST,**kwargs) -> None:
     '''
     Args:
         ast (AST): ast to draw
-        filename (str): filename of the output file with the automaton drawed
-        interactive (bool): tells if the graphic is interactive (nx-vis-visualizer in web),
-            or a figure of matplotlib
         
         kwargs (dict): optional values
-            physics:bool
-            select_menu:bool
-            filter_menu:bool
+
+            filename:str filename of the output file with the ast drawed
+            
+            show:bool tells if the result will be opened after created
+            
+            cache:bool tells if the cache will be used
+            
+            physics:bool tells if show physics controls
+            
+            select_menu:bool tells if show select menu controls
+            
+            filter_menu:bool tells if show filter menu controls
+            
             nodes:bool
+            
             edges:bool
 
     Returns:
@@ -294,11 +353,20 @@ def draw_ast(ast:AST,filename:str|None=None,show:bool=True,cache_file:str|None=N
     filter_menu = kwargs.get('filter_menu',False)
     if not isinstance(filter_menu,bool):
         raise ValueError('filter_menu argument must be a boolean value')
-    nodes = kwargs.get('filter_menu',False)
+    nodes = kwargs.get('nodes',False)
     if not isinstance(nodes,bool):
         raise ValueError('nodes argument must be a boolean value')
-    edges = kwargs.get('filter_menu',False)
+    edges = kwargs.get('edges',False)
     if not isinstance(edges,bool):
+        raise ValueError('edges argument must be a boolean value')
+    filename = kwargs.get('filename','ast')
+    if not isinstance(filename,str):
+        raise ValueError('filename must be an string value')
+    show = kwargs.get('show',False)
+    if not isinstance(show,bool):
+        raise ValueError('edges argument must be a boolean value')
+    cache = kwargs.get('cache',False)
+    if not isinstance(cache,bool):
         raise ValueError('edges argument must be a boolean value')
 
     if physics:
@@ -329,22 +397,36 @@ def draw_ast(ast:AST,filename:str|None=None,show:bool=True,cache_file:str|None=N
         title = node_attrs['title']
         level = node_attrs['level']
 
-        net.add_node(node,label=label,title=title,level=level)
+        net.add_node(
+            node,
+            label=label,
+            title=title,
+            level=level,
+            shape='circle',
+            size=60,
+            font={
+                'size': 14,
+                'face': 'arial',
+                'align': 'center'
+            }
+        )
     
     for u,v in G.edges:
         net.add_edge(u,v)
 
     output_path = f'{filename}.html'
-    if cache_file:
+    if cache:
         cache = {}
-        if os.path.exists(cache_file):
-            with open(cache_file,'rb') as f:
+        if not CACHE_FILE:
+            raise ValueError('cache file not set')
+        if os.path.exists(CACHE_FILE):
+            with open(CACHE_FILE,'rb') as f:
                 cache = pickle.load(f)
         html = net.generate_html(output_path)
         embedder = ResourceEmbedder(cache)
         embedder.feed(html)
-        if not os.path.exists(cache_file):
-            with open(cache_file,'wb') as f:
+        if not os.path.exists(CACHE_FILE):
+            with open(CACHE_FILE,'wb') as f:
                 pickle.dump(cache,f)
         html = embedder.output
         with open(output_path,'w',encoding='utf-8') as f:
@@ -354,3 +436,19 @@ def draw_ast(ast:AST,filename:str|None=None,show:bool=True,cache_file:str|None=N
     
     if show:
         webbrowser.open(output_path,2)
+
+def set_cache_file(filename:str) -> None:
+    '''
+    Args:
+        filename (str)
+    
+    Description:
+        sets the cache file for the resources of the html files result
+
+    !!!WARNING:
+        if filename already exists, it will be overwrited
+    '''
+    global CACHE_FILE
+    if not filename:
+        raise ValueError()
+    CACHE_FILE = filename
