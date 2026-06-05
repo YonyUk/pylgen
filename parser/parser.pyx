@@ -41,13 +41,7 @@ cdef class Parser:
         raise ValueError('Nothing parsed yet')
 
     cpdef void reset(self):
-        '''
-        Description:
-            reset the parser to it's initial state to parse tokens again 
-        '''
-        self._parsed = False # type:ignore
-        self._symbol_by_parse_tree_node.clear()
-        self._parse_tree_edges.clear()
+        raise NotImplementedError()
 
 cdef class BottomUpParser(Parser):
 
@@ -136,10 +130,12 @@ cdef class BottomUpParser(Parser):
         Description:
             reset the parser to it's initial state to parse tokens again 
         '''
-        super().reset()
+        self._parsed = False # type:ignore
         self._stack.clear()
         self._stack_ast.clear()
         self._stack_states = [self._start_state]
+        self._symbol_by_parse_tree_node.clear()
+        self._parse_tree_edges.clear()
 
     def __setitem__(self,production:Production,reductor:Callable[[List[AST]],AST]):
         sig = inspect.signature(reductor)
