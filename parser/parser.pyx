@@ -47,6 +47,7 @@ cdef class BottomUpParser(Parser):
         self._reductor_by_production = {}
         self._stack_states = [start_state]
         self._stack = []
+        self._stack_ast = []
         self._start_state = start_state
         self._parsed = False # type:ignore
 
@@ -69,11 +70,12 @@ cdef class BottomUpParser(Parser):
 
         while current_action[0] == BottomUpParserAction.REDUCE:
             p:Production = current_action[1] # type:ignore
-            new_ast = self._reductor_by_production[p](self._stack[-1*len(p._production):]) # type:ignore
-            self._stack = self._stack[:-1*len(p._production)] + [new_ast]
+            new_ast = self._reductor_by_production[p](self._stack_ast[-1*len(p._production):]) # type:ignore
+            self._stack = self._stack[:-1*len(p._production)] + [p._head]
             self._stack_states = self._stack_states[:-1*len(p._production)]
+            self._stack_ast = self._stack_ast[:-1*len(p._production)] + [new_ast]
             state = self._stack_states[-1]
-            key = (state,(<AST>self._stack[-1])._symbol)
+            key = (state,self._stack[-1])
             if not key in self._action_table:
                 raise ValueError('Parsing error')
             current_action = self._action_table[key]
@@ -87,11 +89,12 @@ cdef class BottomUpParser(Parser):
             current_action = self._action_table[key]
         if current_action[0] == BottomUpParserAction.SHIFT:
             state = self._goto_table[key]
-            self._stack.append(token)
+            self._stack.append(token._symbol)
+            self._stack_ast.append(token)
             self._stack_states.append(state)
         if current_action[0] == BottomUpParserAction.ACCEPT:
             self._parsed = True # type:ignore
-            self._ast = self._stack[-1]
+            self._ast = self._stack_ast[-1]
 
     cpdef void reset(self):
         '''
@@ -99,7 +102,8 @@ cdef class BottomUpParser(Parser):
             reset the parser to it's initial state to parse tokens again 
         '''
         self._parsed = False # type:ignore
-        self._stack = []
+        self._stack.clear()
+        self._stack_ast.clear()
         self._stack_states = [self._start_state]
 
     def __setitem__(self,production:Production,reductor:Callable[[List[AST]],AST]):
