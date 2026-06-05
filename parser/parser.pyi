@@ -6,6 +6,9 @@ class Parser:
 
     def parse(self,tokens:Iterable[Token]) -> AST: ...
 
+    @property
+    def parse_tree_data(self) -> Tuple[List[Tuple[str,str]],Dict[str,Symbol]]: ...
+
 class BottomUpParser(Parser):
 
     def __init__(self,start_state:str,goto_table:Dict[Tuple[str,Symbol],str],action_table:Dict[Tuple[str,Symbol],tuple[str,str | Production]]): ...
