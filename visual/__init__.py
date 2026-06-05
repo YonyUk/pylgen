@@ -9,6 +9,7 @@ from html.parser import HTMLParser
 from pyvis.network import Network
 from automaton.automaton import Automaton
 from lexer.lexer import BaseLexer
+from common.types import AST
 
 class ResourceEmbedder(HTMLParser):
 
@@ -113,6 +114,46 @@ def _to_graph(automaton:Automaton) -> nx.DiGraph:
         
         G.nodes[state.id]['label'] = f'{state.value}'
         G.nodes[state.id]['title'] = f'id: {state.id}'
+    
+    return G
+
+def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
+    G = nx.DiGraph()
+
+    stack = [(ast_root,list(filter(lambda _attr:not _attr.startswith('_'),dir(ast_root))),0,0)]
+    asts = {}
+    asts_levels = {}
+    while stack:
+        entered = False
+        ast,attrs,index,level = stack[-1]
+        for i in range(index,len(attrs)):
+            attr = ast.__getattribute__(attrs[i])
+            if isinstance(attr,AST):
+                G.add_edge(f'{ast.line}-{ast.column}',f'{attr.line}-{attr.column}')
+                if not f'{ast.line}-{ast.column}' in asts:
+                    asts[f'{ast.line}-{ast.column}'] = ast
+                if not f'{ast.line}-{ast.column}' in asts_levels:
+                    asts_levels[f'{ast.line}-{ast.column}'] = level
+                if not f'{attr.line}-{attr.column}' in asts:
+                    asts[f'{attr.line}-{attr.column}'] = attr
+                if not f'{attr.line}-{attr.column}' in asts_levels:
+                    asts_levels[f'{attr.line}-{attr.column}'] = level + 1
+                stack[-1] = ast,attrs,i + 1,level
+                top = attr,list(filter(lambda _attr:not _attr.startswith('_'),dir(attr))),0,level + 1
+                stack.append(top)
+                entered = True
+                break
+        if not entered:
+            stack.pop()
+    
+    for node in G.nodes:
+        n = asts[node]
+        level = asts_levels[node]
+        attrs = list(filter(lambda _attr:not _attr.startswith('_') and _attr != 'symbol',dir(n)))
+        G.nodes[node]['label'] = n.symbol.symbol
+        title = '\n'.join([f'{attr}: {n.__getattribute__(attr)}' for attr in attrs if not isinstance(n.__getattribute__(attr),AST)])
+        G.nodes[node]['title'] = title
+        G.nodes[node]['level'] = level
     
     return G
 
@@ -224,3 +265,92 @@ def draw_lexer(lexer:BaseLexer,filename:str|None=None,show:bool=True,cache_file:
         is equivalent to call draw_automaton(lexer.dfa)
     '''
     draw_automaton(lexer.dfa,filename,show,cache_file,**kwargs)
+
+def draw_ast(ast:AST,filename:str|None=None,show:bool=True,cache_file:str|None=None,**kwargs) -> None:
+    '''
+    Args:
+        ast (AST): ast to draw
+        filename (str): filename of the output file with the automaton drawed
+        interactive (bool): tells if the graphic is interactive (nx-vis-visualizer in web),
+            or a figure of matplotlib
+        
+        kwargs (dict): optional values
+            physics:bool
+            select_menu:bool
+            filter_menu:bool
+            nodes:bool
+            edges:bool
+
+    Returns:
+        None: creates an interactive graphic showing the AST graph of the given AST.
+    '''
+    physics = kwargs.get('physics',False)
+    filters = []
+    if not isinstance(physics,bool):
+        raise ValueError('physics argument must be a boolean value')
+    select_menu = kwargs.get('select_menu',False)
+    if not isinstance(select_menu,bool):
+        raise ValueError('select_menu argument must be a boolean value')
+    filter_menu = kwargs.get('filter_menu',False)
+    if not isinstance(filter_menu,bool):
+        raise ValueError('filter_menu argument must be a boolean value')
+    nodes = kwargs.get('filter_menu',False)
+    if not isinstance(nodes,bool):
+        raise ValueError('nodes argument must be a boolean value')
+    edges = kwargs.get('filter_menu',False)
+    if not isinstance(edges,bool):
+        raise ValueError('edges argument must be a boolean value')
+
+    if physics:
+        filters.append('physics')
+    if nodes:
+        filters.append('nodes')
+    if edges:
+        filters.append('edges')
+    
+    G = _ast_to_graph(ast)
+    if not filename:
+        filename = f'ast'
+    
+    layout = {
+        'hierarchical':{
+            'enabled':True,
+            'direction':'UD',
+            'sortMethod':'directed'
+        }
+    }
+    net = Network(directed=True,height='100vh',width='100%',bgcolor='white',select_menu=select_menu,filter_menu=filter_menu,layout=layout)
+    if filters:
+        net.show_buttons(filter_=filters)
+    
+    for node,node_attrs in G.nodes(data=True):
+
+        label = node_attrs['label']
+        title = node_attrs['title']
+        level = node_attrs['level']
+
+        net.add_node(node,label=label,title=title,level=level)
+    
+    for u,v in G.edges:
+        net.add_edge(u,v)
+
+    output_path = f'{filename}.html'
+    if cache_file:
+        cache = {}
+        if os.path.exists(cache_file):
+            with open(cache_file,'rb') as f:
+                cache = pickle.load(f)
+        html = net.generate_html(output_path)
+        embedder = ResourceEmbedder(cache)
+        embedder.feed(html)
+        if not os.path.exists(cache_file):
+            with open(cache_file,'wb') as f:
+                pickle.dump(cache,f)
+        html = embedder.output
+        with open(output_path,'w',encoding='utf-8') as f:
+            f.write(html)
+    else:
+        net.save_graph(output_path)
+    
+    if show:
+        webbrowser.open(output_path,2)
