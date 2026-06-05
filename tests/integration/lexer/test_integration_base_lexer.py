@@ -1,3 +1,5 @@
+from typing import List
+
 import pytest
 import re
 from string import digits,ascii_letters
@@ -13,6 +15,8 @@ class TokenTypeTestEnum(TokenType):
     NUMBER = 'NUMBER'
     KEYWORD = 'KEYWORD'
     VARIABLE = 'VARIABLE'
+    SYMBOL = 'SYMBOL'
+    OPERATOR = 'OPERATOR'
     GARBAGE = 'GARBAGE'
 
 def get_symbol_function(type_:TokenTypeTestEnum,text:str) -> Symbol:
@@ -20,14 +24,26 @@ def get_symbol_function(type_:TokenTypeTestEnum,text:str) -> Symbol:
         return Symbol('number',True)
     if type_ == TokenTypeTestEnum.VARIABLE:
         return Symbol('variable',True)
+    if type_ == TokenTypeTestEnum.SYMBOL:
+        return Symbol(text,True)
+    if type_ == TokenTypeTestEnum.OPERATOR:
+        return Symbol(text,True)
     return Symbol(text,True)
 
 class TestIntegrationBaseLexer:
 
     @pytest.fixture
-    def keywords(self) -> list[str]:
+    def keywords(self) -> List[str]:
         return ['print','input','len']
     
+    @pytest.fixture
+    def symbols(self) -> List[str]:
+        return ['(',')']
+    
+    @pytest.fixture
+    def operators(self) -> List[str]:
+        return ['*','+']
+
     @pytest.fixture
     def ignore_dfa(self):
         dfa = DFA('start','start',{' ','\n','\t'},True)
@@ -53,6 +69,14 @@ class TestIntegrationBaseLexer:
     def keyword_nfa(self,keywords:list[str]) -> NFA:
         return get_words_automaton_with_value(keywords,TokenTypeTestEnum.KEYWORD,True)
     
+    @pytest.fixture
+    def symbol_dfa(self,symbols:List[str]) -> NFA:
+        return get_words_automaton_with_value(symbols,TokenTypeTestEnum.SYMBOL,True)
+    
+    @pytest.fixture
+    def operator_dfa(self,operators:List[str]) -> NFA:
+        return get_words_automaton_with_value(operators,TokenTypeTestEnum.OPERATOR,True)
+
     @pytest.fixture
     def variable_dfa(self) -> DFA:
         dfa = DFA('start','start',set(ascii_letters+digits+'_'))
@@ -238,6 +262,62 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         for index,token in enumerate(tokens):
             assert token.type == types[index]
             match_:re.Match = re.search(token.text,text) # type: ignore
+            pos = match_.start()
+            column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
+            line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
+            assert token.column == column
+            assert token.line == line
+    
+    def test_lexer_tokenization_6(self,number_dfa:DFA,symbol_dfa:NFA,operator_dfa:NFA,ignore_dfa:DFA):
+        lexer = BaseLexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.NUMBER] = number_dfa
+        lexer[1,TokenTypeTestEnum.SYMBOL] = symbol_dfa
+        lexer[2,TokenTypeTestEnum.OPERATOR] = operator_dfa
+
+        lexer.initialize()
+        text = "(8*5)"
+
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        types = [
+            TokenTypeTestEnum.SYMBOL,
+            TokenTypeTestEnum.NUMBER,
+            TokenTypeTestEnum.OPERATOR,
+            TokenTypeTestEnum.NUMBER,
+            TokenTypeTestEnum.SYMBOL
+        ]
+        assert len(tokens) == 5
+        for index,token in enumerate(tokens):
+            assert token.type == types[index]
+            t_text = f'\\{token.text}' if token.text in '()*+' else token.text
+            match_:re.Match = re.search(t_text,text) # type: ignore
+            pos = match_.start()
+            column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
+            line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
+            assert token.column == column
+            assert token.line == line
+
+    def test_lexer_tokenization_7(self,number_dfa:DFA,symbol_dfa:NFA,operator_dfa:NFA,ignore_dfa:DFA):
+        lexer = BaseLexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.NUMBER] = number_dfa
+        lexer[1,TokenTypeTestEnum.SYMBOL] = symbol_dfa
+        lexer[2,TokenTypeTestEnum.OPERATOR] = operator_dfa
+
+        lexer.initialize()
+        text = "9+ 2"
+
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        types = [
+            TokenTypeTestEnum.NUMBER,
+            TokenTypeTestEnum.OPERATOR,
+            TokenTypeTestEnum.NUMBER,
+        ]
+        assert len(tokens) == 3
+        for index,token in enumerate(tokens):
+            assert token.type == types[index]
+            t_text = f'\\{token.text}' if token.text in '()*+' else token.text
+            match_:re.Match = re.search(t_text,text) # type: ignore
             pos = match_.start()
             column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
             line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1

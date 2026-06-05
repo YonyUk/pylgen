@@ -119,11 +119,10 @@ cdef class BaseLexer:
         self._dfa.reset()
 
         while self._current_token is None and self._text_position_pointer < len(self._text):
-            
             current_symbol = self._text[self._text_position_pointer]
             # checks for a transition
             transition = (self._dfa._current_state._id,current_symbol)
-            while transition in self._dfa._trans_func._table:
+            while transition in self._dfa._trans_func._table and self._dfa._trans_func._table[transition] != self._fault_state._id:
                 # advance the dfa one step
                 self._dfa.walk(current_symbol)
                 # updates the text readed
@@ -139,6 +138,7 @@ cdef class BaseLexer:
                 # updates the transition to check
                 transition = (self._dfa._current_state._id,current_symbol)
             
+
             self._current_token = self._get_token(self._text_readed,self._line,self._column)
             self._column += len(self._text_readed)
             if self._text_position_pointer == 0:
@@ -160,6 +160,19 @@ cdef class BaseLexer:
     cdef Token _current(self):
         return self._current_token
     
+    cdef bint _is_fault_state(self,State state):
+        cdef tuple[str,str] key
+        cdef str from_state_id,to_state_id
+
+        if state._is_accept:
+            return False # type:ignore
+        for key,to_state_id in self._dfa._trans_func._table.items():
+            from_state_id = <str> key[0]
+            if from_state_id == state._id and to_state_id != state._id:
+                return False # type:ignore
+        
+        return True # type:ignore
+
     cpdef void initialize(self):
         cdef State state
         cdef DFA dfa
@@ -210,6 +223,8 @@ cdef class BaseLexer:
             self._dfa = dfa.minimize(initial_partition)
             for state in self._dfa._states_by_id.values():
                 self._types_by_state[state._id] = self._get_dfa_state_values(state)
+                if not self._fault_state and  self._is_fault_state(state):
+                    self._fault_state = state
             self._initialized = True # type:ignore
 
     cdef void _add_token(self,int priority,object type_,Automaton automaton):

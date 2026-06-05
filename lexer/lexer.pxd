@@ -13,6 +13,7 @@ cdef class BaseLexer:
     cdef int _text_position_pointer
     cdef int _line
     cdef int _column
+    cdef State _fault_state
     cdef set[Automaton] _automatons
     cdef bint _initialized
     cdef dict[int,object] _priorites
@@ -29,6 +30,7 @@ cdef class BaseLexer:
     cdef set[object] _get_dfa_state_values(self,State state)
     cdef bint _move_next(self)
     cdef Token _current(self)
+    cdef bint _is_fault_state(self,State state)
 
     cpdef void initialize(self)
     cpdef void load_text(self,str text)
