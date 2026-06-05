@@ -16,9 +16,14 @@ END_SYMBOL = '$'
 E = Symbol('E')
 T = Symbol('T')
 F = Symbol('F')
+P = Symbol('P')
 
 plus = Symbol('+',True)
+minus = Symbol('-',True)
+mod = Symbol('%',True)
 mul = Symbol('*',True)
+div = Symbol('/',True)
+exp = Symbol('**',True)
 n = Symbol('n',True)
 lp = Symbol('(',True)
 rp = Symbol(')',True)
@@ -31,6 +36,36 @@ G1[T] += T,mul,F
 G1[T] += F,
 G1[F] += lp,E,rp
 G1[F] += n,
+
+G2 = Grammar(E,END_SYMBOL)
+
+G2[E] += E,plus,T
+G2[E] += E,minus,T
+G2[E] += T,
+
+G2[T] += T,mul,F
+G2[T] += T,div,F
+G2[T] += F,
+
+G2[F] += lp,E,rp
+G2[F] += n,
+
+G3 = Grammar(E,END_SYMBOL)
+
+G3[E] += E,plus,T
+G3[E] += E,minus,T
+G3[E] += E,mod,T
+G3[E] += T,
+
+G3[T] += T,mul,F
+G3[T] += T,div,F
+G3[T] += F,
+
+G3[F] += F,exp,P
+G3[F] += P,
+
+G3[P] += lp,E,rp
+G3[P] += n,
 
 class BinaryAST(AST):
 
@@ -60,17 +95,49 @@ class PlusAST(BinaryAST):
     def __init__(self,line: int, column: int):
         super().__init__(plus, line, column)
 
+class MinusAST(BinaryAST):
+    
+    def __init__(self,line: int, column: int):
+        super().__init__(minus, line, column)
+
+class ModAST(BinaryAST):
+
+    def __init__(self,line: int, column: int):
+        super().__init__(mod, line, column)
+
 class MulAST(BinaryAST):
 
     def __init__(self,line: int, column: int):
         super().__init__(mul, line, column)
+
+class DivAST(BinaryAST):
+
+    def __init__(self,line: int, column: int):
+        super().__init__(div, line, column)
+
+class ExpAST(BinaryAST):
+
+    def __init__(self,line: int, column: int):
+        super().__init__(exp, line, column)
 
 def reductor_E_plus_T(asts:List[AST]) -> AST:
     result = PlusAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
-        
+
+def reductor_E_minus_T(asts:List[AST]) -> AST:
+    result = MinusAST(asts[1].line,asts[1].column)
+    result.left = asts[0]
+    result.right = asts[2]
+    return result
+
+def reductor_E_mod_T(asts:List[AST]) -> AST:
+    result = ModAST(asts[1].line,asts[1].column)
+    result.left = asts[0]
+    result.right = asts[2]
+    return result
+
 def reductor_E_T(asts:List[AST]) -> AST:
     return asts[0]
         
@@ -79,15 +146,21 @@ def reductor_T_mul_F(asts:List[AST]) -> AST:
     result.left = asts[0]
     result.right = asts[2]
     return result
-        
-def reductor_T_F(asts:List[AST]) -> AST:
-    return asts[0]
-        
+
+def reductor_T_div_F(asts:List[AST]) -> AST:
+    result = DivAST(asts[1].line,asts[1].column)
+    result.left = asts[0]
+    result.right = asts[2]
+    return result
+
+def reductor_F_exp_P(asts:List[AST]) -> AST:
+    result = ExpAST(asts[1].line,asts[1].column)
+    result.left = asts[0]
+    result.right = asts[2]
+    return result
+
 def reductor_F_lp_E_rp(asts:List[AST]) -> AST:
     return asts[1]
-        
-def reductor_F_n(asts:List[AST]) -> AST:
-    return asts[0]
 
 class TokenTypeEnum(TokenType):
     NUMBER = 'NUMBER'
@@ -98,14 +171,8 @@ def get_symbol_function(t:TokenTypeEnum,tx:str) -> Symbol:
     if t == TokenTypeEnum.NUMBER:
         return n
     if t == TokenTypeEnum.SYMBOL:
-        if tx == '(':
-            return lp
-        if tx == ')':
-            return rp
-        return Symbol(END_SYMBOL,True)
-    if tx == '+':
-        return plus
-    return mul
+        return Symbol(tx,True)
+    return Symbol(tx,True)
 
 def get_tokens(end_symbol:Symbol,tokens:Iterable[Token]):
     line = 0
@@ -129,7 +196,11 @@ class TestIntegrationLexerParser:
     def operators(self) -> List[str]:
         return [
             '+',
-            '*'
+            '*',
+            '-',
+            '/',
+            '**',
+            '%'
         ]
 
     @pytest.fixture
@@ -173,20 +244,69 @@ class TestIntegrationLexerParser:
         parser[Production(E,[E,plus,T])] = reductor_E_plus_T
         parser[Production(E,[T])] = reductor_E_T
         parser[Production(T,[T,mul,F])] = reductor_T_mul_F
-        parser[Production(T,[F])] = reductor_T_F
+        parser[Production(T,[F])] = reductor_E_T
         parser[Production(F,[lp,E,rp])] = reductor_F_lp_E_rp
-        parser[Production(F,[n])] = reductor_F_n
+        parser[Production(F,[n])] = reductor_E_T
         return parser
     
+    @pytest.fixture
+    def parser2(self) -> BottomUpParser:
+        parser:BottomUpParser = ParserBuilder.build_parser(G2,ParserType.LALR1) # type: ignore
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[E,minus,T])] = reductor_E_minus_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[T,div,F])] = reductor_T_div_F
+        parser[Production(T,[F])] = reductor_E_T
+        parser[Production(F,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(F,[n])] = reductor_E_T
+        return parser
+    
+    @pytest.fixture
+    def parser3(self) -> BottomUpParser:
+        parser:BottomUpParser = ParserBuilder.build_parser(G3,ParserType.LALR1) # type: ignore
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[E,minus,T])] = reductor_E_minus_T
+        parser[Production(E,[E,mod,T])] = reductor_E_mod_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[T,div,F])] = reductor_T_div_F
+        parser[Production(T,[F])] = reductor_E_T
+        parser[Production(F,[F,exp,P])] = reductor_F_exp_P
+        parser[Production(F,[P])] = reductor_E_T
+        parser[Production(P,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(P,[n])] = reductor_E_T
+        return parser
+
     @pytest.mark.parametrize("text",[
         "12 + 4",
         "9 *3",
         "(8*5)",
         "7 +5",
-        "9+ 2"
+        "9+ 2",
+        "9+4*5",
+        "(1 + 3)* (5+7) *(2 +10 * 15)"
     ])
     def test_simple_arithmetic_parser(self,text:str,lexer:BaseLexer,parser1:BottomUpParser):
         lexer.load_text(text)
-        tokens = list(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
-        input(tokens)
-        ast = parser1.parse(tokens)
+        ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
+    
+    @pytest.mark.parametrize("text",[
+        "1-2",
+        "4 / 2",
+        "1 -2/4",
+        "(1 - 5) / 10",
+        "1 + 4 * (3/2) - 9"
+    ])
+    def test_normal_arithmetic_parser(self,text:str,lexer:BaseLexer,parser2:BottomUpParser):
+        lexer.load_text(text)
+        ast = parser2.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
+    
+    @pytest.mark.parametrize("text",[
+        " 2 % 1",
+        " 3 ** 2",
+        " 23+342 / (4**9 + 10) -235/4 + 20**3%3"
+    ])
+    def test_extended_arithmetic_parser(self,text:str,lexer:BaseLexer,parser3:BottomUpParser):
+        lexer.load_text(text)
+        ast = parser3.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
