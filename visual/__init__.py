@@ -10,6 +10,7 @@ import json
 from pyvis.network import Network
 from automaton.automaton import Automaton
 from lexer.lexer import BaseLexer
+from parser.parser import Parser
 from common.types import AST
 
 CACHE_FILE:str | None = None
@@ -180,6 +181,30 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
         G.nodes[node]['title'] = title
         G.nodes[node]['level'] = level
     
+    return G
+
+def _get_graph_from_parse_tree(parser:Parser) -> nx.DiGraph:
+    G = nx.DiGraph()
+    root_node = None
+    edges,symbols = parser.parse_tree_data
+    for (u,v) in edges:
+        G.add_edge(u,v)
+    for node in G.nodes:
+        G.nodes[node]['label'] = symbols[node].symbol
+        G.nodes[node]['title'] = node
+        if not root_node and G.in_degree(node) == 0:
+            root_node = node
+            G.nodes[root_node]['level'] = 0
+    
+    stack = [root_node]
+    visited = []
+    while stack:
+        current = stack.pop()
+        visited.append(current)
+        for neighbor in G.neighbors(current):
+            if not neighbor in visited:
+                G.nodes[neighbor]['level'] = G.nodes[current]['level'] + 1
+                stack.append(neighbor)
     return G
 
 def draw_automaton(automaton:Automaton,**kwargs) -> None:
@@ -403,6 +428,126 @@ def draw_ast(ast:AST,**kwargs) -> None:
             title=title,
             level=level,
             shape='circle',
+            size=60,
+            font={
+                'size': 14,
+                'face': 'arial',
+                'align': 'center'
+            }
+        )
+    
+    for u,v in G.edges:
+        net.add_edge(u,v)
+
+    output_path = f'{filename}.html'
+    if cache:
+        cache = {}
+        if not CACHE_FILE:
+            raise ValueError('cache file not set')
+        if os.path.exists(CACHE_FILE):
+            with open(CACHE_FILE,'rb') as f:
+                cache = pickle.load(f)
+        html = net.generate_html(output_path)
+        embedder = ResourceEmbedder(cache)
+        embedder.feed(html)
+        if not os.path.exists(CACHE_FILE):
+            with open(CACHE_FILE,'wb') as f:
+                pickle.dump(cache,f)
+        html = embedder.output
+        with open(output_path,'w',encoding='utf-8') as f:
+            f.write(html)
+    else:
+        net.save_graph(output_path)
+    
+    if show:
+        webbrowser.open(output_path,2)
+
+def draw_parse_tree_from_parser(parser:Parser,**kwargs) -> None:
+    '''
+    Args:
+        parser (Parser): parser to draw
+        
+        kwargs (dict): optional values
+
+            filename:str filename of the output file with the ast drawed
+            
+            show:bool tells if the result will be opened after created
+            
+            cache:bool tells if the cache will be used
+            
+            physics:bool tells if show physics controls
+            
+            select_menu:bool tells if show select menu controls
+            
+            filter_menu:bool tells if show filter menu controls
+            
+            nodes:bool
+            
+            edges:bool
+
+    Returns:
+        None: creates an interactive graphic showing the AST graph of the given AST.
+    '''
+    physics = kwargs.get('physics',False)
+    filters = []
+    if not isinstance(physics,bool):
+        raise ValueError('physics argument must be a boolean value')
+    select_menu = kwargs.get('select_menu',False)
+    if not isinstance(select_menu,bool):
+        raise ValueError('select_menu argument must be a boolean value')
+    filter_menu = kwargs.get('filter_menu',False)
+    if not isinstance(filter_menu,bool):
+        raise ValueError('filter_menu argument must be a boolean value')
+    nodes = kwargs.get('nodes',False)
+    if not isinstance(nodes,bool):
+        raise ValueError('nodes argument must be a boolean value')
+    edges = kwargs.get('edges',False)
+    if not isinstance(edges,bool):
+        raise ValueError('edges argument must be a boolean value')
+    filename = kwargs.get('filename','parse tree')
+    if not isinstance(filename,str):
+        raise ValueError('filename must be an string value')
+    show = kwargs.get('show',False)
+    if not isinstance(show,bool):
+        raise ValueError('edges argument must be a boolean value')
+    cache = kwargs.get('cache',False)
+    if not isinstance(cache,bool):
+        raise ValueError('edges argument must be a boolean value')
+
+    if physics:
+        filters.append('physics')
+    if nodes:
+        filters.append('nodes')
+    if edges:
+        filters.append('edges')
+    
+    G = _get_graph_from_parse_tree(parser)
+    if not filename:
+        filename = f'ast'
+    
+    layout = {
+        'hierarchical':{
+            'enabled':True,
+            'direction':'UD',
+            'sortMethod':'directed'
+        }
+    }
+    net = Network(directed=True,height='100vh',width='100%',bgcolor='white',select_menu=select_menu,filter_menu=filter_menu,layout=layout)
+    if filters:
+        net.show_buttons(filter_=filters)
+    
+    for node,node_attrs in G.nodes(data=True):
+
+        label = node_attrs['label']
+        level = node_attrs['level']
+        title = node_attrs['title']
+
+        net.add_node(
+            node,
+            label=label,
+            level=level,
+            shape='circle',
+            title=title,
             size=60,
             font={
                 'size': 14,
