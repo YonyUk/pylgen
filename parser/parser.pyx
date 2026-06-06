@@ -95,7 +95,7 @@ cdef class BottomUpParser(Parser):
                 parse_tree_node_edge = (parse_tree_node_id_from,parse_tree_node_id_to)
                 self._parse_tree_edges.append(parse_tree_node_edge)
             # adds the symbol of the origin node for the new edge
-            self._symbol_by_parse_tree_node[parse_tree_node_id_from] = new_ast._symbol
+            self._symbol_by_parse_tree_node[parse_tree_node_id_from] = p._head
             
             self._stack = self._stack[:-1*len(p._production)] + [p._head]
             self._stack_states = self._stack_states[:-1*len(p._production)]
