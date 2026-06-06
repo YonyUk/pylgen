@@ -92,6 +92,8 @@ class Grammar:
 
 class AttributedGrammar(Grammar):
 
+    def get_reductor(self,production:Production) -> Callable[[List[AST]],AST]: ...
+
     def __getitem__(self,head:Symbol) -> AttributedProductionsSet: ...
 
     def __setitem__(self,head:Symbol,productions:AttributedProductionsSet) -> None: ... # type:ignore
