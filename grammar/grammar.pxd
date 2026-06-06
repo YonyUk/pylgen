@@ -46,6 +46,7 @@ cdef class AttributedGrammar(Grammar):
     cdef dict[Production,object] _reductors_by_production
 
     cdef void _add_attributed_production(self,Symbol head,list[Symbol] production, object reductor)
+    cpdef object get_reductor(self,Production production)
 
 cdef bint _is_left_regular(Grammar g)
 cdef bint _is_right_regular(Grammar g)
