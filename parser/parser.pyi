@@ -14,16 +14,13 @@ class ParseTreeNode:
     
     @property
     def column(self) -> int: ...
-    
-    @property
-    def parse_tree(self) -> ParseTreeNode: ...
 
 class Parser:
 
     def parse(self,tokens:Iterable[Token]) -> AST: ...
 
     @property
-    def parse_tree_data(self) -> Tuple[List[Tuple[str,str]],Dict[str,Symbol]]: ...
+    def parse_tree(self) -> ParseTreeNode: ...
 
 class BottomUpParser(Parser):
 
