@@ -14,6 +14,11 @@ cdef class ProductionsSet:
 
     cdef void _add_production(self,list[Symbol] production)
 
+cdef class AttributedProductionsSet(ProductionsSet):
+    cdef object _last_reductor_added
+    
+    cdef void _add_attributed_production(self,list[Symbol] production,object reductor)
+
 cdef class Grammar:
     cdef Symbol _start_symbol
     cdef Symbol _end_symbol
@@ -36,6 +41,12 @@ cdef class Grammar:
     cpdef set[Symbol] first(self,list[Symbol] production)
     cpdef set[Symbol] follow(self,Symbol symbol)
     cpdef dict to_dict(self)
+
+cdef class AttributedGrammar(Grammar):
+    cdef dict[Production,object] _reductors_by_production
+
+    cdef void _add_attributed_production(self,Symbol head,list[Symbol] production, object reductor)
+    cpdef object get_reductor(self,Production production)
 
 cdef bint _is_left_regular(Grammar g)
 cdef bint _is_right_regular(Grammar g)

@@ -1,6 +1,7 @@
-from typing import List,Tuple,Set
+from typing import List,Tuple,Set,Callable
 from hashlib import sha256
-from common.types cimport Symbol
+from common.types cimport Symbol,AST
+import inspect
 
 cdef class SymbolNotPresentInGrammarException(Exception):
     
@@ -97,6 +98,29 @@ cdef class ProductionsSet:
             self._productions[p_id] = list(production)
 
         self._last_production_added = self._productions[p_id]
+        return self
+
+cdef class AttributedProductionsSet(ProductionsSet):
+
+    def __init__(self):
+        super().__init__()
+    
+    cdef void _add_attributed_production(self,list[Symbol] production,object reductor):
+        self._add_production(production)
+        self._last_reductor_added = reductor
+    
+    def __iadd__(self, production_redutor_pair:Tuple[Tuple[Symbol, ...],Callable[[List[AST]],AST]]) -> ProductionsSet:
+        cdef tuple production
+        cdef object reductor
+
+        production,reductor = production_redutor_pair
+        sig = inspect.signature(reductor)
+        params = list(sig.parameters.values())
+        if params[0].annotation is inspect.Signature.empty or params[0].annotation != List[AST]:
+            raise ValueError('Invalid signature for second item of tuple, reduction must have annotation (List[AST]) -> AST')
+        if sig.return_annotation is inspect.Signature.empty or sig.return_annotation != AST:
+            raise ValueError('Invalid signature for second item of tuple, reduction must have annotation (List[AST]) -> AST')
+        self._add_attributed_production(list(production).copy(),reductor)
         return self
 
 cdef class Grammar:
@@ -572,6 +596,121 @@ cdef class Grammar:
                     self._follows[symbol] = { self._end_symbol }
                 else:
                     self._follows[symbol].clear()
+        self._firsts_computed = False # type:ignore
+        self._follows_computed = False # type:ignore
+
+cdef class AttributedGrammar(Grammar):
+
+    def __init__(self, start_symbol: Symbol, end_symbol: str = '\x00'):
+        super().__init__(start_symbol, end_symbol)
+        self._reductors_by_production = {}
+    
+    cdef void _add_attributed_production(self,Symbol head,list[Symbol] production,object reductor):
+        cdef Production p = Production(head,production)
+        self._add_production(head,production)
+        self._reductors_by_production[p] = reductor
+    
+    cpdef object get_reductor(self,Production production):
+        '''
+        Args:
+            production (Production)
+        
+        Returns:
+            Callable[[List[AST]],AST]: the associated reductor to the given production
+        '''
+        return self._reductors_by_production[production]
+
+    def __getitem__(self,head:Symbol) -> AttributedProductionsSet:
+        '''
+        Args:
+            head (Symbol): head of some production
+        
+        Returns:
+            AttributedProductionsSet: the productions for the given symbol
+        
+        Raises:
+            ValueError("head can't be a terminal symbol")
+        '''
+        cdef Symbol h = head
+        if h._is_terminal:
+            raise ValueError("head can't be a terminal symbol")
+        if h in self._productions:
+            return self._productions[h] # type:ignore
+        
+        return AttributedProductionsSet()
+    
+    def __setitem__(self,head:Symbol,productions:AttributedProductionsSet) -> None:
+        '''
+        Args:
+            head (Symbol): head of the production to add
+            productions (AttributedProductionsSet): set of productions of the given symbol head
+        
+        Description:
+            Set the productions of the given head symbol
+        
+        Returns:
+            None
+        
+        Raises:
+            ValueError("head can't be a terminal symbol") if head is a terminal symbol
+            ValueError('Only can exists one epsilon symbol') if a different epsilon symbol is provided
+        '''
+        cdef Symbol symbol
+        cdef AttributedProductionsSet p = productions
+        cdef Symbol h = head
+
+        if h._is_terminal:
+            raise ValueError("head can't be a terminal symbol")
+
+        if not h in self._non_terminals:
+            self._non_terminals.add(h)
+            self._firsts[h] = set()
+            self._follows[h] = set()
+        
+        for symbol in p._last_production_added:
+            if symbol._is_terminal:
+                if not symbol in self._terminals:
+                    self._terminals.add(symbol)
+                    self._firsts[symbol] = { symbol }
+                    self._follows[symbol] = set()
+                    if symbol._is_epsilon:
+                        if not self._epsilon:
+                            self._epsilon = symbol
+                        elif self._epsilon != symbol:
+                            raise ValueError('Only can exists one epsilon symbol')
+            else:
+                if not symbol in self._non_terminals:
+                    self._non_terminals.add(symbol)
+                    self._firsts[symbol] = set()
+                    if symbol == self._start_symbol:
+                        self._follows[symbol] = { self._end_symbol }
+                    else:
+                        self._follows[symbol] = set()
+            
+            if not symbol in self._symbols:
+                self._symbols.add(symbol)
+
+        self._productions[h] = productions
+
+        if not h in self._productions_by_symbol:
+            self._productions_by_symbol[h] = set()
+        
+        self._productions_by_symbol[h].add(Production(h,p._last_production_added))
+        self._reductors_by_production[Production(h,p._last_production_added)] = p._last_reductor_added
+
+        # reset the computation of first and follows
+        if self._firsts_computed:
+            for h in self._firsts:
+                if h._is_terminal:
+                    self._firsts[h] = { h }
+                else:
+                    self._firsts[h].clear()
+        if self._follows_computed:
+            for h in self._follows:
+                if h == self._start_symbol:
+                    self._follows[h] = { self._end_symbol }
+                else:
+                    self._follows[h].clear()
         self._firsts_computed = False # type:ignore
         self._follows_computed = False # type:ignore
 
