@@ -2,7 +2,7 @@ from typing import Dict, List, Set, Tuple
 
 from common.types import Symbol
 from common.table import Table
-from grammar.grammar import Grammar,Production
+from grammar.grammar import Grammar,Production,AttributedGrammar
 from .lr0_parser import LR0Item,LR0State
 from .lalr_parser import LALRItem,LALRState
 from .parser import Parser
@@ -78,3 +78,6 @@ class ParserBuilder:
 
     @staticmethod
     def build_parser(g:Grammar,type_:ParserType) -> Parser: ...
+
+    @staticmethod
+    def build_parser_from_attributed(g:AttributedGrammar,type_:ParserType) -> Parser: ...
