@@ -609,6 +609,9 @@ cdef class AttributedGrammar(Grammar):
         cdef Production p = Production(head,production)
         self._add_production(head,production)
         self._reductors_by_production[p] = reductor
+    
+    cpdef object get_reductor(self,Production production):
+        return self._reductors_by_production[production]
 
     def __getitem__(self,head:Symbol) -> AttributedProductionsSet:
         '''
