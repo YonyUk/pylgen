@@ -611,6 +611,13 @@ cdef class AttributedGrammar(Grammar):
         self._reductors_by_production[p] = reductor
     
     cpdef object get_reductor(self,Production production):
+        '''
+        Args:
+            production (Production)
+        
+        Returns:
+            Callable[[List[AST]],AST]: the associated reductor to the given production
+        '''
         return self._reductors_by_production[production]
 
     def __getitem__(self,head:Symbol) -> AttributedProductionsSet:
