@@ -2,6 +2,22 @@ from typing import Callable, Dict, Iterable, List, Tuple
 from common.types import Token,AST,Symbol
 from grammar.grammar import Production
 
+class ParseTreeNode:
+
+    def __init__(self,symbol:Symbol,line:int,column:int,childrens:List[ParseTreeNode]=[]): ...
+    
+    @property
+    def symbol(self) -> Symbol: ...
+    
+    @property
+    def line(self) -> int: ...
+    
+    @property
+    def column(self) -> int: ...
+    
+    @property
+    def parse_tree(self) -> ParseTreeNode: ...
+
 class Parser:
 
     def parse(self,tokens:Iterable[Token]) -> AST: ...
