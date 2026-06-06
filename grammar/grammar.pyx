@@ -118,7 +118,7 @@ cdef class AttributedProductionsSet(ProductionsSet):
         params = list(sig.parameters.values())
         if params[0].annotation is inspect.Signature.empty or params[0].annotation != List[AST]:
             raise ValueError('Invalid signature for second item of tuple, reduction must have annotation (List[AST]) -> AST')
-        if params[0].annotation is inspect.Signature.empty or params[0].annotation != AST:
+        if sig.return_annotation is inspect.Signature.empty or sig.return_annotation != AST:
             raise ValueError('Invalid signature for second item of tuple, reduction must have annotation (List[AST]) -> AST')
         self._add_attributed_production(list(production).copy(),reductor)
         return self

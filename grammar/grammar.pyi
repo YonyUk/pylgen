@@ -38,7 +38,7 @@ class ProductionsSet:
 
 class AttributedProductionsSet(ProductionsSet):
     
-    def __iadd__(self, production_redutor_pair:Tuple[Tuple[Symbol, ...],Callable[[List[AST]],AST]]) -> ProductionsSet: ... # type:ignore
+    def __iadd__(self, production_redutor_pair:Tuple[Tuple[Symbol, ...],Callable[[List[AST]],AST]]) -> AttributedProductionsSet: ... # type:ignore
 
 class Grammar:
 
