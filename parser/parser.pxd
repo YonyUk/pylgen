@@ -1,11 +1,16 @@
 from common.types cimport Token,AST,Symbol
 from grammar.grammar cimport Production
-    
+
+cdef class ParseTreeNode:
+    cdef Symbol _symbol
+    cdef int _line,_column
+    cdef list[ParseTreeNode] _childrens
+
 cdef class Parser:
     cdef AST _ast
     cdef bint _parsed
-    cdef list[tuple[str,str]] _parse_tree_edges
-    cdef dict[str,Symbol] _symbol_by_parse_tree_node
+    cdef ParseTreeNode _parse_tree
+    cdef list[ParseTreeNode] _parse_tree_nodes
 
     cdef void _try_parse(self,Token token)
     cpdef void reset(self)
