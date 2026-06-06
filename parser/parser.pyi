@@ -15,6 +15,9 @@ class ParseTreeNode:
     @property
     def column(self) -> int: ...
 
+    @property
+    def childrens(self) -> List[ParseTreeNode]: ...
+
 class Parser:
 
     def parse(self,tokens:Iterable[Token]) -> AST: ...
