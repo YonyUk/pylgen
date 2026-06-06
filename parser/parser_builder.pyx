@@ -198,7 +198,20 @@ cdef class ParserBuilder:
         if type_ == ParserType.LALR1:
             return _build_lalr_parser(g)
         raise NotImplementedError()
-
+    
+    @staticmethod
+    def build_parser_from_attributed(g:AttributedGrammar,type_:ParserType) -> Parser:
+        '''
+        Args:
+            g (AttributedGrammar)
+            type_ (ParserType)
+        
+        Returns:
+            Parser: a parser builded for the given attributed grammar
+        '''
+        if type_ == ParserType.LALR1:
+            return _build_lalr_parser_from_attributed(g)
+        raise NotImplementedError()
 
 cdef set[LR0Item] _clousure_lr0(set[LR0Item] items,Grammar g):
     cdef LR0Item item,new_item
@@ -624,4 +637,15 @@ cdef BottomUpParser _build_lalr_parser(Grammar g):
     plain_action_table = _plain_action_table_lalr(action_table)
 
     result = BottomUpParser('I0',plain_goto_table,plain_action_table) # type:ignore
+    return result
+
+cdef BottomUpParser _build_lalr_parser_from_attributed(AttributedGrammar g):
+    cdef Production production
+    cdef set[Production] productions
+    cdef BottomUpParser result = _build_lalr_parser(g)
+
+    for productions in g._productions_by_symbol.values():
+        for production in productions:
+            result._set_reductor(production,g.get_reductor(production))
+    
     return result

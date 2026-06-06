@@ -1,4 +1,4 @@
-from grammar.grammar cimport Grammar,Production
+from grammar.grammar cimport Grammar,AttributedGrammar,Production
 from common.types cimport Symbol
 from common.table cimport Table
 from .parser cimport BottomUpParser
@@ -37,3 +37,4 @@ cdef tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],
 cdef dict[tuple[str,Symbol],str] _plain_goto_table_lalr(dict[tuple[LALRState,Symbol],LALRState] table)
 cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_lalr(dict[tuple[LALRState,Symbol],tuple] table)
 cdef BottomUpParser _build_lalr_parser(Grammar g)
+cdef BottomUpParser _build_lalr_parser_from_attributed(AttributedGrammar g)
