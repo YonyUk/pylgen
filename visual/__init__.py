@@ -2,7 +2,7 @@ import urllib.request
 import pickle
 import os
 import webbrowser
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 import networkx as nx
 from html.parser import HTMLParser
 import json
@@ -10,7 +10,7 @@ import json
 from pyvis.network import Network
 from automaton.automaton import Automaton
 from lexer.lexer import BaseLexer
-from parser.parser import Parser
+from parser.parser import ParseTreeNode, Parser
 from common.types import AST
 
 CACHE_FILE:str | None = None
@@ -185,26 +185,26 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
 
 def _get_graph_from_parse_tree(parser:Parser) -> nx.DiGraph:
     G = nx.DiGraph()
-    root_node = None
-    edges,symbols = parser.parse_tree_data
-    for (u,v) in edges:
-        G.add_edge(u,v)
-    for node in G.nodes:
-        G.nodes[node]['label'] = symbols[node].symbol
-        G.nodes[node]['title'] = node
-        if not root_node and G.in_degree(node) == 0:
-            root_node = node
-            G.nodes[root_node]['level'] = 0
-    
-    stack = [root_node]
-    visited = []
+    tree = parser.parse_tree
+    nodes_by_id:Dict[str,Tuple[ParseTreeNode,int]] = {}
+
+    stack = [(tree,0)]
     while stack:
-        current = stack.pop()
-        visited.append(current)
-        for neighbor in G.neighbors(current):
-            if not neighbor in visited:
-                G.nodes[neighbor]['level'] = G.nodes[current]['level'] + 1
-                stack.append(neighbor)
+        current,level = stack.pop()
+        current_id = f'{current.symbol}-{current.line}-{current.column}-{level}'
+        if not current_id in nodes_by_id:
+            nodes_by_id[current_id] = (current,level)
+        for children in current.childrens:
+            children_id = f'{children.symbol}-{children.line}-{children.column}-{level + 1}'
+            stack.append((children,level + 1))
+            nodes_by_id[children_id] = (children,level+1)
+            G.add_edge(current_id,children_id)
+    
+    for node in G.nodes:
+        n,level = nodes_by_id[node]
+        G.nodes[node]['label'] = n.symbol.symbol
+        G.nodes[node]['level'] = level
+
     return G
 
 def draw_automaton(automaton:Automaton,**kwargs) -> None:
@@ -540,14 +540,12 @@ def draw_parse_tree_from_parser(parser:Parser,**kwargs) -> None:
 
         label = node_attrs['label']
         level = node_attrs['level']
-        title = node_attrs['title']
 
         net.add_node(
             node,
             label=label,
             level=level,
             shape='circle',
-            title=title,
             size=60,
             font={
                 'size': 14,
