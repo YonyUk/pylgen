@@ -27,7 +27,7 @@ cdef class BaseLexer:
         sig = inspect.signature(get_symbol_function)
         try:
             hints = get_type_hints(get_symbol_function)
-        except Exception:
+        except Exception as ex:
             hints = {}
         params = list(sig.parameters.values())
         if len(params) != 2:

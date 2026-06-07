@@ -1,9 +1,21 @@
 from automaton.automaton cimport NFA,DFA,State,Automaton
 from grammar.grammar cimport Grammar,_is_left_regular,_is_right_regular,ProductionsSet
 from common.types cimport Symbol
+from parser.parser import Parser
+from lexer.lexer cimport BaseLexer
+
+from .regex_parser cimport _build_regex_parser,_build_regex_lexer
 
 cdef class RegexEngine:
+
+    @staticmethod
+    def regex_parser() -> Parser:
+        return _build_regex_parser()
     
+    @staticmethod
+    def regex_lexer() -> BaseLexer:
+        return _build_regex_lexer()
+
     @staticmethod
     def GetAutomaton(g:Grammar) -> DFA:
         '''
