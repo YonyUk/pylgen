@@ -1,4 +1,4 @@
-from typing import Tuple,Callable,Any,Iterable
+from typing import Tuple,Callable,Any,Iterable,get_type_hints
 import inspect
 
 from automaton.automaton cimport Automaton,DFA,NFA,State,_automaton_union
@@ -25,12 +25,26 @@ cdef class BaseLexer:
         if not get_symbol_function:
             raise ValueError('get_symbol_function can not be None')
         sig = inspect.signature(get_symbol_function)
+        try:
+            hints = get_type_hints(get_symbol_function)
+        except Exception:
+            hints = {}
         params = list(sig.parameters.values())
         if len(params) != 2:
             raise ValueError('Invalid signature of function get_symbol_function')
-        if params[0].annotation is not inspect.Parameter.empty and not issubclass(params[0].annotation,TokenType):
-            raise ValueError('Invalid signature of function get_symbol_function')
-        if params[1].annotation is not inspect.Parameter.empty and params[1].annotation != str:
+        param0 = params[0]
+        if param0.annotation is not inspect.Parameter.empty:
+            annot = hints.get(param0.name,param0.annotation)
+            if not issubclass(annot,TokenType):
+                raise ValueError('Invalid signature of function get_symbol_function')
+        else:
+                raise ValueError('Invalid signature of function get_symbol_function')
+        param1 = params[1]
+        if param1.annotation is not inspect.Parameter.empty:
+            annot = hints.get(param1.name,param1.annotation)
+            if params[1].annotation != str:
+                raise ValueError('Invalid signature of function get_symbol_function')
+        else:
             raise ValueError('Invalid signature of function get_symbol_function')
         if sig.return_annotation != Symbol:
             raise ValueError('Invalid signature of function get_symbol_function')
