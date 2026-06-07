@@ -70,7 +70,7 @@ cdef class BaseLexer:
             ret_annotation = resolved
         if ret_annotation != Symbol:
             raise ValueError('Invalid signature of function get_symbol_function')
-        self._enum_type = params[0].annotation
+        self._enum_type = token_type_annot
         self._get_symbol_function = get_symbol_function
         self._types_by_state = {}
         self._ignore = ignore_pattern
