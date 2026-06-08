@@ -73,6 +73,7 @@ CHAR = cSymbol('CHAR') # type:ignore
 RE_CONSTANT = cSymbol('RE_CONSTANT') # type:ignore
 CHAR_SEQUENCE = cSymbol('CHAR_SEQUENCE') # type:ignore
 KLEIN_STAR = cSymbol('KLEIN_STAR') # type:ignore
+POSITIVE_CLOUSURE = cSymbol('POSITIVE_CLOUSURE') # type:ignore
 # RE_SEQUENCE = Symbol('RE_SEQUENCE') # type:ignore
 # RE_LP = Symbol('RE_LP') # type:ignore
 # RE_RP = Symbol('RE_RP') # type:ignore
@@ -114,16 +115,16 @@ cdef class RegexBinaryAST(RegexAST):
 
     def __init__(self,RegexAST left, RegexAST right,cSymbol symbol, int line, int column):
         super().__init__(symbol, line, column)
-        self._right = right
-        self._left = left
+        self._right = right # type:ignore
+        self._left = left # type:ignore
     
     @property
     def left(self) -> RegexAST:
-        return self._left
+        return self._left # type:ignore
     
     @property
     def right(self) -> RegexAST:
-        return self._right
+        return self._right # type:ignore
 
 cdef class ConcatenationAST(RegexBinaryAST):
 
@@ -192,6 +193,14 @@ cdef class KleinStarAST(RegexUnaryAST):
     cdef Automaton _get_automaton(self):
         return _automaton_clousure(self._regex._get_automaton(),0)
 
+cdef class PositiveClousureAST(RegexUnaryAST):
+
+    def __init__(self, regex: RegexAST, line: int, column: int):
+        super().__init__(regex, re_positive_clousure, line, column)
+    
+    cdef Automaton _get_automaton(self):
+        return _automaton_clousure(self._regex._get_automaton(),1)
+
 ###################################################################################################
 #                                  REDUCTORS
 ###################################################################################################
@@ -222,30 +231,48 @@ def klein_star_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef Token token = asts[1] # type:ignore
     return KleinStarAST(asts[0],token._line,token._column)
 
+def positive_clousure_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef Token token = asts[1] # type:ignore
+    return PositiveClousureAST(asts[0],token._line,token._column)
+
 cdef BottomUpParser _build_regex_parser():
     cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
     # REGEX -> RE
     ReGrammar._add_attributed_production(REGEX,[RE],single_ast_reductor)
-    # REGEX -> REGEX | RE
-    ReGrammar._add_attributed_production(REGEX,[REGEX,re_or,RE],union_ast_reductor)
     # RE -> KLEIN_STAR
     ReGrammar._add_attributed_production(RE,[KLEIN_STAR],single_ast_reductor)
-    # RE -> RE KLEIN_STAR
-    ReGrammar._add_attributed_production(RE,[RE,KLEIN_STAR],concatenation_ast_reductor)
-    # RE -> RE CHAR
-    ReGrammar._add_attributed_production(RE,[RE,CHAR],concatenation_ast_reductor)
+    # RE -> POSITIVE_CLOUSURE
+    ReGrammar._add_attributed_production(RE,[POSITIVE_CLOUSURE],single_ast_reductor)
     # RE -> CHAR
     ReGrammar._add_attributed_production(RE,[CHAR],single_ast_reductor)
     # RE -> RE_CONSTANT
     ReGrammar._add_attributed_production(RE,[RE_CONSTANT],single_ast_reductor)
+    
+    # REGEX -> REGEX | RE
+    ReGrammar._add_attributed_production(REGEX,[REGEX,re_or,RE],union_ast_reductor)
+    
+    # RE -> RE KLEIN_STAR
+    ReGrammar._add_attributed_production(RE,[RE,KLEIN_STAR],concatenation_ast_reductor)
+    # RE -> RE CHAR
+    ReGrammar._add_attributed_production(RE,[RE,CHAR],concatenation_ast_reductor)
+    # RE -> RE POSITIVE_CLOUSURE
+    ReGrammar._add_attributed_production(RE,[RE,POSITIVE_CLOUSURE],concatenation_ast_reductor)
+
     # RE_CONSTANT -> re_constant
     ReGrammar._add_attributed_production(RE_CONSTANT,[re_constant],constant_ast_reductor)
     # CHAR -> re_char
     ReGrammar._add_attributed_production(CHAR,[re_char],char_ast_reductor)
+
     # KLEIN_STAR -> CHAR *
     ReGrammar._add_attributed_production(KLEIN_STAR,[CHAR,re_klein_star],klein_star_ast_reductor)
     # KLEIN_STAR -> RE_CONSTANT *
     ReGrammar._add_attributed_production(KLEIN_STAR,[RE_CONSTANT,re_klein_star],klein_star_ast_reductor)
+    
+    # POSITIVE_CLOUSURE -> CHAR +
+    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[CHAR,re_positive_clousure],positive_clousure_ast_reductor)
+    # POSITIVE_CLOUSURE -> RE_CONSTANT +
+    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[RE_CONSTANT,re_positive_clousure],positive_clousure_ast_reductor)
+    
     return _build_lalr_parser_from_attributed(ReGrammar)
 
 cdef BaseLexer _build_regex_lexer():
