@@ -16,5 +16,8 @@ cdef class RegexBinaryAST(RegexAST):
 cdef class ConcatenationAST(RegexBinaryAST):
     pass
 
+cdef class ConstantRegexAST(RegexAST):
+    cdef str _re
+
 cdef BottomUpParser _build_regex_parser()
 cdef BaseLexer _build_regex_lexer()

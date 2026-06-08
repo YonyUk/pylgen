@@ -1,9 +1,16 @@
 from typing import List
-from string import ascii_letters,digits
+from string import ascii_letters,digits,printable,whitespace
 
 from common.types cimport Symbol as cSymbol ,AST,Token
 from common.types import Symbol
-from automaton.automaton cimport get_word_automaton,_automaton_concatenation,DFA,get_words_automaton_with_value
+from automaton.automaton cimport (
+    get_word_automaton,
+    get_words_automaton,
+    _automaton_concatenation,
+    _automaton_complement,
+    DFA,
+    get_words_automaton_with_value
+)
 from grammar.grammar cimport AttributedGrammar
 from parser.parser_builder cimport _build_lalr_parser_from_attributed
 from lexer.lexer cimport BaseLexer
@@ -44,6 +51,8 @@ def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
         return re_char # type:ignore
     if t == ReTokenType.SYMBOL:
         return symbols_by_text[tx] # type:ignore
+    if t == ReTokenType.CONSTANT_RE:
+        return re_constant # type:ignore
     raise NotImplementedError()
 
 ####################################################################################################
@@ -114,6 +123,42 @@ cdef class ConcatenationAST(RegexBinaryAST):
     cdef Automaton _get_automaton(self):
         return _automaton_concatenation(self._left._get_automaton(),self._right._get_automaton())
 
+cdef class ConstantRegexAST(RegexAST):
+
+    def __init__(self, str re,int line, int column):
+        super().__init__(re_constant, line, column)
+        self._re = re
+    
+    @property
+    def re_constant(self) -> str:
+        return self._re
+
+    cdef Automaton _get_automaton(self):
+        cdef Automaton result
+        if self._re == '\\d':
+            result = get_words_automaton(list(digits))
+        elif self._re == '\\D':
+            result = get_words_automaton(list(digits))
+            result._alphabet = set(printable)
+            result = _automaton_complement(result)
+        elif self._re == '\\s':
+            result = get_words_automaton(list(whitespace))
+        elif self._re == '\\S':
+            result = get_words_automaton(list(whitespace))
+            result._alphabet = set(printable)
+            result = _automaton_complement(result)
+        elif self._re == '\\w':
+            result = get_words_automaton(list(digits) + list(ascii_letters) + ['_'])
+        else:
+            result = get_words_automaton(list(digits) + list(ascii_letters) + ['_'])
+            result._alphabet = set(printable)
+            result = _automaton_complement(result)
+        return result
+
+###################################################################################################
+#                                  REDUCTORS
+###################################################################################################
+
 def single_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     return asts[0]
 
@@ -121,21 +166,25 @@ def CHAR_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef Token token = asts[0] # type:ignore
     return CharAST(token._text,token._line,token._column)
 
-def CHAR_SEQUENCE_concatenation_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def REGEX_concatenation_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef RegexAST left = asts[0]
     cdef RegexAST right = asts[1]
-    return ConcatenationAST(left,right,CHAR_SEQUENCE,left._line,left._column)
+    return ConcatenationAST(left,right,REGEX,left._line,left._column)
+
+def RE_constant_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef Token token = asts[0] # type:ignore
+    return ConstantRegexAST(token._text,token._line,token._column)
 
 cdef BottomUpParser _build_regex_parser():
     cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
     # REGEX -> RE
     ReGrammar._add_attributed_production(REGEX,[RE],single_ast_reductor)
-    # RE -> CHAR_SEQUENCE
-    ReGrammar._add_attributed_production(RE,[CHAR_SEQUENCE],single_ast_reductor)
-    # CHAR_SEQUENCE -> CHAR
-    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR],single_ast_reductor)
-    # CHAR_SEQUENCE -> CHAR_SEQUENCE CHAR
-    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_SEQUENCE,CHAR],CHAR_SEQUENCE_concatenation_ast_reductor)
+    # REGEX -> REGEX RE
+    ReGrammar._add_attributed_production(REGEX,[REGEX,RE],REGEX_concatenation_ast_reductor)
+    # RE -> CHAR
+    ReGrammar._add_attributed_production(RE,[CHAR],single_ast_reductor)
+    # RE -> re_constant
+    ReGrammar._add_attributed_production(RE,[re_constant],RE_constant_ast_reductor)
     # CHAR -> re_char
     ReGrammar._add_attributed_production(CHAR,[re_char],CHAR_ast_reductor)
     return _build_lalr_parser_from_attributed(ReGrammar)
@@ -146,7 +195,7 @@ cdef BaseLexer _build_regex_lexer():
         0,
         ReTokenType.CHAR,
         get_words_automaton_with_value(
-            list(ascii_letters) + list(digits) + [' '],
+            list(ascii_letters) + list(digits) + [' ','_'],
             ReTokenType.CHAR,
             True # type:ignore
         )
@@ -156,14 +205,12 @@ cdef BaseLexer _build_regex_lexer():
         ReTokenType.CONSTANT_RE,
         get_words_automaton_with_value(
             [
-                '\\w',
                 '\\d',
                 '\\D',
                 '\\s',
                 '\\S',
                 '\\w',
-                '\\W',
-                '\\'
+                '\\W'
             ],
             ReTokenType.CONSTANT_RE,
             True # type:ignore
