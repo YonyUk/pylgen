@@ -74,6 +74,7 @@ RE_CONSTANT = cSymbol('RE_CONSTANT') # type:ignore
 CHAR_SEQUENCE = cSymbol('CHAR_SEQUENCE') # type:ignore
 KLEIN_STAR = cSymbol('KLEIN_STAR') # type:ignore
 POSITIVE_CLOUSURE = cSymbol('POSITIVE_CLOUSURE') # type:ignore
+OPTIONAL_CLOUSURE = cSymbol('OPTIONAL_CLOUSURE') # type:ignore
 # RE_SEQUENCE = Symbol('RE_SEQUENCE') # type:ignore
 # RE_LP = Symbol('RE_LP') # type:ignore
 # RE_RP = Symbol('RE_RP') # type:ignore
@@ -201,6 +202,14 @@ cdef class PositiveClousureAST(RegexUnaryAST):
     cdef Automaton _get_automaton(self):
         return _automaton_clousure(self._regex._get_automaton(),1)
 
+cdef class OptionalAST(RegexUnaryAST):
+
+    def __init__(self, regex: RegexAST, line: int, column: int):
+        super().__init__(regex, re_optional, line, column)
+    
+    cdef Automaton _get_automaton(self):
+        return _automaton_clousure(self._regex._get_automaton(),2)
+
 ###################################################################################################
 #                                  REDUCTORS
 ###################################################################################################
@@ -235,6 +244,10 @@ def positive_clousure_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef Token token = asts[1] # type:ignore
     return PositiveClousureAST(asts[0],token._line,token._column)
 
+def optional_clousure_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef Token token = asts[1] # type:ignore
+    return OptionalAST(asts[0],token._line,token._column)
+
 cdef BottomUpParser _build_regex_parser():
     cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
     # REGEX -> RE
@@ -247,7 +260,9 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(RE,[CHAR],single_ast_reductor)
     # RE -> RE_CONSTANT
     ReGrammar._add_attributed_production(RE,[RE_CONSTANT],single_ast_reductor)
-    
+    # RE -> OPTIONAL_CLOUSURE
+    ReGrammar._add_attributed_production(RE,[OPTIONAL_CLOUSURE],single_ast_reductor)
+
     # REGEX -> REGEX | RE
     ReGrammar._add_attributed_production(REGEX,[REGEX,re_or,RE],union_ast_reductor)
     
@@ -257,6 +272,8 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(RE,[RE,CHAR],concatenation_ast_reductor)
     # RE -> RE POSITIVE_CLOUSURE
     ReGrammar._add_attributed_production(RE,[RE,POSITIVE_CLOUSURE],concatenation_ast_reductor)
+    # RE -> RE OPTIONAL_CLOUSURE
+    ReGrammar._add_attributed_production(RE,[RE,OPTIONAL_CLOUSURE],concatenation_ast_reductor)
 
     # RE_CONSTANT -> re_constant
     ReGrammar._add_attributed_production(RE_CONSTANT,[re_constant],constant_ast_reductor)
@@ -273,6 +290,11 @@ cdef BottomUpParser _build_regex_parser():
     # POSITIVE_CLOUSURE -> RE_CONSTANT +
     ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[RE_CONSTANT,re_positive_clousure],positive_clousure_ast_reductor)
     
+    # OPTIONAL_CLOUSURE -> CHAR ?
+    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[CHAR,re_optional],optional_clousure_ast_reductor)
+    # OPTIONAL_CLOUSURE -> RE_CONSTANT ?
+    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[RE_CONSTANT,re_optional],optional_clousure_ast_reductor)
+
     return _build_lalr_parser_from_attributed(ReGrammar)
 
 cdef BaseLexer _build_regex_lexer():
