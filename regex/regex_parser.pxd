@@ -4,14 +4,17 @@ from parser.parser cimport BottomUpParser
 from lexer.lexer cimport BaseLexer
 
 cdef class RegexAST(AST):
-    cdef Automaton _automaton
+    cdef Automaton _get_automaton(self)
 
 cdef class CharAST(RegexAST):
+    cdef str _char
+
+cdef class RegexBinaryAST(RegexAST):
+    cdef RegexAST _left
+    cdef RegexAST _right
+
+cdef class ConcatenationAST(RegexBinaryAST):
     pass
-
-cdef class ConcatenationAST(RegexAST):
-
-    cdef void _add_re(self,RegexAST ast)
 
 cdef BottomUpParser _build_regex_parser()
 cdef BaseLexer _build_regex_lexer()

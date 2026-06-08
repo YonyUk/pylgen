@@ -10,12 +10,6 @@ from lexer.lexer cimport BaseLexer
 
 from .enums import ReTokenType
 
-def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
-    raise NotImplementedError()
-
-RE_LEXER = BaseLexer(get_symbol_function,DFA('EMPTY','EMPTY',set())) # type:ignore
-(<BaseLexer>RE_LEXER)._add_token(0,ReTokenType.CHAR,get_words_automaton_with_value(list(ascii_letters) + list(digits),ReTokenType.CHAR,True)) # type:ignore
-
 ####################################################################################################
 #                          TERMINALS
 ####################################################################################################
@@ -32,6 +26,25 @@ re_or = cSymbol('|',True) # type:ignore
 re_escape = cSymbol('\\',True) # type:ignore
 re_optional = cSymbol('?',True) # type:ignore
 re_char = cSymbol('char',True) # type:ignore
+
+##################################################################################################
+#                         MAPPING OF TOKENS TO TERMINALS SYMBOLS
+##################################################################################################
+symbols_by_text:dict[str,cSymbol] = {
+    '(':re_lp,
+    ')':re_rp,
+    '{':re_lb,
+    '}':re_rb,
+    '[':re_lc,
+    ']':re_rc
+}
+
+def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
+    if t == ReTokenType.CHAR:
+        return re_char # type:ignore
+    if t == ReTokenType.SYMBOL:
+        return symbols_by_text[tx] # type:ignore
+    raise NotImplementedError()
 
 ####################################################################################################
 #                         NON-TERMINALS
@@ -52,77 +65,108 @@ PRECEDING_RE = cSymbol('PRECEDING_RE') # type:ignore
 ####################################################################################################
 #                               ASTs
 ####################################################################################################
+
 cdef class RegexAST(AST):
 
-    def __init__(self,cSymbol symbol,int line,int column):
-        super().__init__(symbol,line,column) # type:ignore
-
+    def __init__(self,cSymbol symbol, int line, int column):
+        super().__init__(symbol, line, column) # type:ignore
+    
+    cdef Automaton _get_automaton(self):
+        raise NotImplementedError()
+    
     @property
     def automaton(self) -> Automaton:
-        return self._automaton
+        return self._get_automaton()
 
 cdef class CharAST(RegexAST):
 
-    def __init__(self,str char,int line,int column):
-        super().__init__(re_char,line,column) # type:ignore
-        self._automaton = get_word_automaton(char) # type:ignore
-        
-cdef class ConcatenationAST(RegexAST):
+    def __init__(self,str char, int line,int column):
+        super().__init__(re_char, line, column)
+        self._char = char
 
-    def __init__(self,list[RegexAST] sequence,cSymbol symbol,int line,int column):
-        cdef Automaton aut,aut1
-        cdef int idx
+    @property
+    def char(self) -> str:
+        return self._char
 
-        super().__init__(symbol,line,column) # type:ignore
-        if len(sequence) > 0:
-            aut = (<RegexAST>sequence[0])._automaton
-        
-        for idx in range(1,len(sequence)):
-            aut1 = (<RegexAST>sequence[idx])._automaton
-            aut = _automaton_concatenation(aut,aut1)
-        
-        self._automaton = aut # type:ignore
+    cdef Automaton _get_automaton(self):
+        return get_word_automaton(self._char)
+
+cdef class RegexBinaryAST(RegexAST):
+
+    def __init__(self,RegexAST left, RegexAST right,cSymbol symbol, int line, int column):
+        super().__init__(symbol, line, column)
+        self._right = right
+        self._left = left
     
-    cdef void _add_re(self,RegexAST ast):
-        cdef Automaton aut = ast._automaton
-        self._automaton = _automaton_concatenation(self._automaton,aut) # type:ignore
+    @property
+    def left(self) -> RegexAST:
+        return self._left
+    
+    @property
+    def right(self) -> RegexAST:
+        return self._right
+
+cdef class ConcatenationAST(RegexBinaryAST):
+
+    def __init__(self, RegexAST left, RegexAST right, cSymbol symbol, int line, int column):
+        super().__init__(left, right, symbol, line, column)
+
+    cdef Automaton _get_automaton(self):
+        return _automaton_concatenation(self._left._get_automaton(),self._right._get_automaton())
 
 def single_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     return asts[0]
 
 def CHAR_ast_reductor(asts:List[RegexAST]) -> RegexAST:
-    return CharAST((<Token>asts[0])._text,asts[0]._line,asts[0]._column)
-
-def RE_concatenation_ast_reductor(asts:List[RegexAST]) -> RegexAST:
-    if isinstance(asts[0],ConcatenationAST):
-        asts[0]._add_re(asts[1])
-        return asts[0]
-    return ConcatenationAST(asts,RE,asts[0]._line,asts[0]._column)
+    cdef Token token = asts[0] # type:ignore
+    return CharAST(token._text,token._line,token._column)
 
 def CHAR_SEQUENCE_concatenation_ast_reductor(asts:List[RegexAST]) -> RegexAST:
-    if isinstance(asts[0],ConcatenationAST):
-        asts[0]._add_re(asts[1])
-        return asts[0]
-    return ConcatenationAST(asts,CHAR_SEQUENCE,asts[0]._line,asts[0]._column)
-
-ReGrammar = AttributedGrammar(REGEX) # type:ignore
-# REGEX -> RE
-ReGrammar._add_attributed_production(REGEX,[RE],single_ast_reductor)
-# RE -> PRECEDING_RE
-ReGrammar._add_attributed_production(RE,[PRECEDING_RE],single_ast_reductor)
-# RE -> RE PRECEDING_RE
-ReGrammar._add_attributed_production(RE,[RE,PRECEDING_RE],RE_concatenation_ast_reductor)
-# PRECEDING_RE -> CHAR_SEQUENCE
-ReGrammar._add_attributed_production(PRECEDING_RE,[CHAR_SEQUENCE],single_ast_reductor)
-# CHAR_SEQUENCE -> CHAR
-ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR],single_ast_reductor)
-# CHAR_SEQUENCE -> CHAR_SEQUENCE CHAR
-ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_SEQUENCE,CHAR],CHAR_SEQUENCE_concatenation_ast_reductor)
-# CHAR -> re_char
-ReGrammar._add_attributed_production(CHAR,[re_char],CHAR_ast_reductor)
+    cdef RegexAST left = asts[0]
+    cdef RegexAST right = asts[1]
+    return ConcatenationAST(left,right,CHAR_SEQUENCE,left._line,left._column)
 
 cdef BottomUpParser _build_regex_parser():
+    cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
+    # REGEX -> RE
+    ReGrammar._add_attributed_production(REGEX,[RE],single_ast_reductor)
+    # RE -> CHAR_SEQUENCE
+    ReGrammar._add_attributed_production(RE,[CHAR_SEQUENCE],single_ast_reductor)
+    # CHAR_SEQUENCE -> CHAR
+    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR],single_ast_reductor)
+    # CHAR_SEQUENCE -> CHAR_SEQUENCE CHAR
+    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_SEQUENCE,CHAR],CHAR_SEQUENCE_concatenation_ast_reductor)
+    # CHAR -> re_char
+    ReGrammar._add_attributed_production(CHAR,[re_char],CHAR_ast_reductor)
     return _build_lalr_parser_from_attributed(ReGrammar)
 
 cdef BaseLexer _build_regex_lexer():
+    cdef BaseLexer RE_LEXER = BaseLexer(get_symbol_function,DFA('EMPTY','EMPTY',set())) # type:ignore
+    RE_LEXER._add_token(
+        0,
+        ReTokenType.CHAR,
+        get_words_automaton_with_value(
+            list(ascii_letters) + list(digits) + [' '],
+            ReTokenType.CHAR,
+            True # type:ignore
+        )
+    )
+    RE_LEXER._add_token(
+        1,
+        ReTokenType.CONSTANT_RE,
+        get_words_automaton_with_value(
+            [
+                '\\w',
+                '\\d',
+                '\\D',
+                '\\s',
+                '\\S',
+                '\\w',
+                '\\W',
+                '\\'
+            ],
+            ReTokenType.CONSTANT_RE,
+            True # type:ignore
+        )
+    )
     return RE_LEXER
