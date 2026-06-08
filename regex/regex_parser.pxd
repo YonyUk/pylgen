@@ -22,5 +22,17 @@ cdef class OrAST(RegexBinaryAST):
 cdef class ConstantRegexAST(RegexAST):
     cdef str _re
 
+cdef class RegexUnaryAST(RegexAST):
+    cdef RegexAST _regex
+
+cdef class KleinStarAST(RegexUnaryAST):
+    pass
+
+cdef class PositiveClousureAST(RegexUnaryAST):
+    pass
+
+cdef class OptionalAST(RegexUnaryAST):
+    pass
+
 cdef BottomUpParser _build_regex_parser()
 cdef BaseLexer _build_regex_lexer()

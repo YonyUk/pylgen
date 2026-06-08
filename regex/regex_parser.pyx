@@ -9,8 +9,9 @@ from automaton.automaton cimport (
     _automaton_concatenation,
     _automaton_complement,
     _automaton_union,
-    DFA,
-    get_words_automaton_with_value
+    _automaton_clousure,
+    get_words_automaton_with_value,
+    DFA
 )
 from grammar.grammar cimport AttributedGrammar
 from parser.parser_builder cimport _build_lalr_parser_from_attributed
@@ -28,7 +29,7 @@ re_lb = cSymbol('{',True) # type:ignore
 re_rb = cSymbol('}',True) # type:ignore
 re_lc = cSymbol('[',True) # type:ignore
 re_rc = cSymbol(']',True) # type:ignore
-re_klein_start = cSymbol('*',True) # type:ignore
+re_klein_star = cSymbol('*',True) # type:ignore
 re_positive_clousure = cSymbol('+',True) # type:ignore
 re_or = cSymbol('|',True) # type:ignore
 re_escape = cSymbol('\\',True) # type:ignore
@@ -47,7 +48,7 @@ symbols_by_text:dict[str,cSymbol] = {
     ']':re_rc
 }
 operatos_by_text:dict[str,cSymbol] = {
-    '*':re_klein_start,
+    '*':re_klein_star,
     '+':re_positive_clousure,
     '|':re_or,
     '?':re_optional
@@ -69,8 +70,9 @@ def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
 REGEX = cSymbol('REGEX') # type:ignore
 RE = cSymbol('RE') # type:ignore
 CHAR = cSymbol('CHAR') # type:ignore
+RE_CONSTANT = cSymbol('RE_CONSTANT') # type:ignore
 CHAR_SEQUENCE = cSymbol('CHAR_SEQUENCE') # type:ignore
-PRECEDING_RE = cSymbol('PRECEDING_RE') # type:ignore
+KLEIN_STAR = cSymbol('KLEIN_STAR') # type:ignore
 # RE_SEQUENCE = Symbol('RE_SEQUENCE') # type:ignore
 # RE_LP = Symbol('RE_LP') # type:ignore
 # RE_RP = Symbol('RE_RP') # type:ignore
@@ -171,6 +173,25 @@ cdef class ConstantRegexAST(RegexAST):
             result = _automaton_complement(result)
         return result
 
+cdef class RegexUnaryAST(RegexAST):
+
+    def __init__(self, RegexAST regex, cSymbol symbol, int line, int column):
+        super().__init__(symbol, line, column)
+        self._regex = regex # type:ignore
+    
+    @property
+    def regex(self) -> RegexAST:
+        return self._regex # type:ignore
+    
+cdef class KleinStarAST(RegexUnaryAST):
+
+    def __init__(self,RegexAST regex, int line, int column):
+        super().__init__(regex, re_klein_star, line, column)
+        self._regex = regex # type:ignore
+
+    cdef Automaton _get_automaton(self):
+        return _automaton_clousure(self._regex._get_automaton(),0)
+
 ###################################################################################################
 #                                  REDUCTORS
 ###################################################################################################
@@ -178,7 +199,7 @@ cdef class ConstantRegexAST(RegexAST):
 def single_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     return asts[0]
 
-def CHAR_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def char_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef Token token = asts[0] # type:ignore
     return CharAST(token._text,token._line,token._column)
 
@@ -187,30 +208,44 @@ def concatenation_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef RegexAST right = asts[1]
     return ConcatenationAST(left,right,cSymbol('CONCATENATION'),left._line,left._column) # type:ignore
 
-def REGEX_union_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def union_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef RegexAST left = asts[0]
     cdef RegexAST right = asts[2]
     cdef Token _or = asts[1] # type:ignore
     return OrAST(left,right,_or._line,_or._column)
 
-def RE_constant_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def constant_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef Token token = asts[0] # type:ignore
     return ConstantRegexAST(token._text,token._line,token._column)
+
+def klein_star_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef Token token = asts[1] # type:ignore
+    return KleinStarAST(asts[0],token._line,token._column)
 
 cdef BottomUpParser _build_regex_parser():
     cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
     # REGEX -> RE
     ReGrammar._add_attributed_production(REGEX,[RE],single_ast_reductor)
     # REGEX -> REGEX | RE
-    ReGrammar._add_attributed_production(REGEX,[REGEX,re_or,RE],REGEX_union_ast_reductor)
+    ReGrammar._add_attributed_production(REGEX,[REGEX,re_or,RE],union_ast_reductor)
+    # RE -> KLEIN_STAR
+    ReGrammar._add_attributed_production(RE,[KLEIN_STAR],single_ast_reductor)
+    # RE -> RE KLEIN_STAR
+    ReGrammar._add_attributed_production(RE,[RE,KLEIN_STAR],concatenation_ast_reductor)
     # RE -> RE CHAR
     ReGrammar._add_attributed_production(RE,[RE,CHAR],concatenation_ast_reductor)
     # RE -> CHAR
     ReGrammar._add_attributed_production(RE,[CHAR],single_ast_reductor)
-    # RE -> re_constant
-    ReGrammar._add_attributed_production(RE,[re_constant],RE_constant_ast_reductor)
+    # RE -> RE_CONSTANT
+    ReGrammar._add_attributed_production(RE,[RE_CONSTANT],single_ast_reductor)
+    # RE_CONSTANT -> re_constant
+    ReGrammar._add_attributed_production(RE_CONSTANT,[re_constant],constant_ast_reductor)
     # CHAR -> re_char
-    ReGrammar._add_attributed_production(CHAR,[re_char],CHAR_ast_reductor)
+    ReGrammar._add_attributed_production(CHAR,[re_char],char_ast_reductor)
+    # KLEIN_STAR -> CHAR *
+    ReGrammar._add_attributed_production(KLEIN_STAR,[CHAR,re_klein_star],klein_star_ast_reductor)
+    # KLEIN_STAR -> RE_CONSTANT *
+    ReGrammar._add_attributed_production(KLEIN_STAR,[RE_CONSTANT,re_klein_star],klein_star_ast_reductor)
     return _build_lalr_parser_from_attributed(ReGrammar)
 
 cdef BaseLexer _build_regex_lexer():
