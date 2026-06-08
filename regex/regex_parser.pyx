@@ -8,6 +8,7 @@ from automaton.automaton cimport (
     get_words_automaton,
     _automaton_concatenation,
     _automaton_complement,
+    _automaton_union,
     DFA,
     get_words_automaton_with_value
 )
@@ -45,7 +46,12 @@ symbols_by_text:dict[str,cSymbol] = {
     '[':re_lc,
     ']':re_rc
 }
-
+operatos_by_text:dict[str,cSymbol] = {
+    '*':re_klein_start,
+    '+':re_positive_clousure,
+    '|':re_or,
+    '?':re_optional
+}
 def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
     if t == ReTokenType.CHAR:
         return re_char # type:ignore
@@ -53,6 +59,8 @@ def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
         return symbols_by_text[tx] # type:ignore
     if t == ReTokenType.CONSTANT_RE:
         return re_constant # type:ignore
+    if t == ReTokenType.OPERATOR:
+        return operatos_by_text[tx] # type:ignore
     raise NotImplementedError()
 
 ####################################################################################################
@@ -123,6 +131,14 @@ cdef class ConcatenationAST(RegexBinaryAST):
     cdef Automaton _get_automaton(self):
         return _automaton_concatenation(self._left._get_automaton(),self._right._get_automaton())
 
+cdef class OrAST(RegexBinaryAST):
+
+    def __init__(self, RegexAST left, RegexAST right, int line, int column):
+        super().__init__(left, right, re_or, line, column)
+    
+    cdef Automaton _get_automaton(self):
+        return _automaton_union({self._left._get_automaton(),self._right._get_automaton()})
+
 cdef class ConstantRegexAST(RegexAST):
 
     def __init__(self, str re,int line, int column):
@@ -166,10 +182,16 @@ def CHAR_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef Token token = asts[0] # type:ignore
     return CharAST(token._text,token._line,token._column)
 
-def REGEX_concatenation_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def concatenation_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef RegexAST left = asts[0]
     cdef RegexAST right = asts[1]
-    return ConcatenationAST(left,right,REGEX,left._line,left._column)
+    return ConcatenationAST(left,right,cSymbol('CONCATENATION'),left._line,left._column) # type:ignore
+
+def REGEX_union_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef RegexAST left = asts[0]
+    cdef RegexAST right = asts[2]
+    cdef Token _or = asts[1] # type:ignore
+    return OrAST(left,right,_or._line,_or._column)
 
 def RE_constant_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef Token token = asts[0] # type:ignore
@@ -179,8 +201,10 @@ cdef BottomUpParser _build_regex_parser():
     cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
     # REGEX -> RE
     ReGrammar._add_attributed_production(REGEX,[RE],single_ast_reductor)
-    # REGEX -> REGEX RE
-    ReGrammar._add_attributed_production(REGEX,[REGEX,RE],REGEX_concatenation_ast_reductor)
+    # REGEX -> REGEX | RE
+    ReGrammar._add_attributed_production(REGEX,[REGEX,re_or,RE],REGEX_union_ast_reductor)
+    # RE -> RE CHAR
+    ReGrammar._add_attributed_production(RE,[RE,CHAR],concatenation_ast_reductor)
     # RE -> CHAR
     ReGrammar._add_attributed_production(RE,[CHAR],single_ast_reductor)
     # RE -> re_constant
@@ -213,6 +237,20 @@ cdef BaseLexer _build_regex_lexer():
                 '\\W'
             ],
             ReTokenType.CONSTANT_RE,
+            True # type:ignore
+        )
+    )
+    RE_LEXER._add_token(
+        2,
+        ReTokenType.OPERATOR,
+        get_words_automaton_with_value(
+            [
+                '*',
+                '+',
+                '|',
+                '?'
+            ],
+            ReTokenType.OPERATOR,
             True # type:ignore
         )
     )

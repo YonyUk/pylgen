@@ -16,6 +16,9 @@ cdef class RegexBinaryAST(RegexAST):
 cdef class ConcatenationAST(RegexBinaryAST):
     pass
 
+cdef class OrAST(RegexBinaryAST):
+    pass
+
 cdef class ConstantRegexAST(RegexAST):
     cdef str _re
 
