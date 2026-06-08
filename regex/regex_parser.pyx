@@ -75,11 +75,9 @@ CHAR_SEQUENCE = cSymbol('CHAR_SEQUENCE') # type:ignore
 KLEIN_STAR = cSymbol('KLEIN_STAR') # type:ignore
 POSITIVE_CLOUSURE = cSymbol('POSITIVE_CLOUSURE') # type:ignore
 OPTIONAL_CLOUSURE = cSymbol('OPTIONAL_CLOUSURE') # type:ignore
-# RE_SEQUENCE = Symbol('RE_SEQUENCE') # type:ignore
-# RE_LP = Symbol('RE_LP') # type:ignore
-# RE_RP = Symbol('RE_RP') # type:ignore
-# RE_LB = Symbol('RE_LB') # type:ignore
-# RE_RB = Symbol('RE_RB') # type:ignore
+RE_GROUP = cSymbol('RE_GROUP') # type:ignore
+RE_LP = Symbol('RE_LP') # type:ignore
+RE_RP = Symbol('RE_RP') # type:ignore
 # RE_LC = Symbol('RE_LC') # type:ignore
 # RE_RC = Symbol('RE_RC') # type:ignore
 
@@ -248,6 +246,9 @@ def optional_clousure_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef Token token = asts[1] # type:ignore
     return OptionalAST(asts[0],token._line,token._column)
 
+def group_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    return asts[1]
+
 cdef BottomUpParser _build_regex_parser():
     cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
     # REGEX -> RE
@@ -262,6 +263,8 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(RE,[RE_CONSTANT],single_ast_reductor)
     # RE -> OPTIONAL_CLOUSURE
     ReGrammar._add_attributed_production(RE,[OPTIONAL_CLOUSURE],single_ast_reductor)
+    # RE -> RE_GROUP
+    ReGrammar._add_attributed_production(RE,[RE_GROUP],single_ast_reductor)
 
     # REGEX -> REGEX | RE
     ReGrammar._add_attributed_production(REGEX,[REGEX,re_or,RE],union_ast_reductor)
@@ -274,6 +277,8 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(RE,[RE,POSITIVE_CLOUSURE],concatenation_ast_reductor)
     # RE -> RE OPTIONAL_CLOUSURE
     ReGrammar._add_attributed_production(RE,[RE,OPTIONAL_CLOUSURE],concatenation_ast_reductor)
+    # RE -> RE RE_GROUP
+    ReGrammar._add_attributed_production(RE,[RE,RE_GROUP],concatenation_ast_reductor)
 
     # RE_CONSTANT -> re_constant
     ReGrammar._add_attributed_production(RE_CONSTANT,[re_constant],constant_ast_reductor)
@@ -284,16 +289,25 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(KLEIN_STAR,[CHAR,re_klein_star],klein_star_ast_reductor)
     # KLEIN_STAR -> RE_CONSTANT *
     ReGrammar._add_attributed_production(KLEIN_STAR,[RE_CONSTANT,re_klein_star],klein_star_ast_reductor)
+    # KLEIN_STAR -> RE_GROUP *
+    ReGrammar._add_attributed_production(KLEIN_STAR,[RE_GROUP,re_klein_star],klein_star_ast_reductor)
     
     # POSITIVE_CLOUSURE -> CHAR +
     ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[CHAR,re_positive_clousure],positive_clousure_ast_reductor)
     # POSITIVE_CLOUSURE -> RE_CONSTANT +
     ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[RE_CONSTANT,re_positive_clousure],positive_clousure_ast_reductor)
-    
+    # POSITIVE_CLOUSURE -> RE_GROUP +
+    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[RE_GROUP,re_positive_clousure],positive_clousure_ast_reductor)
+
     # OPTIONAL_CLOUSURE -> CHAR ?
     ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[CHAR,re_optional],optional_clousure_ast_reductor)
     # OPTIONAL_CLOUSURE -> RE_CONSTANT ?
     ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[RE_CONSTANT,re_optional],optional_clousure_ast_reductor)
+    # OPTIONAL_CLOUSURE -> RE_GROUP ?
+    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[RE_GROUP,re_optional],optional_clousure_ast_reductor)
+
+    # RE_GROUP -> ( REGEX )
+    ReGrammar._add_attributed_production(RE_GROUP,[re_lp,REGEX,re_rp],group_ast_reductor)
 
     return _build_lalr_parser_from_attributed(ReGrammar)
 
@@ -335,6 +349,18 @@ cdef BaseLexer _build_regex_lexer():
                 '?'
             ],
             ReTokenType.OPERATOR,
+            True # type:ignore
+        )
+    )
+    RE_LEXER._add_token(
+        3,
+        ReTokenType.SYMBOL,
+        get_words_automaton_with_value(
+            [
+                '(',
+                ')'
+            ],
+            ReTokenType.SYMBOL,
             True # type:ignore
         )
     )

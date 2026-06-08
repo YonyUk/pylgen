@@ -173,7 +173,19 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
                 break
         if not entered:
             stack.pop()
-    
+
+    if len(G.edges) == 0:
+        node = f'{ast_root.line}-{ast_root.column}'
+        G.add_node(node)
+        asts[node] = ast_root
+        ast_attrs[node] = list(
+            filter(
+                lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast_root.__getattribute__(_attr)),
+                dir(ast_root)
+            )
+        )
+        asts_levels[node] = 0
+
     for node in G.nodes:
         n = asts[node]
         level = asts_levels[node]
