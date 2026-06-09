@@ -34,5 +34,10 @@ cdef class PositiveClousureAST(RegexUnaryAST):
 cdef class OptionalAST(RegexUnaryAST):
     pass
 
+cdef class CharSetAST(RegexAST):
+    cdef set[str] _char_set
+
+    cdef void _add_char(self,str char)
+
 cdef BottomUpParser _build_regex_parser()
 cdef BaseLexer _build_regex_lexer()

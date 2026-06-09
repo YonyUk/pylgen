@@ -90,6 +90,13 @@ class ResourceEmbedder(HTMLParser):
             return
         self._output.append(f'&#{name};')
 
+class JsonSerializer(json.JSONEncoder):
+
+    def default(self, o: Any) -> Any:
+        if isinstance(o,(set,frozenset)):
+            return list(o)
+        return super().default(o)
+
 def _to_graph(automaton:Automaton) -> nx.DiGraph:
     G = nx.DiGraph()
 
@@ -123,7 +130,7 @@ def _to_graph(automaton:Automaton) -> nx.DiGraph:
 
 def _is_json_serializable(obj:Any) -> bool:
     try:
-        s = json.dumps(obj)
+        s = json.dumps(obj,cls=JsonSerializer)
         return True
     except Exception:
         return False

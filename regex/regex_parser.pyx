@@ -1,4 +1,4 @@
-from typing import List
+from typing import List,Set
 from string import ascii_letters,digits,printable,whitespace
 
 from common.types cimport Symbol as cSymbol ,AST,Token
@@ -35,6 +35,7 @@ re_or = cSymbol('|',True) # type:ignore
 re_escape = cSymbol('\\',True) # type:ignore
 re_optional = cSymbol('?',True) # type:ignore
 re_char = cSymbol('char',True) # type:ignore
+re_accent = cSymbol('^',True) # type:ignore
 
 ##################################################################################################
 #                         MAPPING OF TOKENS TO TERMINALS SYMBOLS
@@ -51,7 +52,8 @@ operatos_by_text:dict[str,cSymbol] = {
     '*':re_klein_star,
     '+':re_positive_clousure,
     '|':re_or,
-    '?':re_optional
+    '?':re_optional,
+    '^':re_accent
 }
 def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
     if t == ReTokenType.CHAR:
@@ -76,10 +78,8 @@ KLEIN_STAR = cSymbol('KLEIN_STAR') # type:ignore
 POSITIVE_CLOUSURE = cSymbol('POSITIVE_CLOUSURE') # type:ignore
 OPTIONAL_CLOUSURE = cSymbol('OPTIONAL_CLOUSURE') # type:ignore
 RE_GROUP = cSymbol('RE_GROUP') # type:ignore
-RE_LP = Symbol('RE_LP') # type:ignore
-RE_RP = Symbol('RE_RP') # type:ignore
-# RE_LC = Symbol('RE_LC') # type:ignore
-# RE_RC = Symbol('RE_RC') # type:ignore
+CHAR_SEQUENCE = cSymbol('CHAR_SEQUENCE') # type:ignore
+CHAR_SET = cSymbol('CHAR_SET') # type:ignore
 
 ####################################################################################################
 #                               ASTs
@@ -208,6 +208,22 @@ cdef class OptionalAST(RegexUnaryAST):
     cdef Automaton _get_automaton(self):
         return _automaton_clousure(self._regex._get_automaton(),2)
 
+cdef class CharSetAST(RegexAST):
+
+    def __init__(self, line: int, column: int):
+        super().__init__(CHAR_SET, line, column)
+        self._char_set = set()
+    
+    @property
+    def char_set(self) -> Set[str]:
+        return self._char_set
+    
+    cdef void _add_char(self,str char):
+        self._char_set.add(char)
+
+    cdef Automaton _get_automaton(self):
+        return get_words_automaton(list(self._char_set))
+
 ###################################################################################################
 #                                  REDUCTORS
 ###################################################################################################
@@ -249,6 +265,25 @@ def optional_clousure_ast_reductor(asts:List[RegexAST]) -> RegexAST:
 def group_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     return asts[1]
 
+def char_set_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef CharAST char_ast
+    cdef CharSetAST result_ast
+    if len(asts) == 1:
+        char_ast = asts[0] # type:ignore
+        result_ast = CharSetAST(char_ast._line,char_ast._column)
+        result_ast._add_char(char_ast._char)
+        return result_ast
+    char_ast = asts[1] # type:ignore
+    result_ast = asts[0] # type:ignore
+    result_ast._add_char(char_ast._char)
+    return result_ast
+
+def complement_char_set_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef CharSetAST ast = asts[2] # type:ignore
+    cdef set[str] char_set = ast._char_set
+    ast._char_set = set(printable).difference(char_set)
+    return ast
+
 cdef BottomUpParser _build_regex_parser():
     cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
     # REGEX -> RE
@@ -265,6 +300,8 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(RE,[OPTIONAL_CLOUSURE],single_ast_reductor)
     # RE -> RE_GROUP
     ReGrammar._add_attributed_production(RE,[RE_GROUP],single_ast_reductor)
+    # RE -> CHAR_SET
+    ReGrammar._add_attributed_production(RE,[CHAR_SET],single_ast_reductor)
 
     # REGEX -> REGEX | RE
     ReGrammar._add_attributed_production(REGEX,[REGEX,re_or,RE],union_ast_reductor)
@@ -279,6 +316,8 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(RE,[RE,OPTIONAL_CLOUSURE],concatenation_ast_reductor)
     # RE -> RE RE_GROUP
     ReGrammar._add_attributed_production(RE,[RE,RE_GROUP],concatenation_ast_reductor)
+    # RE -> RE CHAR_SET
+    ReGrammar._add_attributed_production(RE,[RE,CHAR_SET],concatenation_ast_reductor)
 
     # RE_CONSTANT -> re_constant
     ReGrammar._add_attributed_production(RE_CONSTANT,[re_constant],constant_ast_reductor)
@@ -291,6 +330,8 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(KLEIN_STAR,[RE_CONSTANT,re_klein_star],klein_star_ast_reductor)
     # KLEIN_STAR -> RE_GROUP *
     ReGrammar._add_attributed_production(KLEIN_STAR,[RE_GROUP,re_klein_star],klein_star_ast_reductor)
+    # KLEENE_STAR -> CHAR_SET *
+    ReGrammar._add_attributed_production(KLEIN_STAR,[CHAR_SET,re_klein_star],klein_star_ast_reductor)
     
     # POSITIVE_CLOUSURE -> CHAR +
     ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[CHAR,re_positive_clousure],positive_clousure_ast_reductor)
@@ -298,6 +339,8 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[RE_CONSTANT,re_positive_clousure],positive_clousure_ast_reductor)
     # POSITIVE_CLOUSURE -> RE_GROUP +
     ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[RE_GROUP,re_positive_clousure],positive_clousure_ast_reductor)
+    # POSITIVE_CLOUSURE -> CHAR_SET +
+    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[CHAR_SET,re_positive_clousure],positive_clousure_ast_reductor)
 
     # OPTIONAL_CLOUSURE -> CHAR ?
     ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[CHAR,re_optional],optional_clousure_ast_reductor)
@@ -305,9 +348,21 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[RE_CONSTANT,re_optional],optional_clousure_ast_reductor)
     # OPTIONAL_CLOUSURE -> RE_GROUP ?
     ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[RE_GROUP,re_optional],optional_clousure_ast_reductor)
+    # OPTIONAL_CLOUSURE -> CHAR_SET ?
+    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[CHAR_SET,re_optional],optional_clousure_ast_reductor)
 
     # RE_GROUP -> ( REGEX )
     ReGrammar._add_attributed_production(RE_GROUP,[re_lp,REGEX,re_rp],group_ast_reductor)
+
+    # CHAR_SET -> [ CHAR_SEQUENCE ]
+    ReGrammar._add_attributed_production(CHAR_SET,[re_lc,CHAR_SEQUENCE,re_rc],group_ast_reductor)
+    # CHAR_SET -> [ ^ CHAR_SEQUENCE ]
+    ReGrammar._add_attributed_production(CHAR_SET,[re_lc,re_accent,CHAR_SEQUENCE,re_rc],complement_char_set_ast_reductor)
+
+    # CHAR_SEQUENCE -> CHAR
+    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR],char_set_ast_reductor)
+    # CHAR_SEQUENCE -> CHAR_SEQUENCE CHAR
+    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_SEQUENCE,CHAR],char_set_ast_reductor)
 
     return _build_lalr_parser_from_attributed(ReGrammar)
 
@@ -346,7 +401,8 @@ cdef BaseLexer _build_regex_lexer():
                 '*',
                 '+',
                 '|',
-                '?'
+                '?',
+                '^'
             ],
             ReTokenType.OPERATOR,
             True # type:ignore
@@ -358,7 +414,9 @@ cdef BaseLexer _build_regex_lexer():
         get_words_automaton_with_value(
             [
                 '(',
-                ')'
+                ')',
+                '[',
+                ']'
             ],
             ReTokenType.SYMBOL,
             True # type:ignore
