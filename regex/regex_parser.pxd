@@ -35,9 +35,20 @@ cdef class OptionalAST(RegexUnaryAST):
     pass
 
 cdef class CharSetAST(RegexAST):
+    cdef CharSetAST _next
+    cdef CharSetAST _preceding
+
+cdef class CharSetExplicitAST(CharSetAST):
     cdef set[str] _char_set
 
     cdef void _add_char(self,str char)
+
+cdef class CharRangeAST(CharSetAST):
+    cdef str _left
+    cdef str _right
+
+cdef class ComplementCharSetAST(CharSetAST):
+    cdef CharSetAST _char_set
 
 cdef BottomUpParser _build_regex_parser()
 cdef BaseLexer _build_regex_lexer()

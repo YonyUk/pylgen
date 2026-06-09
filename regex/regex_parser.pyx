@@ -36,6 +36,7 @@ re_escape = cSymbol('\\',True) # type:ignore
 re_optional = cSymbol('?',True) # type:ignore
 re_char = cSymbol('char',True) # type:ignore
 re_accent = cSymbol('^',True) # type:ignore
+re_minus = cSymbol('-',True) # type:ignore
 
 ##################################################################################################
 #                         MAPPING OF TOKENS TO TERMINALS SYMBOLS
@@ -46,7 +47,8 @@ symbols_by_text:dict[str,cSymbol] = {
     '{':re_lb,
     '}':re_rb,
     '[':re_lc,
-    ']':re_rc
+    ']':re_rc,
+    '-':re_minus
 }
 operatos_by_text:dict[str,cSymbol] = {
     '*':re_klein_star,
@@ -80,6 +82,7 @@ OPTIONAL_CLOUSURE = cSymbol('OPTIONAL_CLOUSURE') # type:ignore
 RE_GROUP = cSymbol('RE_GROUP') # type:ignore
 CHAR_SEQUENCE = cSymbol('CHAR_SEQUENCE') # type:ignore
 CHAR_SET = cSymbol('CHAR_SET') # type:ignore
+CHAR_RANGE = cSymbol('CHAR_RANGE') # type:ignore
 
 ####################################################################################################
 #                               ASTs
@@ -194,7 +197,7 @@ cdef class KleinStarAST(RegexUnaryAST):
 
 cdef class PositiveClousureAST(RegexUnaryAST):
 
-    def __init__(self, regex: RegexAST, line: int, column: int):
+    def __init__(self, RegexAST regex, int line, int column):
         super().__init__(regex, re_positive_clousure, line, column)
     
     cdef Automaton _get_automaton(self):
@@ -210,8 +213,26 @@ cdef class OptionalAST(RegexUnaryAST):
 
 cdef class CharSetAST(RegexAST):
 
+    def __init__(self, cSymbol symbol, int line, int column):
+        super().__init__(symbol, line, column)
+        self._next = None # type:ignore
+        self._preceding = None # type:ignore
+
+    @property
+    def next_re(self) -> CharSetAST:
+        return self._next # type:ignore
+    
+    @property
+    def preceding_re(self) -> CharSetAST:
+        return self._preceding # type:ignore
+    
+    cdef Automaton _get_automaton(self):
+        return _automaton_union({self._preceding._get_automaton(),self._next._get_automaton()})
+
+cdef class CharSetExplicitAST(CharSetAST):
+
     def __init__(self, line: int, column: int):
-        super().__init__(CHAR_SET, line, column)
+        super().__init__(CHAR_SET,line, column)
         self._char_set = set()
     
     @property
@@ -223,6 +244,41 @@ cdef class CharSetAST(RegexAST):
 
     cdef Automaton _get_automaton(self):
         return get_words_automaton(list(self._char_set))
+
+cdef class CharRangeAST(CharSetAST):
+
+    def __init__(self, str left, str right, int line, int column):
+        super().__init__(CHAR_RANGE, line, column)
+        self._left = left
+        self._right = right
+    
+    @property
+    def left(self) -> str:
+        return self._left
+    
+    @property
+    def right(self) -> str:
+        return self._right
+    
+    cdef Automaton _get_automaton(self):
+        cdef int i
+        cdef set[str] _char_set = { chr(i) for i in range(ord(self._left),ord(self._right) + 1)}
+        return get_words_automaton(list(_char_set))
+
+cdef class ComplementCharSetAST(CharSetAST):
+
+    def __init__(self, CharSetAST char_set,int line, int column):
+        super().__init__(CHAR_SET, line, column)
+        self._char_set = char_set # type:ignore
+    
+    @property
+    def char_set(self) -> CharSetAST:
+        return self._char_set # type:ignore
+    
+    cdef Automaton _get_automaton(self):
+        cdef Automaton aut = self._char_set._get_automaton()
+        cdef set[str] _char_set = set(printable).difference(aut._alphabet)
+        return get_words_automaton(list(_char_set))
 
 ###################################################################################################
 #                                  REDUCTORS
@@ -265,24 +321,78 @@ def optional_clousure_ast_reductor(asts:List[RegexAST]) -> RegexAST:
 def group_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     return asts[1]
 
-def char_set_ast_reductor(asts:List[RegexAST]) -> RegexAST:
-    cdef CharAST char_ast
-    cdef CharSetAST result_ast
-    if len(asts) == 1:
-        char_ast = asts[0] # type:ignore
-        result_ast = CharSetAST(char_ast._line,char_ast._column)
-        result_ast._add_char(char_ast._char)
-        return result_ast
-    char_ast = asts[1] # type:ignore
-    result_ast = asts[0] # type:ignore
+def char_set_explicit_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef CharAST char_ast = asts[0] # type:ignore
+    cdef CharSetExplicitAST result_ast = CharSetExplicitAST(char_ast._line,char_ast._column)
     result_ast._add_char(char_ast._char)
     return result_ast
+    
+def directed_char_set_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef CharSetAST ast = asts[1] # type:ignore
+    cdef Token token = asts[0] # type:ignore
+    ast._line = token._line
+    ast._column = token._column
+    return ast
 
 def complement_char_set_ast_reductor(asts:List[RegexAST]) -> RegexAST:
-    cdef CharSetAST ast = asts[2] # type:ignore
-    cdef set[str] char_set = ast._char_set
-    ast._char_set = set(printable).difference(char_set)
-    return ast
+    cdef CharSetAST ast = asts[2] #type:ignore
+    cdef Token token = asts[0] # type:ignore
+    return ComplementCharSetAST(ast,token._line,token._column)
+
+def char_range_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef Token left,right,op
+    right = asts[2] # type:ignore
+    left = asts[0] # type:ignore
+    op = asts[1] # type:ignore
+    return CharRangeAST(left._text,right._text,op._line,op._column)
+
+def char_sequence_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef CharSetAST ast = asts[0] # type:ignore
+    cdef CharSetAST current
+    cdef CharSetAST new_ast
+    cdef CharAST char
+
+    if isinstance(ast,CharSetExplicitAST):
+        if isinstance(asts[1],CharAST):
+            char = asts[1]
+            (<CharSetExplicitAST>ast)._add_char(char._char)
+            return ast
+        new_ast = CharSetAST(CHAR_SET,ast._line,ast._column)
+        new_ast._preceding = ast # type:ignore
+        new_ast._next = asts[1] # type:ignore
+        return new_ast
+    
+    if isinstance(ast,CharRangeAST):
+        new_ast = CharSetAST(CHAR_SET,ast._line,ast._column)
+        new_ast._preceding = ast # type:ignore
+        if isinstance(asts[1],CharAST):
+            char = asts[1]
+            current = CharSetExplicitAST(char._line,char._column)
+            new_ast._next = current # type:ignore
+            return new_ast
+        new_ast._next = asts[1] # type:ignore
+        return new_ast
+    
+    if isinstance(ast._next,CharSetExplicitAST):
+        if isinstance(asts[1],CharAST):
+            char = asts[1]
+            (<CharSetExplicitAST>ast._next)._add_char(char._char)
+            return ast
+        new_ast = CharSetAST(CHAR_SET,ast._line,ast._column)
+        new_ast._preceding = ast # type:ignore
+        new_ast._next = asts[1] # type:ignore
+        return new_ast
+    
+    new_ast = CharSetAST(CHAR_SET,ast._line,ast._column)
+    new_ast._preceding = ast # type:ignore
+    if isinstance(asts[1],CharAST):
+        char = asts[1]
+        current = CharSetExplicitAST(char._line,char._column)
+        (<CharSetExplicitAST>current)._add_char(char._char)
+    else:
+        current = asts[1] # type:ignore    
+    new_ast._next = current # type:ignore
+    return new_ast
 
 cdef BottomUpParser _build_regex_parser():
     cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
@@ -355,24 +465,33 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(RE_GROUP,[re_lp,REGEX,re_rp],group_ast_reductor)
 
     # CHAR_SET -> [ CHAR_SEQUENCE ]
-    ReGrammar._add_attributed_production(CHAR_SET,[re_lc,CHAR_SEQUENCE,re_rc],group_ast_reductor)
+    ReGrammar._add_attributed_production(CHAR_SET,[re_lc,CHAR_SEQUENCE,re_rc],directed_char_set_ast_reductor)
     # CHAR_SET -> [ ^ CHAR_SEQUENCE ]
     ReGrammar._add_attributed_production(CHAR_SET,[re_lc,re_accent,CHAR_SEQUENCE,re_rc],complement_char_set_ast_reductor)
 
     # CHAR_SEQUENCE -> CHAR
-    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR],char_set_ast_reductor)
+    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR],char_set_explicit_ast_reductor)
+    # CHAR_SEQUENCE -> CHAR_RANGE
+    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_RANGE],single_ast_reductor)
+
     # CHAR_SEQUENCE -> CHAR_SEQUENCE CHAR
-    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_SEQUENCE,CHAR],char_set_ast_reductor)
+    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_SEQUENCE,CHAR],char_sequence_ast_reductor)
+    # CHAR_SEQUENCE -> CHAR_SEQUENCE CHAR_RANGE
+    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_SEQUENCE,CHAR_RANGE],char_sequence_ast_reductor)
+
+    # CHAR_RANGE -> re_char - re_char
+    ReGrammar._add_attributed_production(CHAR_RANGE,[re_char,re_minus,re_char],char_range_ast_reductor)
 
     return _build_lalr_parser_from_attributed(ReGrammar)
 
 cdef BaseLexer _build_regex_lexer():
     cdef BaseLexer RE_LEXER = BaseLexer(get_symbol_function,DFA('EMPTY','EMPTY',set())) # type:ignore
+    cdef set[str] char_set = set(printable).difference(set(symbols_by_text.keys()).union(set(operatos_by_text)))
     RE_LEXER._add_token(
         0,
         ReTokenType.CHAR,
         get_words_automaton_with_value(
-            list(ascii_letters) + list(digits) + [' ','_'],
+            list(char_set),
             ReTokenType.CHAR,
             True # type:ignore
         )
@@ -416,7 +535,8 @@ cdef BaseLexer _build_regex_lexer():
                 '(',
                 ')',
                 '[',
-                ']'
+                ']',
+                '-'
             ],
             ReTokenType.SYMBOL,
             True # type:ignore
