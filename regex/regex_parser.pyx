@@ -32,11 +32,11 @@ re_rc = cSymbol(']',True) # type:ignore
 re_klein_star = cSymbol('*',True) # type:ignore
 re_positive_clousure = cSymbol('+',True) # type:ignore
 re_or = cSymbol('|',True) # type:ignore
-re_escape = cSymbol('\\',True) # type:ignore
 re_optional = cSymbol('?',True) # type:ignore
 re_char = cSymbol('char',True) # type:ignore
 re_accent = cSymbol('^',True) # type:ignore
 re_minus = cSymbol('-',True) # type:ignore
+re_escape_char = cSymbol('escape_char',True) # type:ignore
 
 ##################################################################################################
 #                         MAPPING OF TOKENS TO TERMINALS SYMBOLS
@@ -66,6 +66,8 @@ def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
         return re_constant # type:ignore
     if t == ReTokenType.OPERATOR:
         return operatos_by_text[tx] # type:ignore
+    if t == ReTokenType.ESCAPE_CHAR:
+        return re_escape_char # type:ignore
     raise NotImplementedError()
 
 ####################################################################################################
@@ -291,6 +293,10 @@ def char_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef Token token = asts[0] # type:ignore
     return CharAST(token._text,token._line,token._column)
 
+def escape_char_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef Token t0 = asts[0] # type:ignore
+    return CharAST(t0._text[1],t0._line,t0._column)
+
 def concatenation_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef RegexAST left = asts[0]
     cdef RegexAST right = asts[1]
@@ -433,6 +439,8 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(RE_CONSTANT,[re_constant],constant_ast_reductor)
     # CHAR -> re_char
     ReGrammar._add_attributed_production(CHAR,[re_char],char_ast_reductor)
+    # CHAR -> re_escape_char
+    ReGrammar._add_attributed_production(CHAR,[re_escape_char],escape_char_ast_reductor)
 
     # KLEIN_STAR -> CHAR *
     ReGrammar._add_attributed_production(KLEIN_STAR,[CHAR,re_klein_star],klein_star_ast_reductor)
@@ -539,6 +547,28 @@ cdef BaseLexer _build_regex_lexer():
                 '-'
             ],
             ReTokenType.SYMBOL,
+            True # type:ignore
+        )
+    )
+    RE_LEXER._add_token(
+        4,
+        ReTokenType.ESCAPE_CHAR,
+        get_words_automaton_with_value(
+            [
+                '\\(',
+                '\\)',
+                '\\[',
+                '\\]',
+                '\\{',
+                '\\}',
+                '\\-',
+                '\\*',
+                '\\+',
+                '\\?',
+                '\\^',
+                '\\|'
+            ],
+            ReTokenType.ESCAPE_CHAR,
             True # type:ignore
         )
     )
