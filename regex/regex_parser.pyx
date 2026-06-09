@@ -158,6 +158,7 @@ cdef class ConstantRegexAST(RegexAST):
 
     cdef Automaton _get_automaton(self):
         cdef Automaton result
+        cdef set[str] char_set
         if self._re == '\\d':
             result = get_words_automaton(list(digits))
         elif self._re == '\\D':
@@ -172,6 +173,10 @@ cdef class ConstantRegexAST(RegexAST):
             result = _automaton_complement(result)
         elif self._re == '\\w':
             result = get_words_automaton(list(digits) + list(ascii_letters) + ['_'])
+        elif self._re == '.':
+            char_set = set(printable)
+            char_set.discard('\n')
+            result = get_words_automaton(list(char_set))
         else:
             result = get_words_automaton(list(digits) + list(ascii_letters) + ['_'])
             result._alphabet = set(printable)
@@ -495,6 +500,7 @@ cdef BottomUpParser _build_regex_parser():
 cdef BaseLexer _build_regex_lexer():
     cdef BaseLexer RE_LEXER = BaseLexer(get_symbol_function,DFA('EMPTY','EMPTY',set())) # type:ignore
     cdef set[str] char_set = set(printable).difference(set(symbols_by_text.keys()).union(set(operatos_by_text)))
+    char_set.discard('.')
     RE_LEXER._add_token(
         0,
         ReTokenType.CHAR,
@@ -514,7 +520,8 @@ cdef BaseLexer _build_regex_lexer():
                 '\\s',
                 '\\S',
                 '\\w',
-                '\\W'
+                '\\W',
+                '.'
             ],
             ReTokenType.CONSTANT_RE,
             True # type:ignore
@@ -566,7 +573,8 @@ cdef BaseLexer _build_regex_lexer():
                 '\\+',
                 '\\?',
                 '\\^',
-                '\\|'
+                '\\|',
+                '\\.'
             ],
             ReTokenType.ESCAPE_CHAR,
             True # type:ignore
