@@ -3,6 +3,7 @@ from string import ascii_letters,digits,printable,whitespace
 
 from common.types cimport Symbol as cSymbol ,AST,Token
 from common.types import Symbol
+from common.table cimport Table
 from automaton.automaton cimport (
     get_word_automaton,
     get_words_automaton,
@@ -11,7 +12,11 @@ from automaton.automaton cimport (
     _automaton_union,
     _automaton_clousure,
     get_words_automaton_with_value,
-    DFA
+    _copy_dfa,
+    _copy_nfa,
+    DFA,
+    NFA,
+    State
 )
 from grammar.grammar cimport AttributedGrammar
 from parser.parser_builder cimport _build_lalr_parser_from_attributed
@@ -37,6 +42,8 @@ re_char = cSymbol('char',True) # type:ignore
 re_accent = cSymbol('^',True) # type:ignore
 re_minus = cSymbol('-',True) # type:ignore
 re_escape_char = cSymbol('escape_char',True) # type:ignore
+re_com = cSymbol(',',True) # type:ignore
+number = cSymbol('number',True) # type:ignore
 
 ##################################################################################################
 #                         MAPPING OF TOKENS TO TERMINALS SYMBOLS
@@ -48,7 +55,8 @@ symbols_by_text:dict[str,cSymbol] = {
     '}':re_rb,
     '[':re_lc,
     ']':re_rc,
-    '-':re_minus
+    '-':re_minus,
+    ',':re_com
 }
 operatos_by_text:dict[str,cSymbol] = {
     '*':re_klein_star,
@@ -68,6 +76,8 @@ def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
         return operatos_by_text[tx] # type:ignore
     if t == ReTokenType.ESCAPE_CHAR:
         return re_escape_char # type:ignore
+    if t == ReTokenType.NUMBER:
+        return number # type:ignore
     raise NotImplementedError()
 
 ####################################################################################################
@@ -85,6 +95,7 @@ RE_GROUP = cSymbol('RE_GROUP') # type:ignore
 CHAR_SEQUENCE = cSymbol('CHAR_SEQUENCE') # type:ignore
 CHAR_SET = cSymbol('CHAR_SET') # type:ignore
 CHAR_RANGE = cSymbol('CHAR_RANGE') # type:ignore
+REPEAT = cSymbol('REPEAT') # type:ignore
 
 ####################################################################################################
 #                               ASTs
@@ -287,6 +298,85 @@ cdef class ComplementCharSetAST(CharSetAST):
         cdef set[str] _char_set = set(printable).difference(aut._alphabet)
         return get_words_automaton(list(_char_set))
 
+cdef class RepeatPatternAST(RegexAST):
+
+    def __init__(self, RegexAST regex, int min_, int max_, int line, int column):
+        super().__init__(REPEAT, line, column)
+        self._min = min_ # type:ignore
+        self._max = max_ # type:ignore
+        self._regex = regex # type:ignore
+    
+    @property
+    def min(self) -> int:
+        return self._min
+    
+    @property
+    def max(self) -> int:
+        return self._max
+    
+    @property
+    def regex(self) -> RegexAST:
+        return self._regex # type:ignore
+    
+    cdef Automaton _get_automaton(self):
+        cdef Automaton aut = self._regex._get_automaton()
+        cdef NFA result
+        cdef dict[str,State] states_by_id_mapping = {}
+        cdef int iteration
+        cdef str state_id,n_state_id,f_id,t_id,symbol
+        cdef State state,f_state,t_state,n_f_state,n_t_state
+        cdef tuple[str,str] transition
+
+        # maps the states by iteration
+        for iteration in range(self._max):
+            for state_id,state in aut._states_by_id.items():
+                n_state_id = f'{iteration}-{state_id}'
+                if self._min - 1 <= iteration <= self._max - 1:
+                    states_by_id_mapping[n_state_id] = State(n_state_id,state._value,state._is_accept) # type:ignore
+                else:
+                    states_by_id_mapping[n_state_id] = State(n_state_id,state._value) # type:ignore
+        result = NFA('start','start',aut._alphabet) # type:ignore
+        result._start_state = states_by_id_mapping[f'0-{aut._start_state._id}']
+        result._states_by_id[f'0-{aut._start_state._id}'] = result._start_state
+
+        if self._min == 0:
+            result._start_state._is_accept = True # type:ignore
+
+        for iteration in range(self._max):
+            for transition in aut._trans_func._table:
+                f_id = <str>transition[0]
+                symbol = <str>transition[1]
+                t_id = aut._trans_func._table[transition]
+                f_state = aut._states_by_id[f_id]
+                t_state = aut._states_by_id[t_id]
+                n_f_state = states_by_id_mapping[f'{iteration}-{f_id}']
+                n_t_state = states_by_id_mapping[f'{iteration}-{t_id}']
+
+                result.add_transition(n_f_state,n_t_state,symbol)
+                if iteration < self._max - 1:
+                    n_t_state = states_by_id_mapping[f'{iteration + 1}-{aut._start_state._id}']
+                    if f_state._is_accept:
+                        result.add_epsilon_transition(n_f_state,n_t_state)
+                    if t_state._is_accept:
+                        n_f_state = states_by_id_mapping[f'{iteration}-{t_id}']
+                        result.add_epsilon_transition(n_f_state,n_t_state)
+            
+            for f_id in aut._epsilons:
+                for t_id in aut._epsilons[f_id]:
+                    f_state = aut._states_by_id[f_id]
+                    t_state = aut._states_by_id[t_id]
+                    n_f_state = states_by_id_mapping[f'{iteration}-{f_id}']
+                    n_t_state = states_by_id_mapping[f'{iteration}-{t_id}']
+                    result.add_epsilon_transition(n_f_state,n_t_state)
+                    if iteration < self._max - 1:
+                        n_t_state = states_by_id_mapping[f'{iteration + 1}-{aut._start_state._id}']
+                        if f_state._is_accept:
+                            result.add_epsilon_transition(n_f_state,n_t_state)
+                        if t_state._is_accept:
+                            n_f_state = states_by_id_mapping[f'{iteration}-{t_id}']
+                            result.add_epsilon_transition(n_f_state,n_t_state)
+        return result
+
 ###################################################################################################
 #                                  REDUCTORS
 ###################################################################################################
@@ -405,6 +495,15 @@ def char_sequence_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     new_ast._next = current # type:ignore
     return new_ast
 
+def repeat_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef Token min_,max_
+    cdef RegexAST regex = asts[0]
+
+    min_ = asts[2] # type:ignore
+    max_ = asts[4] # type:ignore
+
+    return RepeatPatternAST(regex,int(min_._text),int(max_._text),regex._line,regex._column)
+
 cdef BottomUpParser _build_regex_parser():
     cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
     # REGEX -> RE
@@ -423,7 +522,7 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(RE,[RE_GROUP],single_ast_reductor)
     # RE -> CHAR_SET
     ReGrammar._add_attributed_production(RE,[CHAR_SET],single_ast_reductor)
-
+    
     # REGEX -> REGEX | RE
     ReGrammar._add_attributed_production(REGEX,[REGEX,re_or,RE],union_ast_reductor)
     
@@ -439,7 +538,9 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(RE,[RE,RE_GROUP],concatenation_ast_reductor)
     # RE -> RE CHAR_SET
     ReGrammar._add_attributed_production(RE,[RE,CHAR_SET],concatenation_ast_reductor)
-
+    # RE -> RE { number , number }
+    ReGrammar._add_attributed_production(RE,[RE,re_lb,number,re_com,number,re_rb],repeat_ast_reductor)
+    
     # RE_CONSTANT -> re_constant
     ReGrammar._add_attributed_production(RE_CONSTANT,[re_constant],constant_ast_reductor)
     # CHAR -> re_char
@@ -500,9 +601,28 @@ cdef BottomUpParser _build_regex_parser():
 cdef BaseLexer _build_regex_lexer():
     cdef BaseLexer RE_LEXER = BaseLexer(get_symbol_function,DFA('EMPTY','EMPTY',set())) # type:ignore
     cdef set[str] char_set = set(printable).difference(set(symbols_by_text.keys()).union(set(operatos_by_text)))
+    cdef DFA numbers_dfa = DFA('start','start',set(digits)) # type:ignore
+    cdef State final_state = State('final',ReTokenType.NUMBER,True) # type:ignore
+    cdef State final_2 = State('final-2',ReTokenType.NUMBER,True) # type:ignore
+    cdef str digit
+    
     char_set.discard('.')
+
+    for digit in digits:
+        if digit == '0':
+            numbers_dfa.add_transition(numbers_dfa._start_state,final_2,digit)
+        else:
+            numbers_dfa.add_transition(numbers_dfa._start_state,final_state,digit)
+        numbers_dfa.add_transition(final_state,final_state,digit)
+
     RE_LEXER._add_token(
         0,
+        ReTokenType.NUMBER,
+        numbers_dfa
+    )
+
+    RE_LEXER._add_token(
+        1,
         ReTokenType.CHAR,
         get_words_automaton_with_value(
             list(char_set),
@@ -511,7 +631,7 @@ cdef BaseLexer _build_regex_lexer():
         )
     )
     RE_LEXER._add_token(
-        1,
+        2,
         ReTokenType.CONSTANT_RE,
         get_words_automaton_with_value(
             [
@@ -528,7 +648,7 @@ cdef BaseLexer _build_regex_lexer():
         )
     )
     RE_LEXER._add_token(
-        2,
+        3,
         ReTokenType.OPERATOR,
         get_words_automaton_with_value(
             [
@@ -543,7 +663,7 @@ cdef BaseLexer _build_regex_lexer():
         )
     )
     RE_LEXER._add_token(
-        3,
+        4,
         ReTokenType.SYMBOL,
         get_words_automaton_with_value(
             [
@@ -551,14 +671,17 @@ cdef BaseLexer _build_regex_lexer():
                 ')',
                 '[',
                 ']',
-                '-'
+                '-',
+                '{',
+                '}',
+                ','
             ],
             ReTokenType.SYMBOL,
             True # type:ignore
         )
     )
     RE_LEXER._add_token(
-        4,
+        5,
         ReTokenType.ESCAPE_CHAR,
         get_words_automaton_with_value(
             [
@@ -574,7 +697,8 @@ cdef BaseLexer _build_regex_lexer():
                 '\\?',
                 '\\^',
                 '\\|',
-                '\\.'
+                '\\.',
+                '\\,'
             ],
             ReTokenType.ESCAPE_CHAR,
             True # type:ignore

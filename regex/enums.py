@@ -6,3 +6,4 @@ class ReTokenType(TokenType):
     CONSTANT_RE = 'CONSTANT_RE'
     ESCAPE_CHAR = 'ESCAPE_CHAR'
     OPERATOR = 'OPERATOR'
+    NUMBER = 'NUMBER'
