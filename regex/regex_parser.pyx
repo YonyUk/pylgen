@@ -44,6 +44,7 @@ re_minus = cSymbol('-',True) # type:ignore
 re_escape_char = cSymbol('escape_char',True) # type:ignore
 re_com = cSymbol(',',True) # type:ignore
 number = cSymbol('number',True) # type:ignore
+digit = cSymbol('digit',True) # type:ignore
 
 ##################################################################################################
 #                         MAPPING OF TOKENS TO TERMINALS SYMBOLS
@@ -77,6 +78,8 @@ def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
     if t == ReTokenType.ESCAPE_CHAR:
         return re_escape_char # type:ignore
     if t == ReTokenType.NUMBER:
+        if len(tx) == 1:
+            return digit # type:ignore
         return number # type:ignore
     raise NotImplementedError()
 
@@ -540,11 +543,19 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(RE,[RE,CHAR_SET],concatenation_ast_reductor)
     # RE -> RE { number , number }
     ReGrammar._add_attributed_production(RE,[RE,re_lb,number,re_com,number,re_rb],repeat_ast_reductor)
-    
+    # RE -> RE { digit , digit }
+    ReGrammar._add_attributed_production(RE,[RE,re_lb,digit,re_com,digit,re_rb],repeat_ast_reductor)
+    # RE -> RE { digit , number }
+    ReGrammar._add_attributed_production(RE,[RE,re_lb,digit,re_com,number,re_rb],repeat_ast_reductor)
+    # RE -> RE { number , digit }
+    ReGrammar._add_attributed_production(RE,[RE,re_lb,number,re_com,digit,re_rb],repeat_ast_reductor)
+
     # RE_CONSTANT -> re_constant
     ReGrammar._add_attributed_production(RE_CONSTANT,[re_constant],constant_ast_reductor)
     # CHAR -> re_char
     ReGrammar._add_attributed_production(CHAR,[re_char],char_ast_reductor)
+    # CHAR -> digit
+    ReGrammar._add_attributed_production(CHAR,[digit],char_ast_reductor)
     # CHAR -> re_escape_char
     ReGrammar._add_attributed_production(CHAR,[re_escape_char],escape_char_ast_reductor)
 
@@ -595,6 +606,12 @@ cdef BottomUpParser _build_regex_parser():
 
     # CHAR_RANGE -> re_char - re_char
     ReGrammar._add_attributed_production(CHAR_RANGE,[re_char,re_minus,re_char],char_range_ast_reductor)
+    # CHAR_RANGE -> digit - digit
+    ReGrammar._add_attributed_production(CHAR_RANGE,[digit,re_minus,digit],char_range_ast_reductor)
+    # CHAR_RANGE -> re_char - digit
+    ReGrammar._add_attributed_production(CHAR_RANGE,[re_char,re_minus,digit],char_range_ast_reductor)
+    # CHAR_RANGE -> digit - re_char
+    ReGrammar._add_attributed_production(CHAR_RANGE,[digit,re_minus,re_char],char_range_ast_reductor)
 
     return _build_lalr_parser_from_attributed(ReGrammar)
 
