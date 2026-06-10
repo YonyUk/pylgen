@@ -721,4 +721,5 @@ cdef BaseLexer _build_regex_lexer():
             True # type:ignore
         )
     )
+    RE_LEXER.initialize()
     return RE_LEXER

@@ -16,3 +16,6 @@ class RegexEngine:
 
     @staticmethod
     def regex_lexer() -> BaseLexer: ...
+
+    @staticmethod
+    def parse(re:str) -> DFA: ...
