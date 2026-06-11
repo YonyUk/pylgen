@@ -88,6 +88,8 @@ def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
 ####################################################################################################
 REGEX = cSymbol('REGEX') # type:ignore
 RE = cSymbol('RE') # type:ignore
+RE_1 = cSymbol('RE_1') # type:ignore
+RE_2 = cSymbol('RE_2') # type:ignore
 CHAR = cSymbol('CHAR') # type:ignore
 RE_CONSTANT = cSymbol('RE_CONSTANT') # type:ignore
 CHAR_SEQUENCE = cSymbol('CHAR_SEQUENCE') # type:ignore
@@ -509,109 +511,7 @@ def repeat_ast_reductor(asts:List[RegexAST]) -> RegexAST:
 
 cdef BottomUpParser _build_regex_parser():
     cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
-    # REGEX -> RE
-    ReGrammar._add_attributed_production(REGEX,[RE],single_ast_reductor)
-    # RE -> KLEIN_STAR
-    ReGrammar._add_attributed_production(RE,[KLEIN_STAR],single_ast_reductor)
-    # RE -> POSITIVE_CLOUSURE
-    ReGrammar._add_attributed_production(RE,[POSITIVE_CLOUSURE],single_ast_reductor)
-    # RE -> CHAR
-    ReGrammar._add_attributed_production(RE,[CHAR],single_ast_reductor)
-    # RE -> RE_CONSTANT
-    ReGrammar._add_attributed_production(RE,[RE_CONSTANT],single_ast_reductor)
-    # RE -> OPTIONAL_CLOUSURE
-    ReGrammar._add_attributed_production(RE,[OPTIONAL_CLOUSURE],single_ast_reductor)
-    # RE -> RE_GROUP
-    ReGrammar._add_attributed_production(RE,[RE_GROUP],single_ast_reductor)
-    # RE -> CHAR_SET
-    ReGrammar._add_attributed_production(RE,[CHAR_SET],single_ast_reductor)
     
-    # REGEX -> REGEX | RE
-    ReGrammar._add_attributed_production(REGEX,[REGEX,re_or,RE],union_ast_reductor)
-    
-    # RE -> RE KLEIN_STAR
-    ReGrammar._add_attributed_production(RE,[RE,KLEIN_STAR],concatenation_ast_reductor)
-    # RE -> RE CHAR
-    ReGrammar._add_attributed_production(RE,[RE,CHAR],concatenation_ast_reductor)
-    # RE -> RE POSITIVE_CLOUSURE
-    ReGrammar._add_attributed_production(RE,[RE,POSITIVE_CLOUSURE],concatenation_ast_reductor)
-    # RE -> RE OPTIONAL_CLOUSURE
-    ReGrammar._add_attributed_production(RE,[RE,OPTIONAL_CLOUSURE],concatenation_ast_reductor)
-    # RE -> RE RE_GROUP
-    ReGrammar._add_attributed_production(RE,[RE,RE_GROUP],concatenation_ast_reductor)
-    # RE -> RE CHAR_SET
-    ReGrammar._add_attributed_production(RE,[RE,CHAR_SET],concatenation_ast_reductor)
-    # RE -> RE { number , number }
-    ReGrammar._add_attributed_production(RE,[RE,re_lb,number,re_com,number,re_rb],repeat_ast_reductor)
-    # RE -> RE { digit , digit }
-    ReGrammar._add_attributed_production(RE,[RE,re_lb,digit,re_com,digit,re_rb],repeat_ast_reductor)
-    # RE -> RE { digit , number }
-    ReGrammar._add_attributed_production(RE,[RE,re_lb,digit,re_com,number,re_rb],repeat_ast_reductor)
-    # RE -> RE { number , digit }
-    ReGrammar._add_attributed_production(RE,[RE,re_lb,number,re_com,digit,re_rb],repeat_ast_reductor)
-
-    # RE_CONSTANT -> re_constant
-    ReGrammar._add_attributed_production(RE_CONSTANT,[re_constant],constant_ast_reductor)
-    # CHAR -> re_char
-    ReGrammar._add_attributed_production(CHAR,[re_char],char_ast_reductor)
-    # CHAR -> digit
-    ReGrammar._add_attributed_production(CHAR,[digit],char_ast_reductor)
-    # CHAR -> re_escape_char
-    ReGrammar._add_attributed_production(CHAR,[re_escape_char],escape_char_ast_reductor)
-
-    # KLEIN_STAR -> CHAR *
-    ReGrammar._add_attributed_production(KLEIN_STAR,[CHAR,re_klein_star],klein_star_ast_reductor)
-    # KLEIN_STAR -> RE_CONSTANT *
-    ReGrammar._add_attributed_production(KLEIN_STAR,[RE_CONSTANT,re_klein_star],klein_star_ast_reductor)
-    # KLEIN_STAR -> RE_GROUP *
-    ReGrammar._add_attributed_production(KLEIN_STAR,[RE_GROUP,re_klein_star],klein_star_ast_reductor)
-    # KLEENE_STAR -> CHAR_SET *
-    ReGrammar._add_attributed_production(KLEIN_STAR,[CHAR_SET,re_klein_star],klein_star_ast_reductor)
-    
-    # POSITIVE_CLOUSURE -> CHAR +
-    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[CHAR,re_positive_clousure],positive_clousure_ast_reductor)
-    # POSITIVE_CLOUSURE -> RE_CONSTANT +
-    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[RE_CONSTANT,re_positive_clousure],positive_clousure_ast_reductor)
-    # POSITIVE_CLOUSURE -> RE_GROUP +
-    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[RE_GROUP,re_positive_clousure],positive_clousure_ast_reductor)
-    # POSITIVE_CLOUSURE -> CHAR_SET +
-    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[CHAR_SET,re_positive_clousure],positive_clousure_ast_reductor)
-
-    # OPTIONAL_CLOUSURE -> CHAR ?
-    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[CHAR,re_optional],optional_clousure_ast_reductor)
-    # OPTIONAL_CLOUSURE -> RE_CONSTANT ?
-    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[RE_CONSTANT,re_optional],optional_clousure_ast_reductor)
-    # OPTIONAL_CLOUSURE -> RE_GROUP ?
-    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[RE_GROUP,re_optional],optional_clousure_ast_reductor)
-    # OPTIONAL_CLOUSURE -> CHAR_SET ?
-    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[CHAR_SET,re_optional],optional_clousure_ast_reductor)
-
-    # RE_GROUP -> ( REGEX )
-    ReGrammar._add_attributed_production(RE_GROUP,[re_lp,REGEX,re_rp],group_ast_reductor)
-
-    # CHAR_SET -> [ CHAR_SEQUENCE ]
-    ReGrammar._add_attributed_production(CHAR_SET,[re_lc,CHAR_SEQUENCE,re_rc],directed_char_set_ast_reductor)
-    # CHAR_SET -> [ ^ CHAR_SEQUENCE ]
-    ReGrammar._add_attributed_production(CHAR_SET,[re_lc,re_accent,CHAR_SEQUENCE,re_rc],complement_char_set_ast_reductor)
-
-    # CHAR_SEQUENCE -> CHAR
-    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR],char_set_explicit_ast_reductor)
-    # CHAR_SEQUENCE -> CHAR_RANGE
-    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_RANGE],single_ast_reductor)
-
-    # CHAR_SEQUENCE -> CHAR_SEQUENCE CHAR
-    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_SEQUENCE,CHAR],char_sequence_ast_reductor)
-    # CHAR_SEQUENCE -> CHAR_SEQUENCE CHAR_RANGE
-    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_SEQUENCE,CHAR_RANGE],char_sequence_ast_reductor)
-
-    # CHAR_RANGE -> re_char - re_char
-    ReGrammar._add_attributed_production(CHAR_RANGE,[re_char,re_minus,re_char],char_range_ast_reductor)
-    # CHAR_RANGE -> digit - digit
-    ReGrammar._add_attributed_production(CHAR_RANGE,[digit,re_minus,digit],char_range_ast_reductor)
-    # CHAR_RANGE -> re_char - digit
-    ReGrammar._add_attributed_production(CHAR_RANGE,[re_char,re_minus,digit],char_range_ast_reductor)
-    # CHAR_RANGE -> digit - re_char
-    ReGrammar._add_attributed_production(CHAR_RANGE,[digit,re_minus,re_char],char_range_ast_reductor)
 
     return _build_lalr_parser_from_attributed(ReGrammar)
 
