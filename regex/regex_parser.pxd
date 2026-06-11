@@ -44,8 +44,8 @@ cdef class CharSetExplicitAST(CharSetAST):
     cdef void _add_char(self,str char)
 
 cdef class CharRangeAST(CharSetAST):
-    cdef str _left
-    cdef str _right
+    cdef CharAST _left
+    cdef CharAST _right
 
 cdef class ComplementCharSetAST(CharSetAST):
     cdef CharSetAST _char_set

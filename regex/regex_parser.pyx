@@ -88,8 +88,6 @@ def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
 ####################################################################################################
 REGEX = cSymbol('REGEX') # type:ignore
 RE = cSymbol('RE') # type:ignore
-RE_1 = cSymbol('RE_1') # type:ignore
-RE_2 = cSymbol('RE_2') # type:ignore
 CHAR = cSymbol('CHAR') # type:ignore
 RE_CONSTANT = cSymbol('RE_CONSTANT') # type:ignore
 CHAR_SEQUENCE = cSymbol('CHAR_SEQUENCE') # type:ignore
@@ -270,22 +268,22 @@ cdef class CharSetExplicitAST(CharSetAST):
 
 cdef class CharRangeAST(CharSetAST):
 
-    def __init__(self, str left, str right, int line, int column):
+    def __init__(self, CharAST left, CharAST right, int line, int column):
         super().__init__(CHAR_RANGE, line, column)
-        self._left = left
-        self._right = right
+        self._left = left # type:ignore
+        self._right = right # type:ignore
     
     @property
-    def left(self) -> str:
-        return self._left
+    def left(self) -> CharAST:
+        return self._left # type:ignore
     
     @property
-    def right(self) -> str:
-        return self._right
+    def right(self) -> CharAST:
+        return self._right # type:ignore
     
     cdef Automaton _get_automaton(self):
         cdef int i
-        cdef set[str] _char_set = { chr(i) for i in range(ord(self._left),ord(self._right) + 1)}
+        cdef set[str] _char_set = { chr(i) for i in range(ord(self._left._char),ord(self._right._char) + 1)}
         return get_words_automaton(list(_char_set))
 
 cdef class ComplementCharSetAST(CharSetAST):
@@ -446,11 +444,12 @@ def complement_char_set_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     return ComplementCharSetAST(ast,token._line,token._column)
 
 def char_range_ast_reductor(asts:List[RegexAST]) -> RegexAST:
-    cdef Token left,right,op
+    cdef Token op
+    cdef CharAST left,right
     right = asts[2] # type:ignore
     left = asts[0] # type:ignore
     op = asts[1] # type:ignore
-    return CharRangeAST(left._text,right._text,op._line,op._column)
+    return CharRangeAST(left,right,op._line,op._column)
 
 def char_sequence_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef CharSetAST ast = asts[0] # type:ignore
@@ -474,6 +473,7 @@ def char_sequence_ast_reductor(asts:List[RegexAST]) -> RegexAST:
         if isinstance(asts[1],CharAST):
             char = asts[1]
             current = CharSetExplicitAST(char._line,char._column)
+            (<CharSetExplicitAST>current)._add_char(char._char)
             new_ast._next = current # type:ignore
             return new_ast
         new_ast._next = asts[1] # type:ignore
@@ -510,8 +510,179 @@ def repeat_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     return RepeatPatternAST(regex,int(min_._text),int(max_._text),regex._line,regex._column)
 
 cdef BottomUpParser _build_regex_parser():
-    cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
+    '''
+    REGEX -> RE
+
+    REGEX -> REGEX | RE
+
+    RE -> CHAR | RE CHAR
     
+    RE -> RE_CONSTANT | RE RE_CONSTANT
+    
+    RE -> KLEIN_STAR | RE KLEIN_STAR
+    
+    RE -> POSITIVE_CLOUSURE | RE POSITIVE_CLOUSURE
+    
+    RE -> OPTIONAL_CLOUSURE | RE OPTIONAL_CLOUSURE
+    
+    RE -> RE_GROUP | RE RE_GROUP
+    
+    RE -> CHAR_SET | RE CHAR_SET
+    
+    RE -> REPEAT | RE REPEAT
+
+    CHAR -> re_char | digit | re_escape_char
+
+    RE_CONSTANT -> re_constant
+
+    KLEIN_STAR -> CHAR * | RE_CONSTANT * | RE_GROUP * | CHAR_SET *
+
+    POSITIVE_CLOUSURE -> CHAR + | RE_CONSTANT + | RE_GROUP + | CHAR_SET +
+
+    OPTIONAL_CLOUSURE -> CHAR ? | RE_CONSTANT ? | RE_GROUP ? | CHAR_SET ?
+
+    RE_GROUP -> re_lp REGEX re_rp
+
+    CHAR_SET -> [ CHAR_SEQUENCE ] | [ ^ CHAR_SEQUENCE ]
+
+    CHAR_SEQUENCE -> CHAR | CHAR_RANGE | CHAR_SEQUENCE CHAR | CHAR_SEQUENCE CHAR_RANGE
+
+    CHAR_RANGE -> CHAR - CHAR
+
+    REPEAT -> CHAR { digit , digit } | CHAR { number , number } | CHAR { number , digit } | CHAR { digit , number }
+    
+    REPEAT -> RE_CONSTANT { digit , digit } | RE_CONSTANT { number , number } | RE_CONSTANT { number , digit } | RE_CONSTANT { digit , number }
+    
+    REPEAT -> RE_GROUP { digit , digit } | RE_GROUP { number , number } | RE_GROUP { number , digit } | RE_GROUP { digit , number }
+    '''
+    cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
+    # REGEX -> RE
+    ReGrammar._add_attributed_production(REGEX,[RE],single_ast_reductor)
+    # REGEX -> REGEX | RE
+    ReGrammar._add_attributed_production(REGEX,[REGEX,re_or,RE],union_ast_reductor)
+
+    # RE -> CHAR
+    ReGrammar._add_attributed_production(RE,[CHAR],single_ast_reductor)
+    # RE -> RE CHAR
+    ReGrammar._add_attributed_production(RE,[RE,CHAR],concatenation_ast_reductor)
+    
+    # RE -> RE_CONSTANT
+    ReGrammar._add_attributed_production(RE,[RE_CONSTANT],single_ast_reductor)
+    # RE -> RE RE_CONSTANT
+    ReGrammar._add_attributed_production(RE,[RE,RE_CONSTANT],concatenation_ast_reductor)
+
+    # RE -> KLEIN_STAR
+    ReGrammar._add_attributed_production(RE,[KLEIN_STAR],single_ast_reductor)
+    # RE -> RE KLEIN_STAR
+    ReGrammar._add_attributed_production(RE,[RE,KLEIN_STAR],concatenation_ast_reductor)
+
+    # RE -> POSITIVE_CLOUSURE
+    ReGrammar._add_attributed_production(RE,[POSITIVE_CLOUSURE],single_ast_reductor)
+    # RE -> RE POSITIVE_CLOUSURE
+    ReGrammar._add_attributed_production(RE,[RE,POSITIVE_CLOUSURE],concatenation_ast_reductor)
+
+    # RE -> OPTIONAL_CLOUSURE
+    ReGrammar._add_attributed_production(RE,[OPTIONAL_CLOUSURE],single_ast_reductor)
+    # RE -> RE OPTIONAL_CLOUSURE
+    ReGrammar._add_attributed_production(RE,[RE,OPTIONAL_CLOUSURE],concatenation_ast_reductor)
+
+    # RE -> RE_GROUP
+    ReGrammar._add_attributed_production(RE,[RE_GROUP],single_ast_reductor)
+    # RE -> RE RE_GROUP
+    ReGrammar._add_attributed_production(RE,[RE,RE_GROUP],concatenation_ast_reductor)
+
+    # RE -> CHAR_SET
+    ReGrammar._add_attributed_production(RE,[CHAR_SET],single_ast_reductor)
+    # RE -> RE CHAR_SET
+    ReGrammar._add_attributed_production(RE,[RE,CHAR_SET],concatenation_ast_reductor)
+
+    # RE -> REPEAT
+    ReGrammar._add_attributed_production(RE,[REPEAT],single_ast_reductor)
+    # RE -> RE REPEAT
+    ReGrammar._add_attributed_production(RE,[RE,REPEAT],concatenation_ast_reductor)
+
+    # CHAR -> re_char
+    ReGrammar._add_attributed_production(CHAR,[re_char],char_ast_reductor)
+    # CHAR -> digit
+    ReGrammar._add_attributed_production(CHAR,[digit],char_ast_reductor)
+    # CHAR -> re_escape_char
+    ReGrammar._add_attributed_production(CHAR,[re_escape_char],escape_char_ast_reductor)
+
+    # RE_CONSTANT -> re_constant
+    ReGrammar._add_attributed_production(RE_CONSTANT,[re_constant],constant_ast_reductor)
+
+    # KLEIN_STAR -> CHAR *
+    ReGrammar._add_attributed_production(KLEIN_STAR,[CHAR,re_klein_star],klein_star_ast_reductor)
+    # KLEIN_STAR -> RE_CONSTANT *
+    ReGrammar._add_attributed_production(KLEIN_STAR,[RE_CONSTANT,re_klein_star],klein_star_ast_reductor)
+    # KLEIN_STAR -> RE_GROUP *
+    ReGrammar._add_attributed_production(KLEIN_STAR,[RE_GROUP,re_klein_star],klein_star_ast_reductor)
+    # KLEIN_STAR -> CHAR_SET *
+    ReGrammar._add_attributed_production(KLEIN_STAR,[CHAR_SET,re_klein_star],klein_star_ast_reductor)
+
+    # POSITIVE_CLOUSURE -> CHAR +
+    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[CHAR,re_positive_clousure],positive_clousure_ast_reductor)
+    # POSITIVE_CLOUSURE -> RE_CONSTANT +
+    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[RE_CONSTANT,re_positive_clousure],positive_clousure_ast_reductor)
+    # POSITIVE_CLOUSURE -> RE_GROUP +
+    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[RE_GROUP,re_positive_clousure],positive_clousure_ast_reductor)
+    # POSITIVE_CLOUSURE -> CHAR_SET +
+    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[CHAR_SET,re_positive_clousure],positive_clousure_ast_reductor)
+
+    # OPTIONAL_CLOUSURE -> CHAR ?
+    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[CHAR,re_optional],optional_clousure_ast_reductor)
+    # OPTIONAL_CLOUSURE -> RE_CONSTANT ?
+    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[RE_CONSTANT,re_optional],optional_clousure_ast_reductor)
+    # OPTIONAL_CLOUSURE -> RE_GROUP ?
+    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[RE_GROUP,re_optional],optional_clousure_ast_reductor)
+    # OPTIONAL_CLOUSURE -> CHAR_SET ?
+    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[CHAR_SET,re_optional],optional_clousure_ast_reductor)
+
+    # RE_GROUP -> ( REGEX )
+    ReGrammar._add_attributed_production(RE_GROUP,[re_lp,REGEX,re_rp],group_ast_reductor)
+
+    # CHAR_SET -> [ CHAR_SEQUENCE ]
+    ReGrammar._add_attributed_production(CHAR_SET,[re_lc,CHAR_SEQUENCE,re_rc],directed_char_set_ast_reductor)
+    # CHAR_SET -> [ ^ CHAR_SEQUENCE ]
+    ReGrammar._add_attributed_production(CHAR_SET,[re_lc,re_accent,CHAR_SEQUENCE,re_rc],complement_char_set_ast_reductor)
+
+    # CHAR_SEQUENCE -> CHAR
+    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR],char_set_explicit_ast_reductor)
+    # CHAR_SEQUENCE -> CHAR_RANGE
+    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_RANGE],single_ast_reductor)
+    # CHAR_SEQUENCE -> CHAR_SEQUENCE CHAR
+    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_SEQUENCE,CHAR],char_sequence_ast_reductor)
+    # CHAR_SEQUENCE -> CHAR_SEQUENCE CHAR_RANGE
+    ReGrammar._add_attributed_production(CHAR_SEQUENCE,[CHAR_SEQUENCE,CHAR_RANGE],char_sequence_ast_reductor)
+
+    # CHAR_RANGE -> CHAR - CHAR
+    ReGrammar._add_attributed_production(CHAR_RANGE,[CHAR,re_minus,CHAR],char_range_ast_reductor)
+
+    # REPEAT -> CHAR { digit , digit }
+    ReGrammar._add_attributed_production(REPEAT,[CHAR,re_lb,digit,re_com,digit,re_rb],repeat_ast_reductor)
+    # REPEAT -> CHAR { number , number }
+    ReGrammar._add_attributed_production(REPEAT,[CHAR,re_lb,number,re_com,number,re_rb],repeat_ast_reductor)
+    # REPEAT -> CHAR { digit , number }
+    ReGrammar._add_attributed_production(REPEAT,[CHAR,re_lb,digit,re_com,number,re_rb],repeat_ast_reductor)
+    # REPEAT -> CHAR { number , digit }
+    ReGrammar._add_attributed_production(REPEAT,[CHAR,re_lb,number,re_com,digit,re_rb],repeat_ast_reductor)
+    # REPEAT -> RE_CONSTANT { digit , digit }
+    ReGrammar._add_attributed_production(REPEAT,[RE_CONSTANT,re_lb,digit,re_com,digit,re_rb],repeat_ast_reductor)
+    # REPEAT -> RE_CONSTANT { number , number }
+    ReGrammar._add_attributed_production(REPEAT,[RE_CONSTANT,re_lb,number,re_com,number,re_rb],repeat_ast_reductor)
+    # REPEAT -> RE_CONSTANT { digit , number }
+    ReGrammar._add_attributed_production(REPEAT,[RE_CONSTANT,re_lb,digit,re_com,number,re_rb],repeat_ast_reductor)
+    # REPEAT -> RE_CONSTANT { number , digit }
+    ReGrammar._add_attributed_production(REPEAT,[RE_CONSTANT,re_lb,number,re_com,digit,re_rb],repeat_ast_reductor)
+
+    # REPEAT -> RE_GROUP { digit , digit }
+    ReGrammar._add_attributed_production(REPEAT,[RE_GROUP,re_lb,digit,re_com,digit,re_rb],repeat_ast_reductor)
+    # REPEAT -> RE_GROUP { number , number }
+    ReGrammar._add_attributed_production(REPEAT,[RE_GROUP,re_lb,number,re_com,number,re_rb],repeat_ast_reductor)
+    # REPEAT -> RE_GROUP { digit , number }
+    ReGrammar._add_attributed_production(REPEAT,[RE_GROUP,re_lb,digit,re_com,number,number],repeat_ast_reductor)
+    # REPEAT -> RE_GROUP { number , digit }
+    ReGrammar._add_attributed_production(REPEAT,[RE_GROUP,re_lb,number,re_com,digit,number],repeat_ast_reductor)
 
     return _build_lalr_parser_from_attributed(ReGrammar)
 
