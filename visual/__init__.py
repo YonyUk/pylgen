@@ -90,6 +90,13 @@ class ResourceEmbedder(HTMLParser):
             return
         self._output.append(f'&#{name};')
 
+class JsonSerializer(json.JSONEncoder):
+
+    def default(self, o: Any) -> Any:
+        if isinstance(o,(set,frozenset)):
+            return list(o)
+        return super().default(o)
+
 def _to_graph(automaton:Automaton) -> nx.DiGraph:
     G = nx.DiGraph()
 
@@ -122,8 +129,10 @@ def _to_graph(automaton:Automaton) -> nx.DiGraph:
     return G
 
 def _is_json_serializable(obj:Any) -> bool:
+    if not obj:
+        return False
     try:
-        s = json.dumps(obj)
+        s = json.dumps(obj,cls=JsonSerializer)
         return True
     except Exception:
         return False
@@ -138,27 +147,29 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
     while stack:
         entered = False
         ast,attrs,index,level = stack[-1]
+        from_node = f'{ast.line}-{ast.column}-{level}'
         for i in range(index,len(attrs)):
             attr = ast.__getattribute__(attrs[i])
             if isinstance(attr,AST):
-                G.add_edge(f'{ast.line}-{ast.column}',f'{attr.line}-{attr.column}')
-                if not f'{ast.line}-{ast.column}' in asts:
-                    asts[f'{ast.line}-{ast.column}'] = ast
-                if not f'{ast.line}-{ast.column}' in asts_levels:
-                    asts_levels[f'{ast.line}-{ast.column}'] = level
-                if not f'{attr.line}-{attr.column}' in asts:
-                    asts[f'{attr.line}-{attr.column}'] = attr
-                if not f'{attr.line}-{attr.column}' in asts_levels:
-                    asts_levels[f'{attr.line}-{attr.column}'] = level + 1
-                if not f'{ast.line}-{ast.column}' in ast_attrs:
-                    ast_attrs[f'{ast.line}-{ast.column}'] = list(
+                to_node = f'{attr.line}-{attr.column}-{level + 1}'
+                G.add_edge(from_node,to_node)
+                if not from_node in asts:
+                    asts[from_node] = ast
+                if not from_node in asts_levels:
+                    asts_levels[from_node] = level
+                if not to_node in asts:
+                    asts[to_node] = attr
+                if not to_node in asts_levels:
+                    asts_levels[to_node] = level + 1
+                if not from_node in ast_attrs:
+                    ast_attrs[from_node] = list(
                         filter(
                             lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast.__getattribute__(_attr)),
                             dir(ast)
                         )
                     )
-                if not f'{attr.line}-{attr.column}' in ast_attrs:
-                    ast_attrs[f'{attr.line}-{attr.column}'] = list(
+                if not to_node in ast_attrs:
+                    ast_attrs[to_node] = list(
                         filter(
                             lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(attr.__getattribute__(_attr)),
                             dir(attr)
@@ -171,7 +182,19 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
                 break
         if not entered:
             stack.pop()
-    
+
+    if len(G.edges) == 0:
+        node = f'{ast_root.line}-{ast_root.column}'
+        G.add_node(node)
+        asts[node] = ast_root
+        ast_attrs[node] = list(
+            filter(
+                lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast_root.__getattribute__(_attr)),
+                dir(ast_root)
+            )
+        )
+        asts_levels[node] = 0
+
     for node in G.nodes:
         n = asts[node]
         level = asts_levels[node]
