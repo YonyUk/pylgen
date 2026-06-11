@@ -176,15 +176,13 @@ cdef class ConstantRegexAST(RegexAST):
         if self._re == '\\d':
             result = get_words_automaton(list(digits))
         elif self._re == '\\D':
-            result = get_words_automaton(list(digits))
-            result._alphabet = set(printable)
-            result = _automaton_complement(result)
+            char_set = set(printable).difference(set(digits))
+            result = get_words_automaton(list(char_set))
         elif self._re == '\\s':
             result = get_words_automaton(list(whitespace))
         elif self._re == '\\S':
-            result = get_words_automaton(list(whitespace))
-            result._alphabet = set(printable)
-            result = _automaton_complement(result)
+            char_set = set(printable).difference(set(whitespace))
+            result = get_words_automaton(list(char_set))
         elif self._re == '\\w':
             result = get_words_automaton(list(digits) + list(ascii_letters) + ['_'])
         elif self._re == '.':
@@ -192,9 +190,8 @@ cdef class ConstantRegexAST(RegexAST):
             char_set.discard('\n')
             result = get_words_automaton(list(char_set))
         else:
-            result = get_words_automaton(list(digits) + list(ascii_letters) + ['_'])
-            result._alphabet = set(printable)
-            result = _automaton_complement(result)
+            char_set = set(printable).difference(set(ascii_letters+digits+'_'))
+            result = get_words_automaton(list(char_set))
         return result
 
 cdef class RegexUnaryAST(RegexAST):
@@ -509,6 +506,27 @@ def repeat_ast_reductor(asts:List[RegexAST]) -> RegexAST:
 
     return RepeatPatternAST(regex,int(min_._text),int(max_._text),regex._line,regex._column)
 
+def char_set_repeat_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef Token min_,max_,open_
+    cdef RegexAST regex = asts[1]
+
+    open_ = asts[0] # type:ignore
+    min_ = asts[4] # type:ignore
+    max_ = asts[6] # type:ignore
+    regex = asts[1]
+    return RepeatPatternAST(regex,int(min_._text),int(max_._text),open_._line,open_._column)
+
+def complement_char_set_repeat_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef Token min_,max_,open_
+    cdef RegexAST regex,char_set_ast
+
+    open_ = asts[0] # type:ignore
+    min_ = asts[5] # type:ignore
+    max_ = asts[7] # type:ignore
+    regex = asts[2]
+    char_set_ast = ComplementCharSetAST(regex,regex._line,regex._column) # type:ignore
+    return RepeatPatternAST(char_set_ast,int(min_._text),int(max_._text),open_._line,open_._column)
+
 cdef BottomUpParser _build_regex_parser():
     '''
     REGEX -> RE
@@ -554,6 +572,10 @@ cdef BottomUpParser _build_regex_parser():
     REPEAT -> RE_CONSTANT { digit , digit } | RE_CONSTANT { number , number } | RE_CONSTANT { number , digit } | RE_CONSTANT { digit , number }
     
     REPEAT -> RE_GROUP { digit , digit } | RE_GROUP { number , number } | RE_GROUP { number , digit } | RE_GROUP { digit , number }
+    
+    REPEAT -> [ CHAR_SEQUENCE ] { digit , digit } | [ CHAR_SEQUENCE ] { number , number } | [ CHAR_SEQUENCE ] { number , digit } | [ CHAR_SEQUENCE ] { digit , number }
+    
+    REPEAT -> [ ^ CHAR_SEQUENCE ] { digit , digit } | [ ^ CHAR_SEQUENCE ] { number , number } | [ ^ CHAR_SEQUENCE ] { number , digit } | [ ^ CHAR_SEQUENCE ] { digit , number }
     '''
     cdef AttributedGrammar ReGrammar = AttributedGrammar(REGEX) # type:ignore
     # REGEX -> RE
@@ -666,6 +688,7 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(REPEAT,[CHAR,re_lb,digit,re_com,number,re_rb],repeat_ast_reductor)
     # REPEAT -> CHAR { number , digit }
     ReGrammar._add_attributed_production(REPEAT,[CHAR,re_lb,number,re_com,digit,re_rb],repeat_ast_reductor)
+    
     # REPEAT -> RE_CONSTANT { digit , digit }
     ReGrammar._add_attributed_production(REPEAT,[RE_CONSTANT,re_lb,digit,re_com,digit,re_rb],repeat_ast_reductor)
     # REPEAT -> RE_CONSTANT { number , number }
@@ -683,6 +706,24 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(REPEAT,[RE_GROUP,re_lb,digit,re_com,number,number],repeat_ast_reductor)
     # REPEAT -> RE_GROUP { number , digit }
     ReGrammar._add_attributed_production(REPEAT,[RE_GROUP,re_lb,number,re_com,digit,number],repeat_ast_reductor)
+
+    # REPEAT -> [ CHAR_SEQUENCE ] { digit , digit }
+    ReGrammar._add_attributed_production(REPEAT,[re_lc,CHAR_SEQUENCE,re_rc,re_lb,digit,re_com,digit,re_rb],char_set_repeat_ast_reductor)
+    # REPEAT -> [ CHAR_SEQUENCE ] { number , number }
+    ReGrammar._add_attributed_production(REPEAT,[re_lc,CHAR_SEQUENCE,re_rc,re_lb,number,re_com,number,re_rb],char_set_repeat_ast_reductor)
+    # REPEAT -> [ CHAR_SEQUENCE ] { digit , number }
+    ReGrammar._add_attributed_production(REPEAT,[re_lc,CHAR_SEQUENCE,re_rc,re_lb,digit,re_com,number,number],char_set_repeat_ast_reductor)
+    # REPEAT -> [ CHAR_SEQUENCE ] { number , digit }
+    ReGrammar._add_attributed_production(REPEAT,[re_lc,CHAR_SEQUENCE,re_rc,re_lb,number,re_com,digit,number],char_set_repeat_ast_reductor)
+
+    # REPEAT -> [ ^ CHAR_SEQUENCE ] { digit , digit }
+    ReGrammar._add_attributed_production(REPEAT,[re_lc,re_accent,CHAR_SEQUENCE,re_rc,re_lb,digit,re_com,digit,re_rb],complement_char_set_repeat_ast_reductor)
+    # REPEAT -> [ ^ CHAR_SEQUENCE ] { number , number }
+    ReGrammar._add_attributed_production(REPEAT,[re_lc,re_accent,CHAR_SEQUENCE,re_rc,re_lb,number,re_com,number,re_rb],complement_char_set_repeat_ast_reductor)
+    # REPEAT -> [ ^ CHAR_SEQUENCE ] { digit , number }
+    ReGrammar._add_attributed_production(REPEAT,[re_lc,re_accent,CHAR_SEQUENCE,re_rc,re_lb,digit,re_com,number,number],complement_char_set_repeat_ast_reductor)
+    # REPEAT -> [ ^ CHAR_SEQUENCE ] { number , digit }
+    ReGrammar._add_attributed_production(REPEAT,[re_lc,re_accent,CHAR_SEQUENCE,re_rc,re_lb,number,re_com,digit,number],complement_char_set_repeat_ast_reductor)
 
     return _build_lalr_parser_from_attributed(ReGrammar)
 
