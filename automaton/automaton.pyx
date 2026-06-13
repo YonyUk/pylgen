@@ -1265,7 +1265,7 @@ cdef NFA _automaton_concatenation(Automaton first,Automaton second):
     second_id = second.id
 
     state_id = sha256(f'CONCAT-{first_id}-{second_id}'.encode()).hexdigest()
-    result = NFA(state_id,state_id,first.alphabet.union(second.alphabet),first._start_state._is_accept)
+    result = NFA(state_id,state_id,first.alphabet.union(second.alphabet))
     
     states_by_id[state_id] = result._start_state
 
