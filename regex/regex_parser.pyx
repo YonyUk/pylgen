@@ -527,6 +527,52 @@ def complement_char_set_repeat_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     char_set_ast = ComplementCharSetAST(regex,regex._line,regex._column) # type:ignore
     return RepeatPatternAST(char_set_ast,int(min_._text),int(max_._text),open_._line,open_._column)
 
+def number_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef Token token
+    cdef ConcatenationAST result
+    cdef CharAST left,right
+    cdef RegexAST before
+    cdef int idx
+
+    if len(asts) == 1:
+        token = asts[0] # type:ignore
+        left = CharAST(token._text[0],token._line,token._column)
+        right = CharAST(token._text[1],token._line,token._column+1)
+        result = ConcatenationAST(left,right,cSymbol('CONCATENATION'),token._line,token._column) # type:ignore
+        for idx in range(2,len(token._text)):
+            right = CharAST(token._text[idx],token._line,token._column+idx)
+            result = ConcatenationAST(result,right,cSymbol('CONCATENATION'),token._line,token._column) # type:ignore
+    else:
+        token = asts[1] # type:ignore
+        before = asts[0]
+        for idx in range(len(token._text)):
+            right = CharAST(token._text[idx],token._line,token._column+idx)
+            result = ConcatenationAST(before,right,cSymbol('CONCATENATION'),(<RegexAST>asts[0])._line,(<RegexAST>asts[0])._column) # type:ignore
+            before = result
+    return result
+
+def number_clousure_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+    cdef Token token,token1
+    cdef ConcatenationAST result
+    cdef CharAST left,right
+    cdef RegexAST before
+    cdef int idx
+
+    token1 = asts[1] # type:ignore
+    token = asts[0] # type:ignore
+    left = CharAST(token._text[0],token._line,token._column)
+    right = CharAST(token._text[1],token._line,token._column+1)
+    result = ConcatenationAST(left,right,cSymbol('CONCATENATION'),token._line,token._column) # type:ignore
+    for idx in range(2,len(token._text)):
+        right = CharAST(token._text[idx],token._line,token._column+idx)
+        result = ConcatenationAST(result,right,cSymbol('CONCATENATION'),token._line,token._column) # type:ignore
+
+    if token1._text == '*':
+        return KleinStarAST(result,token._line,token._column)
+    if token1 == '+':
+        return PositiveClousureAST(result,token._line,token._column)
+    return OptionalAST(result,token._line,token._column)
+
 cdef BottomUpParser _build_regex_parser():
     '''
     REGEX -> RE
@@ -588,6 +634,11 @@ cdef BottomUpParser _build_regex_parser():
     # RE -> RE CHAR
     ReGrammar._add_attributed_production(RE,[RE,CHAR],concatenation_ast_reductor)
     
+    # RE -> number
+    ReGrammar._add_attributed_production(RE,[number],number_ast_reductor)
+    # RE -> RE number
+    ReGrammar._add_attributed_production(RE,[RE,number],number_ast_reductor)
+
     # RE -> RE_CONSTANT
     ReGrammar._add_attributed_production(RE,[RE_CONSTANT],single_ast_reductor)
     # RE -> RE RE_CONSTANT
@@ -641,6 +692,8 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(KLEIN_STAR,[RE_GROUP,re_klein_star],klein_star_ast_reductor)
     # KLEIN_STAR -> CHAR_SET *
     ReGrammar._add_attributed_production(KLEIN_STAR,[CHAR_SET,re_klein_star],klein_star_ast_reductor)
+    # KLEIN_STAR -> number *
+    ReGrammar._add_attributed_production(KLEIN_STAR,[number,re_klein_star],number_clousure_ast_reductor)
 
     # POSITIVE_CLOUSURE -> CHAR +
     ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[CHAR,re_positive_clousure],positive_clousure_ast_reductor)
@@ -650,6 +703,8 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[RE_GROUP,re_positive_clousure],positive_clousure_ast_reductor)
     # POSITIVE_CLOUSURE -> CHAR_SET +
     ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[CHAR_SET,re_positive_clousure],positive_clousure_ast_reductor)
+    # POSITIVE_CLOUSURE -> number +
+    ReGrammar._add_attributed_production(POSITIVE_CLOUSURE,[number,re_positive_clousure],number_clousure_ast_reductor)
 
     # OPTIONAL_CLOUSURE -> CHAR ?
     ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[CHAR,re_optional],optional_clousure_ast_reductor)
@@ -659,6 +714,8 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[RE_GROUP,re_optional],optional_clousure_ast_reductor)
     # OPTIONAL_CLOUSURE -> CHAR_SET ?
     ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[CHAR_SET,re_optional],optional_clousure_ast_reductor)
+    # OPTIONAL_CLOUSURE -> number ?
+    ReGrammar._add_attributed_production(OPTIONAL_CLOUSURE,[number,re_optional],number_clousure_ast_reductor)
 
     # RE_GROUP -> ( REGEX )
     ReGrammar._add_attributed_production(RE_GROUP,[re_lp,REGEX,re_rp],group_ast_reductor)
