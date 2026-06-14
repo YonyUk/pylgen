@@ -129,7 +129,7 @@ def _to_graph(automaton:Automaton) -> nx.DiGraph:
     return G
 
 def _is_json_serializable(obj:Any) -> bool:
-    if not obj:
+    if not obj and type(obj) not in [int,bool]:
         return False
     try:
         s = json.dumps(obj,cls=JsonSerializer)

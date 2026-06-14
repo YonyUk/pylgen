@@ -101,9 +101,6 @@ cdef class BottomUpParser(Parser):
             raise ValueError('Parsing error')
         
         if not key in self._action_table:
-            input(key)
-            with open('action.txt','w') as f:
-                f.write(f'{self._action_table}')
             raise ValueError('Parsing error')
         
         current_action = self._action_table[key]

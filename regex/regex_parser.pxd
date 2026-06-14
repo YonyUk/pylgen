@@ -25,7 +25,7 @@ cdef class ConstantRegexAST(RegexAST):
 cdef class RegexUnaryAST(RegexAST):
     cdef RegexAST _regex
 
-cdef class KleinStarAST(RegexUnaryAST):
+cdef class KleeneStarAST(RegexUnaryAST):
     pass
 
 cdef class PositiveClousureAST(RegexUnaryAST):
@@ -51,8 +51,8 @@ cdef class ComplementCharSetAST(CharSetAST):
     cdef CharSetAST _char_set
 
 cdef class RepeatPatternAST(RegexAST):
-    cdef int _min
-    cdef int _max
+    cdef CharAST _min
+    cdef CharAST _max
     cdef RegexAST _regex
 
 cdef BottomUpParser _build_regex_parser()
