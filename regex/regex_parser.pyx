@@ -539,7 +539,7 @@ cdef BottomUpParser _build_regex_parser():
 
     RE_GROUP -> ( REGEX )
 
-    REPEAT -> CHAR { CHAR , CHAR } | re_constant { CHAR , CHAR } | RE_GROUP { CHAR , CHAR }
+    REPEAT -> CHAR { CHAR , CHAR } | re_constant { CHAR , CHAR } | RE_GROUP { CHAR , CHAR } | CHAR_SET { CHAR , CHAR }
 
     CHAR_SET -> [ CHAR_SET_SEQUENCE ] | [ ^ CHAR_SET_SEQUENCE ]
 
@@ -590,6 +590,8 @@ cdef BottomUpParser _build_regex_parser():
     ReGrammar._add_attributed_production(REPEAT,[RE_GROUP,re_lb,CHAR,re_com,CHAR,re_rb],repeat_ast_reductor)
     # REPEAT -> re_constant { CHAR , CHAR }
     ReGrammar._add_attributed_production(REPEAT,[re_constant,re_lb,CHAR,re_com,CHAR,re_rb],repeat_re_constant_ast_reductor)
+    # REPEAT -> CHAR_SET { CHAR , CHAR }
+    ReGrammar._add_attributed_production(REPEAT,[CHAR_SET,re_lb,CHAR,re_com,CHAR,re_rb],repeat_ast_reductor)
 
     # CHAR_SET -> [ CHAR_SET_SEQUENCE ]
     ReGrammar._add_attributed_production(CHAR_SET,[re_lc,CHAR_SET_SEQUENCE,re_rc],char_set_ast_reductor)
