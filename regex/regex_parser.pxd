@@ -51,9 +51,12 @@ cdef class ComplementCharSetAST(CharSetAST):
     cdef CharSetAST _char_set
 
 cdef class RepeatPatternAST(RegexAST):
-    cdef CharAST _min
-    cdef CharAST _max
+    cdef StringAST _min
+    cdef StringAST _max
     cdef RegexAST _regex
+
+cdef class StringAST(AST):
+    cdef str _string
 
 cdef BottomUpParser _build_regex_parser()
 cdef BaseLexer _build_regex_lexer()

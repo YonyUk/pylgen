@@ -90,6 +90,7 @@ CHAR_SET = cSymbol('CHAR_SET') # type:ignore
 CHAR_SET_SEQUENCE = cSymbol('CHAR_SET_SEQUENCE') # type:ignore
 CHAR_SET_SEQUENCE_ATOM = cSymbol('CHAR_SET_SEQUENCE_ATOM') # type:ignore
 CHAR_RANGE = cSymbol('CHAR_RANGE') # type:ignore
+STRING = cSymbol('STRING') # type:ignore
 
 ####################################################################################################
 #                               ASTs
@@ -291,7 +292,7 @@ cdef class ComplementCharSetAST(CharSetAST):
 
 cdef class RepeatPatternAST(RegexAST):
 
-    def __init__(self, RegexAST regex, CharAST min_, CharAST max_, int line, int column):
+    def __init__(self, RegexAST regex, StringAST min_, StringAST max_, int line, int column):
         super().__init__(REPEAT, line, column)
         self._min = min_ # type:ignore
         self._min._symbol = cSymbol('min') # type:ignore
@@ -300,11 +301,11 @@ cdef class RepeatPatternAST(RegexAST):
         self._regex = regex # type:ignore
     
     @property
-    def min(self) -> CharAST:
+    def min(self) -> StringAST:
         return self._min # type:ignore
     
     @property
-    def max(self) -> CharAST:
+    def max(self) -> StringAST:
         return self._max # type:ignore
     
     @property
@@ -321,8 +322,8 @@ cdef class RepeatPatternAST(RegexAST):
         cdef tuple[str,str] transition
         cdef int max_,min_
 
-        max_ = int(self._max._char)
-        min_ = int(self._min._char)
+        max_ = int(self._max._string)
+        min_ = int(self._min._string)
 
         # maps the states by iteration
         for iteration in range(max_):
@@ -336,7 +337,7 @@ cdef class RepeatPatternAST(RegexAST):
         result._start_state = states_by_id_mapping[f'0-{aut._start_state._id}']
         result._states_by_id[f'0-{aut._start_state._id}'] = result._start_state
 
-        if self._min == 0:
+        if min_ == 0:
             result._start_state._is_accept = True # type:ignore
 
         for iteration in range(max_):
@@ -372,7 +373,18 @@ cdef class RepeatPatternAST(RegexAST):
                         if t_state._is_accept:
                             n_f_state = states_by_id_mapping[f'{iteration}-{t_id}']
                             result.add_epsilon_transition(n_f_state,n_t_state)
+
         return result
+
+cdef class StringAST(AST):
+
+    def __init__(self,str string, int line, int column):
+        super().__init__(STRING, line, column) # type:ignore
+        self._string = string
+    
+    @property
+    def string(self) -> str:
+        return self._string
 
 ###################################################################################################
 #                                  REDUCTORS
@@ -423,7 +435,7 @@ def group_ast_reductor(asts:List[RegexAST]) -> RegexAST:
 
 def repeat_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef RegexAST regex = asts[0]
-    cdef CharAST min_,max_
+    cdef StringAST min_,max_
 
     min_ = asts[2] # type:ignore
     max_ = asts[4] # type:ignore
@@ -432,7 +444,7 @@ def repeat_ast_reductor(asts:List[RegexAST]) -> RegexAST:
 
 def repeat_re_constant_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     cdef Token constant = asts[0] # type:ignore
-    cdef CharAST min_,max_
+    cdef StringAST min_,max_
     cdef RegexAST regex = ConstantRegexAST(constant._text,constant._line,constant._column)
 
     min_ = asts[2] # type:ignore
@@ -525,6 +537,20 @@ def char_set_sequence_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     new_result._next = char_range1 # type:ignore
     return new_result
 
+def string_ast_reductor(asts:List[RegexAST]) -> AST:
+    cdef StringAST string
+    cdef CharAST char
+
+    if len(asts) == 1:
+        char = asts[0] # type:ignore
+        string = StringAST(char._char,char._line,char._column)
+        return string
+    
+    string = asts[0] # type:ignore
+    char = asts[1] # type:ignore
+    string._string += char._char
+    return string
+
 cdef BottomUpParser _build_regex_parser():
     '''
     REGEX -> RE
@@ -536,6 +562,8 @@ cdef BottomUpParser _build_regex_parser():
     ATOM -> CHAR | re_constant | RE_GROUP | REPEAT | CHAR_SET | ATOM * | ATOM + | ATOM ?
 
     CHAR -> re_char | re_escape_char
+
+    STRING -> CHAR | STRING CHAR
 
     RE_GROUP -> ( REGEX )
 
@@ -576,6 +604,11 @@ cdef BottomUpParser _build_regex_parser():
     # ATOM -> ATOM ?
     ReGrammar._add_attributed_production(ATOM,[ATOM,re_optional],optional_ast_reductor)
 
+    # STRING -> CHAR
+    ReGrammar._add_attributed_production(STRING,[CHAR],string_ast_reductor)
+    # STRING -> STRING CHAR
+    ReGrammar._add_attributed_production(STRING,[STRING,CHAR],string_ast_reductor)
+
     # CHAR -> re_char
     ReGrammar._add_attributed_production(CHAR,[re_char],char_ast_reductor)
     # CHAR -> re_escape_char
@@ -584,14 +617,14 @@ cdef BottomUpParser _build_regex_parser():
     # RE_GROUP -> ( REGEX )
     ReGrammar._add_attributed_production(RE_GROUP,[re_lp,REGEX,re_rp],group_ast_reductor)
 
-    # REPEAT -> CHAR { CHAR , CHAR }
-    ReGrammar._add_attributed_production(REPEAT,[CHAR,re_lb,CHAR,re_com,CHAR,re_rb],repeat_ast_reductor)
-    # REPEAT -> RE_GROUP { CHAR , CHAR }
-    ReGrammar._add_attributed_production(REPEAT,[RE_GROUP,re_lb,CHAR,re_com,CHAR,re_rb],repeat_ast_reductor)
-    # REPEAT -> re_constant { CHAR , CHAR }
-    ReGrammar._add_attributed_production(REPEAT,[re_constant,re_lb,CHAR,re_com,CHAR,re_rb],repeat_re_constant_ast_reductor)
-    # REPEAT -> CHAR_SET { CHAR , CHAR }
-    ReGrammar._add_attributed_production(REPEAT,[CHAR_SET,re_lb,CHAR,re_com,CHAR,re_rb],repeat_ast_reductor)
+    # REPEAT -> CHAR { STRING , STRING }
+    ReGrammar._add_attributed_production(REPEAT,[CHAR,re_lb,STRING,re_com,STRING,re_rb],repeat_ast_reductor)
+    # REPEAT -> RE_GROUP { STRING , STRING }
+    ReGrammar._add_attributed_production(REPEAT,[RE_GROUP,re_lb,STRING,re_com,STRING,re_rb],repeat_ast_reductor)
+    # REPEAT -> re_constant { STRING , STRING }
+    ReGrammar._add_attributed_production(REPEAT,[re_constant,re_lb,STRING,re_com,STRING,re_rb],repeat_re_constant_ast_reductor)
+    # REPEAT -> CHAR_SET { STRING , STRING }
+    ReGrammar._add_attributed_production(REPEAT,[CHAR_SET,re_lb,STRING,re_com,STRING,re_rb],repeat_ast_reductor)
 
     # CHAR_SET -> [ CHAR_SET_SEQUENCE ]
     ReGrammar._add_attributed_production(CHAR_SET,[re_lc,CHAR_SET_SEQUENCE,re_rc],char_set_ast_reductor)
