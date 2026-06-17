@@ -1292,9 +1292,6 @@ cdef NFA _automaton_concatenation(Automaton first,Automaton second):
         is_accept = from_state._is_accept
         states_by_id[state_id] = State(state_id,state_value,is_accept)
 
-    for p in old_to_new_map.items():
-        print(p)
-
     # makes a epsilon transition from new start to first start state
     from_state = result._start_state
     to_state = states_by_id[old_to_new_map[('first',first_id,first._start_state._id)]]
