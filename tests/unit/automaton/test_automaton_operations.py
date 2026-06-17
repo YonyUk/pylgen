@@ -4835,13 +4835,11 @@ class TestAutomatonOperations:
         t1 = Table()
 
         q0 = State('q0','q0')
-        q1 = State('q1','q1')
-        q2 = State('q2','q2',True)
+        q1 = State('q1','q1',True)
 
         t1['q0','1'] = 'q1'
-        t1['q1','1'] = 'q2'
 
-        states = {q0,q1,q2}
+        states = {q0,q1}
 
         aut1 = create_dfa(states,t1,'q0',{'1'})
         aut2 = create_dfa(states,t1,'q0',{'1'})
