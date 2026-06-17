@@ -317,10 +317,10 @@ cdef bint _is_normalized(Automaton automaton):
         for t_id in automaton._epsilons[f_id]:
             if t_id == automaton._start_state._id:
                 return False # type:ignore
-        if (<State>automaton._states_by_id[f_id])._is_accept:
-            finals.add(f_id)
-        if (<State>automaton._states_by_id[t_id])._is_accept:
-            finals.add(t_id)
+            if (<State>automaton._states_by_id[f_id])._is_accept:
+                finals.add(f_id)
+            if (<State>automaton._states_by_id[t_id])._is_accept:
+                finals.add(t_id)
     return len(finals) == 1 # type:ignore
 
 cdef NFA _normalize(Automaton automaton):
@@ -335,7 +335,8 @@ cdef NFA _normalize(Automaton automaton):
     cdef list[str] finals_ids = []
 
     for from_state in automaton._states_by_id.values():
-        finals_counter += 1
+        if from_state._is_accept:
+            finals_counter += 1
     
     if finals_counter == 0:
         raise ValueError('Automaton must have at least one final state')
@@ -392,6 +393,9 @@ cdef tuple[dict[tuple[str,str],str],list[tuple[str,str]]] _build_tags_for_regex_
         else:
             tags[key] += f'|{transition[1]}'
     
+        if '|' in tags[key]:
+            tags[key] = f'({tags[key]})'
+
     for f_id in automaton._epsilons:
         for t_id in automaton._epsilons[f_id]:
             epsilons.append((f_id,t_id))
@@ -430,12 +434,13 @@ cdef tuple[dict[str,set[str]],dict[str,set[str]]] _get_predecessors_and_successo
 cdef str _get_regex(Automaton automaton):
     cdef str result,f_id,t_id,current_id,bucle_re,predecesor_current_re,current_successor_re,final_id
     cdef Automaton _regex
-    cdef set[str] states = set()
+    cdef list[str] states = []
     cdef State current_state
     cdef dict[tuple[str,str]] tags
     cdef list[tuple[str,str]] epsilons
     cdef dict[str,set[str]] predecessors,successors
     cdef tuple[str,str] tag_key,bucle_tag_key,predecessor_current_tag_key,current_successor_tag_key
+    cdef bint predecessor_current_re_derive_in_epsilon,current_successor_re_derive_in_epsilon
 
     if not _is_normalized(automaton):
         _regex = _normalize(automaton)
@@ -447,15 +452,18 @@ cdef str _get_regex(Automaton automaton):
 
     for current_state in _regex._states_by_id.values():
         if not (current_state._is_accept or current_state._id == _regex._start_state._id):
-            states.add(current_state._id)
+            states.append(current_state._id)
         elif current_state._is_accept:
             final_id = current_state._id
 
+    states.sort()
+    states = states[-1:] + states[:-1]
     while states:
-
+        input(f'tags: {tags}\n')
         current_id = states.pop()
+        input(f'state: {current_id}')
         bucle_tag_key = (current_id,current_id)
-        
+                
         if bucle_tag_key in tags:
             if len(tags[bucle_tag_key]) == 1:
                 bucle_re = f'{tags[bucle_tag_key]}*'
@@ -470,15 +478,14 @@ cdef str _get_regex(Automaton automaton):
         for f_id in predecessors[current_id]:
             if f_id == current_id:
                 continue
+            predecessor_current_re_derive_in_epsilon = False # type:ignore
             predecessor_current_tag_key = (f_id,current_id)
             # R_iq: current tag of the transition
-            if predecessor_current_tag_key in tags:
-                predecesor_current_re = tags[predecessor_current_tag_key]
+            if predecessor_current_tag_key in tags or predecessor_current_tag_key in epsilons:
+                if predecessor_current_tag_key in tags:
+                    predecesor_current_re = tags[predecessor_current_tag_key]
                 if predecessor_current_tag_key in epsilons:
-                    predecesor_current_re += '|'
-            # RULE: ε ∙ R = R
-            elif predecessor_current_tag_key in epsilons:
-                predecesor_current_re = ''
+                    predecessor_current_re_derive_in_epsilon = True # type:ignore
             else:
                 # RULE: ∅ ∙ R = ∅
                 # the current tag doesn't gets updated
@@ -486,18 +493,20 @@ cdef str _get_regex(Automaton automaton):
                 # R_iq = ∅ ---> (R_iq ∙ R_qq* ∙ R_qj) = (∅ ∙ R_qq* ∙ R_qj) = (∅ ∙ R_qj) = (∅) = ∅
                 # So R_iq = ∅ ---> R_ij = R_ij | (R_iq ∙ R_qq* ∙ R_qj) = R_ij | ∅ = R_ij
                 continue
+ 
+            if not predecessor_current_re_derive_in_epsilon and predecesor_current_re == '()':
+                predecessor_current_re_derive_in_epsilon = True # type:ignore
 
             for t_id in successors[current_id]:
                 if t_id == current_id:
                     continue
+                current_successor_re_derive_in_epsilon = False # type:ignore
                 current_successor_tag_key = (current_id,t_id)
-                if current_successor_tag_key in tags:
-                    current_successor_re = tags[current_successor_tag_key]
+                if current_successor_tag_key in tags or current_successor_tag_key in epsilons:
+                    if current_successor_tag_key in tags:
+                        current_successor_re = tags[current_successor_tag_key]
                     if current_successor_tag_key in epsilons:
-                        current_successor_re += '|'
-                # RULE: R ∙ ε = R
-                elif current_successor_tag_key in epsilons:
-                    current_successor_re = ''
+                        current_successor_re_derive_in_epsilon = True # type:ignore
                 else:
                     # RULE: R ∙ ∅ = ∅
                     # the current tag doesn't gets updated
@@ -505,13 +514,33 @@ cdef str _get_regex(Automaton automaton):
                     # R_qj = ∅ ---> (R_iq ∙ R_qq* ∙ R_qj) = (R_iq ∙ R_qq* ∙ ∅) = (R_iq ∙ ∅) = (∅) = ∅
                     # So R_qj = ∅ ---> R_ij = R_ij | (R_iq ∙ R_qq* ∙ R_qj) = R_ij | ∅ = R_ij
                     continue
+                
+                if not current_successor_re:
+                    current_successor_re = ''
+                if current_successor_re == '()':
+                    current_successor_re_derive_in_epsilon = True # type:ignore
+
+                if predecessor_current_re_derive_in_epsilon and len(predecesor_current_re) > 0:
+                    if len(predecesor_current_re) == 1:
+                        predecesor_current_re = f'{predecesor_current_re}?'
+                    else:
+                        predecesor_current_re = f'({predecesor_current_re})?'
+                if current_successor_re_derive_in_epsilon and len(current_successor_re) > 0:
+                    if len(current_successor_re) == 1:
+                        current_successor_re = f'{current_successor_re}?'
+                    else:
+                        current_successor_re = f'({current_successor_re})?'
+                
+                input(f'R_iq: {predecesor_current_re}, R_qq: {bucle_re}, R_qj: {current_successor_re}')
                 tag_key = (f_id,t_id)
                 if tag_key in tags:
-                    tags[tag_key] = f'{tags[tag_key]}|({predecesor_current_re}{bucle_re}{current_successor_re})'
+                    tags[tag_key] = f'({tags[tag_key]}|{predecesor_current_re}{bucle_re}{current_successor_re})'
                 else:
                     # RULE: ∅ | R = R
-                    tags[tag_key] = f'({predecesor_current_re}{bucle_re}{current_successor_re})'
+                    tags[tag_key] = f'{predecesor_current_re}{bucle_re}{current_successor_re}'
                 
+                input(f'R_ij: {tags[tag_key]}\n')
+
                 if not f_id in successors:
                     successors[f_id] = set()
                 successors[f_id].add(t_id)
