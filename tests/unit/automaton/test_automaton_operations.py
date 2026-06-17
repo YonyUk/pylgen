@@ -4831,6 +4831,25 @@ class TestAutomatonOperations:
 
         assert conc.accept(list(string)) == should_accept
     
+    def test_automaton_concatenation_operation_6(self):
+        t1 = Table()
+
+        q0 = State('q0','q0')
+        q1 = State('q1','q1',True)
+
+        t1['q0','1'] = 'q1'
+
+        states = {q0,q1}
+
+        aut1 = create_dfa(states,t1,'q0',{'1'})
+        aut2 = create_dfa(states,t1,'q0',{'1'})
+
+        aut = aut1 + aut2
+        aut = aut.to_deterministic()
+
+        assert aut.accept(['1','1'])
+        assert not aut.accept(['1','1','1','1'])
+
     @pytest.mark.parametrize("string,should_accept",[
         ('',True),
         ('0',True),
