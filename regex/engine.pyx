@@ -17,15 +17,22 @@ lexer:BaseLexer = loads(b'\x80\x04\x95\x02\x00\x01\x00\x00\x00\x00\x00\x8c\x0ble
 cdef class RegexEngine:
 
     @staticmethod
-    def regex_parser() -> Parser:
+    def BuildRegexParser() -> Parser:
         return _build_regex_parser()
     
     @staticmethod
-    def regex_lexer() -> BaseLexer:
+    def BuildRegexLexer() -> BaseLexer:
         return _build_regex_lexer()
     
     @staticmethod
-    def parse(str re) -> DFA:
+    def Parse(str re) -> DFA:
+        '''
+        Args:
+            re (str)
+        
+        Returns:
+            DFA: the automaton wich language is exactly the described by the given regular expression
+        '''
         cdef Automaton aut
         cdef int line,column
         cdef Token end_token
@@ -75,6 +82,13 @@ cdef class RegexEngine:
     
     @staticmethod
     def GetRegex(Automaton automaton) -> str:
+        '''
+        Args:
+            automaton (Automaton)
+        
+        Returns:
+            str: a regex equivalent to the given automaton
+        '''
         return _get_regex(automaton)
 
 cdef DFA _left_regular_automaton(Grammar g):

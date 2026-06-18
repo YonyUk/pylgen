@@ -9,7 +9,7 @@ from common import Table
 class TestIntegrationRegex:
 
     def test_parse_simples_re(self):
-        aut = RegexEngine.parse('a')
+        aut = RegexEngine.Parse('a')
         for char in string.printable:
             assert aut.accept([char]) == (char == 'a')
         for _ in range(100):
@@ -26,7 +26,7 @@ class TestIntegrationRegex:
         '\\s'
     ])
     def test_parse_constant(self,re_exp:str):
-        aut = RegexEngine.parse(re_exp)
+        aut = RegexEngine.Parse(re_exp)
         for _ in range(1000):
             k = random.randint(0,10)
             word = random.choices(string.printable,k=k)
@@ -42,7 +42,7 @@ class TestIntegrationRegex:
         'g{10,15}'
     ])
     def test_parse_regex_1(self,re_exp:str):
-        aut = RegexEngine.parse(re_exp)
+        aut = RegexEngine.Parse(re_exp)
         for char in string.printable:
             for _ in range(1000):
                 word = [char]*random.randint(0,16)
@@ -62,14 +62,14 @@ class TestIntegrationRegex:
         '[0-37-9]'
     ])
     def text_parse_regex_2(self,re_exp:str):
-        aut = RegexEngine.parse(re_exp)
+        aut = RegexEngine.Parse(re_exp)
         for _ in range(1000):
             k = random.randint(0,10)
             word = random.choices(string.printable,k=k)
             assert aut.accept(word) == (re.fullmatch(re_exp,''.join(word)) is not None)
     
     def test_parse_regex_3(self):
-        aut = RegexEngine.parse('(hello)*')
+        aut = RegexEngine.Parse('(hello)*')
         assert aut.accept(list('hello'))
         assert aut.accept(list(''))
         assert aut.accept(list('hellohellohellohellohello'))
@@ -77,7 +77,7 @@ class TestIntegrationRegex:
         assert not aut.accept(list('h'))
         assert not aut.accept(list('hellohe'))
         assert not aut.accept(list('hellohellohel'))
-        aut = RegexEngine.parse('(hello)+')
+        aut = RegexEngine.Parse('(hello)+')
         assert aut.accept(list('hello'))
         assert aut.accept(list('hellohellohellohellohello'))
         assert not aut.accept(list(''))
@@ -85,7 +85,7 @@ class TestIntegrationRegex:
         assert not aut.accept(list('h'))
         assert not aut.accept(list('hellohe'))
         assert not aut.accept(list('hellohellohel'))
-        aut = RegexEngine.parse('(hello)?')
+        aut = RegexEngine.Parse('(hello)?')
         assert aut.accept(list('hello'))
         assert aut.accept(list(''))
         assert not aut.accept(list('hellohellohellohellohello'))
@@ -109,7 +109,7 @@ class TestIntegrationRegex:
         '[0-9a-z]?',
     ])
     def test_parser_regex_4(self,re_exp:str):
-        aut = RegexEngine.parse(re_exp)
+        aut = RegexEngine.Parse(re_exp)
         for _ in range(1000):
             k = random.randint(0,5)
             word = random.choices(string.ascii_letters+string.digits)
@@ -142,16 +142,16 @@ class TestIntegrationRegex:
         ('[a-z]|(hello)+|(play){2,4}','playplayplayplayplay',False),
     ])
     def test_parser_regex_5(self,re_exp:str,word:str,should_accept:bool):
-        aut = RegexEngine.parse(re_exp)
+        aut = RegexEngine.Parse(re_exp)
         assert aut.accept(list(word)) == should_accept
     
     def test_parser_regex_6(self):
-        aut = RegexEngine.parse('.')
+        aut = RegexEngine.Parse('.')
         for char in string.printable:
             assert aut.accept([char]) == (char != '\n')
     
     def test_parser_regex_7(self):
-        aut = RegexEngine.parse('.*')
+        aut = RegexEngine.Parse('.*')
         for _ in range(1000):
             k = random.randint(1,20)
             word = random.choices(string.printable,k=k)
@@ -206,7 +206,7 @@ class TestIntegrationRegex:
         ('\\|','|',True)
     ])
     def test_parser_regex_8(self,re_exp:str,text:str,should_accept:bool):
-        aut = RegexEngine.parse(re_exp)
+        aut = RegexEngine.Parse(re_exp)
         assert aut.accept(list(text)) == should_accept
     
     def test_get_regex_1(self):
@@ -432,7 +432,7 @@ class TestIntegrationRegex:
 
         regex = RegexEngine.GetRegex(aut)
 
-        aut_re = RegexEngine.parse(regex)
+        aut_re = RegexEngine.Parse(regex)
 
         for _ in range(100):
             k = random.randint(1,6)
@@ -458,7 +458,7 @@ class TestIntegrationRegex:
 
         regex = RegexEngine.GetRegex(aut)
 
-        aut_re = RegexEngine.parse(regex)
+        aut_re = RegexEngine.Parse(regex)
         
         for _ in range(1000):
             k = random.randint(1,3)
