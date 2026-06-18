@@ -8,7 +8,8 @@ from random import choices,randint
 from common.table import Table
 from common.types import Symbol
 from common.enums import TokenType
-from lexer.lexer import BaseLexer
+from lexer.base_lexer import BaseLexer
+from lexer.lexer import Lexer
 from automaton.automaton import NFA,DFA,State,create_dfa,get_words_automaton_with_value
 
 class TokenTypeTestEnum(TokenType):
@@ -91,7 +92,7 @@ class TestIntegrationBaseLexer:
         
         return dfa
 
-    def test_lexer_initialization_1(self,number_dfa:DFA,ignore_dfa:DFA):
+    def test_lexer_initialization_1_1(self,number_dfa:DFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
         lexer[0,TokenTypeTestEnum.NUMBER] = number_dfa
         lexer.initialize()
@@ -103,8 +104,21 @@ class TestIntegrationBaseLexer:
             assert dfa.accept(number)
         
         assert not dfa.accept([])
+
+    def test_lexer_initialization_1_2(self,ignore_dfa:DFA):
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
+        lexer.initialize()
+
+        dfa = lexer.dfa
+        for _ in range(100):
+            size = randint(1,20)
+            number = choices(digits,k=size)
+            assert dfa.accept(number)
+        
+        assert not dfa.accept([])
     
-    def test_lexer_initialization_2(self,keyword_nfa:NFA,keywords:list[str],ignore_dfa:DFA):
+    def test_lexer_initialization_2_1(self,keyword_nfa:NFA,keywords:list[str],ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
         lexer[0,TokenTypeTestEnum.KEYWORD] = keyword_nfa
         lexer.initialize()
@@ -121,7 +135,24 @@ class TestIntegrationBaseLexer:
             else:
                 assert dfa.accept(word)
     
-    def test_lexer_initialization_3(self,number_dfa:DFA,keyword_nfa:NFA,keywords:list[str],ignore_dfa:DFA):
+    def test_lexer_initialization_2_2(self,keywords:list[str],ignore_dfa:DFA):
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.KEYWORD] = '|'.join(keywords)
+        lexer.initialize()
+
+        dfa = lexer.dfa
+        for word in keywords:
+            assert dfa.accept(list(word))
+        
+        for _ in range(100):
+            size = randint(1,20)
+            word = choices(ascii_letters,k=size)
+            if not ''.join(word) in keywords:
+                assert not dfa.accept(word)
+            else:
+                assert dfa.accept(word)
+    
+    def test_lexer_initialization_3_1(self,number_dfa:DFA,keyword_nfa:NFA,keywords:list[str],ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
         lexer[0,TokenTypeTestEnum.NUMBER] = number_dfa
         lexer[1,TokenTypeTestEnum.KEYWORD] = keyword_nfa
@@ -145,8 +176,33 @@ class TestIntegrationBaseLexer:
                 assert not dfa.accept(word)
             else:
                 assert dfa.accept(word)
+
+    def test_lexer_initialization_3_2(self,keywords:list[str],ignore_dfa:DFA):
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
+        lexer[1,TokenTypeTestEnum.KEYWORD] = '|'.join(keywords)
+        lexer.initialize()
+
+        dfa = lexer.dfa
+        for _ in range(100):
+            size = randint(1,20)
+            number = choices(digits,k=size)
+            assert dfa.accept(number)
         
-    def test_lexer_tokenization_1(self,number_dfa:DFA,ignore_dfa:DFA):
+        assert not dfa.accept([])
+
+        for word in keywords:
+            assert dfa.accept(list(word))
+        
+        for _ in range(100):
+            size = randint(1,20)
+            word = choices(ascii_letters,k=size)
+            if not ''.join(word) in keywords:
+                assert not dfa.accept(word)
+            else:
+                assert dfa.accept(word)
+        
+    def test_lexer_tokenization_1_1(self,number_dfa:DFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
         lexer[0,TokenTypeTestEnum.NUMBER] = number_dfa
         lexer.initialize()
@@ -155,7 +211,16 @@ class TestIntegrationBaseLexer:
         
         assert len(tokens) == 0
 
-    def test_lexer_tokenization_2(self,number_dfa:DFA,ignore_dfa:DFA):
+    def test_lexer_tokenization_1_2(self,ignore_dfa:DFA):
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
+        lexer.initialize()
+
+        tokens = list(lexer.tokens)
+        
+        assert len(tokens) == 0
+
+    def test_lexer_tokenization_2_1(self,number_dfa:DFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
         lexer[0,TokenTypeTestEnum.NUMBER] = number_dfa
         lexer.initialize()
@@ -185,8 +250,39 @@ class TestIntegrationBaseLexer:
         for i in range(len(tokens)):
             assert tokens[i].column == pos[i][0]
             assert tokens[i].line == pos[i][1]
+
+    def test_lexer_tokenization_2_2(self,ignore_dfa:DFA):
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
+        lexer.initialize()
+
+        text = '''1 0 01 10 35 353
+3534 172
+1238 23819 238932
+'''
+        lexer.load_text(text)
+
+        tokens = list(lexer.tokens)
+        pos = [
+            (1,1),
+            (3,1),
+            (5,1),
+            (8,1),
+            (11,1),
+            (14,1),
+            (1,2),
+            (6,2),
+            (1,3),
+            (6,3),
+            (12,3)
+        ]
+        assert len(tokens) == 11
+        assert all(map(lambda token:token.type==TokenTypeTestEnum.NUMBER,tokens))
+        for i in range(len(tokens)):
+            assert tokens[i].column == pos[i][0]
+            assert tokens[i].line == pos[i][1]
     
-    def test_lexer_tokenization_3(self,keyword_nfa:NFA,ignore_dfa:DFA):
+    def test_lexer_tokenization_3_1(self,keyword_nfa:NFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
         lexer[0,TokenTypeTestEnum.KEYWORD] = keyword_nfa
         lexer.initialize()
@@ -209,8 +305,32 @@ len input print
         for i in range(len(tokens)):
             assert tokens[i].column == pos[i][0]
             assert tokens[i].line == pos[i][1]
+
+    def test_lexer_tokenization_3_2(self,keywords:list[str],ignore_dfa:DFA):
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.KEYWORD] = '|'.join(keywords)
+        lexer.initialize()
+
+        text = '''print input
+len input print
+'''
+
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        pos = [
+            (1,1),
+            (7,1),
+            (1,2),
+            (5,2),
+            (11,2)
+        ]
+        assert len(tokens) == 5
+        assert all(map(lambda token:token.type==TokenTypeTestEnum.KEYWORD,tokens))
+        for i in range(len(tokens)):
+            assert tokens[i].column == pos[i][0]
+            assert tokens[i].line == pos[i][1]
     
-    def test_lexer_tokenization_4(self,variable_dfa:DFA,ignore_dfa:DFA):
+    def test_lexer_tokenization_4_1(self,variable_dfa:DFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
         lexer[0,TokenTypeTestEnum.VARIABLE] = variable_dfa
         lexer.initialize()
@@ -235,8 +355,34 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         for i in range(len(tokens)):
             assert tokens[i].column == pos[i][0]
             assert tokens[i].line == pos[i][1]
+
+    def test_lexer_tokenization_4_2(self,ignore_dfa:DFA):
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.VARIABLE] = '[a-zA-Z_]\\w*'
+        lexer.initialize()
+
+        text = '''var var1 _var2
+var_3 var_4_ _var_5 nad_2_nad_12_token
+'''
+
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        pos = [
+            (1,1),
+            (5,1),
+            (10,1),
+            (1,2),
+            (7,2),
+            (14,2),
+            (21,2)
+        ]
+        assert len(tokens) == 7
+        assert all(map(lambda token:token.type==TokenTypeTestEnum.VARIABLE,tokens))
+        for i in range(len(tokens)):
+            assert tokens[i].column == pos[i][0]
+            assert tokens[i].line == pos[i][1]
     
-    def test_lexer_tokenization_5(self,keyword_nfa:NFA,number_dfa:DFA,variable_dfa:DFA,ignore_dfa:DFA):
+    def test_lexer_tokenization_5_1(self,keyword_nfa:NFA,number_dfa:DFA,variable_dfa:DFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
         lexer[0,TokenTypeTestEnum.KEYWORD] = keyword_nfa
         lexer[1,TokenTypeTestEnum.VARIABLE] = variable_dfa
@@ -267,8 +413,40 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
             assert token.column == column
             assert token.line == line
+
+    def test_lexer_tokenization_5_2(self,keywords:list[str],ignore_dfa:DFA):
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.KEYWORD] = '|'.join(keywords)
+        lexer[1,TokenTypeTestEnum.VARIABLE] = '[a-zA-Z_]\\w*'
+        lexer[2,TokenTypeTestEnum.NUMBER] = '\\d+'
+        lexer.initialize()
+
+        text = '''print my_var len
+123 _var_2_in input var05
+'''
+
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        types = [
+            TokenTypeTestEnum.KEYWORD,
+            TokenTypeTestEnum.VARIABLE,
+            TokenTypeTestEnum.KEYWORD,
+            TokenTypeTestEnum.NUMBER,
+            TokenTypeTestEnum.VARIABLE,
+            TokenTypeTestEnum.KEYWORD,
+            TokenTypeTestEnum.VARIABLE
+        ]
+        assert len(tokens) == 7
+        for index,token in enumerate(tokens):
+            assert token.type == types[index]
+            match_:re.Match = re.search(token.text,text) # type: ignore
+            pos = match_.start()
+            column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
+            line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
+            assert token.column == column
+            assert token.line == line
     
-    def test_lexer_tokenization_6(self,number_dfa:DFA,symbol_dfa:NFA,operator_dfa:NFA,ignore_dfa:DFA):
+    def test_lexer_tokenization_6_1(self,number_dfa:DFA,symbol_dfa:NFA,operator_dfa:NFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
         lexer[0,TokenTypeTestEnum.NUMBER] = number_dfa
         lexer[1,TokenTypeTestEnum.SYMBOL] = symbol_dfa
@@ -297,11 +475,67 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             assert token.column == column
             assert token.line == line
 
-    def test_lexer_tokenization_7(self,number_dfa:DFA,symbol_dfa:NFA,operator_dfa:NFA,ignore_dfa:DFA):
+    def test_lexer_tokenization_6_2(self,operators:List[str],symbols:List[str],ignore_dfa:DFA):
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
+        lexer[1,TokenTypeTestEnum.SYMBOL] = '\\(|\\)'
+        lexer[2,TokenTypeTestEnum.OPERATOR] = '\\*|\\+'
+
+        lexer.initialize()
+        text = "(8*5)"
+
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        types = [
+            TokenTypeTestEnum.SYMBOL,
+            TokenTypeTestEnum.NUMBER,
+            TokenTypeTestEnum.OPERATOR,
+            TokenTypeTestEnum.NUMBER,
+            TokenTypeTestEnum.SYMBOL
+        ]
+        assert len(tokens) == 5
+        for index,token in enumerate(tokens):
+            assert token.type == types[index]
+            t_text = f'\\{token.text}' if token.text in '()*+' else token.text
+            match_:re.Match = re.search(t_text,text) # type: ignore
+            pos = match_.start()
+            column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
+            line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
+            assert token.column == column
+            assert token.line == line
+
+    def test_lexer_tokenization_7_1(self,number_dfa:DFA,symbol_dfa:NFA,operator_dfa:NFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
         lexer[0,TokenTypeTestEnum.NUMBER] = number_dfa
         lexer[1,TokenTypeTestEnum.SYMBOL] = symbol_dfa
         lexer[2,TokenTypeTestEnum.OPERATOR] = operator_dfa
+
+        lexer.initialize()
+        text = "9+ 2"
+
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        types = [
+            TokenTypeTestEnum.NUMBER,
+            TokenTypeTestEnum.OPERATOR,
+            TokenTypeTestEnum.NUMBER,
+        ]
+        assert len(tokens) == 3
+        for index,token in enumerate(tokens):
+            assert token.type == types[index]
+            t_text = f'\\{token.text}' if token.text in '()*+' else token.text
+            match_:re.Match = re.search(t_text,text) # type: ignore
+            pos = match_.start()
+            column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
+            line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
+            assert token.column == column
+            assert token.line == line
+
+    def test_lexer_tokenization_7_2(self,symbols:List[str],operators:List[str],ignore_dfa:DFA):
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
+        lexer[1,TokenTypeTestEnum.SYMBOL] = '\\(|\\)'
+        lexer[2,TokenTypeTestEnum.OPERATOR] = '\\*|\\+'
 
         lexer.initialize()
         text = "9+ 2"
