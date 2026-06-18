@@ -5,7 +5,7 @@ import pytest
 from automaton import DFA
 from common.types import Symbol
 from common.enums import TokenType
-from lexer.lexer import BaseLexer,LexerNotInitializedException,LexerNotTokensProvidedException
+from lexer.base_lexer import BaseLexer,LexerNotInitializedException,LexerNotTokensProvidedException
 
 class MyInvalidTokenType(StrEnum):
     T1 = 'T1'

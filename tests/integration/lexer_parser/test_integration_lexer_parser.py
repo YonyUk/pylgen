@@ -8,7 +8,8 @@ from grammar.grammar import Grammar,Production
 from parser.parser_builder import ParserBuilder
 from parser.parser_type import ParserType
 from parser.parser import BottomUpParser
-from lexer.lexer import BaseLexer
+from lexer.base_lexer import BaseLexer
+from lexer.lexer import Lexer
 from automaton.automaton import NFA, State,DFA,get_words_automaton_with_value
 
 END_SYMBOL = '$'
@@ -237,6 +238,14 @@ class TestIntegrationLexerParser:
         lexer[1,TokenTypeEnum.SYMBOL] = symbols_dfa
         lexer[2,TokenTypeEnum.OPERATOR] = operators_dfa
         return lexer
+
+    @pytest.fixture
+    def lexer1(self,ignore_dfa:DFA):
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeEnum.NUMBER] = '\\d+'
+        lexer[1,TokenTypeEnum.SYMBOL] = '\\(|\\)'
+        lexer[2,TokenTypeEnum.OPERATOR] = '\\+|\\*\\*?|\\-|/|%'
+        return lexer
     
     @pytest.fixture
     def parser1(self) -> BottomUpParser:
@@ -287,9 +296,22 @@ class TestIntegrationLexerParser:
         "9+4*5",
         "(1 + 3)* (5+7) *(2 +10 * 15)"
     ])
-    def test_simple_arithmetic_parser(self,text:str,lexer:BaseLexer,parser1:BottomUpParser):
+    def test_simple_arithmetic_parser_1(self,text:str,lexer:BaseLexer,parser1:BottomUpParser):
         lexer.load_text(text)
         ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
+    
+    @pytest.mark.parametrize("text",[
+        "12 + 4",
+        "9 *3",
+        "(8*5)",
+        "7 +5",
+        "9+ 2",
+        "9+4*5",
+        "(1 + 3)* (5+7) *(2 +10 * 15)"
+    ])
+    def test_simple_arithmetic_parser_2(self,text:str,lexer1:Lexer,parser1:BottomUpParser):
+        lexer1.load_text(text)
+        ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
     
     @pytest.mark.parametrize("text",[
         "1-2",
@@ -298,15 +320,36 @@ class TestIntegrationLexerParser:
         "(1 - 5) / 10",
         "1 + 4 * (3/2) - 9"
     ])
-    def test_normal_arithmetic_parser(self,text:str,lexer:BaseLexer,parser2:BottomUpParser):
+    def test_normal_arithmetic_parser_1(self,text:str,lexer:BaseLexer,parser2:BottomUpParser):
         lexer.load_text(text)
         ast = parser2.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
-    
+
+    @pytest.mark.parametrize("text",[
+        "1-2",
+        "4 / 2",
+        "1 -2/4",
+        "(1 - 5) / 10",
+        "1 + 4 * (3/2) - 9"
+    ])
+    def test_normal_arithmetic_parser_2(self,text:str,lexer1:Lexer,parser2:BottomUpParser):
+        lexer1.load_text(text)
+        ast = parser2.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+
+
     @pytest.mark.parametrize("text",[
         " 2 % 1",
         " 3 ** 2",
         " 23+342 / (4**9 + 10) -235/4 + 20**3%3"
     ])
-    def test_extended_arithmetic_parser(self,text:str,lexer:BaseLexer,parser3:BottomUpParser):
+    def test_extended_arithmetic_parser_1(self,text:str,lexer:BaseLexer,parser3:BottomUpParser):
         lexer.load_text(text)
         ast = parser3.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
+
+    @pytest.mark.parametrize("text",[
+        " 2 % 1",
+        " 3 ** 2",
+        " 23+342 / (4**9 + 10) -235/4 + 20**3%3"
+    ])
+    def test_extended_arithmetic_parser_2(self,text:str,lexer1:BaseLexer,parser3:BottomUpParser):
+        lexer1.load_text(text)
+        ast = parser3.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
