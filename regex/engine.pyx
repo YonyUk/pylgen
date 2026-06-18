@@ -33,27 +33,7 @@ cdef class RegexEngine:
         Returns:
             DFA: the automaton wich language is exactly the described by the given regular expression
         '''
-        cdef Automaton aut
-        cdef int line,column
-        cdef Token end_token
-        cdef BaseLexer _lexer = lexer
-        cdef Parser _parser = parser
-        _lexer.load_text(re)
-        while _lexer._move_next():
-            _parser._try_parse(_lexer._current_token)
-            line = _lexer._current_token._line
-            column = _lexer._current_token._column
-        end_token = Token('\x00',ReTokenType.SYMBOL,Symbol('\x00',True),line,column + 1) # type:ignore
-        _parser._try_parse(end_token)
-        if _parser._parsed:
-            aut = (<RegexAST>_parser._ast)._get_automaton() # type:ignore
-            _parser.reset()
-            if isinstance(aut,NFA):
-                aut = aut.to_deterministic()
-            aut = aut.minimize() # type:ignore
-            return aut # type:ignore
-        _parser.reset()
-        raise ValueError()
+        return _parse(re)
 
     @staticmethod
     def GetAutomaton(g:Grammar) -> DFA:
@@ -612,3 +592,26 @@ cdef str _get_regex(Automaton automaton):
             return ''
         raise ValueError('the given automaton is empty')
     return tags[tag_key]
+
+cdef DFA _parse(str re):
+    cdef Automaton aut
+    cdef int line,column
+    cdef Token end_token
+    cdef BaseLexer _lexer = lexer
+    cdef Parser _parser = parser
+    _lexer.load_text(re)
+    while _lexer._move_next():
+        _parser._try_parse(_lexer._current_token)
+        line = _lexer._current_token._line
+        column = _lexer._current_token._column
+    end_token = Token('\x00',ReTokenType.SYMBOL,Symbol('\x00',True),line,column + 1) # type:ignore
+    _parser._try_parse(end_token)
+    if _parser._parsed:
+        aut = (<RegexAST>_parser._ast)._get_automaton() # type:ignore
+        _parser.reset()
+        if isinstance(aut,NFA):
+            aut = aut.to_deterministic()
+        aut = aut.minimize() # type:ignore
+        return aut # type:ignore
+    _parser.reset()
+    raise ValueError()
