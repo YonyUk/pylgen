@@ -1,7 +1,7 @@
 from common.types cimport AST
 from automaton.automaton cimport Automaton
 from parser.parser cimport BottomUpParser
-from lexer.lexer cimport BaseLexer
+from lexer.base_lexer cimport BaseLexer
 
 cdef class RegexAST(AST):
     cdef Automaton _get_automaton(self)

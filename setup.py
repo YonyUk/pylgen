@@ -81,9 +81,9 @@ parser_extensions = Extension(
 #                                  LEXER
 ###################################################################################
 lexer_extensions = Extension(
-    name='lexer.lexer',
+    name='lexer.base_lexer',
     sources=[
-        'lexer/lexer.pyx'
+        'lexer/base_lexer.pyx'
     ]
 )
 

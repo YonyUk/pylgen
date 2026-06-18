@@ -20,7 +20,7 @@ from automaton.automaton cimport (
 )
 from grammar.grammar cimport AttributedGrammar
 from parser.parser_builder cimport _build_lalr_parser_from_attributed
-from lexer.lexer cimport BaseLexer
+from lexer.base_lexer cimport BaseLexer
 
 from .enums import ReTokenType
 
