@@ -19,3 +19,6 @@ class RegexEngine:
 
     @staticmethod
     def parse(re:str) -> DFA: ...
+
+    @staticmethod
+    def GetRegex(automaton:Automaton) -> str: ...

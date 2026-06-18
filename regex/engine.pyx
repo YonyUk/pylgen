@@ -293,9 +293,33 @@ cdef Grammar _get_grammar(Automaton automaton):
     return result
 
 cdef bint _is_normalized(Automaton automaton):
-    cdef str f_id,t_id
+    cdef str f_id,t_id,symbol
     cdef tuple[str,str] transition
     cdef set[str] finals = set()
+    cdef list[str] queue,seen
+
+    stack = [automaton._start_state._id]
+    seen = []
+
+    # checks for unreachables states
+    # BFS
+    while stack:
+        f_id = stack.pop(0)
+        seen.append(f_id)
+
+        for transition,t_id in automaton._trans_func._table.items():
+            if transition[0] != f_id:
+                continue
+            if not (t_id in stack or t_id in seen):
+                stack.append(t_id)
+        
+        if f_id in automaton._epsilons:
+            for t_id in automaton._epsilons[f_id]:
+                if not (t_id in stack or t_id in seen):
+                    stack.append(t_id)
+    
+    if len(seen) < len(automaton._states_by_id):
+        raise ValueError('unreachables states detected')
 
     for transition in automaton._trans_func._table:
         f_id = transition[0]
@@ -459,7 +483,6 @@ cdef str _get_regex(Automaton automaton):
     while states:
         current_id = states.pop()
         bucle_tag_key = (current_id,current_id)
-        
         if bucle_tag_key in tags:
             if len(tags[bucle_tag_key]) == 1:
                 bucle_re = f'{tags[bucle_tag_key]}*'
@@ -470,7 +493,7 @@ cdef str _get_regex(Automaton automaton):
         else:
             # RULE: ∅* = ε and ε* = ε
             bucle_re = ''
-                
+        
         for f_id in predecessors[current_id]:
             if f_id == current_id:
                 continue
@@ -561,8 +584,17 @@ cdef str _get_regex(Automaton automaton):
             del predecessors[current_id]
         if current_id in successors:
             del successors[current_id]
-                
+    
+    for tag_key in tags:
+        if tag_key in epsilons:
+            if len(tags[tag_key]) == 1:
+                tags[tag_key] = f'{tags[tag_key]}?'
+            else:
+                tags[tag_key] = f'({tags[tag_key]})?'
+
     tag_key = (_regex._start_state._id,final_id)
     if not tag_key in tags:
+        if tag_key in epsilons:
+            return ''
         raise ValueError('the given automaton is empty')
     return tags[tag_key]
