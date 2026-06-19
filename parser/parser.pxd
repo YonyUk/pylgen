@@ -1,5 +1,6 @@
 from common.types cimport Token,AST,Symbol
 from grammar.grammar cimport Production
+from analisis.error cimport SintaxError
 
 cdef class ParseTreeNode:
     cdef Symbol _symbol
@@ -11,6 +12,7 @@ cdef class Parser:
     cdef bint _parsed
     cdef ParseTreeNode _parse_tree
     cdef list[ParseTreeNode] _parse_tree_nodes
+    cdef set[SintaxError] _errors
 
     cdef void _try_parse(self,Token token)
     cpdef void reset(self)

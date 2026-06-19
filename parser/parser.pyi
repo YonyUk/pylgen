@@ -1,6 +1,7 @@
-from typing import Callable, Dict, Iterable, List, Tuple
+from typing import Callable, Dict, Iterable, List, Set, Tuple
 from common.types import Token,AST,Symbol
 from grammar.grammar import Production
+from analisis.error import SintaxError
 
 class ParseTreeNode:
 
@@ -24,6 +25,9 @@ class Parser:
 
     @property
     def parse_tree(self) -> ParseTreeNode: ...
+
+    @property
+    def errors(self) -> Set[SintaxError]: ...
 
 class BottomUpParser(Parser):
 

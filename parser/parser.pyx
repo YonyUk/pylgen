@@ -3,6 +3,7 @@ from typing import Iterable,Callable,List,Tuple,Dict
 from common.types cimport Token,AST,Symbol
 from grammar.grammar cimport Production
 from parser.bottom_up_parser_actions import BottomUpParserAction
+from analisis.error cimport SintaxError
 
 cdef class ParseTreeNode:
 
@@ -63,6 +64,10 @@ cdef class Parser:
         if self._parsed:
             return self._parse_tree
         raise ValueError('Nothing parsed yet')
+    
+    @property
+    def errors(self) -> set[SintaxError]:
+        return self._errors
 
     cpdef void reset(self):
         raise NotImplementedError()
