@@ -11,6 +11,7 @@ from common.enums import TokenType
 from lexer.base_lexer import BaseLexer
 from lexer.lexer import Lexer
 from automaton.automaton import NFA,DFA,State,create_dfa,get_words_automaton_with_value
+from analisis.lexical import LexicRule
 
 class TokenTypeTestEnum(TokenType):
     NUMBER = 'NUMBER'
@@ -557,3 +558,65 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
             assert token.column == column
             assert token.line == line
+    
+    def test_lexer_tokenization_with_error_collecting_1(self,ignore_dfa:DFA):
+
+        class IntegerRule(LexicRule):
+
+            def __init__(self) -> None:
+                super().__init__('integers must star with a non-zero digit or be zero')
+            
+            def _check(self, text: str):
+                return str(int(text)) == text
+
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
+        lexer.add_rule(TokenTypeTestEnum.NUMBER,IntegerRule())
+
+        lexer.initialize()
+
+        text = '010 23 00000 245 0 003'
+        lexer.load_text(text)
+        for _ in lexer.tokens: pass
+
+        errors = [(1,1),(1,8),(1,20)]
+        assert len(lexer.errors) != 0
+        for error in lexer.errors:
+            assert (error.line,error.column) in errors
+
+    def test_lexer_tokenization_with_error_collecting_2(self,ignore_dfa:DFA):
+
+        class IntegerRule(LexicRule):
+
+            def __init__(self) -> None:
+                super().__init__('integers must star with a non-zero digit or be zero')
+            
+            def _check(self, text: str):
+                return str(int(text)) == text
+        
+        class VariableRule(LexicRule):
+
+            def __init__(self) -> None:
+                super().__init__('variables names can\'t star with a number')
+            
+            def _check(self, text: str):
+                return not text[0].isdigit()
+
+        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
+        lexer[1,TokenTypeTestEnum.VARIABLE] = '\\w+'
+        
+        lexer.add_rule(TokenTypeTestEnum.NUMBER,IntegerRule())
+        lexer.add_rule(TokenTypeTestEnum.VARIABLE,VariableRule())
+
+        lexer.initialize()
+
+        text = '010 23 00000 245 0 003 var_1 _var2 0_var 1nada'
+
+        lexer.load_text(text)
+        for _ in lexer.tokens: pass
+
+        errors = [(1,1),(1,8),(1,20),(1,36),(1,42)]
+        assert len(lexer.errors) != 0
+        for error in lexer.errors:
+            assert (error.line,error.column) in errors

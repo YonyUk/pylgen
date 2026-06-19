@@ -21,14 +21,13 @@ cdef class Lexer(BaseLexer):
     @property
     def tokens(self) -> Iterable[Token]:
         cdef LexicError error
-        cdef object key
         cdef LexicRule rule
         self.initialize()
         while self._move_next():
             if self._ignore.accept(list(self._current_token._text)):
                 continue
-            for key in self._rules:
-                for rule in self._rules[key]:
+            if self._current_token._type in self._rules:
+                for rule in self._rules[self._current_token._type]:
                     error = rule.check(self._current_token)
                     if not error is None:
                         self._errors.add(error)
