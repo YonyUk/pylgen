@@ -4,7 +4,7 @@ cdef class Error:
 
     def __init__(self,object type_,int line,int column,str msg) -> None:
         if not (isinstance(type_,ErrorType) or isinstance(type_,str)):
-            raise ValueError('type_ must be a member of ErrorType')
+            raise TypeError('type_ must be a member of ErrorType')
         if isinstance(type_,str) and not type_ in ErrorType: # type:ignore
             raise ValueError('type_ must be a member of ErrorType')
         if isinstance(type_,str):
