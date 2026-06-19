@@ -1,0 +1,33 @@
+from .error_type import ErrorType
+
+class Error:
+
+    def __init__(self,type_:ErrorType,line:int,column:int,msg:str) -> None: ...
+    
+    @property
+    def line(self) -> int: ...
+
+    @property
+    def column(self) -> int: ...
+    
+    @property
+    def type(self) -> ErrorType: ...
+
+    @property
+    def message(self) -> str: ...
+
+    def __str__(self) -> str: ...
+    
+    def __repr__(self) -> str: ...
+
+class LexicError(Error):
+
+    def __init__(self, msg:str, line:int, column:int) -> None: ...
+
+class SintaxError(Error):
+
+    def __init__(self, msg:str ,line:int, column:int) -> None: ...
+
+class SemanticError(Error):
+
+    def __init__(self, msg:str,line:int, column:int) -> None: ...

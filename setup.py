@@ -93,7 +93,22 @@ lexer_extensions = Extension(
         'lexer/lexer.pyx'
     ]
 )
+###################################################################################
+#                                  ANALISIS
+###################################################################################
+error_extensions = Extension(
+    name='analisis.error',
+    sources=[
+        'analisis/error.pyx'
+    ]
+)
 
+lexical_rule_extension = Extension(
+    name='analisis.lexical',
+    sources=[
+        'analisis/lexical.pyx'
+    ]
+)
 setup(
     ext_modules=cythonize(common_extensions),
     language_level=3
@@ -150,5 +165,15 @@ setup(
 
 setup(
     ext_modules=cythonize(lexer_extensions),
+    language_level=3
+)
+
+setup(
+    ext_modules=cythonize(error_extensions),
+    language_level=3
+)
+
+setup(
+    ext_modules=cythonize(lexical_rule_extension),
     language_level=3
 )
