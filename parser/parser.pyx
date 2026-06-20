@@ -163,9 +163,6 @@ cdef class BottomUpParser(Parser):
         if self._parsed:
             raise ValueError('EOF token already readed')
         
-        if not key in self._action_table:
-            self._start_recovery_mode(token._symbol,token._line,token._column)
-        
         if self._panic_mode:
             if token._symbol == self._recovery_symbol:
                 self._end_recovery_mode()
@@ -173,6 +170,10 @@ cdef class BottomUpParser(Parser):
                 self._end_recovery_mode()
             else:
                 return # type:ignore
+        
+        if not key in self._action_table:
+            self._start_recovery_mode(token._symbol,token._line,token._column)
+            return # type:ignore
 
         current_action = self._action_table[key]
         # while the action is reduce
