@@ -74,12 +74,13 @@ cdef class Parser:
 
 cdef class BottomUpParser(Parser):
 
-    def __init__(self,str start_state,dict[tuple[str,Symbol],str] goto_table,dict[tuple[str,Symbol],tuple[str,object]] action_table):
+    def __init__(self,str start_state,dict[tuple[str,Symbol],str] goto_table,dict[tuple[str,Symbol],tuple[str,object]] action_table,dict[Symbol,set[Symbol]] follows):
         '''
         Args:
             start_state (str): id of the start state for this parser
             goto_table (Dict[Tuple[str,Symbol],str]): GOTO table for the parser
             action_table (Dict[Tuple[str,Symbol],tuple[str,str | Production]]): ACTION table for the parser
+            follows (Dict[Symbol,Set[Symbol]]): dict of FOLLOW set by non-terminal
         '''
         self._action_table = action_table
         self._goto_table = goto_table
@@ -90,9 +91,48 @@ cdef class BottomUpParser(Parser):
         self._start_state = start_state
         self._parsed = False # type:ignore
         self._parse_tree_nodes = []
+        self._errors = set()
+        self._follows = follows
+        self._panic_mode = False # type:ignore
+        self._current_syncronization_set = set()
 
     cdef void _set_reductor(self,Production production,object reductor): # type:ignore
         self._reductor_by_production[production] = reductor
+
+    cdef void _start_recovery_mode(self,Symbol symbol,int line, int column):
+        cdef Symbol stack_symbol,follow_symbol
+        cdef bint started = False # type:ignore
+        cdef tuple[str,Symbol] key
+        cdef set[Symbol] expected_symbols = set()
+        cdef SintaxError error
+
+        for key in self._action_table:
+            if key[0] == self._stack_states[-1]:
+                expected_symbols.add(key[1]) # type:ignore
+
+        error = SintaxError(f'Unexpected symbol "{symbol}"; expected {expected_symbols}',line,column) # type:ignore
+
+        self._panic_mode = True # type:ignore
+        self._current_syncronization_set = set()
+
+        for stack_symbol in self._stack:
+            if not stack_symbol._is_terminal:
+                for follow_symbol in self._follows[stack_symbol]:
+                    if follow_symbol != symbol:
+                        self._current_syncronization_set.add(follow_symbol)
+        
+        while self._stack_states:
+            for follow_symbol in self._current_syncronization_set:
+                key = (self._stack[-1],follow_symbol)
+                if key in self._action_table and self._action_table[key][0] != BottomUpParserAction.SHIFT:
+                    started = True # type:ignore
+                    self._recovery_symbol = follow_symbol
+                    break
+            self._stack_states.pop()
+    
+    cdef void _end_recovery_mode(self):
+        self._current_syncronization_set = set()
+        self._panic_mode = False # type:ignore
 
     cdef void _try_parse(self,Token token):
         cdef tuple[str,object] current_action
@@ -103,61 +143,75 @@ cdef class BottomUpParser(Parser):
         cdef list[ParseTreeNode] childrens
 
         if self._parsed:
-            raise ValueError('Parsing error')
+            raise ValueError('EOF token already readed')
         
         if not key in self._action_table:
-            raise ValueError('Parsing error')
+            self._start_recovery_mode(token._symbol,token._line,token._column)
         
+        if self._panic_mode:
+            if token._symbol == self._recovery_symbol:
+                self._end_recovery_mode()
+            else:
+                return # type:ignore
+
         current_action = self._action_table[key]
         # while the action is reduce
         while current_action[0] == BottomUpParserAction.REDUCE:
             p:Production = current_action[1] # type:ignore
-            new_ast = self._reductor_by_production[p](self._stack_ast[-1*len(p._production):]) # type:ignore
-            # build the parse tree
-            childrens = self._parse_tree_nodes[-1*len(p._production):]
-            new_node = ParseTreeNode(p._head,new_ast._line,new_ast._column,childrens)
-            # updates the stack of parse tree nodes
-            self._parse_tree_nodes = self._parse_tree_nodes[:-1*len(p._production)] + [new_node]
+            if len(self._errors) == 0:
+                new_ast = self._reductor_by_production[p](self._stack_ast[-1*len(p._production):]) # type:ignore
+                # build the parse tree
+                childrens = self._parse_tree_nodes[-1*len(p._production):]
+                new_node = ParseTreeNode(p._head,new_ast._line,new_ast._column,childrens)
+                # updates the stack of parse tree nodes
+                self._parse_tree_nodes = self._parse_tree_nodes[:-1*len(p._production)] + [new_node]
             # update the stack of symbols
             self._stack = self._stack[:-1*len(p._production)] + [p._head]
             # update the stack of states
             self._stack_states = self._stack_states[:-1*len(p._production)]
-            # update the stack of ast
-            self._stack_ast = self._stack_ast[:-1*len(p._production)] + [new_ast]
+            if len(self._errors) == 0:
+                # update the stack of ast
+                self._stack_ast = self._stack_ast[:-1*len(p._production)] + [new_ast]
             # sets the current state
             state = self._stack_states[-1]
             key = (state,self._stack[-1])
             # checks for an action
             if not key in self._action_table:
-                raise ValueError('Parsing error')
+                self._start_recovery_mode(self._stack[-1],new_ast._line,new_ast._column)
+                break
             current_action = self._action_table[key]
             # checks if the action is shift, due to reductions only may occur at top of the stack
             if current_action[0] != BottomUpParserAction.SHIFT:
-                raise ValueError('Parsing error')
+                self._start_recovery_mode(self._stack[-1],new_ast._line,new_ast._column)
+                break
             # sets the state by the GOTO table and put it at stack of states top
             state = self._goto_table[key]
             self._stack_states.append(state)
             # checks for an action with the current state and the current token
             key = (state,token._symbol)
             if not key in self._action_table:
-                raise ValueError('Parsing error')
+                self._start_recovery_mode(token._symbol,token._line,token._column)
+                break
             # updates the current action
             current_action = self._action_table[key]
-        if current_action[0] == BottomUpParserAction.SHIFT:
+        if not self._panic_mode and current_action[0] == BottomUpParserAction.SHIFT:
             state = self._goto_table[key]
-            # adds a new parse tree node to the parse tree
-            new_node = ParseTreeNode(token._symbol,token._line,token._column)
-            self._parse_tree_nodes.append(new_node)
+            if len(self._errors):
+                # adds a new parse tree node to the parse tree
+                new_node = ParseTreeNode(token._symbol,token._line,token._column)
+                self._parse_tree_nodes.append(new_node)
             # push the symbol in the stack
             self._stack.append(token._symbol)
-            # push the ast in the stack
-            self._stack_ast.append(token)
+            if len(self._errors) == 0:
+                # push the ast in the stack
+                self._stack_ast.append(token)
             # push the state in the stack
             self._stack_states.append(state)
-        if current_action[0] == BottomUpParserAction.ACCEPT:
+        if not self._panic_mode and current_action[0] == BottomUpParserAction.ACCEPT:
             self._parsed = True # type:ignore
-            self._ast = self._stack_ast[-1]
-            self._parse_tree = self._parse_tree_nodes[-1]
+            if len(self._errors) == 0:
+                self._ast = self._stack_ast[-1]
+                self._parse_tree = self._parse_tree_nodes[-1]
 
     cpdef void reset(self):
         '''
@@ -170,6 +224,7 @@ cdef class BottomUpParser(Parser):
         self._stack.clear()
         self._stack_ast.clear()
         self._stack_states = [self._start_state]
+        self._errors.clear()
         
     def __setitem__(self,production:Production,reductor:Callable[[List[AST]],AST]):
         sig = inspect.signature(reductor)
