@@ -5,7 +5,7 @@ from common.enums import TokenType
 from grammar.grammar import Grammar,AttributedGrammar,Production
 from parser.parser_builder import ParserBuilder
 from parser.parser_type import ParserType
-from parser.parser import BottomUpParser
+from parser.parser import BottomUpParser,ParsingException
 
 class TokenTypeEnum(TokenType):
     NUMBER = 'NUMBER'
@@ -76,7 +76,18 @@ class TestIntegrationParserBuilder:
         ast = parser.parse(tokens)
         assert ast.symbol == E
         assert ast.line == plus_token.line and ast.column == plus_token.column
-        
+
+        parser.reset()
+        tokens = [number1,plus_token,number2,number2,mul_token,number3,end]
+        try:
+            ast = parser.parse(tokens)
+        except ParsingException:
+            pass
+
+        assert len(parser.errors) == 1
+        error = next(iter(parser.errors))
+        assert error.line == number2.line
+        assert error.column == number2.column
         number1 = Token('12',TokenTypeEnum.NUMBER,n,1,3)
         plus_token = Token('+',TokenTypeEnum.SYMBOL,plus,1,6)
         number2 = Token('13',TokenTypeEnum.NUMBER,n,1,8)
@@ -90,7 +101,19 @@ class TestIntegrationParserBuilder:
         ast = parser.parse(tokens)
         assert ast.symbol == E
         assert ast.column == mul_token.column
-    
+
+        parser.reset()
+        tokens = [lp_token,number1,number1,plus_token,number2,rp_token,mul_token,mul_token,number3,end]
+        try:
+            ast = parser.parse(tokens)
+        except ParsingException:
+            pass
+
+        errors = [(1,3),(1,13)]
+        assert len(parser.errors) == 2
+        for error in parser.errors:
+            assert (error.line,error.column) in errors
+
     def test_build_lalr_parser_2(self):
         E = Symbol('E')
         T = Symbol('T')
@@ -148,6 +171,18 @@ class TestIntegrationParserBuilder:
         assert ast.symbol == E
         assert ast.line == plus_token.line and ast.column == plus_token.column
         
+        parser.reset()
+        tokens = [number1,plus_token,number2,number2,mul_token,number3,end]
+        try:
+            ast = parser.parse(tokens)
+        except ParsingException:
+            pass
+
+        assert len(parser.errors) == 1
+        error = next(iter(parser.errors))
+        assert error.line == number2.line
+        assert error.column == number2.column
+
         number1 = Token('12',TokenTypeEnum.NUMBER,n,1,3)
         plus_token = Token('+',TokenTypeEnum.SYMBOL,plus,1,6)
         number2 = Token('13',TokenTypeEnum.NUMBER,n,1,8)
@@ -161,3 +196,15 @@ class TestIntegrationParserBuilder:
         ast = parser.parse(tokens)
         assert ast.symbol == E
         assert ast.column == mul_token.column
+
+        parser.reset()
+        tokens = [lp_token,number1,number1,plus_token,number2,rp_token,mul_token,mul_token,number3,end]
+        try:
+            ast = parser.parse(tokens)
+        except ParsingException:
+            pass
+
+        errors = [(1,3),(1,13)]
+        assert len(parser.errors) == 2
+        for error in parser.errors:
+            assert (error.line,error.column) in errors
