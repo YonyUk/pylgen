@@ -83,7 +83,7 @@ cdef class Parser:
 
 cdef class BottomUpParser(Parser):
 
-    def __init__(self,str start_state,dict[tuple[str,Symbol],str] goto_table,dict[tuple[str,Symbol],tuple[str,object]] action_table,dict[Symbol,set[Symbol]] follows):
+    def __init__(self,str start_state,dict[tuple[str,Symbol],str] goto_table,dict[tuple[str,Symbol],tuple[str,object]] action_table):
         '''
         Args:
             start_state (str): id of the start state for this parser
@@ -101,7 +101,6 @@ cdef class BottomUpParser(Parser):
         self._parsed = False # type:ignore
         self._parse_tree_nodes = []
         self._errors = set()
-        self._follows = follows
         self._panic_mode = False # type:ignore
         self._current_syncronization_set = set()
 
@@ -114,6 +113,7 @@ cdef class BottomUpParser(Parser):
         cdef tuple[str,Symbol] key
         cdef set[Symbol] expected_symbols = set()
         cdef SintaxError error
+        cdef str state
 
         for key in self._action_table:
             if key[0] == self._stack_states[-1]:
@@ -125,29 +125,22 @@ cdef class BottomUpParser(Parser):
         self._errors.add(error)
         self._panic_mode = True # type:ignore
         self._current_syncronization_set = set()
-
-        for stack_symbol in self._stack:
-            if not stack_symbol._is_terminal:
-                for follow_symbol in self._follows[stack_symbol]:
-                    if follow_symbol != symbol:
-                        self._current_syncronization_set.add(follow_symbol)
         
+        for state in self._stack_states:
+            for key in self._action_table:
+                if key[0] == state and self._action_table[key][0] == BottomUpParserAction.SHIFT:
+                    self._current_syncronization_set.add(key[1]) # type:ignore
+
         while self._stack_states:
             for follow_symbol in self._current_syncronization_set:
-                key = (self._stack[-1],follow_symbol)
+                key = (self._stack_states[-1],follow_symbol)
                 if key in self._action_table and self._action_table[key][0] == BottomUpParserAction.SHIFT:
                     started = True # type:ignore
-                    self._recovery_symbol = follow_symbol
                     break
+            if started:
+                break
             self._stack_states.pop()
         
-        if not self._stack_states:
-            self._stack_states = [self._start_state]
-            self._current_syncronization_set = set()
-            for key in self._action_table:
-                if key[0] == self._stack_states[-1] and key[1] != symbol:
-                    self._current_syncronization_set.add(key[1]) # type:ignore
-    
     cdef void _end_recovery_mode(self):
         self._current_syncronization_set = set()
         self._panic_mode = False # type:ignore
@@ -164,13 +157,11 @@ cdef class BottomUpParser(Parser):
             raise ValueError('EOF token already readed')
         
         if self._panic_mode:
-            if token._symbol == self._recovery_symbol:
-                self._end_recovery_mode()
-            elif len(self._stack_states) == 1 and token._symbol in self._current_syncronization_set:
+            if token._symbol in self._current_syncronization_set:
                 self._end_recovery_mode()
             else:
                 return # type:ignore
-        
+
         if not key in self._action_table:
             self._start_recovery_mode(token._symbol,token._line,token._column)
             return # type:ignore

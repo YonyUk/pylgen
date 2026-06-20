@@ -28,10 +28,8 @@ cdef class BottomUpParser(Parser):
     cdef list[AST] _stack_ast
     cdef list[str] _stack_states
     cdef str _start_state
-    cdef dict[Symbol,set[Symbol]] _follows
     cdef set[Symbol] _current_syncronization_set
     cdef bint _panic_mode
-    cdef Symbol _recovery_symbol
 
     cdef void _start_recovery_mode(self,Symbol symbol,int line,int column)
     cdef void _end_recovery_mode(self)
