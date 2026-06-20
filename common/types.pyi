@@ -1,3 +1,5 @@
+from typing import List
+
 from .enums import TokenType
 
 class Symbol:
@@ -35,7 +37,9 @@ class AST:
     
     @property
     def column(self) -> int: ...
-    
+
+    def children(self) -> List[AST]: ...
+
     def __str__(self) -> str: ...
     
     def __repr__(self) -> str: ...

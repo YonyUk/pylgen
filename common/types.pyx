@@ -85,6 +85,9 @@ cdef class AST:
     def column(self) -> int:
         return self._column
     
+    cpdef list[AST] children(self):
+        raise NotImplementedError()
+    
     def __str__(self) -> str:
         return self._symbol._symbol
     

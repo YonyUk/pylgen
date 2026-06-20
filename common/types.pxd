@@ -9,6 +9,8 @@ cdef class AST:
     cdef int _line
     cdef int _column
 
+    cpdef list[AST] children(self)
+
 cdef class Token(AST):
     cdef str _text
     cdef object _type
