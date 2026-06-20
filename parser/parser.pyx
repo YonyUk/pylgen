@@ -135,7 +135,7 @@ cdef class BottomUpParser(Parser):
         while self._stack_states:
             for follow_symbol in self._current_syncronization_set:
                 key = (self._stack[-1],follow_symbol)
-                if key in self._action_table and self._action_table[key][0] != BottomUpParserAction.SHIFT:
+                if key in self._action_table and self._action_table[key][0] == BottomUpParserAction.SHIFT:
                     started = True # type:ignore
                     self._recovery_symbol = follow_symbol
                     break
@@ -178,8 +178,8 @@ cdef class BottomUpParser(Parser):
         # while the action is reduce
         while current_action[0] == BottomUpParserAction.REDUCE:
             p:Production = current_action[1] # type:ignore
+            new_ast = self._reductor_by_production[p](self._stack_ast[-1*len(p._production):]) # type:ignore
             if len(self._errors) == 0:
-                new_ast = self._reductor_by_production[p](self._stack_ast[-1*len(p._production):]) # type:ignore
                 # build the parse tree
                 childrens = self._parse_tree_nodes[-1*len(p._production):]
                 new_node = ParseTreeNode(p._head,new_ast._line,new_ast._column,childrens)
@@ -189,9 +189,8 @@ cdef class BottomUpParser(Parser):
             self._stack = self._stack[:-1*len(p._production)] + [p._head]
             # update the stack of states
             self._stack_states = self._stack_states[:-1*len(p._production)]
-            if len(self._errors) == 0:
-                # update the stack of ast
-                self._stack_ast = self._stack_ast[:-1*len(p._production)] + [new_ast]
+            # update the stack of ast
+            self._stack_ast = self._stack_ast[:-1*len(p._production)] + [new_ast]
             # sets the current state
             state = self._stack_states[-1]
             key = (state,self._stack[-1])
@@ -216,15 +215,14 @@ cdef class BottomUpParser(Parser):
             current_action = self._action_table[key]
         if not self._panic_mode and current_action[0] == BottomUpParserAction.SHIFT:
             state = self._goto_table[key]
-            if len(self._errors):
+            if len(self._errors) == 0:
                 # adds a new parse tree node to the parse tree
                 new_node = ParseTreeNode(token._symbol,token._line,token._column)
                 self._parse_tree_nodes.append(new_node)
             # push the symbol in the stack
             self._stack.append(token._symbol)
-            if len(self._errors) == 0:
-                # push the ast in the stack
-                self._stack_ast.append(token)
+            # push the ast in the stack
+            self._stack_ast.append(token)
             # push the state in the stack
             self._stack_states.append(state)
         if not self._panic_mode and current_action[0] == BottomUpParserAction.ACCEPT:
