@@ -4,12 +4,13 @@ from string import digits
 
 from common.types import Symbol,AST,Token
 from common.enums import TokenType
-from grammar.grammar import AttributedGrammar,Production
+from grammar.grammar import AttributedGrammar
 from parser.parser_builder import ParserBuilder
 from parser.parser_type import ParserType
-from parser.parser import BottomUpParser
+from parser.parser import BottomUpParser,ParsingException
 from lexer.base_lexer import BaseLexer
 from lexer.lexer import Lexer
+from analisis.lexical import LexicRule
 from automaton.automaton import NFA, State,DFA,get_words_automaton_with_value
 
 END_SYMBOL = '$'
@@ -167,6 +168,14 @@ class TokenTypeEnum(TokenType):
     NUMBER = 'NUMBER'
     SYMBOL = 'SYMBOL'
     OPERATOR = 'OPERATOR'
+
+class NumberLexicRule(LexicRule):
+
+    def __init__(self) -> None:
+        super().__init__('number must be 0 or star with a non-zero digit')
+    
+    def _check(self, text: str):
+        return str(int(text)) == text
 
 def get_symbol_function(t:TokenTypeEnum,tx:str) -> Symbol:
     if t == TokenTypeEnum.NUMBER:
@@ -327,3 +336,39 @@ class TestIntegrationLexerParser:
     def test_extended_arithmetic_parser_2(self,text:str,lexer1:Lexer,parser3:BottomUpParser):
         lexer1.load_text(text)
         ast = parser3.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+    
+    def test_error_detecting_1(self,lexer1:Lexer,parser1:BottomUpParser):
+        text = "(01 + 3)* (5+7) *(2 +010 * 15)"
+        lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicRule())
+        
+        lexer1.load_text(text)
+        try:
+            ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+        except ParsingException:
+            pass
+
+        errors = [(1,2),(1,22)]
+        assert len(lexer1.errors) == 2
+        for error in lexer1.errors:
+            assert (error.line,error.column) in errors
+        parser1.reset()
+        text = "(1 + 3) * (5++7) *(2 + 10 * * 15)"
+        lexer1.load_text(text)
+        try:
+            ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+        except ParsingException:
+            pass
+        assert len(parser1.errors) >= 2
+    
+    def test_error_detecting_2(self,lexer1:Lexer,parser3:BottomUpParser):
+        lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicRule())
+        text = '23+0342 / (4**9 + + 10) -0235//4 9 + 20**3%3'
+
+        lexer1.load_text(text)
+        try:
+            ast = parser3.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+        except ParsingException:
+            pass
+        
+        assert len(lexer1.errors) == 2
+        assert len(parser3.errors) >= 3
