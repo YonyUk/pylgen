@@ -30,8 +30,7 @@ cdef class BottomUpParser(Parser):
     cdef str _start_state
     cdef set[Symbol] _current_syncronization_set
     cdef bint _panic_mode
-    cdef Symbol _recovery_symbol
 
     cdef void _start_recovery_mode(self,Symbol symbol,int line,int column)
-    cdef void _end_recovery_mode(self)
+    cdef void _end_recovery_mode(self,Symbol symbol)
     cdef void _set_reductor(self,Production production,object reductor)

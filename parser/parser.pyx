@@ -109,7 +109,6 @@ cdef class BottomUpParser(Parser):
 
     cdef void _start_recovery_mode(self,Symbol symbol,int line, int column):
         cdef Symbol stack_symbol,follow_symbol
-        cdef bint started = False # type:ignore
         cdef tuple[str,Symbol] key
         cdef set[Symbol] expected_symbols = set()
         cdef SintaxError error
@@ -128,25 +127,24 @@ cdef class BottomUpParser(Parser):
         
         for state in self._stack_states:
             for key in self._action_table:
+                if not (<Symbol>key[1])._is_terminal: continue
                 if key[0] == state and self._action_table[key][0] == BottomUpParserAction.SHIFT:
                     self._current_syncronization_set.add(key[1]) # type:ignore
-
+        
+    cdef void _end_recovery_mode(self,Symbol symbol):
+        cdef bint started = False # type:ignore
+        self._current_syncronization_set = set()
+        self._panic_mode = False # type:ignore
         while self._stack_states:
-            for follow_symbol in self._current_syncronization_set:
-                key = (self._stack_states[-1],follow_symbol)
-                if key in self._action_table and self._action_table[key][0] == BottomUpParserAction.SHIFT:
-                    started = True # type:ignore
-                    self._recovery_symbol = follow_symbol
-                    break
+            key = (self._stack_states[-1],symbol)
+            if key in self._action_table and self._action_table[key][0] == BottomUpParserAction.SHIFT:
+                started = True # type:ignore
+                break
             if started:
                 break
             self._stack_states.pop()
             self._stack_ast.pop()
             self._stack.pop()
-        
-    cdef void _end_recovery_mode(self):
-        self._current_syncronization_set = set()
-        self._panic_mode = False # type:ignore
 
     cdef void _try_parse(self,Token token):
         cdef tuple[str,object] current_action
@@ -160,10 +158,11 @@ cdef class BottomUpParser(Parser):
             raise ValueError('EOF token already readed')
         
         if self._panic_mode:
-            if token._symbol == self._recovery_symbol:
-                self._end_recovery_mode()
+            if token._symbol in self._current_syncronization_set:
+                self._end_recovery_mode(token._symbol)
             else:
                 return # type:ignore
+        
 
         if not key in self._action_table:
             self._start_recovery_mode(token._symbol,token._line,token._column)
