@@ -52,7 +52,7 @@ class TestIntegrationBottomUpParser:
         action[('I1',end)] = (BottomUpParserAction.REDUCE,Production(E,[n]))
         action[('I2',end)] = (BottomUpParserAction.ACCEPT,'')
 
-        parser = BottomUpParser('I0',goto,action,{E:{end}})
+        parser = BottomUpParser('I0',goto,action)
         parser[Production(E,[n])] = reductor
 
         tokens = [token,end_token]
@@ -106,7 +106,7 @@ class TestIntegrationBottomUpParser:
         action[('I5',end)] = (BottomUpParserAction.REDUCE,Production(E,[E,plus,T]))
         action[('I5',plus)] = (BottomUpParserAction.REDUCE,Production(E,[E,plus,T]))
 
-        parser = BottomUpParser('I0',goto,action,{E:{plus,end},T:{plus,end}})
+        parser = BottomUpParser('I0',goto,action)
         
         parser[Production(T,[n])] = reductor_T_n
         parser[Production(E,[T])] = reductor_E_T
@@ -139,8 +139,6 @@ class TestIntegrationBottomUpParser:
         G[F] += lp,E,rp
         G[F] += n,
 
-        follows = { sym: G.follow(sym) for sym in G.non_terminals}
-
         def reductor_E_plus_T(asts:List[AST]) -> AST:
             return AST(E,asts[1].line,asts[1].column)
         
@@ -164,7 +162,7 @@ class TestIntegrationBottomUpParser:
         plain_goto = self.plain_goto_table(goto)
         plain_action = self.plain_action_table(action)
 
-        parser = BottomUpParser('I0',plain_goto,plain_action,follows)
+        parser = BottomUpParser('I0',plain_goto,plain_action)
         parser[Production(E,[E,plus,T])] = reductor_E_plus_T
         parser[Production(E,[T])] = reductor_E_T
         parser[Production(T,[T,mul,F])] = reductor_T_mul_F
@@ -225,8 +223,6 @@ class TestIntegrationBottomUpParser:
         G[F] += lp,E,rp
         G[F] += n,
 
-        follows = { sym: G.follow(sym) for sym in G.non_terminals}
-
         def reductor_E_plus_T(asts:List[AST]) -> AST:
             return AST(E,asts[1].line,asts[1].column)
         
@@ -250,7 +246,7 @@ class TestIntegrationBottomUpParser:
         plain_goto = self.plain_goto_table(goto)
         plain_action = self.plain_action_table(action)
 
-        parser = BottomUpParser('I0',plain_goto,plain_action,follows)
+        parser = BottomUpParser('I0',plain_goto,plain_action)
         parser[Production(E,[E,plus,T])] = reductor_E_plus_T
         parser[Production(E,[T])] = reductor_E_T
         parser[Production(T,[T,mul,F])] = reductor_T_mul_F
@@ -302,8 +298,6 @@ class TestIntegrationBottomUpParser:
         G[F] += lp,E,rp
         G[F] += n,
 
-        follows = { sym: G.follow(sym) for sym in G.non_terminals}
-
         def reductor_E_plus_T(asts:List[AST]) -> AST:
             return AST(E,asts[1].line,asts[1].column)
         
@@ -327,7 +321,7 @@ class TestIntegrationBottomUpParser:
         plain_goto = self.plain_goto_table(goto)
         plain_action = self.plain_action_table(action)
 
-        parser = BottomUpParser('I0',plain_goto,plain_action,follows)
+        parser = BottomUpParser('I0',plain_goto,plain_action)
         parser[Production(E,[E,plus,T])] = reductor_E_plus_T
         parser[Production(E,[T])] = reductor_E_T
         parser[Production(T,[T,mul,F])] = reductor_T_mul_F
