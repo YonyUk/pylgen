@@ -75,7 +75,7 @@ cdef class Parser:
         raise ParsingException('Nothing parsed')
     
     @property
-    def errors(self) -> set[SintaxError]:
+    def errors(self) -> List[SintaxError]:
         return self._errors
 
     cpdef void reset(self):
@@ -100,7 +100,7 @@ cdef class BottomUpParser(Parser):
         self._start_state = start_state
         self._parsed = False # type:ignore
         self._parse_tree_nodes = []
-        self._errors = set()
+        self._errors = []
         self._panic_mode = False # type:ignore
         self._current_syncronization_set = set()
 
@@ -122,7 +122,7 @@ cdef class BottomUpParser(Parser):
                     expected_symbols.add(follow_symbol)
 
         error = SintaxError(f'Unexpected symbol "{symbol}"; expected {expected_symbols}',line,column) # type:ignore
-        self._errors.add(error)
+        self._errors.append(error)
         self._panic_mode = True # type:ignore
         self._current_syncronization_set = set()
         
@@ -136,10 +136,13 @@ cdef class BottomUpParser(Parser):
                 key = (self._stack_states[-1],follow_symbol)
                 if key in self._action_table and self._action_table[key][0] == BottomUpParserAction.SHIFT:
                     started = True # type:ignore
+                    self._recovery_symbol = follow_symbol
                     break
             if started:
                 break
             self._stack_states.pop()
+            self._stack_ast.pop()
+            self._stack.pop()
         
     cdef void _end_recovery_mode(self):
         self._current_syncronization_set = set()
@@ -157,7 +160,7 @@ cdef class BottomUpParser(Parser):
             raise ValueError('EOF token already readed')
         
         if self._panic_mode:
-            if token._symbol in self._current_syncronization_set:
+            if token._symbol == self._recovery_symbol:
                 self._end_recovery_mode()
             else:
                 return # type:ignore

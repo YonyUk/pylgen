@@ -15,7 +15,7 @@ cdef class Parser:
     cdef bint _parsed
     cdef ParseTreeNode _parse_tree
     cdef list[ParseTreeNode] _parse_tree_nodes
-    cdef set[SintaxError] _errors
+    cdef list[SintaxError] _errors
 
     cdef void _try_parse(self,Token token)
     cpdef void reset(self)
@@ -30,6 +30,7 @@ cdef class BottomUpParser(Parser):
     cdef str _start_state
     cdef set[Symbol] _current_syncronization_set
     cdef bint _panic_mode
+    cdef Symbol _recovery_symbol
 
     cdef void _start_recovery_mode(self,Symbol symbol,int line,int column)
     cdef void _end_recovery_mode(self)
