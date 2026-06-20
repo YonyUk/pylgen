@@ -118,6 +118,9 @@ cdef class CharAST(RegexAST):
     def char(self) -> str:
         return self._char
 
+    cpdef list[AST] children(self):
+        return []
+
     cdef Automaton _get_automaton(self):
         return get_word_automaton(self._char)
 
@@ -135,6 +138,9 @@ cdef class RegexBinaryAST(RegexAST):
     @property
     def right(self) -> RegexAST:
         return self._right # type:ignore
+
+    cpdef list[AST] children(self):
+        return [self._left,self._right]
 
 cdef class ConcatenationAST(RegexBinaryAST):
 
@@ -161,6 +167,9 @@ cdef class ConstantRegexAST(RegexAST):
     @property
     def re_constant(self) -> str:
         return self._re
+    
+    cpdef list[AST] children(self):
+        return []
 
     cdef Automaton _get_automaton(self):
         cdef Automaton result
@@ -195,6 +204,9 @@ cdef class RegexUnaryAST(RegexAST):
     @property
     def regex(self) -> RegexAST:
         return self._regex # type:ignore
+    
+    cpdef list[AST] children(self):
+        return [self._regex]
     
 cdef class KleeneStarAST(RegexUnaryAST):
 
@@ -236,6 +248,9 @@ cdef class CharSetAST(RegexAST):
     def preceding_re(self) -> CharSetAST:
         return self._preceding # type:ignore
     
+    cpdef list[AST] children(self):
+        return [self._preceding,self._next]
+
     cdef Automaton _get_automaton(self):
         return _automaton_union({self._preceding._get_automaton(),self._next._get_automaton()})
 
@@ -270,6 +285,9 @@ cdef class CharRangeAST(CharSetAST):
     def right(self) -> CharAST:
         return self._right # type:ignore
     
+    cpdef list[AST] children(self):
+        return [self._left,self._right]
+
     cdef Automaton _get_automaton(self):
         cdef int i
         cdef set[str] _char_set = { chr(i) for i in range(ord(self._left._char),ord(self._right._char) + 1)}
@@ -285,6 +303,9 @@ cdef class ComplementCharSetAST(CharSetAST):
     def char_set(self) -> CharSetAST:
         return self._char_set # type:ignore
     
+    cpdef list[AST] children(self):
+        return [self._char_set]
+
     cdef Automaton _get_automaton(self):
         cdef Automaton aut = self._char_set._get_automaton()
         cdef set[str] _char_set = set(printable).difference(aut._alphabet)
@@ -312,6 +333,9 @@ cdef class RepeatPatternAST(RegexAST):
     def regex(self) -> RegexAST:
         return self._regex # type:ignore
     
+    cpdef list[AST] children(self):
+        return [self._min,self._max,self._regex]
+
     cdef Automaton _get_automaton(self):
         cdef Automaton aut = self._regex._get_automaton()
         cdef NFA result
@@ -385,6 +409,9 @@ cdef class StringAST(AST):
     @property
     def string(self) -> str:
         return self._string
+    
+    cpdef list[AST] children(self):
+        return []
 
 ###################################################################################################
 #                                  REDUCTORS
