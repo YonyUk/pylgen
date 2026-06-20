@@ -140,7 +140,19 @@ def _is_json_serializable(obj:Any) -> bool:
 def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
     G = nx.DiGraph()
 
-    stack = [(ast_root,list(filter(lambda _attr:not _attr.startswith('_'),dir(ast_root))),0,0)]
+    stack = [
+        (
+            ast_root,
+            list(
+                filter(
+                    lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast_root.__getattribute__(_attr)),
+                    dir(ast_root)
+                    )
+                ),
+            0,
+            0,
+        )
+    ]
     asts = {}
     asts_levels = {}
     ast_attrs = {}
@@ -148,38 +160,38 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
         entered = False
         ast,attrs,index,level = stack[-1]
         from_node = f'{ast.line}-{ast.column}-{level}'
-        for i in range(index,len(attrs)):
-            attr = ast.__getattribute__(attrs[i])
-            if isinstance(attr,AST):
-                to_node = f'{attr.line}-{attr.column}-{level + 1}'
-                G.add_edge(from_node,to_node)
-                if not from_node in asts:
-                    asts[from_node] = ast
-                if not from_node in asts_levels:
-                    asts_levels[from_node] = level
-                if not to_node in asts:
-                    asts[to_node] = attr
-                if not to_node in asts_levels:
-                    asts_levels[to_node] = level + 1
-                if not from_node in ast_attrs:
-                    ast_attrs[from_node] = list(
-                        filter(
-                            lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast.__getattribute__(_attr)),
-                            dir(ast)
-                        )
+        childs = ast.children()
+        for i in range(index,len(childs)):
+            child = childs[i]
+            to_node = f'{child.line}-{child.column}-{level + 1}'
+            G.add_edge(from_node,to_node)
+            if not from_node in asts:
+                asts[from_node] = ast
+            if not from_node in asts_levels:
+                asts_levels[from_node] = level
+            if not to_node in asts:
+                asts[to_node] = child
+            if not to_node in asts_levels:
+                asts_levels[to_node] = level + 1
+            if not from_node in ast_attrs:
+                ast_attrs[from_node] = list(
+                    filter(
+                        lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast.__getattribute__(_attr)),
+                        dir(ast)
                     )
-                if not to_node in ast_attrs:
-                    ast_attrs[to_node] = list(
-                        filter(
-                            lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(attr.__getattribute__(_attr)),
-                            dir(attr)
-                        )
+                )
+            if not to_node in ast_attrs:
+                ast_attrs[to_node] = list(
+                    filter(
+                        lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(child.__getattribute__(_attr)),
+                        dir(child)
                     )
-                stack[-1] = ast,attrs,i + 1,level
-                top = attr,list(filter(lambda _attr:not _attr.startswith('_'),dir(attr))),0,level + 1
-                stack.append(top)
-                entered = True
-                break
+                )
+            stack[-1] = ast,attrs,i + 1,level
+            top = child,list(filter(lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(child.__getattribute__(_attr)),dir(child))),0,level + 1
+            stack.append(top)
+            entered = True
+            break
         if not entered:
             stack.pop()
 
