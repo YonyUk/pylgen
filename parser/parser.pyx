@@ -145,7 +145,7 @@ cdef class BottomUpParser(Parser):
             self._stack_states = [self._start_state]
             self._current_syncronization_set = set()
             for key in self._action_table:
-                if key[0] == self._stack_states[-1]:
+                if key[0] == self._stack_states[-1] and key[1] != symbol:
                     self._current_syncronization_set.add(key[1]) # type:ignore
     
     cdef void _end_recovery_mode(self):
