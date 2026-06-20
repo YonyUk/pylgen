@@ -629,20 +629,15 @@ cdef BottomUpParser _build_lalr_parser(Grammar g):
     cdef dict[tuple[LALRState,Symbol],tuple] action_table
     cdef dict[tuple[str,Symbol],str] plain_goto_table
     cdef dict[tuple[str,Symbol],tuple[str,object]] plain_action_table
-    cdef dict[Symbol,set[Symbol]] follows
     cdef Symbol non_terminal
     cdef BottomUpParser result
 
     goto_table,action_table = _get_goto_action_tables_lalr(g)
 
-    follows = {}
-    for non_terminal in g._non_terminals:
-        follows[non_terminal] = g.follow(non_terminal)
-
     plain_goto_table = _plain_goto_table_lalr(goto_table)
     plain_action_table = _plain_action_table_lalr(action_table)
 
-    result = BottomUpParser('I0',plain_goto_table,plain_action_table,follows) # type:ignore
+    result = BottomUpParser('I0',plain_goto_table,plain_action_table) # type:ignore
     return result
 
 cdef BottomUpParser _build_lalr_parser_from_attributed(AttributedGrammar g):
