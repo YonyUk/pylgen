@@ -2,6 +2,9 @@ from common.types cimport Token,AST,Symbol
 from grammar.grammar cimport Production
 from analisis.error cimport SintaxError
 
+cdef class ParsingException(Exception):
+    pass
+
 cdef class ParseTreeNode:
     cdef Symbol _symbol
     cdef int _line,_column

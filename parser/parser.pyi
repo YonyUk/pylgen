@@ -3,6 +3,10 @@ from common.types import Token,AST,Symbol
 from grammar.grammar import Production
 from analisis.error import SintaxError
 
+class ParsingException(Exception):
+    
+    def __init__(self, *args: object) -> None: ...
+
 class ParseTreeNode:
 
     def __init__(self,symbol:Symbol,line:int,column:int,childrens:List[ParseTreeNode]=[]): ...

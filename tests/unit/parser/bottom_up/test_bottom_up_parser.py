@@ -17,7 +17,7 @@ class TestBottomUpParser:
         T = Symbol('T')
 
         production = Production(E,[E,plus,T])
-        parser = BottomUpParser('I0',{},{})
+        parser = BottomUpParser('I0',{},{},{})
 
         parser[production] = reductor
     
@@ -37,7 +37,7 @@ class TestBottomUpParser:
         T = Symbol('T')
 
         production = Production(E,[E,plus,T])
-        parser = BottomUpParser('I0',{},{})
+        parser = BottomUpParser('I0',{},{},{})
 
         with pytest.raises(ValueError,match='invalid reductor function signature'):
             parser[production] = invalid_reductor_1

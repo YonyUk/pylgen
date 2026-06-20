@@ -5,6 +5,11 @@ from grammar.grammar cimport Production
 from parser.bottom_up_parser_actions import BottomUpParserAction
 from analisis.error cimport SintaxError
 
+cdef class ParsingException(Exception):
+    
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
 cdef class ParseTreeNode:
 
     def __init__(self,Symbol symbol,int line,int column,list[ParseTreeNode] childrens=[]):
@@ -49,8 +54,10 @@ cdef class Parser:
         for token in tokens:
             self._try_parse(token)
         if self._parsed:
+            if len(self._errors) > 0:
+                raise ParsingException('The parsing ended with errors')
             return self._ast
-        raise ValueError('Parsing error')
+        raise ParsingException('Nothing parsed')
 
     cdef void _try_parse(self,Token token):
         raise NotImplementedError()
@@ -62,8 +69,10 @@ cdef class Parser:
             ParseTree: the current parse tree if parsing was successfully
         '''
         if self._parsed:
+            if len(self._errors) > 0:
+                raise ParsingException('The parsing ended with errors')
             return self._parse_tree
-        raise ValueError('Nothing parsed yet')
+        raise ParsingException('Nothing parsed')
     
     @property
     def errors(self) -> set[SintaxError]:
@@ -108,10 +117,12 @@ cdef class BottomUpParser(Parser):
 
         for key in self._action_table:
             if key[0] == self._stack_states[-1]:
-                expected_symbols.add(key[1]) # type:ignore
+                follow_symbol = key[1] # type:ignore
+                if follow_symbol._is_terminal:
+                    expected_symbols.add(follow_symbol)
 
         error = SintaxError(f'Unexpected symbol "{symbol}"; expected {expected_symbols}',line,column) # type:ignore
-
+        self._errors.add(error)
         self._panic_mode = True # type:ignore
         self._current_syncronization_set = set()
 
@@ -129,6 +140,13 @@ cdef class BottomUpParser(Parser):
                     self._recovery_symbol = follow_symbol
                     break
             self._stack_states.pop()
+        
+        if not self._stack_states:
+            self._stack_states = [self._start_state]
+            self._current_syncronization_set = set()
+            for key in self._action_table:
+                if key[0] == self._stack_states[-1]:
+                    self._current_syncronization_set.add(key[1]) # type:ignore
     
     cdef void _end_recovery_mode(self):
         self._current_syncronization_set = set()
@@ -150,6 +168,8 @@ cdef class BottomUpParser(Parser):
         
         if self._panic_mode:
             if token._symbol == self._recovery_symbol:
+                self._end_recovery_mode()
+            elif len(self._stack_states) == 1 and token._symbol in self._current_syncronization_set:
                 self._end_recovery_mode()
             else:
                 return # type:ignore
@@ -225,6 +245,8 @@ cdef class BottomUpParser(Parser):
         self._stack_ast.clear()
         self._stack_states = [self._start_state]
         self._errors.clear()
+        self._panic_mode = False # type:ignore
+        self._current_syncronization_set.clear()
         
     def __setitem__(self,production:Production,reductor:Callable[[List[AST]],AST]):
         sig = inspect.signature(reductor)
