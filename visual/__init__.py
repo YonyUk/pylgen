@@ -9,7 +9,7 @@ import json
 
 from pyvis.network import Network
 from automaton.automaton import Automaton
-from lexer.lexer import BaseLexer
+from lexer.base_lexer import BaseLexer
 from parser.parser import ParseTreeNode, Parser
 from common.types import AST
 
