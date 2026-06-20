@@ -148,8 +148,8 @@ cdef class BottomUpParser(Parser):
 
     cdef void _try_parse(self,Token token):
         cdef tuple[str,object] current_action
-        cdef str state = self._stack_states[-1]
-        cdef tuple[str,Symbol] key = (state,token._symbol)
+        cdef str state
+        cdef tuple[str,Symbol] key
         cdef AST new_ast
         cdef ParseTreeNode new_node
         cdef list[ParseTreeNode] childrens
@@ -163,6 +163,8 @@ cdef class BottomUpParser(Parser):
             else:
                 return # type:ignore
         
+        state = self._stack_states[-1]
+        key = (state,token._symbol)
 
         if not key in self._action_table:
             self._start_recovery_mode(token._symbol,token._line,token._column)

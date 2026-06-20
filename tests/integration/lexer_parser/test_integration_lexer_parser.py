@@ -384,7 +384,7 @@ class TestIntegrationLexerParser:
             ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
         except ParsingException:
             pass
-        assert len(parser1.errors) >= 2
+        assert len(parser1.errors) == 2
     
     def test_error_detecting_2(self,lexer1:Lexer,parser3:BottomUpParser):
         lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicRule())
@@ -397,4 +397,4 @@ class TestIntegrationLexerParser:
             pass
         
         assert len(lexer1.errors) == 2
-        assert len(parser3.errors) >= 3
+        assert len(parser3.errors) == 3
