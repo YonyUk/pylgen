@@ -1,0 +1,26 @@
+from typing import List
+from common.types import AST
+from .error import SemanticError
+
+class ASTVisitor:
+    
+    def visit(self, ast:AST) -> SemanticError | None: ...
+
+class ASTChildrenSelector:
+
+    def select_children(self, ast:AST) -> List[AST]: ...
+
+class ASTWalker:
+
+    def __init__(self,) -> None: ...
+    
+    @property
+    def errors(self) -> list[SemanticError]: ...
+
+    def reset(self) -> None: ...
+
+    def add_visitor(self,ast_type: type, visitor:ASTVisitor) -> None: ...
+
+    def add_selector(self, ast_type:type, selector:ASTChildrenSelector) -> None: ...
+
+    def walk(self, ast:AST) -> None: ...

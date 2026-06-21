@@ -109,6 +109,12 @@ lexical_rule_extension = Extension(
         'analisis/lexical.pyx'
     ]
 )
+
+visitor_extension = Extension(
+    name='analisis.visitor',
+    sources=['analisis/visitor.pyx']
+)
+
 setup(
     ext_modules=cythonize(common_extensions),
     language_level=3
@@ -175,5 +181,10 @@ setup(
 
 setup(
     ext_modules=cythonize(lexical_rule_extension),
+    language_level=3
+)
+
+setup(
+    ext_modules=cythonize(visitor_extension),
     language_level=3
 )
