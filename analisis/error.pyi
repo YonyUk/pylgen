@@ -1,3 +1,5 @@
+from typing import List
+
 from .error_type import ErrorType
 
 class Error:
@@ -31,3 +33,23 @@ class SintaxError(Error):
 class SemanticError(Error):
 
     def __init__(self, msg:str,line:int, column:int) -> None: ...
+
+class RuntimeError:
+
+    def __init__(self,stack_trace:List[str], line:int, column:int, msg:str) -> None: ...
+
+    @property
+    def stack_trace(self) -> List[str]: ...
+    
+    @property
+    def line(self) -> int: ...
+    
+    @property
+    def column(self) -> int: ...
+    
+    @property
+    def message(self) -> str: ...
+    
+    def __str__(self) -> str: ...
+    
+    def __repr__(self) -> str: ...

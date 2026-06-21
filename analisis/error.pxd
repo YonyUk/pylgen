@@ -12,3 +12,9 @@ cdef class SintaxError(Error):
 
 cdef class SemanticError(Error):
     pass
+
+cdef class RuntimeError:
+    cdef list[str] _stack_trace
+    cdef int _line
+    cdef int _column
+    cdef str _msg
