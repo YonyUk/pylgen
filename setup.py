@@ -115,6 +115,11 @@ visitor_extension = Extension(
     sources=['analisis/visitor.pyx']
 )
 
+context_extension = Extension(
+    name='analisis.context',
+    sources=['analisis/context.pyx']
+)
+
 setup(
     ext_modules=cythonize(common_extensions),
     language_level=3
@@ -186,5 +191,10 @@ setup(
 
 setup(
     ext_modules=cythonize(visitor_extension),
+    language_level=3
+)
+
+setup(
+    ext_modules=cythonize(context_extension),
     language_level=3
 )

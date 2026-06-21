@@ -33,6 +33,9 @@ cdef class Lexer(BaseLexer):
                         self._errors.add(error)
             yield self._current_token
 
+    cpdef void clear_errors(self):
+        self._errors.clear()
+
     def __setitem__(self, key: Tuple[int, object], re:str):
         cdef DFA dfa = _parse(re)
         cdef State state

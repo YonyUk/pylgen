@@ -47,21 +47,37 @@ cdef class ASTWalker:
         self._visitors[ast_type] = visitor
     
     cpdef void walk(self,AST ast):
-        cdef list[AST] stack = [ast]
+        cdef list[AST] stack = []
         cdef AST current
+        cdef list[AST] seen = []
         cdef type ast_type # type:ignore
         cdef ASTVisitor visitor
         cdef ASTChildrenSelector selector
         cdef SemanticError error
+        cdef AST child
+        cdef bint asts_added = False # type:ignore
+
+        ast_type = type(ast)
+        if ast_type in self._selectors:
+            selector = self._selectors[ast_type] # type:ignore
+            stack += selector.select_children(ast)
 
         while stack:
-            current = stack.pop()
+            asts_added = False # type:ignore
+            current = stack[-1]
+            seen.append(current)
             ast_type = type(current)
+            if ast_type in self._selectors:
+                selector = self._selectors[ast_type] # type:ignore
+                for child in selector.select_children(current):
+                    if not child in stack and not child in seen:
+                        stack.append(child)
+                        asts_added = True # type:ignore
+            if asts_added:
+                continue
             if ast_type in self._visitors:
-                visitor = self._visitors[ast_type]
+                visitor = self._visitors[ast_type] # type:ignore
                 error = visitor.visit(current)
                 if not error is None:
                     self._errors.append(error)
-            if ast_type in self._selectors:
-                selector = self._selectors[ast_type]
-                stack += selector.select_children(current)
+            stack.pop()
