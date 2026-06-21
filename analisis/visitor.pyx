@@ -47,19 +47,12 @@ cdef class ASTWalker:
         self._visitors[ast_type] = visitor
     
     cpdef void walk(self,AST ast):
-        cdef list[AST] stack = []
+        cdef list[AST] stack = [ast]
         cdef AST current
         cdef type ast_type # type:ignore
         cdef ASTVisitor visitor
         cdef ASTChildrenSelector selector
         cdef SemanticError error
-
-        ast_type = type(ast)
-        if ast_type in self._selectors:
-            selector = self._selectors[ast_type]
-            stack += selector.select_children(ast)
-        else:
-            stack = [ast]
 
         while stack:
             current = stack.pop()
