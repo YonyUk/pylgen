@@ -1,9 +1,10 @@
 from common.types cimport AST
 from .error cimport SemanticError
+from .context cimport Context
 
 cdef class ASTVisitor:
     
-    cpdef SemanticError visit(self,AST ast):
+    cpdef void visit(self,AST ast,Context context):
         '''
         Args: ast (AST)
 
@@ -14,7 +15,7 @@ cdef class ASTVisitor:
 
 cdef class ASTChildrenSelector:
 
-    cpdef list[AST] select_children(self,AST ast):
+    cpdef list[AST] select_children(self,AST ast, Context context):
         '''
         Args:
             ast (AST)
@@ -28,23 +29,16 @@ cdef class ASTChildrenSelector:
 
 cdef class ASTWalker:
 
-    def __init__(self,) -> None:
-        self._errors = []
+    def __init__(self,Context context) -> None:
         self._visitors = {}
         self._selectors = {}
-    
-    @property
-    def errors(self) -> list[SemanticError]:
-        return self._errors
-    
-    cpdef void reset(self):
-        self._errors.clear()
+        self._context = context
     
     cpdef void add_selector(self,type ast_type,ASTChildrenSelector selector):
-        self._selectors[ast_type] = selector
+        self._selectors[ast_type] = selector # type:ignore
 
     cpdef void add_visitor(self,type ast_type,ASTVisitor visitor):
-        self._visitors[ast_type] = visitor
+        self._visitors[ast_type] = visitor # type:ignore
     
     cpdef void walk(self,AST ast):
         cdef list[AST] stack = []
@@ -60,7 +54,7 @@ cdef class ASTWalker:
         ast_type = type(ast)
         if ast_type in self._selectors:
             selector = self._selectors[ast_type] # type:ignore
-            stack += selector.select_children(ast)
+            stack += selector.select_children(ast,self._context)
 
         while stack:
             asts_added = False # type:ignore
@@ -69,7 +63,7 @@ cdef class ASTWalker:
             ast_type = type(current)
             if ast_type in self._selectors:
                 selector = self._selectors[ast_type] # type:ignore
-                for child in selector.select_children(current):
+                for child in selector.select_children(current,self._context):
                     if not child in stack and not child in seen:
                         stack.append(child)
                         asts_added = True # type:ignore
@@ -77,7 +71,5 @@ cdef class ASTWalker:
                 continue
             if ast_type in self._visitors:
                 visitor = self._visitors[ast_type] # type:ignore
-                error = visitor.visit(current)
-                if not error is None:
-                    self._errors.append(error)
+                visitor.visit(current,self._context)
             stack.pop()
