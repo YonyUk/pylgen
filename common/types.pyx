@@ -103,6 +103,9 @@ cdef class Token(AST):
         self._text = text
         self._type = type_
     
+    cpdef list[AST] children(self):
+        return []
+
     @property
     def text(self) -> str:
         return self._text
