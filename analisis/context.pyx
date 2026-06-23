@@ -20,7 +20,7 @@ cdef class Context:
 
     @property
     def errors(self) -> list[SemanticError | RuntimeError]:
-        raise self._errors.copy() + self.get_runtime_errors().copy() # type:ignore
+        return self._errors.copy() + self.get_runtime_errors().copy() # type:ignore
 
     @property
     def stack_trace(self) -> list[str]:

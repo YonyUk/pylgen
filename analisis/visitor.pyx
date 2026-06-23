@@ -7,22 +7,46 @@ from .error cimport SemanticError
 from .context cimport Context
 
 cdef class ASTVisitor:
+    '''
+    Base clas for Visitor pattern
+
+    methods that must be implemented
+
+    def visit(self,ast:AST,context:Context)
+    WARNING: self._check_context_type must be called at first of visit method
+    '''
 
     def __init__(self,type context_type) -> None:
         self._context_type = context_type
 
-    cpdef void visit(self,AST ast,Context context):
-        '''
-        Args: ast (AST)
-
-        '''
+    cpdef void _check_context_type(self,Context context):
         if not isinstance(context,self._context_type):
             raise TypeError(f'context must be an instance of {self._context_type}')
 
+    cpdef void visit(self,AST ast,Context context):
+        '''
+        Args:
+            ast (AST)
+            context (Context)
+        '''
+        raise NotImplementedError()
+
 cdef class ASTChildrenSelector:
+    '''
+    Base class for AST children selectors
+
+    methods that must be implemented
+    select_children(self,ast:AST,context:Context)
+    WARNING: self._check_context_type must be called at first of select_children method
+    '''
 
     def __init__(self,type context_type) -> None:
         self._context_type = context_type
+
+    cpdef void _check_context_type(self,Context context):
+        if not isinstance(context,self._context_type):
+            raise TypeError(f'context must be an instance of {self._context_type}')
+
 
     cpdef list[AST] select_children(self,AST ast, Context context):
         '''
@@ -33,16 +57,27 @@ cdef class ASTChildrenSelector:
             List[AST]: a list of childrens (self-included if needed) with the nodes in the orden in which
             the nodes will be visited
         '''
-        if not isinstance(context,self._context_type):
-            raise TypeError(f'context must be an instance of {self._context_type}')
-
+        raise NotImplementedError()
 
 cdef class TraversalStrategy:
+    '''
+    Base class for traversals strategies for walk over asts
+    
+    methods that must be implemented
+    has_next(self)
+    reset(self)
+    current(self)
+    WARNING: self._check_context_type must be called at first of current method
+    '''
 
     def __init__(self,type context_type) -> None:
         self._selectors = {}
         self._context_type = context_type
     
+    cpdef void _check_context_type(self,Context context):
+        if not isinstance(context,self._context_type):
+            raise TypeError(f'context must be an instance of {self._context_type}')
+
     cpdef void init(self,AST root):
         self._root = root
 
@@ -50,8 +85,7 @@ cdef class TraversalStrategy:
         raise NotImplementedError()
     
     cpdef AST current(self,Context context):
-        if not isinstance(context,self._context_type):
-            raise TypeError(f'context must be an instance of {self._context_type}')
+        raise NotImplementedError()
 
     cpdef void reset(self):
         raise NotImplementedError()
@@ -62,11 +96,11 @@ cdef class TraversalStrategy:
 
     cpdef void add_selector(self,type ast_type,ASTChildrenSelector selector):
         signature = inspect.signature(selector.select_children)
-        params = signature.parameters.values()
+        params = list(signature.parameters.values())
         if params[1].annotation is inspect.Signature.empty:
-            raise TypeError()
+            raise TypeError(f'selector.select_children incorrect signature, second param must be of type {self._context_type}')
         if params[1].annotation != self._context_type:
-            raise TypeError()
+            raise TypeError(f'selector.select_children incorrect signature, second param must be of type {self._context_type}')
         self._selectors[ast_type] = selector # type:ignore
 
 cdef class ASTWalker:
