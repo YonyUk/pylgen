@@ -1,5 +1,5 @@
-from analisis.error import Error,LexicError,SintaxError,SemanticError
-from analisis.error_type import ErrorType
+from pylgen.analisis.error import Error,LexicError,SintaxError,SemanticError
+from pylgen.analisis.error_type import ErrorType
 
 import pytest
 

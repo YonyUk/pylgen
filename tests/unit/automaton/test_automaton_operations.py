@@ -1,8 +1,8 @@
 import pytest
 from typing import Set
 
-from automaton import Automaton,NFA,DFA,State, create_dfa
-from common.table import Table
+from pylgen.automaton import Automaton,NFA,DFA,State, create_dfa
+from pylgen.common.table import Table
 
 class TestAutomatonOperations:
 

@@ -2,7 +2,7 @@ from typing import Set
 
 import pytest
 
-from automaton import State,DFA
+from pylgen.automaton import State,DFA
 
 class TestDFA:
 

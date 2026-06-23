@@ -1,5 +1,5 @@
 import pytest
-from common.types import AST,Symbol
+from pylgen.common.types import AST,Symbol
 
 class TestAST:
 

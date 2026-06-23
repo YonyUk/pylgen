@@ -1,8 +1,8 @@
 from typing import Set
 import pytest
 
-from automaton import DFA,NFA,State
-from regex import RegexEngine
+from pylgen.automaton import DFA,NFA,State
+from pylgen.regex import RegexEngine
 
 class TestAutomatonToRegex:
 

@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from automaton import State
+from pylgen.automaton import State
 
 class TestState:
 

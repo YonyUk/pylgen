@@ -1,7 +1,7 @@
 import pytest
 from typing import Set
 
-from automaton import Automaton,DFA,NFA,State
+from pylgen.automaton import Automaton,DFA,NFA,State
 
 class TestAutomatonConsistence:
 

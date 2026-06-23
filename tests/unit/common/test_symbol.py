@@ -1,6 +1,6 @@
 import pytest
 
-from common.types import Symbol
+from pylgen.common.types import Symbol
 
 class TestSymbol:
 

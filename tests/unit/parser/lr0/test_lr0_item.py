@@ -1,5 +1,5 @@
-from parser.lr0_parser import LR0Item
-from common.types import Symbol
+from pylgen.parser.lr0_parser import LR0Item
+from pylgen.common.types import Symbol
 
 class TestLR0Item:
 

@@ -1,7 +1,7 @@
 import pytest
 
-from grammar.grammar import Production
-from common.types import Symbol
+from pylgen.grammar.grammar import Production
+from pylgen.common.types import Symbol
 
 class TestProduction:
 

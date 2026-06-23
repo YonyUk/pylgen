@@ -2,8 +2,8 @@ from typing import Any, List
 
 import pytest
 
-from grammar.grammar import AttributedProductionsSet
-from common.types import Symbol,AST
+from pylgen.grammar.grammar import AttributedProductionsSet
+from pylgen.common.types import Symbol,AST
 
 def comodin_reductor(asts:List[AST]) -> AST:
     return AST(Symbol('s'),0,0)

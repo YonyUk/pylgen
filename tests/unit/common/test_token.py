@@ -1,5 +1,5 @@
-from common.types import Symbol,Token
-from common.enums import TokenType
+from pylgen.common.types import Symbol,Token
+from pylgen.common.enums import TokenType
 
 import pytest
 

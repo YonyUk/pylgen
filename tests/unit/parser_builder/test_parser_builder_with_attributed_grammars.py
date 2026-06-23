@@ -4,12 +4,12 @@ from random import choice, randint, random
 
 import pytest
 import time
-from common.types import AST, Symbol
-from grammar.grammar import Grammar,AttributedGrammar,Production
-from parser.parser_builder import LALRReduceReduceConflictException, LALRShiftReduceConflictException, ParserBuilder
-from parser.bottom_up_parser_actions import BottomUpParserAction
-from parser.lr0_parser import LR0Item,LR0State
-from parser.lalr_parser import LALRItem,LALRState
+from pylgen.common.types import AST, Symbol
+from pylgen.grammar.grammar import Grammar,AttributedGrammar,Production
+from pylgen.parser.parser_builder import LALRReduceReduceConflictException, LALRShiftReduceConflictException, ParserBuilder
+from pylgen.parser.bottom_up_parser_actions import BottomUpParserAction
+from pylgen.parser.lr0_parser import LR0Item,LR0State
+from pylgen.parser.lalr_parser import LALRItem,LALRState
 
 def comodin_reductor(asts:List[AST]) -> AST:
     return AST(Symbol('s'),0,0)

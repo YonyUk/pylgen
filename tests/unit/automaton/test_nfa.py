@@ -1,7 +1,7 @@
 import pytest
 from typing import Set
 
-from automaton import State,DFA,NFA
+from pylgen.automaton import State,DFA,NFA
 
 class TestNFA:
 

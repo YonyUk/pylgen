@@ -2,7 +2,7 @@ import pytest
 from typing import List, Set, Tuple
 from random import random
 
-from automaton import DFA,State,Automaton
+from pylgen.automaton import DFA,State,Automaton
 
 class TestAutomaton:
 

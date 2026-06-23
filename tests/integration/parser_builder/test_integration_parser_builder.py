@@ -1,11 +1,11 @@
 from typing import List
 
-from common.types import Symbol,AST,Token
-from common.enums import TokenType
-from grammar.grammar import Grammar,AttributedGrammar,Production
-from parser.parser_builder import ParserBuilder
-from parser.parser_type import ParserType
-from parser.parser import BottomUpParser,ParsingException
+from pylgen.common.types import Symbol,AST,Token
+from pylgen.common.enums import TokenType
+from pylgen.grammar.grammar import Grammar,AttributedGrammar,Production
+from pylgen.parser.parser_builder import ParserBuilder
+from pylgen.parser.parser_type import ParserType
+from pylgen.parser.parser import BottomUpParser,ParsingException
 
 class TokenTypeEnum(TokenType):
     NUMBER = 'NUMBER'

@@ -2,9 +2,9 @@ import pytest
 import string
 import random
 import re
-from regex.engine import RegexEngine
-from automaton import State,DFA,NFA,create_dfa
-from common import Table
+from pylgen.regex.engine import RegexEngine
+from pylgen.automaton import State,DFA,NFA,create_dfa
+from pylgen.common import Table
 
 class TestIntegrationRegex:
 

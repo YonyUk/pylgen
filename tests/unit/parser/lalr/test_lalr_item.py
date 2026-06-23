@@ -1,5 +1,5 @@
-from parser.lalr_parser import LALRItem
-from common.types import Symbol
+from pylgen.parser.lalr_parser import LALRItem
+from pylgen.common.types import Symbol
 
 class TestLALRItem:
 

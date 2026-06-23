@@ -4,7 +4,7 @@ import random
 
 import pytest
 
-from automaton import get_word_automaton,get_words_automaton,get_word_automaton_with_value,get_words_automaton_with_value
+from pylgen.automaton import get_word_automaton,get_words_automaton,get_word_automaton_with_value,get_words_automaton_with_value
 
 class TestAutomatonTools:
 

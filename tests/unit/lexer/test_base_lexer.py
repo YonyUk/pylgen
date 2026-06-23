@@ -2,10 +2,10 @@ from typing import Any
 from enum import StrEnum
 import pytest
 
-from automaton import DFA
-from common.types import Symbol
-from common.enums import TokenType
-from lexer.base_lexer import BaseLexer,LexerNotInitializedException,LexerNotTokensProvidedException
+from pylgen.automaton import DFA
+from pylgen.common.types import Symbol
+from pylgen.common.enums import TokenType
+from pylgen.lexer.base_lexer import BaseLexer,LexerNotInitializedException,LexerNotTokensProvidedException
 
 class MyInvalidTokenType(StrEnum):
     T1 = 'T1'

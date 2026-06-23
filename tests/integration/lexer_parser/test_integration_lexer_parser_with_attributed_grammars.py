@@ -2,16 +2,16 @@ import pytest
 from typing import Iterable, List
 from string import digits
 
-from common.types import Symbol,AST,Token
-from common.enums import TokenType
-from grammar.grammar import AttributedGrammar
-from parser.parser_builder import ParserBuilder
-from parser.parser_type import ParserType
-from parser.parser import BottomUpParser,ParsingException
-from lexer.base_lexer import BaseLexer
-from lexer.lexer import Lexer
-from analisis.lexical import LexicRule
-from automaton.automaton import NFA, State,DFA,get_words_automaton_with_value
+from pylgen.common.types import Symbol,AST,Token
+from pylgen.common.enums import TokenType
+from pylgen.grammar.grammar import AttributedGrammar
+from pylgen.parser.parser_builder import ParserBuilder
+from pylgen.parser.parser_type import ParserType
+from pylgen.parser.parser import BottomUpParser,ParsingException
+from pylgen.lexer.base_lexer import BaseLexer
+from pylgen.lexer.lexer import Lexer
+from pylgen.analisis.lexical import LexicRule
+from pylgen.automaton.automaton import NFA, State,DFA,get_words_automaton_with_value
 
 END_SYMBOL = '$'
 

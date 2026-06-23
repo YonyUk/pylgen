@@ -1,12 +1,12 @@
 from typing import Dict, List, Tuple
 
-from common.types import AST, Token,Symbol
-from common.enums import TokenType
-from grammar.grammar import Grammar, Production
-from parser.parser import BottomUpParser,ParsingException
-from parser.bottom_up_parser_actions import BottomUpParserAction
-from parser.lalr_parser import LALRState
-from parser.parser_builder import ParserBuilder
+from pylgen.common.types import AST, Token,Symbol
+from pylgen.common.enums import TokenType
+from pylgen.grammar.grammar import Grammar, Production
+from pylgen.parser.parser import BottomUpParser,ParsingException
+from pylgen.parser.bottom_up_parser_actions import BottomUpParserAction
+from pylgen.parser.lalr_parser import LALRState
+from pylgen.parser.parser_builder import ParserBuilder
 
 class TokenTypeEnum(TokenType):
     NUMBER = 'NUMBER'

@@ -2,8 +2,8 @@ from typing import Tuple
 
 import pytest
 
-from grammar.grammar import Grammar,SymbolNotPresentInGrammarException,Production
-from common.types import Symbol
+from pylgen.grammar.grammar import Grammar,SymbolNotPresentInGrammarException,Production
+from pylgen.common.types import Symbol
 
 class TestGrammar:
 

@@ -2,8 +2,8 @@ from typing import List, Tuple
 
 import pytest
 
-from grammar.grammar import AttributedGrammar, Grammar,SymbolNotPresentInGrammarException,Production
-from common.types import AST, Symbol
+from pylgen.grammar.grammar import AttributedGrammar, Grammar,SymbolNotPresentInGrammarException,Production
+from pylgen.common.types import AST, Symbol
 
 def comodin_reductor(asts:List[AST]) -> AST:
     return AST(Symbol('s'),0,0)

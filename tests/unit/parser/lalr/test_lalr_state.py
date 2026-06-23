@@ -1,5 +1,5 @@
-from common.types import Symbol
-from parser.lalr_parser import LALRState,LALRItem
+from pylgen.common.types import Symbol
+from pylgen.parser.lalr_parser import LALRState,LALRItem
 
 class TestLALRState:
 

@@ -1,8 +1,8 @@
 import pytest
 
-from regex import RegexEngine
-from grammar import Grammar
-from common.types import Symbol
+from pylgen.regex import RegexEngine
+from pylgen.grammar import Grammar
+from pylgen.common.types import Symbol
 
 class TestGrammarToAutomaton:
 

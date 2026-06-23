@@ -1,7 +1,7 @@
-from common.types import Symbol
-from common.enums import TokenType
-from lexer.lexer import Lexer
-from automaton import DFA
+from pylgen.common.types import Symbol
+from pylgen.common.enums import TokenType
+from pylgen.lexer.lexer import Lexer
+from pylgen.automaton import DFA
 
 class TokenTypeEnum(TokenType):
     NUMBER = 'NUMBER'

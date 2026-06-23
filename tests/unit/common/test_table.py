@@ -1,6 +1,6 @@
 import pytest
 
-from common import Table
+from pylgen.common import Table
 
 class TestTable:
 

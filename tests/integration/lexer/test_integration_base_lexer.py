@@ -5,13 +5,13 @@ import re
 from string import digits,ascii_letters
 from random import choices,randint
 
-from common.table import Table
-from common.types import Symbol
-from common.enums import TokenType
-from lexer.base_lexer import BaseLexer
-from lexer.lexer import Lexer
-from automaton.automaton import NFA,DFA,State,create_dfa,get_words_automaton_with_value
-from analisis.lexical import LexicRule
+from pylgen.common.table import Table
+from pylgen.common.types import Symbol
+from pylgen.common.enums import TokenType
+from pylgen.lexer.base_lexer import BaseLexer
+from pylgen.lexer.lexer import Lexer
+from pylgen.automaton.automaton import NFA,DFA,State,create_dfa,get_words_automaton_with_value
+from pylgen.analisis.lexical import LexicRule
 
 class TokenTypeTestEnum(TokenType):
     NUMBER = 'NUMBER'

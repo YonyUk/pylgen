@@ -1,9 +1,9 @@
 import pytest
 from typing import Any, List
 
-from parser.parser import BottomUpParser
-from grammar.grammar import Production
-from common.types import AST, Symbol
+from pylgen.parser.parser import BottomUpParser
+from pylgen.grammar.grammar import Production
+from pylgen.common.types import AST, Symbol
 
 class TestBottomUpParser:
     
