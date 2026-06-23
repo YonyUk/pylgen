@@ -1,19 +1,28 @@
+# cython language_level:3
+from typing import get_type_hints
+import inspect
+
 from common.types cimport AST
 from .error cimport SemanticError
 from .context cimport Context
 
 cdef class ASTVisitor:
-    
+
+    def __init__(self,type context_type) -> None:
+        self._context_type = context_type
+
     cpdef void visit(self,AST ast,Context context):
         '''
         Args: ast (AST)
 
-        Returns:
-            SemanticError | None 
         '''
-        raise NotImplementedError()
+        if not isinstance(context,self._context_type):
+            raise TypeError(f'context must be an instance of {self._context_type}')
 
 cdef class ASTChildrenSelector:
+
+    def __init__(self,type context_type) -> None:
+        self._context_type = context_type
 
     cpdef list[AST] select_children(self,AST ast, Context context):
         '''
@@ -24,14 +33,15 @@ cdef class ASTChildrenSelector:
             List[AST]: a list of childrens (self-included if needed) with the nodes in the orden in which
             the nodes will be visited
         '''
-        raise NotImplementedError()
+        if not isinstance(context,self._context_type):
+            raise TypeError(f'context must be an instance of {self._context_type}')
 
 
 cdef class TraversalStrategy:
 
-    def __init__(self) -> None:
+    def __init__(self,type context_type) -> None:
         self._selectors = {}
-        pass
+        self._context_type = context_type
     
     cpdef void init(self,AST root):
         self._root = root
@@ -40,7 +50,8 @@ cdef class TraversalStrategy:
         raise NotImplementedError()
     
     cpdef AST current(self,Context context):
-        raise NotImplementedError()
+        if not isinstance(context,self._context_type):
+            raise TypeError(f'context must be an instance of {self._context_type}')
 
     cpdef void reset(self):
         raise NotImplementedError()
@@ -50,6 +61,12 @@ cdef class TraversalStrategy:
         return self._selectors[ast_type] # type:ignore
 
     cpdef void add_selector(self,type ast_type,ASTChildrenSelector selector):
+        signature = inspect.signature(selector.select_children)
+        params = signature.parameters.values()
+        if params[1].annotation is inspect.Signature.empty:
+            raise TypeError()
+        if params[1].annotation != self._context_type:
+            raise TypeError()
         self._selectors[ast_type] = selector # type:ignore
 
 cdef class ASTWalker:
@@ -72,7 +89,7 @@ cdef class ASTWalker:
         self._strategy.init(ast)
 
         while self._strategy.has_next():
-            current = self._strategy.current(self._context)
+            current = self._strategy.current(self._context) # type:ignore
             ast_type = type(current)
             if ast_type in self._visitors:
                 visitor = self._visitors[ast_type] # type:ignore

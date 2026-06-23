@@ -1,16 +1,21 @@
+# cython language_level:3
 from common.types cimport AST
-from .error cimport SemanticError
 from .context cimport Context
 
 cdef class ASTVisitor:
+
+    cdef type _context_type # type:ignore
 
     cpdef void visit(self,AST ast,Context context)
 
 cdef class ASTChildrenSelector:
 
+    cdef type _context_type # type:ignore
+
     cpdef list[AST] select_children(self,AST ast, Context context)
 
 cdef class TraversalStrategy:
+    cdef type _context_type # type:ignore
     cdef AST _root
     cdef dict[type,ASTChildrenSelector] _selectors
 

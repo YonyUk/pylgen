@@ -1,19 +1,22 @@
 from typing import List
 from common.types import AST
-from .error import SemanticError
 from .context import Context
 
 class ASTVisitor:
+
+    def __init__(self,context_type:type) -> None: ...    
     
     def visit(self, ast:AST,context:Context) -> None: ...
 
 class ASTChildrenSelector:
 
+    def __init__(self,context_type:type) -> None: ...
+
     def select_children(self, ast:AST,context:Context) -> List[AST]: ...
 
 class TraversalStrategy:
 
-    def __init__(self) -> None: ...
+    def __init__(self,context_type:type) -> None: ...
 
     def init(self, root:AST) -> None: ...
 
