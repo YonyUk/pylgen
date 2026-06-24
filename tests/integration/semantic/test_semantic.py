@@ -148,6 +148,26 @@ class TestIntegrationSemantic:
         walker.add_visitor(BinaryAST,visitor)
         return walker
 
+    def build_walker3(self,context:CounterContext) -> ASTWalker:
+        
+        strategy = PostOrderTraversalStrategy()
+        selector = CounterChildrenSelector()
+        strategy.set_default_selector(selector)
+        walker = ASTWalker(context,strategy)
+        visitor = CounterASTVisitor()
+        walker.set_default_visitor(visitor)
+        return walker
+
+    def build_walker4(self,context:CounterContext) -> ASTWalker:
+        
+        strategy = PreOrderTraversalStrategy()
+        selector = CounterChildrenSelector()
+        strategy.set_default_selector(selector)
+        walker = ASTWalker(context,strategy)
+        visitor = CounterASTVisitor()
+        walker.set_default_visitor(visitor)
+        return walker
+
     def test_1(self,ast1:AST):
 
         context = CounterContext()
@@ -160,6 +180,22 @@ class TestIntegrationSemantic:
 
         context = CounterContext()
         walker = self.build_walker2(context)
+        walker.walk(ast1)
+
+        assert context.asts == [ast1,ast1.left,ast1.right] # type: ignore
+
+    def test_3(self,ast1:AST):
+
+        context = CounterContext()
+        walker = self.build_walker3(context)
+        walker.walk(ast1)
+
+        assert context.asts == [ast1.left,ast1.right,ast1] # type: ignore
+    
+    def test_4(self,ast1:AST):
+
+        context = CounterContext()
+        walker = self.build_walker4(context)
         walker.walk(ast1)
 
         assert context.asts == [ast1,ast1.left,ast1.right] # type: ignore
