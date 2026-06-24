@@ -17,6 +17,8 @@ cdef class ASTVisitor:
     '''
 
     def __init__(self,type context_type) -> None:
+        if not issubclass(context_type,Context):
+            raise ValueError(f'context_type must be a subclass of {Context}')
         self._context_type = context_type
 
     cpdef void _check_context_type(self,Context context):
