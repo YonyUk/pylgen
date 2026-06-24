@@ -159,11 +159,8 @@ cdef class ASTWalker:
         while self._strategy.has_next():
             current = self._strategy.current(self._context) # type:ignore
             ast_type = type(current)
-            if ast_type in self._visitors:
-                if not ast_type in self._visitors and self._default_visitor is not None:
-                    visitor = self._default_visitor # type:ignore
-                else:
-                    visitor = self._visitors[ast_type] # type:ignore
+            if ast_type in self._visitors or self._default_visitor is not None:
+                visitor = self._visitors.get(ast_type,self._default_visitor) # type:ignore
                 visitor.visit(current,self._context)
         
         self._strategy.reset()
