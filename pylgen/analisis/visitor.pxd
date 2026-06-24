@@ -20,6 +20,7 @@ cdef class TraversalStrategy:
     cdef type _context_type # type:ignore
     cdef AST _root
     cdef dict[type,ASTChildrenSelector] _selectors
+    cdef ASTChildrenSelector _default_selector
 
     cpdef void _check_context_type(self,Context context)
     cpdef void init(self,AST root)
@@ -28,12 +29,15 @@ cdef class TraversalStrategy:
     cpdef void reset(self)
     cpdef ASTChildrenSelector _get_selector(self,AST ast)
     cpdef void add_selector(self,type ast_type,ASTChildrenSelector selector)
+    cpdef void set_default_selector(self,ASTChildrenSelector selector)
 
 cdef class ASTWalker:
 
     cdef Context _context
     cdef dict[type,ASTVisitor] _visitors
     cdef TraversalStrategy _strategy
+    cdef ASTVisitor _default_visitor
 
     cpdef void walk(self,AST ast)
     cpdef void add_visitor(self,type ast_type,ASTVisitor visitor)
+    cpdef void set_default_visitor(self,ASTVisitor visitor)

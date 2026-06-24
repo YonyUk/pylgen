@@ -79,6 +79,7 @@ cdef class TraversalStrategy:
             raise ValueError(f'context_type must be a subclass of {Context}')
         self._context_type = context_type
         self._selectors = {}
+        self._default_selector = None # type:ignore
     
     cpdef void _check_context_type(self,Context context):
         if not isinstance(context,self._context_type):
@@ -98,6 +99,8 @@ cdef class TraversalStrategy:
     
     cpdef ASTChildrenSelector _get_selector(self,AST ast):
         cdef type ast_type = type(ast) # type:ignore
+        if not ast_type in self._selectors and self._default_selector is not None: # type:ignore
+            return self._default_selector # type:ignore
         return self._selectors[ast_type] # type:ignore
 
     cpdef void add_selector(self,type ast_type,ASTChildrenSelector selector):
@@ -108,6 +111,15 @@ cdef class TraversalStrategy:
         if params[1].annotation != self._context_type:
             raise TypeError(f'selector.select_children incorrect signature, second param must be of type {self._context_type}')
         self._selectors[ast_type] = selector # type:ignore
+    
+    cpdef void set_default_selector(self,ASTChildrenSelector selector):
+        signature = inspect.signature(selector.select_children)
+        params = list(signature.parameters.values())
+        if params[1].annotation is inspect.Signature.empty:
+            raise TypeError(f'selector.select_children incorrect signature, second param must be of type {self._context_type}')
+        if params[1].annotation != self._context_type:
+            raise TypeError(f'selector.select_children incorrect signature, second param must be of type {self._context_type}')
+        self._default_selector = selector # type:ignore
 
 cdef class ASTWalker:
 
@@ -115,10 +127,26 @@ cdef class ASTWalker:
         self._visitors = {}
         self._context = context
         self._strategy = strategy # type:ignore
+        self._default_visitor = None # type:ignore
 
     cpdef void add_visitor(self,type ast_type,ASTVisitor visitor):
+        signature = inspect.signature(visitor.visit)
+        params = list(signature.parameters.values())
+        if params[1].annotation is inspect.Signature.empty:
+            raise TypeError(f'selector.select_children incorrect signature, second param must be of type {type(self._context)}')
+        if params[1].annotation != type(self._context):
+            raise TypeError(f'selector.select_children incorrect signature, second param must be of type {type(self._context)}')
         self._visitors[ast_type] = visitor # type:ignore
     
+    cpdef void set_default_visitor(self,ASTVisitor visitor):
+        signature = inspect.signature(visitor.visit)
+        params = list(signature.parameters.values())
+        if params[1].annotation is inspect.Signature.empty:
+            raise TypeError(f'selector.select_children incorrect signature, second param must be of type {type(self._context)}')
+        if params[1].annotation != type(self._context):
+            raise TypeError(f'selector.select_children incorrect signature, second param must be of type {type(self._context)}')
+        self._default_visitor = visitor # type:ignore
+
     cpdef void walk(self,AST ast):
         cdef AST current
         cdef type ast_type # type:ignore
@@ -132,7 +160,10 @@ cdef class ASTWalker:
             current = self._strategy.current(self._context) # type:ignore
             ast_type = type(current)
             if ast_type in self._visitors:
-                visitor = self._visitors[ast_type] # type:ignore
+                if not ast_type in self._visitors and self._default_visitor is not None:
+                    visitor = self._default_visitor # type:ignore
+                else:
+                    visitor = self._visitors[ast_type] # type:ignore
                 visitor.visit(current,self._context)
         
         self._strategy.reset()
