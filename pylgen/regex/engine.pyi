@@ -3,6 +3,13 @@ from ..grammar.grammar import Grammar
 from ..parser.parser import Parser
 from ..lexer.base_lexer import BaseLexer
 
+class RegexParsingException(Exception):
+
+    def __init__(self,errors:list[RuntimeError], *args: object) -> None: ...
+
+    @property
+    def errors(self) -> list[RuntimeError]: ...
+    
 class RegexEngine:
 
     @staticmethod

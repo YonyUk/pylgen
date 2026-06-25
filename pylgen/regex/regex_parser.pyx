@@ -251,7 +251,14 @@ cdef class CharSetAST(RegexAST):
         return self._preceding # type:ignore
     
     cpdef list[AST] children(self):
-        return [self._preceding,self._next]
+        cdef list[AST] children = []
+        
+        if not self._preceding is None:
+            children.append(self._preceding)
+        if not self._next is None:
+            children.append(self._next)
+        
+        return children
 
     cdef Automaton _get_automaton(self):
         return _automaton_union({self._preceding._get_automaton(),self._next._get_automaton()})
