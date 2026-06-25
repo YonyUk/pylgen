@@ -2,6 +2,9 @@ from ..common.types cimport AST
 from ..automaton.automaton cimport Automaton
 from ..parser.parser cimport BottomUpParser
 from ..lexer.base_lexer cimport BaseLexer
+from ..analisis.context cimport Context
+from ..analisis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
+from ..analisis.error cimport RuntimeError
 
 cdef class RegexAST(AST):
     cdef Automaton _get_automaton(self)
@@ -58,5 +61,22 @@ cdef class RepeatPatternAST(RegexAST):
 cdef class StringAST(AST):
     cdef str _string
 
+cdef class RegexContext(Context):
+
+    cdef list[RuntimeError] _runtime_errors
+    cdef dict[RegexAST,object] _values
+
+cdef class RegexASTChildrenSelector(ASTChildrenSelector):
+    pass
+
+cdef class RepeatPatternASTVisitor(ASTVisitor):
+    pass
+
+cdef class PostOrderStrategy(TraversalStrategy):
+    
+    cdef list[RegexAST] _stack
+    cdef list[RegexAST] _seen
+
 cdef BottomUpParser _build_regex_parser()
 cdef BaseLexer _build_regex_lexer()
+cdef tuple[ASTWalker,RegexContext] _get_regex_ast_walker()

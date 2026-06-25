@@ -1,8 +1,13 @@
 from ..automaton.automaton cimport DFA,NFA,Automaton,State
 from ..grammar.grammar cimport Grammar
+from ..analisis.error cimport RuntimeError
 
 cdef class RegexEngine:
     pass
+
+cdef class RegexParsingException(Exception):
+
+    cdef list[RuntimeError] _errors
 
 cdef DFA _left_regular_automaton(Grammar g)
 cdef DFA _right_regular_automaton(Grammar g)
