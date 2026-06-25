@@ -84,7 +84,7 @@ cdef class TraversalStrategy:
     cdef void add_selector_without_signature_checking(self,type ast_type,ASTChildrenSelector selector):
         self._selectors[ast_type] = selector
 
-    cpdef void set_default_selector_without_signatur_checking(self,ASTChildrenSelector selector):
+    cdef void set_default_selector_without_signatur_checking(self,ASTChildrenSelector selector):
         self._default_selector = selector
 
     cpdef void _check_context_type(self,Context context):
@@ -138,7 +138,7 @@ cdef class ASTWalker:
     cdef void add_visitor_without_signature_checking(self,type ast_type,ASTVisitor visitor):
         self._visitors[ast_type] = visitor
 
-    cpdef void set_default_visitor_without_signature_checking(self,ASTVisitor visitor):
+    cdef void set_default_visitor_without_signature_checking(self,ASTVisitor visitor):
         self._default_visitor = visitor
 
     cpdef void add_visitor(self,type ast_type,ASTVisitor visitor):
