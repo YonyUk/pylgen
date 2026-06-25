@@ -46,7 +46,7 @@ cdef class Context:
         '''
         raise NotImplementedError()
 
-    cpdef void clear_runtimes_errors(self):
+    cpdef void clear_runtime_errors(self):
         '''
         Description:
             Clear all the runtime errors
@@ -74,7 +74,7 @@ cdef class Context:
         '''
         self._stack.clear()
         self.clear_semantic_errors()
-        self.clear_runtimes_errors()
+        self.clear_runtime_errors()
 
     cpdef void clear_errors(self):
         '''
@@ -83,7 +83,7 @@ cdef class Context:
         '''
         self._stack.clear()
         self.clear_semantic_errors()
-        self.clear_runtimes_errors()
+        self.clear_runtime_errors()
 
     cpdef void add_semantic_error(self,SemanticError error):
         '''

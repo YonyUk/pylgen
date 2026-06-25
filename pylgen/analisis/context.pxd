@@ -14,6 +14,6 @@ cdef class Context:
     cpdef void reset(self)
     cpdef void clear_errors(self)
     cpdef void clear_semantic_errors(self)
-    cpdef void clear_runtimes_errors(self)
+    cpdef void clear_runtime_errors(self)
     cpdef void add_semantic_error(self,SemanticError error)
     cpdef void add_runtime_error(self,AST ast,RuntimeError error)

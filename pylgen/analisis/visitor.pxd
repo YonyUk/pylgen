@@ -28,8 +28,10 @@ cdef class TraversalStrategy:
     cpdef AST current(self,Context context)
     cpdef void reset(self)
     cpdef ASTChildrenSelector _get_selector(self,AST ast)
+    cdef void add_selector_without_signature_checking(self,type ast_type,ASTChildrenSelector selector)
     cpdef void add_selector(self,type ast_type,ASTChildrenSelector selector)
     cpdef void set_default_selector(self,ASTChildrenSelector selector)
+    cpdef void set_default_selector_without_signatur_checking(self,ASTChildrenSelector selector)
 
 cdef class ASTWalker:
 
@@ -39,5 +41,7 @@ cdef class ASTWalker:
     cdef ASTVisitor _default_visitor
 
     cpdef void walk(self,AST ast)
+    cdef void add_visitor_without_signature_checking(self,type ast_type,ASTVisitor visitor)
     cpdef void add_visitor(self,type ast_type,ASTVisitor visitor)
     cpdef void set_default_visitor(self,ASTVisitor visitor)
+    cpdef void set_default_visitor_without_signature_checking(self,ASTVisitor visitor)
