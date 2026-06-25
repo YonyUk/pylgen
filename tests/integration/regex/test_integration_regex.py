@@ -2,7 +2,7 @@ import pytest
 import string
 import random
 import re
-from pylgen.regex.engine import RegexEngine
+from pylgen.regex.engine import RegexEngine,RegexParsingException
 from pylgen.automaton import State,DFA,NFA,create_dfa
 from pylgen.common import Table
 
@@ -464,3 +464,28 @@ class TestIntegrationRegex:
             k = random.randint(1,3)
             word = random.choices(string.digits,k=k)
             assert aut_re.accept(word) == (int(''.join(word)) % 3 == 0)
+    
+    def test_get_regex_error_parsing(self):
+        with pytest.raises(RegexParsingException):
+            RegexEngine.Parse('a{m,n}')
+        
+        with pytest.raises(RegexParsingException):
+            RegexEngine.Parse('a{10,n}')
+        
+        with pytest.raises(RegexParsingException):
+            RegexEngine.Parse('a{m,10}')
+        
+        try:
+            RegexEngine.Parse('a{m,n}')
+        except RegexParsingException as ex:
+            assert len(ex.errors) == 2
+        
+        try:
+            RegexEngine.Parse('a{10,n}')
+        except RegexParsingException as ex:
+            assert len(ex.errors) == 1
+        
+        try:
+            RegexEngine.Parse('a{m,10}')
+        except RegexParsingException as ex:
+            assert len(ex.errors) == 1

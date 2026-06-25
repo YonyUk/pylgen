@@ -20,6 +20,9 @@ from ..automaton.automaton cimport (
 from ..grammar.grammar cimport AttributedGrammar
 from ..parser.parser_builder cimport _build_lalr_parser_from_attributed
 from ..lexer.base_lexer cimport BaseLexer
+from ..analisis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
+from ..analisis.context cimport Context
+from ..analisis.error cimport RuntimeError
 
 from .enums import ReTokenType
 
@@ -248,7 +251,14 @@ cdef class CharSetAST(RegexAST):
         return self._preceding # type:ignore
     
     cpdef list[AST] children(self):
-        return [self._preceding,self._next]
+        cdef list[AST] children = []
+        
+        if not self._preceding is None:
+            children.append(self._preceding)
+        if not self._next is None:
+            children.append(self._next)
+        
+        return children
 
     cdef Automaton _get_automaton(self):
         return _automaton_union({self._preceding._get_automaton(),self._next._get_automaton()})
@@ -411,6 +421,96 @@ cdef class StringAST(AST):
     
     cpdef list[AST] children(self):
         return []
+
+###################################################################################################
+#                                  SEMANTIC
+###################################################################################################
+
+cdef class RegexContext(Context):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._runtime_errors = []
+        self._values = {}
+    
+    cpdef void add_runtime_error(self,AST ast,RuntimeError error):
+        if not error in self._runtime_errors:
+            self._runtime_errors.append(error)
+        self._values[ast] = error # type:ignore
+    
+    cpdef void clear_runtime_errors(self):
+        self._runtime_errors.clear()
+    
+    cpdef void reset(self):
+        super(RegexContext,self).reset()
+        self._values.clear()
+    
+    cpdef list[RuntimeError] get_runtime_errors(self):
+        return self._runtime_errors.copy()
+
+cdef class RegexASTChildrenSelector(ASTChildrenSelector):
+
+    def __init__(self) -> None:
+        super().__init__(RegexContext) # type:ignore
+    
+    cpdef list[AST] select_children(self, AST ast, Context context):
+        return ast.children() # type:ignore
+
+cdef class RepeatPatternASTVisitor(ASTVisitor):
+
+    def __init__(self) -> None:
+        super().__init__(RegexContext)
+    
+    cpdef void visit(self,AST ast,Context context):
+        cdef RepeatPatternAST _ast = ast # type:ignore
+        cdef StringAST left,right
+        cdef RuntimeError error1,error2
+
+        left = _ast._min # type:ignore
+        right = _ast._max # type:ignore
+
+        if not left._string.isnumeric():
+            error1 = RuntimeError([],left._line,left._column,'not a number') # type:ignore
+            context.add_runtime_error(ast,error1)
+        if not right._string.isnumeric():
+            error2 = RuntimeError([],right._line,right._column,'not a number') # type:ignore
+            context.add_runtime_error(ast,error2)
+
+cdef class PostOrderStrategy(TraversalStrategy):
+
+    def __init__(self) -> None:
+        super().__init__(RegexContext)
+        self._stack = []
+        self._seen = []
+    
+    cpdef void init(self,AST root):
+        super(PostOrderStrategy,self).init(root)
+        self._stack.append(root) # type:ignore
+    
+    cpdef bint has_next(self):
+        return len(self._stack) > 0 # type:ignore
+    
+    cpdef AST current(self,Context context):
+        cdef RegexASTChildrenSelector selector
+        cdef list[AST] children
+        cdef bint seen = False # type:ignore
+        cdef AST child
+
+        selector = self._get_selector(self._stack[-1]) # type:ignore
+        children = selector.select_children(self._stack[-1],context) # type:ignore
+        seen = self._stack[-1] in self._seen # type:ignore
+        while children and not seen:
+            self._seen.append(self._stack[-1])
+            for child in children:
+                self._stack.append(child) # type:ignore
+            selector = self._get_selector(self._stack[-1]) # type:ignore
+            children = selector.select_children(self._stack[-1],context) # type:ignore
+            seen = self._stack[-1] in self._seen # type:ignore
+        return self._stack.pop() # type:ignore
+
+    cpdef void reset(self):
+        self._stack.clear()
+        self._seen.clear()
 
 ###################################################################################################
 #                                  REDUCTORS
@@ -760,3 +860,12 @@ cdef BaseLexer _build_regex_lexer():
     )
     RE_LEXER.initialize()
     return RE_LEXER
+
+cdef tuple[ASTWalker,RegexContext] _get_regex_ast_walker():
+    cdef RegexContext context = RegexContext()
+    cdef PostOrderStrategy traversal_strategy = PostOrderStrategy()
+    cdef ASTWalker regex_walker
+    traversal_strategy.set_default_selector_without_signatur_checking(RegexASTChildrenSelector()) # type:ignore
+    regex_walker = ASTWalker(context,traversal_strategy) # type:ignore
+    regex_walker.add_visitor_without_signature_checking(RepeatPatternAST,RepeatPatternASTVisitor())
+    return regex_walker,context

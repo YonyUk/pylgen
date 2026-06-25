@@ -21,7 +21,7 @@ class TestContext:
             context.pop_scope()
         
         with pytest.raises(NotImplementedError):
-            context.clear_runtimes_errors()
+            context.clear_runtime_errors()
         
         with pytest.raises(NotImplementedError):
             context.get_runtime_errors()
