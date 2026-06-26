@@ -31,7 +31,7 @@ cdef class TraversalStrategy:
     cdef void add_selector_without_signature_checking(self,type ast_type,ASTChildrenSelector selector)
     cpdef void add_selector(self,type ast_type,ASTChildrenSelector selector)
     cpdef void set_default_selector(self,ASTChildrenSelector selector)
-    cdef void set_default_selector_without_signatur_checking(self,ASTChildrenSelector selector)
+    cdef void set_default_selector_without_signature_checking(self,ASTChildrenSelector selector)
 
 cdef class ASTWalker:
 

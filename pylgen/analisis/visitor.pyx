@@ -84,7 +84,7 @@ cdef class TraversalStrategy:
     cdef void add_selector_without_signature_checking(self,type ast_type,ASTChildrenSelector selector):
         self._selectors[ast_type] = selector
 
-    cdef void set_default_selector_without_signatur_checking(self,ASTChildrenSelector selector):
+    cdef void set_default_selector_without_signature_checking(self,ASTChildrenSelector selector):
         self._default_selector = selector
 
     cpdef void _check_context_type(self,Context context):
