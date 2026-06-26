@@ -865,7 +865,7 @@ cdef tuple[ASTWalker,RegexContext] _get_regex_ast_walker():
     cdef RegexContext context = RegexContext()
     cdef PostOrderStrategy traversal_strategy = PostOrderStrategy()
     cdef ASTWalker regex_walker
-    traversal_strategy.set_default_selector_without_signatur_checking(RegexASTChildrenSelector()) # type:ignore
+    traversal_strategy.set_default_selector_without_signature_checking(RegexASTChildrenSelector()) # type:ignore
     regex_walker = ASTWalker(context,traversal_strategy) # type:ignore
     regex_walker.add_visitor_without_signature_checking(RepeatPatternAST,RepeatPatternASTVisitor())
     return regex_walker,context
