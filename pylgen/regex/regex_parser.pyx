@@ -5,14 +5,10 @@ from ..common.types cimport Symbol as cSymbol ,AST,Token
 from ..common.types import Symbol
 from ..automaton.automaton cimport (
     get_word_automaton,
-    get_words_automaton,
     _automaton_concatenation,
-    _automaton_complement,
     _automaton_union,
     _automaton_clousure,
     get_words_automaton_with_value,
-    _copy_dfa,
-    _copy_nfa,
     DFA,
     NFA,
     State
@@ -174,27 +170,30 @@ cdef class ConstantRegexAST(RegexAST):
         return []
 
     cdef Automaton _get_automaton(self):
-        cdef Automaton result
+        cdef DFA result
+        cdef State final = State('final','final',True) # type:ignore
         cdef set[str] char_set
+        cdef str char
+
         if self._re == '\\d':
-            result = get_words_automaton(list(digits))
+            char_set = set(digits)
         elif self._re == '\\D':
             char_set = set(printable).difference(set(digits))
-            result = get_words_automaton(list(char_set))
         elif self._re == '\\s':
-            result = get_words_automaton(list(whitespace))
+            char_set = set(whitespace)
         elif self._re == '\\S':
             char_set = set(printable).difference(set(whitespace))
-            result = get_words_automaton(list(char_set))
         elif self._re == '\\w':
-            result = get_words_automaton(list(digits) + list(ascii_letters) + ['_'])
+            char_set = set(list(digits) + list(ascii_letters) + ['_'])
         elif self._re == '.':
             char_set = set(printable)
             char_set.discard('\n')
-            result = get_words_automaton(list(char_set))
         else:
             char_set = set(printable).difference(set(ascii_letters+digits+'_'))
-            result = get_words_automaton(list(char_set))
+        
+        result = DFA('start','start',char_set) # type:ignore
+        for char in char_set:
+            result.add_transition(result._start_state,final,char)
         return result
 
 cdef class RegexUnaryAST(RegexAST):
@@ -277,7 +276,13 @@ cdef class CharSetExplicitAST(CharSetAST):
         self._char_set.add(char)
 
     cdef Automaton _get_automaton(self):
-        return get_words_automaton(list(self._char_set))
+        cdef DFA result = DFA('start','start',self._char_set) # type:ignore
+        cdef State final = State('final','final',True) # type:ignore
+        cdef str char
+
+        for char in self._char_set:
+            result.add_transition(result._start_state,final,char)
+        return result
 
 cdef class CharRangeAST(CharSetAST):
 
@@ -300,7 +305,13 @@ cdef class CharRangeAST(CharSetAST):
     cdef Automaton _get_automaton(self):
         cdef int i
         cdef set[str] _char_set = { chr(i) for i in range(ord(self._left._char),ord(self._right._char) + 1)}
-        return get_words_automaton(list(_char_set))
+        cdef DFA result = DFA('start','start',_char_set) # type:ignore
+        cdef State final = State('final','final',True) # type:ignore
+        cdef str char
+
+        for char in _char_set:
+            result.add_transition(result._start_state,final,char)
+        return result
 
 cdef class ComplementCharSetAST(CharSetAST):
 
@@ -318,7 +329,13 @@ cdef class ComplementCharSetAST(CharSetAST):
     cdef Automaton _get_automaton(self):
         cdef Automaton aut = self._char_set._get_automaton()
         cdef set[str] _char_set = set(printable).difference(aut._alphabet)
-        return get_words_automaton(list(_char_set))
+        cdef DFA result = DFA('start','start',_char_set) # type:ignore
+        cdef State final = State('final','final',True) # type:ignore
+        cdef str char
+
+        for char in _char_set:
+            result.add_transition(result._start_state,final,char)
+        return result
 
 cdef class RepeatPatternAST(RegexAST):
 
