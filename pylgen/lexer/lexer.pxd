@@ -7,3 +7,4 @@ cdef class Lexer(BaseLexer):
     cdef set[LexicError] _errors
     cpdef void add_rule(self,object type_,LexicRule rule)
     cpdef void clear_errors(self)
+    cpdef void add_token_regex(self,int priority,object type_,str re)
