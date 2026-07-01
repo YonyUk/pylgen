@@ -38,7 +38,7 @@ cdef class Lexer(BaseLexer):
             column = self._current_token._column
         if self._eof:
             self._eof._line = line
-            self._eof._column = column
+            self._eof._column = column + 1
             yield self._eof
 
     cpdef void clear_errors(self):
