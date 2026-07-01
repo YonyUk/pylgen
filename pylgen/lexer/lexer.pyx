@@ -35,18 +35,21 @@ cdef class Lexer(BaseLexer):
 
     cpdef void clear_errors(self):
         self._errors.clear()
-
-    def __setitem__(self, key: Tuple[int, object], re:str):
+    
+    cpdef void add_token_regex(self,int priority,object type_,str re):
         cdef DFA dfa = _parse(re)
         cdef State state
 
         for state in dfa._states_by_id.values():
             if state._is_accept:
-                state._value = key[1]
+                state._value = type_
         
-        self._add_token(key[0],key[1],dfa)
-        if not key[1] in self._rules:
-            self._rules[key[1]] = set()
+        self._add_token(priority,type_,dfa)
+        if not type_ in self._rules:
+            self._rules[type_] = set()
+
+    def __setitem__(self, key: Tuple[int, object], re:str):
+        self.add_token_regex(key[0],key[1],re)
     
     cpdef void add_rule(self,object type_,LexicRule rule):
         self._rules[type_].add(rule)
