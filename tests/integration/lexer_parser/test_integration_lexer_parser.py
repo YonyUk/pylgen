@@ -254,6 +254,7 @@ class TestIntegrationLexerParser:
         lexer[0,TokenTypeEnum.NUMBER] = '\\d+'
         lexer[1,TokenTypeEnum.SYMBOL] = '\\(|\\)'
         lexer[2,TokenTypeEnum.OPERATOR] = '\\+|\\*\\*?|\\-|/|%'
+        lexer.set_eof_token(END_SYMBOL,TokenTypeEnum.SYMBOL)
         return lexer
     
     @pytest.fixture
@@ -320,7 +321,7 @@ class TestIntegrationLexerParser:
     ])
     def test_simple_arithmetic_parser_2(self,text:str,lexer1:Lexer,parser1:BottomUpParser):
         lexer1.load_text(text)
-        ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+        ast = parser1.parse(lexer1.tokens)
     
     @pytest.mark.parametrize("text",[
         "1-2",
@@ -342,7 +343,7 @@ class TestIntegrationLexerParser:
     ])
     def test_normal_arithmetic_parser_2(self,text:str,lexer1:Lexer,parser2:BottomUpParser):
         lexer1.load_text(text)
-        ast = parser2.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+        ast = parser2.parse(lexer1.tokens)
 
 
     @pytest.mark.parametrize("text",[
@@ -359,9 +360,9 @@ class TestIntegrationLexerParser:
         " 3 ** 2",
         " 23+342 / (4**9 + 10) -235/4 + 20**3%3"
     ])
-    def test_extended_arithmetic_parser_2(self,text:str,lexer1:BaseLexer,parser3:BottomUpParser):
+    def test_extended_arithmetic_parser_2(self,text:str,lexer1:Lexer,parser3:BottomUpParser):
         lexer1.load_text(text)
-        ast = parser3.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+        ast = parser3.parse(lexer1.tokens)
 
     def test_error_detecting_1(self,lexer1:Lexer,parser1:BottomUpParser):
         text = "(01 + 3)* (5+7) *(2 +010 * 15)"
@@ -369,7 +370,7 @@ class TestIntegrationLexerParser:
         
         lexer1.load_text(text)
         try:
-            ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+            ast = parser1.parse(lexer1.tokens)
         except ParsingException:
             pass
 
@@ -381,7 +382,7 @@ class TestIntegrationLexerParser:
         text = "(1 + 3) * (5++7) *(2 + 10 * * 15)"
         lexer1.load_text(text)
         try:
-            ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+            ast = parser1.parse(lexer1.tokens)
         except ParsingException:
             pass
         assert len(parser1.errors) == 2
@@ -392,7 +393,7 @@ class TestIntegrationLexerParser:
 
         lexer1.load_text(text)
         try:
-            ast = parser3.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+            ast = parser3.parse(lexer1.tokens)
         except ParsingException:
             pass
         
