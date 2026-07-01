@@ -13,6 +13,7 @@ cdef class Lexer(BaseLexer):
         super().__init__(get_symbol_function, ignore_pattern)
         self._rules = {}
         self._errors = set()
+        self._eof = None # type:ignore
     
     @property
     def errors(self) -> Set[LexicError]:
@@ -22,6 +23,7 @@ cdef class Lexer(BaseLexer):
     def tokens(self) -> Iterable[Token]:
         cdef LexicError error
         cdef LexicRule rule
+        cdef int line,column
         self.initialize()
         while self._move_next():
             if self._ignore.accept(list(self._current_token._text)):
@@ -32,10 +34,21 @@ cdef class Lexer(BaseLexer):
                     if not error is None:
                         self._errors.add(error)
             yield self._current_token
+            line = self._current_token._line
+            column = self._current_token._column
+        if self._eof:
+            self._eof._line = line
+            self._eof._column = column
+            yield self._eof
 
     cpdef void clear_errors(self):
         self._errors.clear()
     
+    cpdef void set_eof_token(self,str symbol,object type_):
+        if not isinstance(type_,self._enum_type): # type:ignore
+            raise ValueError(f'type_ must be a member of {self._enum_type}')
+        self._eof = Token(symbol,type_,Symbol(symbol,True),0,0) # type:ignore
+
     cpdef void add_token_regex(self,int priority,object type_,str re):
         cdef DFA dfa = _parse(re)
         cdef State state
