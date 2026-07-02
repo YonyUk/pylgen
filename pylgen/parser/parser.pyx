@@ -241,9 +241,10 @@ cdef class BottomUpParser(Parser):
             local_stack_states.append(state)
         if not self._panic_mode and current_action[0] == BottomUpParserAction.ACCEPT:
             self._parsed = True # type:ignore
-            if not errors and draw_parse_tree_flag:
+            if not errors:
                 self._ast = local_stack_ast[-1]
-                self._parse_tree = local_parse_tree_nodes[-1]
+                if draw_parse_tree_flag:
+                    self._parse_tree = local_parse_tree_nodes[-1]
         self._stack = local_stack
         self._stack_states = local_stack_states
         self._stack_ast = local_stack_ast
