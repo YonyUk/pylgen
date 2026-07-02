@@ -138,7 +138,7 @@ cdef class BaseLexer:
         cdef int priority
         cdef Symbol symbol
 
-        for priority in sorted(self._priorites.keys()):
+        for priority in self._priorities_sorted:
             if self._priorites[priority] in self._types_by_state[self._dfa._current_state._id]:
                 symbol = self._get_symbol(self._priorites[priority],text)
                 return Token(text,self._priorites[priority],symbol,self._line,self._column) # type:ignore
@@ -163,7 +163,7 @@ cdef class BaseLexer:
             current_symbol = self._text[self._text_position_pointer]
             # checks for a transition
             transition = (self._dfa._current_state._id,current_symbol)
-            while transition in self._dfa._trans_func._table and (not self._fault_state or self._dfa._trans_func._table[transition] != self._fault_state._id):
+            while transition in self._dfa_transition_function and (not self._fault_state or self._dfa._trans_func._table[transition] != self._fault_state._id):
                 # input(f'readed: {self._text_readed}')
                 # input(f'pointer {self._text_position_pointer}')
                 # advance the ignore_dfa one step
@@ -269,6 +269,8 @@ cdef class BaseLexer:
                 self._types_by_state[state._id] = self._get_dfa_state_values(state)
                 if not self._fault_state and  self._is_fault_state(state):
                     self._fault_state = state
+            self._priorities_sorted = sorted(self._priorites.keys())
+            self._dfa_transition_function = self._dfa._trans_func._table
             self._initialized = True # type:ignore
 
     cdef void _add_token(self,int priority,object type_,Automaton automaton):

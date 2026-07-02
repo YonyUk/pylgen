@@ -17,6 +17,8 @@ cdef class BaseLexer:
     cdef set[Automaton] _automatons
     cdef bint _initialized
     cdef dict[int,object] _priorites
+    cdef list[int] _priorities_sorted
+    cdef dict[str,str] _dfa_transition_function
     cdef DFA _dfa
     cdef object _get_symbol_function
     cdef dict[str,set[object]] _types_by_state
