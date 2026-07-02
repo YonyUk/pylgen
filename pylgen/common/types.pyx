@@ -17,6 +17,12 @@ cdef class Symbol:
         Raises:
             ValueError('A symbol only can be epsilon if its a terminal symbol')
         '''
+        cdef bytes digest = sha256(f'{symbol}-{is_terminal}-{is_epsilon}'.encode()).digest()
+        cdef long long h = 0 # type:ignore
+        cdef int i
+        for i in range(8):
+            h = (h << 8) | digest[i]
+        self._hash = h
         self._symbol = symbol
         self._is_terminal = is_terminal
         if is_epsilon and not is_terminal:
@@ -49,12 +55,7 @@ cdef class Symbol:
         return o._symbol == self._symbol and o._is_terminal == self._is_terminal and o._is_epsilon == self._is_epsilon
     
     def __hash__(self) -> int:
-        cdef bytes digest = sha256(f'{self._symbol}-{self._is_terminal}-{self._is_epsilon}'.encode()).digest()
-        cdef long long h = 0 # type:ignore
-        cdef int i
-        for i in range(8):
-            h = (h << 8) | digest[i]
-        return h # type:ignore
+        self._hash
 
 cdef class AST:
     '''

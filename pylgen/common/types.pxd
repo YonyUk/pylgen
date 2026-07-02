@@ -1,5 +1,6 @@
 cdef class Symbol:
 
+    cdef int _hash
     cdef str _symbol
     cdef bint _is_terminal
     cdef bint _is_epsilon
