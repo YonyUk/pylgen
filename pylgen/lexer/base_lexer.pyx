@@ -13,7 +13,7 @@ cdef class LexerNotTokensProvidedException(Exception):
 
 cdef class BaseLexer:
 
-    def __init__(self,get_symbol_function:Callable[[Any,str],Symbol],ignore_pattern:DFA) -> None:
+    def __init__(self,get_symbol_function:Callable[[Any,str],Symbol],ignore_pattern:DFA,check_annotation:bool=True) -> None:
         self._column = 0
         self._line = 0
         self._priorites = {}
@@ -22,55 +22,60 @@ cdef class BaseLexer:
         self._text_readed = ''
         self._initialized = False # type:ignore
         self._automatons = set()
+
         if not get_symbol_function:
             raise ValueError('get_symbol_function can not be None')
-        sig = inspect.signature(get_symbol_function)
-        try:
-            hints = get_type_hints(get_symbol_function)
-        except Exception as ex:
-            hints = {}
-        params = list(sig.parameters.values())
-        if len(params) != 2:
-            raise ValueError('Invalid signature of function get_symbol_function')
-        param0 = params[0]
-        if param0.annotation is inspect.Parameter.empty:
-            raise ValueError('Invalid signature of function get_symbol_function')
         
-        token_type_annot = hints.get(param0.name,param0.annotation)
-        # if token_type_annot is an string
-        if isinstance(token_type_annot,str):
+        if check_annotation:
+            sig = inspect.signature(get_symbol_function)
             try:
-                resolved = eval(token_type_annot,get_symbol_function.__globals__)
-            except NameError:
-                raise ValueError('couldn\'t resolve type annotation for first parameter of get_symbol_function')
-            token_type_annot = resolved
-        if not issubclass(token_type_annot,TokenType):
-            raise ValueError('Invalid signature of function get_symbol_function')
-
-        param1 = params[1]
-        if param1.annotation is not inspect.Parameter.empty:
-            annot = hints.get(param1.name,param1.annotation)
-            if isinstance(annot,str):
-                try:
-                    resolved = eval(annot,get_symbol_function.__globals__)
-                except NameError:
-                    raise ValueError('couldn\'t resolve type annotation for second parameter of get_symbol_function')
-                annot = resolved
-            if annot != str:
+                hints = get_type_hints(get_symbol_function)
+            except Exception as ex:
+                hints = {}
+            params = list(sig.parameters.values())
+            if len(params) != 2:
                 raise ValueError('Invalid signature of function get_symbol_function')
-        else:
-            raise ValueError('Invalid signature of function get_symbol_function')
+            param0 = params[0]
+            if param0.annotation is inspect.Parameter.empty:
+                raise ValueError('Invalid signature of function get_symbol_function')
+
+            token_type_annot = hints.get(param0.name,param0.annotation)
+            # if token_type_annot is an string
+            if isinstance(token_type_annot,str):
+                try:
+                    resolved = eval(token_type_annot,get_symbol_function.__globals__)
+                except NameError:
+                    raise ValueError('couldn\'t resolve type annotation for first parameter of get_symbol_function')
+                token_type_annot = resolved
+
+            if not issubclass(token_type_annot,TokenType):
+                raise ValueError('Invalid signature of function get_symbol_function')
+
+            param1 = params[1]
+            if param1.annotation is not inspect.Parameter.empty:
+                annot = hints.get(param1.name,param1.annotation)
+                if isinstance(annot,str):
+                    try:
+                        resolved = eval(annot,get_symbol_function.__globals__)
+                    except NameError:
+                        raise ValueError('couldn\'t resolve type annotation for second parameter of get_symbol_function')
+                    annot = resolved
+                if annot != str:
+                    raise ValueError('Invalid signature of function get_symbol_function')
+            else:
+                raise ValueError('Invalid signature of function get_symbol_function')
+            self._enum_type = token_type_annot
+
+            ret_annotation = sig.return_annotation
+            if isinstance(ret_annotation,str):
+                try:
+                    resolved = eval(ret_annotation,get_symbol_function.__globals__)
+                except NameError:
+                    raise ValueError('couldn\'t resolve type annotation for return type of get_symbol_function')
+                ret_annotation = resolved
+            if ret_annotation != Symbol:
+                raise ValueError('Invalid signature of function get_symbol_function')
         
-        ret_annotation = sig.return_annotation
-        if isinstance(ret_annotation,str):
-            try:
-                resolved = eval(ret_annotation,get_symbol_function.__globals__)
-            except NameError:
-                raise ValueError('couldn\'t resolve type annotation for return type of get_symbol_function')
-            ret_annotation = resolved
-        if ret_annotation != Symbol:
-            raise ValueError('Invalid signature of function get_symbol_function')
-        self._enum_type = token_type_annot
         self._get_symbol_function = get_symbol_function
         self._types_by_state = {}
         self._ignore = ignore_pattern
@@ -85,7 +90,7 @@ cdef class BaseLexer:
     def tokens(self) -> Iterable[Token]:
         self.initialize()
         while self._move_next():
-            if self._ignore.accept(list(self._current_token._text)):
+            if not self._ignore._is_stuck and self._ignore._current_state._is_accept:
                 continue
             yield self._current_token
     
@@ -142,23 +147,27 @@ cdef class BaseLexer:
     cdef bint _move_next(self):
         cdef tuple[str,str] transition
         cdef str current_symbol
-        cdef bint line_jumped = False # type:ignore
 
         if not self._initialized:
             raise LexerNotInitializedException()
         
         self._current_token = None # type:ignore        
         # restart the pointer and text readed
-        self._text_position_pointer = 0
         self._text_readed = ''
         # restart the dfa
         self._dfa.reset()
+        # restart the ignore dfa
 
         while self._current_token is None and self._text_position_pointer < len(self._text):
+            self._ignore.reset()
             current_symbol = self._text[self._text_position_pointer]
             # checks for a transition
             transition = (self._dfa._current_state._id,current_symbol)
             while transition in self._dfa._trans_func._table and (not self._fault_state or self._dfa._trans_func._table[transition] != self._fault_state._id):
+                # input(f'readed: {self._text_readed}')
+                # input(f'pointer {self._text_position_pointer}')
+                # advance the ignore_dfa one step
+                self._ignore.walk(current_symbol)
                 # advance the dfa one step
                 self._dfa.walk(current_symbol)
                 # updates the text readed
@@ -173,24 +182,23 @@ cdef class BaseLexer:
                 # updates last symbol seen
                 # updates the transition to check
                 transition = (self._dfa._current_state._id,current_symbol)
-            
-
+    
+            # input(f'readed {self._text_readed}')
+            # input(f'pointer {self._text_position_pointer}')
             self._current_token = self._get_token(self._text_readed,self._line,self._column)
-            self._column += len(self._text_readed)
-            if self._text_position_pointer == 0:
-                line_jumped = '\n' == self._text[0] # type:ignore
-                self._text = self._text[1:]
-                self._column += 1
+            if not self._current_token:
+                if self._text[self._text_position_pointer] == '\n':
+                    self._line += 1
+                    self._column = 1
+                else:
+                    self._column += 1
+                self._text_position_pointer += 1
             else:
-                line_jumped = '\n' in self._text[:self._text_position_pointer] # type:ignore
-                self._text = self._text[self._text_position_pointer:]
-            if line_jumped:
-                self._line += 1
-                self._column = 1
-            line_jumped = False # type:ignore
-            self._text_position_pointer = 0
+                self._column += len(self._text_readed)
+            if '\n' in self._text_readed:
+                self._line += self._text_readed.count('\n')
+                self._column = len(self._text_readed[self._text_readed.rindex('\n'):])
             self._text_readed = ''
-
         return self._current_token is not None # type:ignore
 
     cdef Token _current(self):
