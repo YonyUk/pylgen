@@ -80,6 +80,9 @@ cdef class Parser:
 
     cpdef void reset(self):
         raise NotImplementedError()
+    
+    cpdef void set_draw_parse_tree_flag(self,bint flag):
+        self._draw_parse_tree = flag
 
 cdef class BottomUpParser(Parser):
 
@@ -103,6 +106,7 @@ cdef class BottomUpParser(Parser):
         self._errors = []
         self._panic_mode = False # type:ignore
         self._current_syncronization_set = set()
+        self._draw_parse_tree = False # type:ignore
 
     cdef void _set_reductor(self,Production production,object reductor): # type:ignore
         self._reductor_by_production[production] = reductor
@@ -162,6 +166,8 @@ cdef class BottomUpParser(Parser):
         cdef list[AST] local_stack_ast = self._stack_ast
         cdef dict[tuple[str,Symbol],str] local_goto_table = self._goto_table
         cdef list[ParseTreeNode] local_parse_tree_nodes = self._parse_tree_nodes
+        cdef bint draw_parse_tree_flag = self._draw_parse_tree
+        cdef bint errors = len(self._errors) > 0 # type:ignore
 
         if self._parsed:
             raise ValueError('EOF token already readed')
@@ -185,12 +191,11 @@ cdef class BottomUpParser(Parser):
             p:Production = current_action[1] # type:ignore
             production_len = len(p._production)
             new_ast = local_reductor_by_production[p](local_stack_ast[-1*production_len:]) # type:ignore
-            if len(self._errors) == 0:
+            if not errors and draw_parse_tree_flag:
                 # build the parse tree
                 childrens = local_parse_tree_nodes[-1*production_len:]
                 new_node = ParseTreeNode(p._head,new_ast._line,new_ast._column,childrens)
                 # updates the stack of parse tree nodes
-                self._parse_tree_nodes = self._parse_tree_nodes[:-1*production_len] + [new_node]
                 del local_parse_tree_nodes[-1*production_len:]
                 local_parse_tree_nodes.append(new_node)
             # update the stack of symbols
@@ -224,7 +229,7 @@ cdef class BottomUpParser(Parser):
                 break
         if not self._panic_mode and current_action[0] == BottomUpParserAction.SHIFT:
             state = local_goto_table[key]
-            if len(self._errors) == 0:
+            if not errors and draw_parse_tree_flag:
                 # adds a new parse tree node to the parse tree
                 new_node = ParseTreeNode(token._symbol,token._line,token._column)
                 local_parse_tree_nodes.append(new_node)
@@ -236,7 +241,7 @@ cdef class BottomUpParser(Parser):
             local_stack_states.append(state)
         if not self._panic_mode and current_action[0] == BottomUpParserAction.ACCEPT:
             self._parsed = True # type:ignore
-            if len(self._errors) == 0:
+            if not errors and draw_parse_tree_flag:
                 self._ast = local_stack_ast[-1]
                 self._parse_tree = local_parse_tree_nodes[-1]
         self._stack = local_stack

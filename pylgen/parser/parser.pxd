@@ -13,12 +13,14 @@ cdef class ParseTreeNode:
 cdef class Parser:
     cdef AST _ast
     cdef bint _parsed
+    cdef bint _draw_parse_tree
     cdef ParseTreeNode _parse_tree
     cdef list[ParseTreeNode] _parse_tree_nodes
     cdef list[SintaxError] _errors
 
     cdef void _try_parse(self,Token token)
     cpdef void reset(self)
+    cpdef void set_draw_parse_tree_flag(self,bint flag)
 
 cdef class BottomUpParser(Parser):
     cdef dict[Production,object] _reductor_by_production

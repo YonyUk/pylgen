@@ -33,6 +33,9 @@ class Parser:
     @property
     def errors(self) -> List[SintaxError]: ...
 
+    def set_draw_parse_tree_flag(self,flag:bool) -> None: ...
+
+
 class BottomUpParser(Parser):
 
     def __init__(self,start_state:str,goto_table:Dict[Tuple[str,Symbol],str],action_table:Dict[Tuple[str,Symbol],tuple[str,str | Production]]): ...
