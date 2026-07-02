@@ -9,8 +9,8 @@ from .base_lexer cimport BaseLexer
 
 cdef class Lexer(BaseLexer):
     
-    def __init__(self, get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: DFA) -> None:
-        super().__init__(get_symbol_function, ignore_pattern)
+    def __init__(self, get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: DFA,check_annotation:bool=True) -> None:
+        super().__init__(get_symbol_function, ignore_pattern,check_annotation)
         self._rules = {}
         self._errors = set()
         self._eof = None # type:ignore
@@ -26,7 +26,7 @@ cdef class Lexer(BaseLexer):
         cdef int line,column
         self.initialize()
         while self._move_next():
-            if self._ignore.accept(list(self._current_token._text)):
+            if not self._ignore._is_stuck and self._ignore._current_state._is_accept:
                 continue
             if self._current_token._type in self._rules:
                 for rule in self._rules[self._current_token._type]:
