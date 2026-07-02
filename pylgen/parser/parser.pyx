@@ -153,6 +153,15 @@ cdef class BottomUpParser(Parser):
         cdef AST new_ast
         cdef ParseTreeNode new_node
         cdef list[ParseTreeNode] childrens
+        cdef int production_len
+        # local references for micro-optimizations
+        cdef list[str] local_stack_states = self._stack_states
+        cdef dict[tuple[str,Symbol],tuple[str,object]] local_action_table = self._action_table
+        cdef dict[Production,object] local_reductor_by_production = self._reductor_by_production
+        cdef list[Symbol] local_stack = self._stack
+        cdef list[AST] local_stack_ast = self._stack_ast
+        cdef dict[tuple[str,Symbol],str] local_goto_table = self._goto_table
+        cdef list[ParseTreeNode] local_parse_tree_nodes = self._parse_tree_nodes
 
         if self._parsed:
             raise ValueError('EOF token already readed')
@@ -163,69 +172,77 @@ cdef class BottomUpParser(Parser):
             else:
                 return # type:ignore
         
-        state = self._stack_states[-1]
+        state = local_stack_states[-1]
         key = (state,token._symbol)
 
-        if not key in self._action_table:
+        current_action = local_action_table.get(key,('',None))
+        if current_action == ('',None):
             self._start_recovery_mode(token._symbol,token._line,token._column)
             return # type:ignore
 
-        current_action = self._action_table[key]
         # while the action is reduce
         while current_action[0] == BottomUpParserAction.REDUCE:
             p:Production = current_action[1] # type:ignore
-            new_ast = self._reductor_by_production[p](self._stack_ast[-1*len(p._production):]) # type:ignore
+            production_len = len(p._production)
+            new_ast = local_reductor_by_production[p](local_stack_ast[-1*production_len:]) # type:ignore
             if len(self._errors) == 0:
                 # build the parse tree
-                childrens = self._parse_tree_nodes[-1*len(p._production):]
+                childrens = local_parse_tree_nodes[-1*production_len:]
                 new_node = ParseTreeNode(p._head,new_ast._line,new_ast._column,childrens)
                 # updates the stack of parse tree nodes
-                self._parse_tree_nodes = self._parse_tree_nodes[:-1*len(p._production)] + [new_node]
+                self._parse_tree_nodes = self._parse_tree_nodes[:-1*production_len] + [new_node]
+                del local_parse_tree_nodes[-1*production_len:]
+                local_parse_tree_nodes.append(new_node)
             # update the stack of symbols
-            self._stack = self._stack[:-1*len(p._production)] + [p._head]
+            del local_stack[-1*production_len:]
+            local_stack.append(p._head)
             # update the stack of states
-            self._stack_states = self._stack_states[:-1*len(p._production)]
+            del local_stack_states[-1*production_len:]
             # update the stack of ast
-            self._stack_ast = self._stack_ast[:-1*len(p._production)] + [new_ast]
+            del local_stack_ast[-1*production_len:]
+            local_stack_ast.append(new_ast)
             # sets the current state
-            state = self._stack_states[-1]
-            key = (state,self._stack[-1])
+            state = local_stack_states[-1]
+            key = (state,local_stack[-1])
+            current_action = local_action_table.get(key,('',None))
             # checks for an action
-            if not key in self._action_table:
-                self._start_recovery_mode(self._stack[-1],new_ast._line,new_ast._column)
+            if current_action == ('',None):
+                self._start_recovery_mode(local_stack[-1],new_ast._line,new_ast._column)
                 break
-            current_action = self._action_table[key]
             # checks if the action is shift, due to reductions only may occur at top of the stack
             if current_action[0] != BottomUpParserAction.SHIFT:
-                self._start_recovery_mode(self._stack[-1],new_ast._line,new_ast._column)
+                self._start_recovery_mode(local_stack[-1],new_ast._line,new_ast._column)
                 break
             # sets the state by the GOTO table and put it at stack of states top
-            state = self._goto_table[key]
-            self._stack_states.append(state)
+            state = local_goto_table[key]
+            local_stack_states.append(state)
             # checks for an action with the current state and the current token
             key = (state,token._symbol)
-            if not key in self._action_table:
+            current_action = local_action_table.get(key,('',None))
+            if current_action == ('',None):
                 self._start_recovery_mode(token._symbol,token._line,token._column)
                 break
-            # updates the current action
-            current_action = self._action_table[key]
         if not self._panic_mode and current_action[0] == BottomUpParserAction.SHIFT:
-            state = self._goto_table[key]
+            state = local_goto_table[key]
             if len(self._errors) == 0:
                 # adds a new parse tree node to the parse tree
                 new_node = ParseTreeNode(token._symbol,token._line,token._column)
-                self._parse_tree_nodes.append(new_node)
+                local_parse_tree_nodes.append(new_node)
             # push the symbol in the stack
-            self._stack.append(token._symbol)
+            local_stack.append(token._symbol)
             # push the ast in the stack
-            self._stack_ast.append(token)
+            local_stack_ast.append(token)
             # push the state in the stack
-            self._stack_states.append(state)
+            local_stack_states.append(state)
         if not self._panic_mode and current_action[0] == BottomUpParserAction.ACCEPT:
             self._parsed = True # type:ignore
             if len(self._errors) == 0:
-                self._ast = self._stack_ast[-1]
-                self._parse_tree = self._parse_tree_nodes[-1]
+                self._ast = local_stack_ast[-1]
+                self._parse_tree = local_parse_tree_nodes[-1]
+        self._stack = local_stack
+        self._stack_states = local_stack_states
+        self._stack_ast = local_stack_ast
+        self._parse_tree_nodes = local_parse_tree_nodes
 
     cpdef void reset(self):
         '''
