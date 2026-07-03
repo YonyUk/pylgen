@@ -95,6 +95,16 @@ cdef class AST:
     def __repr__(self) -> str:
         return str(self)
 
+cdef class ASTListView:
+
+    def __getitem__(self,int idx):
+        if idx < 0 or idx >= self._end - self._start:
+            raise IndexError('ASTListView index out of range')
+        return self._data[self._start + idx]
+
+    def __len__(self):
+        return self._end - self._start
+
 cdef class Token(AST):
 
     def __init__(self,str text, object type_, Symbol symbol, int line, int column):
