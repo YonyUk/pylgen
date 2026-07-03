@@ -5,6 +5,8 @@ from ..grammar.grammar cimport Production
 from ..analisis.error cimport SintaxError
 from .bottom_up_parser_actions import BottomUpParserAction
 
+_offset:int = 20
+
 cdef class ParsingException(Exception):
     
     def __init__(self, *args: object) -> None:
@@ -94,8 +96,36 @@ cdef class BottomUpParser(Parser):
             action_table (Dict[Tuple[str,Symbol],tuple[str,str | Production]]): ACTION table for the parser
             follows (Dict[Symbol,Set[Symbol]]): dict of FOLLOW set by non-terminal
         '''
+        cdef int key,state_id,symbol_id
+        cdef tuple[str,Symbol] table_key
         self._action_table = action_table
         self._goto_table = goto_table
+        self._action_table_optimized = {}
+        self._goto_table_optimized = {}
+        self._symbols_id = {}
+
+        for table_key in goto_table:
+            state_id = int(table_key[0][1:])
+            symbol_id = (<Symbol>table_key[1])._hash
+            if not symbol_id in self._symbols_id:
+                self._symbols_id[symbol_id] = len(self._symbols_id)
+                symbol_id = self._symbols_id[symbol_id]
+            else:
+                symbol_id = self._symbols_id[symbol_id]
+            key = (state_id << _offset ) | symbol_id
+            self._goto_table_optimized[key] = goto_table[table_key]
+
+        for table_key in action_table:
+            state_id = int(table_key[0][1:])
+            symbol_id = (<Symbol>table_key[1])._hash
+            if not symbol_id in self._symbols_id:
+                self._symbols_id[symbol_id] = len(self._symbols_id)
+                symbol_id = self._symbols_id[symbol_id]
+            else:
+                symbol_id = self._symbols_id[symbol_id]
+            key = (state_id << _offset ) | symbol_id
+            self._action_table_optimized[key] = action_table[table_key]
+
         self._reductor_by_production = {}
         self._stack_states = [start_state]
         self._stack = []
@@ -153,21 +183,23 @@ cdef class BottomUpParser(Parser):
     cdef void _try_parse(self,Token token):
         cdef tuple[str,object] current_action
         cdef str state
-        cdef tuple[str,Symbol] key
+        cdef int key
         cdef AST new_ast
         cdef ParseTreeNode new_node
         cdef list[ParseTreeNode] childrens
         cdef int production_len
         # local references for micro-optimizations
         cdef list[str] local_stack_states = self._stack_states
-        cdef dict[tuple[str,Symbol],tuple[str,object]] local_action_table = self._action_table
+        cdef dict[int,tuple[str,object]] local_action_table = self._action_table_optimized
         cdef dict[Production,object] local_reductor_by_production = self._reductor_by_production
         cdef list[Symbol] local_stack = self._stack
         cdef list[AST] local_stack_ast = self._stack_ast
-        cdef dict[tuple[str,Symbol],str] local_goto_table = self._goto_table
+        cdef dict[int,str] local_goto_table = self._goto_table_optimized
         cdef list[ParseTreeNode] local_parse_tree_nodes = self._parse_tree_nodes
         cdef bint draw_parse_tree_flag = self._draw_parse_tree
         cdef bint errors = len(self._errors) > 0 # type:ignore
+        cdef dict[int,int] local_symbols_ids = self._symbols_id
+        cdef int symbol_id
 
         if self._parsed:
             raise ValueError('EOF token already readed')
@@ -179,9 +211,12 @@ cdef class BottomUpParser(Parser):
                 return # type:ignore
         
         state = local_stack_states[-1]
-        key = (state,token._symbol)
+        symbol_id = local_symbols_ids[(<Symbol>token._symbol)._hash]
+
+        key = (int(state[1:]) << _offset) | symbol_id
 
         current_action = local_action_table.get(key,('',None))
+        # input(current_action)
         if current_action == ('',None):
             self._start_recovery_mode(token._symbol,token._line,token._column)
             return # type:ignore
@@ -208,7 +243,9 @@ cdef class BottomUpParser(Parser):
             local_stack_ast.append(new_ast)
             # sets the current state
             state = local_stack_states[-1]
-            key = (state,local_stack[-1])
+            symbol_id = local_symbols_ids[(<Symbol>local_stack[-1])._hash]
+
+            key = (int(state[1:]) << _offset) | symbol_id
             current_action = local_action_table.get(key,('',None))
             # checks for an action
             if current_action == ('',None):
@@ -221,8 +258,9 @@ cdef class BottomUpParser(Parser):
             # sets the state by the GOTO table and put it at stack of states top
             state = local_goto_table[key]
             local_stack_states.append(state)
+            symbol_id = local_symbols_ids[(<Symbol>token._symbol)._hash]
             # checks for an action with the current state and the current token
-            key = (state,token._symbol)
+            key = (int(state[1:]) << _offset ) | symbol_id
             current_action = local_action_table.get(key,('',None))
             if current_action == ('',None):
                 self._start_recovery_mode(token._symbol,token._line,token._column)
