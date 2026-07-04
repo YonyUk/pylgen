@@ -1,4 +1,4 @@
-from ..common.types cimport Token,AST,Symbol
+from ..common.types cimport Token,AST,Symbol,ASTListView
 from ..grammar.grammar cimport Production
 from ..analisis.error cimport SintaxError
 
@@ -35,6 +35,13 @@ cdef class BottomUpParser(Parser):
     cdef str _start_state
     cdef set[Symbol] _current_syncronization_set
     cdef bint _panic_mode
+    cdef ASTListView _view
+    cdef int _stack_top
+    cdef int _stack_len
+    cdef int _stack_ast_top
+    cdef int _stack_ast_len
+    cdef int _stack_states_top
+    cdef int _stack_states_len
 
     cdef void _start_recovery_mode(self,Symbol symbol,int line,int column)
     cdef void _end_recovery_mode(self,Symbol symbol)

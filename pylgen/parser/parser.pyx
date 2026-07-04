@@ -103,6 +103,7 @@ cdef class BottomUpParser(Parser):
         self._action_table_optimized = {}
         self._goto_table_optimized = {}
         self._symbols_id = {}
+        self._view = ASTListView()
 
         for table_key in goto_table:
             state_id = int(table_key[0][1:])
@@ -137,6 +138,13 @@ cdef class BottomUpParser(Parser):
         self._panic_mode = False # type:ignore
         self._current_syncronization_set = set()
         self._draw_parse_tree = False # type:ignore
+        self._view._data = self._stack_ast
+        self._stack_top = 0
+        self._stack_len = 0
+        self._stack_ast_len = 0
+        self._stack_ast_top = 0
+        self._stack_states_len = 1
+        self._stack_states_top = 1
 
     cdef void _set_reductor(self,Production production,object reductor): # type:ignore
         self._reductor_by_production[production] = reductor
@@ -147,9 +155,10 @@ cdef class BottomUpParser(Parser):
         cdef set[Symbol] expected_symbols = set()
         cdef SintaxError error
         cdef str state
+        cdef int idx
 
         for key in self._action_table:
-            if key[0] == self._stack_states[-1]:
+            if key[0] == self._stack_states[self._stack_states_top - 1]:
                 follow_symbol = key[1] # type:ignore
                 if follow_symbol._is_terminal:
                     expected_symbols.add(follow_symbol)
@@ -159,7 +168,8 @@ cdef class BottomUpParser(Parser):
         self._panic_mode = True # type:ignore
         self._current_syncronization_set = set()
         
-        for state in self._stack_states:
+        for idx in range(self._stack_states_top):
+            state = self._stack_states[idx]
             for key in self._action_table:
                 if not (<Symbol>key[1])._is_terminal: continue
                 if key[0] == state and self._action_table[key][0] == BottomUpParserAction.SHIFT:
@@ -169,16 +179,16 @@ cdef class BottomUpParser(Parser):
         cdef bint started = False # type:ignore
         self._current_syncronization_set = set()
         self._panic_mode = False # type:ignore
-        while self._stack_states:
-            key = (self._stack_states[-1],symbol)
+        while self._stack_states_top > 0:
+            key = (self._stack_states[self._stack_states_top - 1],symbol)
             if key in self._action_table and self._action_table[key][0] == BottomUpParserAction.SHIFT:
                 started = True # type:ignore
                 break
             if started:
                 break
-            self._stack_states.pop()
-            self._stack_ast.pop()
-            self._stack.pop()
+            self._stack_states_top -= 1
+            self._stack_ast_top -= 1
+            self._stack_top -= 1
 
     cdef void _try_parse(self,Token token):
         cdef tuple[str,object] current_action
@@ -189,19 +199,11 @@ cdef class BottomUpParser(Parser):
         cdef list[ParseTreeNode] childrens
         cdef int production_len
         # local references for micro-optimizations
-        cdef list[str] local_stack_states = self._stack_states
-        cdef dict[int,tuple[str,object]] local_action_table = self._action_table_optimized
-        cdef dict[Production,object] local_reductor_by_production = self._reductor_by_production
-        cdef list[Symbol] local_stack = self._stack
-        cdef list[AST] local_stack_ast = self._stack_ast
-        cdef dict[int,str] local_goto_table = self._goto_table_optimized
-        cdef list[ParseTreeNode] local_parse_tree_nodes = self._parse_tree_nodes
-        cdef bint draw_parse_tree_flag = self._draw_parse_tree
         cdef bint errors = len(self._errors) > 0 # type:ignore
-        cdef dict[int,int] local_symbols_ids = self._symbols_id
         cdef int symbol_id
-        cdef ASTListView view = ASTListView()
-        view._data = local_stack_ast
+        cdef ASTListView _view = self._view
+
+        _view._data = self._stack_ast
 
         if self._parsed:
             raise ValueError('EOF token already readed')
@@ -211,14 +213,13 @@ cdef class BottomUpParser(Parser):
                 self._end_recovery_mode(token._symbol)
             else:
                 return # type:ignore
-        
-        state = local_stack_states[-1]
-        symbol_id = local_symbols_ids[(<Symbol>token._symbol)._hash]
+
+        state = self._stack_states[self._stack_states_top - 1]
+        symbol_id = self._symbols_id[(<Symbol>token._symbol)._hash]
 
         key = (int(state[1:]) << _offset) | symbol_id
 
-        current_action = local_action_table.get(key,('',None))
-        # input(current_action)
+        current_action = self._action_table_optimized.get(key,('',None))
         if current_action == ('',None):
             self._start_recovery_mode(token._symbol,token._line,token._column)
             return # type:ignore
@@ -227,70 +228,101 @@ cdef class BottomUpParser(Parser):
         while current_action[0] == BottomUpParserAction.REDUCE:
             p:Production = current_action[1] # type:ignore
             production_len = len(p._production)
-            view._end = len(local_stack_ast)
-            view._start = view._end - production_len
-            new_ast = local_reductor_by_production[p](view) # type:ignore
-            if not errors and draw_parse_tree_flag:
+            _view._end = self._stack_ast_top
+            _view._start = self._stack_ast_top - production_len
+            new_ast = self._reductor_by_production[p](_view) # type:ignore
+            if not errors and self._draw_parse_tree:
                 # build the parse tree
-                childrens = local_parse_tree_nodes[-1*production_len:]
+                childrens = self._parse_tree_nodes[-1*production_len:]
                 new_node = ParseTreeNode(p._head,new_ast._line,new_ast._column,childrens)
                 # updates the stack of parse tree nodes
-                del local_parse_tree_nodes[-1*production_len:]
-                local_parse_tree_nodes.append(new_node)
+                del self._parse_tree_nodes[-1*production_len:]
+                self._parse_tree_nodes.append(new_node)
+            
             # update the stack of symbols
-            del local_stack[-1*production_len:]
-            local_stack.append(p._head)
+            self._stack_top -= production_len
+            self._stack[self._stack_top] = p._head
+            self._stack_top += 1
+
             # update the stack of states
-            del local_stack_states[-1*production_len:]
+            self._stack_states_top -= production_len
             # update the stack of ast
-            del local_stack_ast[-1*production_len:]
-            local_stack_ast.append(new_ast)
+            self._stack_ast_top -= production_len
+            self._stack_ast[self._stack_ast_top] = new_ast
+            self._stack_ast_top += 1
+
             # sets the current state
-            state = local_stack_states[-1]
-            symbol_id = local_symbols_ids[(<Symbol>local_stack[-1])._hash]
+            state = self._stack_states[self._stack_states_top - 1]
+            symbol_id = self._symbols_id[(<Symbol>self._stack[self._stack_top - 1])._hash]
 
             key = (int(state[1:]) << _offset) | symbol_id
-            current_action = local_action_table.get(key,('',None))
+            current_action = self._action_table_optimized.get(key,('',None))
+            
             # checks for an action
             if current_action == ('',None):
-                self._start_recovery_mode(local_stack[-1],new_ast._line,new_ast._column)
+                self._stack_states_top = self._stack_states_top
+                self._stack_ast_top = self._stack_ast_top
+                self._stack_top = self._stack_top
+                self._start_recovery_mode(self._stack[self._stack_top - 1],new_ast._line,new_ast._column)
                 break
+            
             # checks if the action is shift, due to reductions only may occur at top of the stack
             if current_action[0] != BottomUpParserAction.SHIFT:
-                self._start_recovery_mode(local_stack[-1],new_ast._line,new_ast._column)
+                self._stack_states_top = self._stack_states_top
+                self._stack_ast_top = self._stack_ast_top
+                self._stack_top = self._stack_top
+                self._start_recovery_mode(self._stack[self._stack_top - 1],new_ast._line,new_ast._column)
                 break
             # sets the state by the GOTO table and put it at stack of states top
-            state = local_goto_table[key]
-            local_stack_states.append(state)
-            symbol_id = local_symbols_ids[(<Symbol>token._symbol)._hash]
+            state = self._goto_table_optimized[key]
+            # self._stack_states.append(state)
+            self._stack_states[self._stack_states_top] = state
+            self._stack_states_top += 1
+            symbol_id = self._symbols_id[(<Symbol>token._symbol)._hash]
             # checks for an action with the current state and the current token
             key = (int(state[1:]) << _offset ) | symbol_id
-            current_action = local_action_table.get(key,('',None))
+            current_action = self._action_table_optimized.get(key,('',None))
             if current_action == ('',None):
+                self._stack_states_top = self._stack_states_top
+                self._stack_ast_top = self._stack_ast_top
+                self._stack_top = self._stack_top
                 self._start_recovery_mode(token._symbol,token._line,token._column)
                 break
+        
         if not self._panic_mode and current_action[0] == BottomUpParserAction.SHIFT:
-            state = local_goto_table[key]
-            if not errors and draw_parse_tree_flag:
+            state = self._goto_table_optimized[key]
+            if not errors and self._draw_parse_tree:
                 # adds a new parse tree node to the parse tree
                 new_node = ParseTreeNode(token._symbol,token._line,token._column)
-                local_parse_tree_nodes.append(new_node)
+                self._parse_tree_nodes.append(new_node)
             # push the symbol in the stack
-            local_stack.append(token._symbol)
+            if self._stack_top >= self._stack_len:
+                self._stack.append(token._symbol)
+                self._stack_len += 1
+            else:
+                self._stack[self._stack_top] = token._symbol
+            self._stack_top += 1
             # push the ast in the stack
-            local_stack_ast.append(token)
+            if self._stack_ast_top >= self._stack_ast_len:
+                self._stack_ast.append(token)
+                self._stack_ast_len += 1
+            else:
+                self._stack_ast[self._stack_ast_top] = token
+            self._stack_ast_top += 1
             # push the state in the stack
-            local_stack_states.append(state)
+            if self._stack_states_top >= self._stack_states_len:
+                self._stack_states.append(state)
+                self._stack_states_len += 1
+            else:
+                self._stack_states[self._stack_states_top] = state
+            self._stack_states_top += 1
+        
         if not self._panic_mode and current_action[0] == BottomUpParserAction.ACCEPT:
             self._parsed = True # type:ignore
             if not errors:
-                self._ast = local_stack_ast[-1]
-                if draw_parse_tree_flag:
-                    self._parse_tree = local_parse_tree_nodes[-1]
-        self._stack = local_stack
-        self._stack_states = local_stack_states
-        self._stack_ast = local_stack_ast
-        self._parse_tree_nodes = local_parse_tree_nodes
+                self._ast = self._stack_ast[self._stack_ast_top - 1]
+                if self._draw_parse_tree:
+                    self._parse_tree = self._parse_tree_nodes[-1]
 
     cpdef void reset(self):
         '''
@@ -300,9 +332,10 @@ cdef class BottomUpParser(Parser):
         self._parsed = False # type:ignore
         self._parse_tree = None # type:ignore
         self._ast = None # type:ignore
-        self._stack.clear()
-        self._stack_ast.clear()
-        self._stack_states = [self._start_state]
+        self._stack_top = 0
+        self._stack_ast_top = 0
+        self._stack_states_top = 1
+        self._stack_states[0] = self._start_state
         self._errors.clear()
         self._panic_mode = False # type:ignore
         self._current_syncronization_set.clear()
