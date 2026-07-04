@@ -97,13 +97,19 @@ cdef class AST:
 
 cdef class ASTListView:
 
-    def __getitem__(self,int idx):
+    cdef inline AST _get(self,int idx):
         if idx < 0 or idx >= self._end - self._start:
             raise IndexError('ASTListView index out of range')
         return self._data[self._start + idx]
 
-    def __len__(self):
+    cdef inline int _size(self):
         return self._end - self._start
+
+    def __getitem__(self,int idx):
+        return self._get(idx)
+
+    def __len__(self):
+        return self._size()
 
 cdef class Token(AST):
 
