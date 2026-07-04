@@ -26,20 +26,35 @@ cdef class Lexer(BaseLexer):
         cdef int line,column
         self.initialize()
         while self._move_next():
-            if not self._ignore._is_stuck and self._ignore._current_state._is_accept:
-                continue
-            if self._current_token._type in self._rules:
-                for rule in self._rules[self._current_token._type]:
-                    error = rule.check(self._current_token)
-                    if not error is None:
-                        self._errors.add(error)
-            yield self._current_token
+            yield self._current()
             line = self._current_token._line
             column = self._current_token._column
         if self._eof:
             self._eof._line = line
             self._eof._column = column + 1
             yield self._eof
+
+    cdef bint _move_next(self):
+        cdef bint continue_ = True # type:ignore
+
+        while continue_:
+            if not BaseLexer._move_next(self):
+                return False # type:ignore
+            continue_ = not self._ignore._is_stuck and self._ignore._current_state._is_accept # type:ignore
+        
+        return True # type:ignore
+    
+    cdef Token _current(self):
+        cdef LexicRule rule
+        cdef LexicError error
+        cdef int line,column
+
+        if self._current_token._type in self._rules:
+            for rule in self._rules[self._current_token._type]:
+                error = rule.check(self._current_token)
+                if not error is None:
+                    self._errors.add(error)
+        return self._current_token
 
     cpdef void clear_errors(self):
         self._errors.clear()
