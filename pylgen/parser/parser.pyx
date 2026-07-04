@@ -140,7 +140,7 @@ cdef class BottomUpParser(Parser):
         self._stack_states_top = 1
 
     cdef void _set_reductor(self,Production production,object reductor): # type:ignore
-        self._reductor_by_production[production] = reductor
+        self._reductor_by_production[(<Production>production)._hash] = reductor
 
     cdef void _start_recovery_mode(self,Symbol symbol,int line, int column):
         cdef Symbol stack_symbol,follow_symbol
@@ -222,7 +222,7 @@ cdef class BottomUpParser(Parser):
             production_len = len(p._production)
             self._view._end = self._stack_ast_top
             self._view._start = self._stack_ast_top - production_len
-            new_ast = self._reductor_by_production[p](self._view) # type:ignore
+            new_ast = self._reductor_by_production[p._hash](self._view) # type:ignore
             if not errors and self._draw_parse_tree:
                 # build the parse tree
                 childrens = self._parse_tree_nodes[-1*production_len:]

@@ -23,7 +23,7 @@ cdef class Parser:
     cpdef void set_draw_parse_tree_flag(self,bint flag)
 
 cdef class BottomUpParser(Parser):
-    cdef dict[Production,object] _reductor_by_production
+    cdef dict[int,object] _reductor_by_production
     cdef dict[tuple[str,Symbol],str] _goto_table
     cdef dict[tuple[str,Symbol],tuple[str,object]] _action_table
     cdef dict[long long,int] _goto_table_optimized
