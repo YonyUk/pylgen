@@ -183,8 +183,6 @@ cdef class BaseLexer:
                 # updates the transition to check
                 transition = (self._dfa._current_state._id,current_symbol)
     
-            # input(f'readed {self._text_readed}')
-            # input(f'pointer {self._text_position_pointer}')
             self._current_token = self._get_token(self._text_readed,self._line,self._column)
             if not self._current_token:
                 if self._text[self._text_position_pointer] == '\n':
