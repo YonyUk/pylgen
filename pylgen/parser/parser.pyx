@@ -196,9 +196,6 @@ cdef class BottomUpParser(Parser):
         # local references for micro-optimizations
         cdef bint errors = len(self._errors) > 0 # type:ignore
         cdef unsigned int symbol_id
-        cdef ASTListView _view = self._view
-
-        _view._data = self._stack_ast
 
         if self._parsed:
             raise ValueError('EOF token already readed')
@@ -223,9 +220,9 @@ cdef class BottomUpParser(Parser):
         while current_action[0] == BottomUpParserAction.REDUCE:
             p:Production = current_action[1] # type:ignore
             production_len = len(p._production)
-            _view._end = self._stack_ast_top
-            _view._start = self._stack_ast_top - production_len
-            new_ast = self._reductor_by_production[p](_view) # type:ignore
+            self._view._end = self._stack_ast_top
+            self._view._start = self._stack_ast_top - production_len
+            new_ast = self._reductor_by_production[p](self._view) # type:ignore
             if not errors and self._draw_parse_tree:
                 # build the parse tree
                 childrens = self._parse_tree_nodes[-1*production_len:]
@@ -270,7 +267,6 @@ cdef class BottomUpParser(Parser):
                 break
             # sets the state by the GOTO table and put it at stack of states top
             state = self._goto_table_optimized[key]
-            # self._stack_states.append(state)
             self._stack_states[self._stack_states_top] = state
             self._stack_states_top += 1
             symbol_id = (<Symbol>token._symbol)._hash & 0xFFFFFFFF
