@@ -22,11 +22,20 @@ cdef class Production:
         '''
         cdef Symbol symbol
         cdef list[str] prod = [symbol._symbol for symbol in production]
+        cdef bytes digest
+        cdef long long h = 0 # type:ignore
+        cdef int i
+
         if head._is_terminal:
             raise ValueError("head can't be a terminal symbol")
         self._head = head
         self._production = production
         self._id = f'{head} -> {" ".join(prod)}'
+        
+        digest = sha256(self._id.encode()).digest()
+        for i in range(8):
+            h = (h << 8) | digest[i]
+        self._hash = h
     
     @property
     def id(self) -> str:
@@ -56,12 +65,7 @@ cdef class Production:
         return self._production == other._production
     
     def __hash__(self) -> int:
-        cdef bytes digest = sha256(self._id.encode()).digest()
-        cdef long long h = 0 # type:ignore
-        cdef int i
-        for i in range(8):
-            h = (h << 8) | digest[i]
-        return h # type:ignore
+        return self._hash
 
 cdef class ProductionsSet:
 
