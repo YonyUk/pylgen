@@ -1,3 +1,6 @@
+# cython: boundscheck=False
+# cython: wraparound=False
+# cython: nonecheck=False
 import inspect
 from typing import Iterable,Callable,List
 from ..common.types cimport Token,AST,Symbol,ASTListView
