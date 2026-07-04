@@ -5,7 +5,7 @@ from ..grammar.grammar cimport Production
 from ..analisis.error cimport SintaxError
 from .bottom_up_parser_actions import BottomUpParserAction
 
-_offset:int = 20
+_offset:int = 32
 
 cdef class ParsingException(Exception):
     
@@ -96,39 +96,29 @@ cdef class BottomUpParser(Parser):
             action_table (Dict[Tuple[str,Symbol],tuple[str,str | Production]]): ACTION table for the parser
             follows (Dict[Symbol,Set[Symbol]]): dict of FOLLOW set by non-terminal
         '''
-        cdef int key,state_id,symbol_id
+        cdef unsigned int symbol_id
+        cdef long long key,state_id
         cdef tuple[str,Symbol] table_key
         self._action_table = action_table
         self._goto_table = goto_table
         self._action_table_optimized = {}
         self._goto_table_optimized = {}
-        self._symbols_id = {}
         self._view = ASTListView()
 
         for table_key in goto_table:
             state_id = int(table_key[0][1:])
-            symbol_id = (<Symbol>table_key[1])._hash
-            if not symbol_id in self._symbols_id:
-                self._symbols_id[symbol_id] = len(self._symbols_id)
-                symbol_id = self._symbols_id[symbol_id]
-            else:
-                symbol_id = self._symbols_id[symbol_id]
+            symbol_id = (<Symbol>table_key[1])._hash & 0xFFFFFFFF
             key = (state_id << _offset ) | symbol_id
-            self._goto_table_optimized[key] = goto_table[table_key]
+            self._goto_table_optimized[key] = int(goto_table[table_key][1:])
 
         for table_key in action_table:
             state_id = int(table_key[0][1:])
-            symbol_id = (<Symbol>table_key[1])._hash
-            if not symbol_id in self._symbols_id:
-                self._symbols_id[symbol_id] = len(self._symbols_id)
-                symbol_id = self._symbols_id[symbol_id]
-            else:
-                symbol_id = self._symbols_id[symbol_id]
+            symbol_id = (<Symbol>table_key[1])._hash & 0xFFFFFFFF
             key = (state_id << _offset ) | symbol_id
             self._action_table_optimized[key] = action_table[table_key]
 
         self._reductor_by_production = {}
-        self._stack_states = [start_state]
+        self._stack_states = [int(start_state[1:])]
         self._stack = []
         self._stack_ast = []
         self._start_state = start_state
@@ -154,11 +144,11 @@ cdef class BottomUpParser(Parser):
         cdef tuple[str,Symbol] key
         cdef set[Symbol] expected_symbols = set()
         cdef SintaxError error
-        cdef str state
+        cdef int state
         cdef int idx
 
         for key in self._action_table:
-            if key[0] == self._stack_states[self._stack_states_top - 1]:
+            if int(key[0][1:]) == self._stack_states[self._stack_states_top - 1]:
                 follow_symbol = key[1] # type:ignore
                 if follow_symbol._is_terminal:
                     expected_symbols.add(follow_symbol)
@@ -170,17 +160,19 @@ cdef class BottomUpParser(Parser):
         
         for idx in range(self._stack_states_top):
             state = self._stack_states[idx]
-            for key in self._action_table:
+            for key in self._action_table: # type:ignore
                 if not (<Symbol>key[1])._is_terminal: continue
-                if key[0] == state and self._action_table[key][0] == BottomUpParserAction.SHIFT:
+                if int(key[0][1:]) == state and self._action_table[key][0] == BottomUpParserAction.SHIFT: # type:ignore
                     self._current_syncronization_set.add(key[1]) # type:ignore
         
     cdef void _end_recovery_mode(self,Symbol symbol):
         cdef bint started = False # type:ignore
+        cdef tuple[str,Symbol] key
+
         self._current_syncronization_set = set()
         self._panic_mode = False # type:ignore
         while self._stack_states_top > 0:
-            key = (self._stack_states[self._stack_states_top - 1],symbol)
+            key = (f'I{self._stack_states[self._stack_states_top - 1]}',symbol)
             if key in self._action_table and self._action_table[key][0] == BottomUpParserAction.SHIFT:
                 started = True # type:ignore
                 break
@@ -192,15 +184,15 @@ cdef class BottomUpParser(Parser):
 
     cdef void _try_parse(self,Token token):
         cdef tuple[str,object] current_action
-        cdef str state
-        cdef int key
+        cdef long long state
+        cdef long long key
         cdef AST new_ast
         cdef ParseTreeNode new_node
         cdef list[ParseTreeNode] childrens
         cdef int production_len
         # local references for micro-optimizations
         cdef bint errors = len(self._errors) > 0 # type:ignore
-        cdef int symbol_id
+        cdef unsigned int symbol_id
         cdef ASTListView _view = self._view
 
         _view._data = self._stack_ast
@@ -215,12 +207,12 @@ cdef class BottomUpParser(Parser):
                 return # type:ignore
 
         state = self._stack_states[self._stack_states_top - 1]
-        symbol_id = self._symbols_id[(<Symbol>token._symbol)._hash]
+        symbol_id = (<Symbol>token._symbol)._hash & 0xFFFFFFFF
 
-        key = (int(state[1:]) << _offset) | symbol_id
+        key = (state << _offset) | symbol_id
 
-        current_action = self._action_table_optimized.get(key,('',None))
-        if current_action == ('',None):
+        current_action = self._action_table_optimized.get(key,None)
+        if not current_action:
             self._start_recovery_mode(token._symbol,token._line,token._column)
             return # type:ignore
 
@@ -253,13 +245,13 @@ cdef class BottomUpParser(Parser):
 
             # sets the current state
             state = self._stack_states[self._stack_states_top - 1]
-            symbol_id = self._symbols_id[(<Symbol>self._stack[self._stack_top - 1])._hash]
+            symbol_id = (<Symbol>self._stack[self._stack_top - 1])._hash & 0xFFFFFFFF
 
-            key = (int(state[1:]) << _offset) | symbol_id
-            current_action = self._action_table_optimized.get(key,('',None))
+            key = (state << _offset) | symbol_id
+            current_action = self._action_table_optimized.get(key,None)
             
             # checks for an action
-            if current_action == ('',None):
+            if not current_action:
                 self._stack_states_top = self._stack_states_top
                 self._stack_ast_top = self._stack_ast_top
                 self._stack_top = self._stack_top
@@ -278,11 +270,11 @@ cdef class BottomUpParser(Parser):
             # self._stack_states.append(state)
             self._stack_states[self._stack_states_top] = state
             self._stack_states_top += 1
-            symbol_id = self._symbols_id[(<Symbol>token._symbol)._hash]
+            symbol_id = (<Symbol>token._symbol)._hash & 0xFFFFFFFF
             # checks for an action with the current state and the current token
-            key = (int(state[1:]) << _offset ) | symbol_id
-            current_action = self._action_table_optimized.get(key,('',None))
-            if current_action == ('',None):
+            key = (state << _offset ) | symbol_id
+            current_action = self._action_table_optimized.get(key,None)
+            if not current_action:
                 self._stack_states_top = self._stack_states_top
                 self._stack_ast_top = self._stack_ast_top
                 self._stack_top = self._stack_top
@@ -335,7 +327,7 @@ cdef class BottomUpParser(Parser):
         self._stack_top = 0
         self._stack_ast_top = 0
         self._stack_states_top = 1
-        self._stack_states[0] = self._start_state
+        self._stack_states[0] = int(self._start_state[1:])
         self._errors.clear()
         self._panic_mode = False # type:ignore
         self._current_syncronization_set.clear()
