@@ -147,6 +147,7 @@ cdef class BaseLexer:
     cdef bint _move_next(self):
         cdef tuple[str,str] transition
         cdef str current_symbol
+        cdef int start
 
         if not self._initialized:
             raise LexerNotInitializedException()
@@ -159,19 +160,18 @@ cdef class BaseLexer:
         # restart the ignore dfa
 
         while self._current_token is None and self._text_position_pointer < len(self._text):
+            start = self._text_position_pointer
             self._ignore.reset()
             current_symbol = self._text[self._text_position_pointer]
             # checks for a transition
             transition = (self._dfa._current_state._id,current_symbol)
             while transition in self._dfa_transition_function and (not self._fault_state or self._dfa._trans_func._table[transition] != self._fault_state._id):
-                # input(f'readed: {self._text_readed}')
-                # input(f'pointer {self._text_position_pointer}')
                 # advance the ignore_dfa one step
                 self._ignore.walk(current_symbol)
                 # advance the dfa one step
                 self._dfa.walk(current_symbol)
                 # updates the text readed
-                self._text_readed += current_symbol
+                # self._text_readed += current_symbol
                 # updates the pointer
                 self._text_position_pointer += 1
                 # if the text has been ended
@@ -183,6 +183,7 @@ cdef class BaseLexer:
                 # updates the transition to check
                 transition = (self._dfa._current_state._id,current_symbol)
     
+            self._text_readed = self._text[start:self._text_position_pointer]
             self._current_token = self._get_token(self._text_readed,self._line,self._column)
             if not self._current_token:
                 if self._text[self._text_position_pointer] == '\n':

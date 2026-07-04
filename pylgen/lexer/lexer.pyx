@@ -1,3 +1,6 @@
+# cython: boundscheck=False
+# cython: wraparound=False
+# cython: nonecheck=False
 from typing import Callable,Any,Tuple,Iterable,Set
 
 from ..common.types cimport Symbol,Token
