@@ -19,6 +19,12 @@ cdef class State:
 
             is_accept (bool): tells if this state is an accepting state
         '''
+        cdef bytes digest = sha256(id.encode()).digest()
+        cdef long long h = 0 # type:ignore
+        cdef int i
+        for i in range(8):
+            h = (h << 8) | digest[i]
+        self._hash = h
         self._id = id
         self._value = value
         self._is_accept = is_accept
@@ -58,12 +64,7 @@ cdef class State:
         return __o.id == self._id
     
     def __hash__(self) -> int:
-        cdef bytes digest = sha256(self._id.encode()).digest()
-        cdef long long h = 0 # type:ignore
-        cdef int i
-        for i in range(8):
-            h = (h << 8) | digest[i]
-        return h # type:ignore
+        return self._hash
 
 cdef class Automaton:
     '''
