@@ -1,6 +1,8 @@
+# cython: boundscheck=False
+# cython: nonecheck=False
+# cython: language_level=3
 from typing import Tuple,Callable,Any,Iterable,get_type_hints
 import inspect
-
 from ..automaton.automaton cimport Automaton,DFA,NFA,State,_automaton_union
 from ..common.types cimport Token,Symbol
 from ..common.enums import TokenType
@@ -145,9 +147,9 @@ cdef class BaseLexer:
         return None # type:ignore
 
     cdef bint _move_next(self):
-        cdef tuple[str,str] transition
         cdef str current_symbol
         cdef int start
+        cdef State last_state
 
         if not self._initialized:
             raise LexerNotInitializedException()
@@ -157,21 +159,25 @@ cdef class BaseLexer:
         self._text_readed = ''
         # restart the dfa
         self._dfa.reset()
-        # restart the ignore dfa
+        # set the last state
+        last_state = self._dfa._current_state
 
         while self._current_token is None and self._text_position_pointer < len(self._text):
             start = self._text_position_pointer
             self._ignore.reset()
             current_symbol = self._text[self._text_position_pointer]
-            # checks for a transition
-            transition = (self._dfa._current_state._id,current_symbol)
-            while transition in self._dfa_transition_function and (not self._fault_state or self._dfa._trans_func._table[transition] != self._fault_state._id):
-                # advance the ignore_dfa one step
-                self._ignore.walk(current_symbol)
+            while True:
                 # advance the dfa one step
                 self._dfa.walk(current_symbol)
-                # updates the text readed
-                # self._text_readed += current_symbol
+                # if the dfa is stuck
+                if self._dfa._is_stuck:
+                    break
+                # if reached to a fault state
+                if self._fault_state and self._dfa._current_state._id == self._fault_state._id:
+                    break
+                last_state = self._dfa._current_state
+                # advance the ignore_dfa one step
+                self._ignore.walk(current_symbol)
                 # updates the pointer
                 self._text_position_pointer += 1
                 # if the text has been ended
@@ -179,11 +185,9 @@ cdef class BaseLexer:
                     break
                 # updates the current symbol
                 current_symbol = self._text[self._text_position_pointer]
-                # updates last symbol seen
-                # updates the transition to check
-                transition = (self._dfa._current_state._id,current_symbol)
-    
+
             self._text_readed = self._text[start:self._text_position_pointer]
+            self._dfa._current_state = last_state
             self._current_token = self._get_token(self._text_readed,self._line,self._column)
             if not self._current_token:
                 if self._text[self._text_position_pointer] == '\n':
@@ -192,12 +196,17 @@ cdef class BaseLexer:
                 else:
                     self._column += 1
                 self._text_position_pointer += 1
+                # reset the text readed
+                self._text_readed = ''
+                # restart the dfa
+                self._dfa.reset()
+                # set the last state
+                last_state = self._dfa._current_state
             else:
                 self._column += len(self._text_readed)
             if '\n' in self._text_readed:
                 self._line += self._text_readed.count('\n')
                 self._column = len(self._text_readed[self._text_readed.rindex('\n'):])
-            self._text_readed = ''
         return self._current_token is not None # type:ignore
 
     cdef Token _current(self):
