@@ -13,8 +13,9 @@ cdef class LALRItem(LR0Item):
         cdef long long h = 0 # type:ignore
         cdef int i
 
-        super().__init__(head, left, right)
-        
+        self._head = head
+        self._left = list(left)
+        self._right = list(right)        
         self._lookaheads = lookaheads.copy()
 
         left_l = [sym._symbol for sym in self._left]
