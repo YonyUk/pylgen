@@ -1,6 +1,6 @@
 from typing import Sequence, Set
 from ..common.types import Symbol
-from .lr0_parser import LR0Item,LR0State
+from .lr0_parser import LR0Item
 
 class LALRItem(LR0Item):
     
