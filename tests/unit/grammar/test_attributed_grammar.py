@@ -3,9 +3,9 @@ from typing import List, Tuple
 import pytest
 
 from pylgen.grammar.grammar import AttributedGrammar, Grammar,SymbolNotPresentInGrammarException,Production
-from pylgen.common.types import AST, Symbol
+from pylgen.common.types import AST, Symbol, ASTListView
 
-def comodin_reductor(asts:List[AST]) -> AST:
+def comodin_reductor(asts:ASTListView) -> AST:
     return AST(Symbol('s'),0,0)
 
 class TestGrammar:
@@ -631,7 +631,7 @@ class TestGrammar:
     
     def test_grammar_attributed_add_production(self):
         
-        def reductor(asts:List[AST]) -> AST:
+        def reductor(asts:ASTListView) -> AST:
             return asts[1]
 
         E = Symbol('E')
@@ -646,10 +646,10 @@ class TestGrammar:
     
     def test_grammar_attributed_add_production_twice_different_reductor(self):
 
-        def reductor_1(asts:List[AST]) -> AST:
+        def reductor_1(asts:ASTListView) -> AST:
             return asts[1]
 
-        def reductor_2(asts:List[AST]) -> AST:
+        def reductor_2(asts:ASTListView) -> AST:
             return asts[1]
 
         E = Symbol('E')
@@ -665,10 +665,10 @@ class TestGrammar:
 
     def test_grammar_attributed_add_many_productions(self):
 
-        def reductor_1(asts:List[AST]) -> AST:
+        def reductor_1(asts:ASTListView) -> AST:
             return asts[1]
 
-        def reductor_2(asts:List[AST]) -> AST:
+        def reductor_2(asts:ASTListView) -> AST:
             return asts[1]
 
         E = Symbol('E')
