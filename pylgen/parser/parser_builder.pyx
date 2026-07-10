@@ -9,8 +9,8 @@ from .lr0_parser cimport LR0Item,LR0State
 from .lalr_parser cimport LALRState
 from .bottom_up_parser_actions import BottomUpParserAction
 
-_clousures:dict[tuple[str,str],set[LR0Item]] = {}
-_clousures_lalr:dict[tuple[str,str],set[LALRItem]] = {}
+_clousures:dict[tuple[str,frozenset],set[LR0Item]] = {}
+_clousures_lalr:dict[tuple[str,frozenset],set[LALRItem]] = {}
 
 cdef class ParserBuildingConflictException(Exception):
     pass
@@ -218,36 +218,25 @@ cdef set[LR0Item] _clousure_lr0(set[LR0Item] items,Grammar g):
     cdef Production production
     cdef Symbol head
     cdef set[LR0Item] result = items.copy()
-    cdef set[LR0Item] copy
-    cdef bint change = True # type:ignore
-    cdef str set_id
-    cdef list[str] ids = []
-    cdef tuple[str,str] key
+    cdef list[LR0Item] worklist = list(items)
+    cdef tuple[str,frozenset] key
 
-    for item in items:
-        ids.append(str(item))
-    ids.sort()
-    
-    set_id = sha256('-'.join(ids).encode()).hexdigest()
-    key = (g._id(),set_id)
+    key = (g._id(),frozenset(items))
     # checks for a precomputed value
     if key in _clousures:
         return _clousures[key] # type:ignore
     
-    while change:
-        change = False # type:ignore
-        
-        copy = result.copy()
-        
-        for item in copy:
-            if len(item._right) > 0:
-                head = item._right[0]
-                if not head._is_terminal:
-                    for production in g._productions_by_symbol[head]:
-                        new_item = LR0Item(head,[],production._production) # type:ignore
-                        if not new_item in result:
-                            change = True # type:ignore
-                            result.add(new_item)
+    while worklist:
+        item = worklist.pop()
+
+        if len(item._right) > 0:
+            head = item._right[0]
+            if not head._is_terminal:
+                for production in g._productions_by_symbol[head]:
+                    new_item = LR0Item(head,[],production._production) # type:ignore
+                    if not new_item in result:
+                        result.add(new_item)
+                        worklist.append(new_item)
     
     _clousures[key] = result
     return result
@@ -257,28 +246,24 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
     cdef Production production
     cdef Symbol head,lookahead_symbol,new_lookahead
     cdef set[LALRItem] result = items.copy()
+    cdef list[LALRItem] worklist = list(items)
     cdef set[LALRItem] copy
     cdef bint change = True # type:ignore
     cdef bint exists = False # type:ignore
-    cdef str set_id
-    cdef list[str] ids = []
-    cdef tuple[str,str] key
+    cdef tuple[str,frozenset] key
     cdef tuple[Symbol,tuple,tuple] kernel
     cdef dict[tuple[Symbol,tuple,tuple],LALRItem] item_by_kernel = {}
     cdef set[Symbol] first,current_lookaheads
 
-    for item in items:
-        kernel = (item._head,tuple(item._left),tuple(item._right))
-        item_by_kernel[kernel] = item
-        ids.append(str(item))
-    ids.sort()
-
-    set_id = sha256('-'.join(ids).encode()).hexdigest()
-    key = (g._id(),set_id)
+    key = (g._id(),frozenset(items))
     # checks for a precomputed value
     if key in _clousures_lalr:
         return _clousures_lalr[key] # type:ignore
-    
+
+    for item in items:
+        kernel = (item._head,tuple(item._left),tuple(item._right))
+        item_by_kernel[kernel] = item
+
     while change:
         change = False # type:ignore
 
@@ -306,6 +291,7 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
                             result.add(new_item)
                             change = True # type:ignore
                         item_by_kernel[kernel] = new_item
+
     _clousures_lalr[key] = result
     return result
 
@@ -338,24 +324,23 @@ cdef set[LR0State] _get_canonical_lr0_states(Grammar g):
     cdef LR0Item start = LR0Item(augmented._start_symbol,[],[g._start_symbol]) # type:ignore
     cdef LR0State state,new_state
     cdef set[LR0State] result = { LR0State(_clousure_lr0({start},augmented)) } # type:ignore
-    cdef set[LR0State] copy
+    cdef list[LR0State] worklist = list(result)
     cdef set[LR0Item] items
-    cdef bint change = True # type:ignore
     cdef Symbol symbol
 
-    while change:
-        change = False # type:ignore
-        copy = result.copy()
+    while worklist:
 
-        for state in copy:
-            for symbol in g._symbols:
-                if symbol == augmented._end_symbol: continue
-                items = _goto_lr0(state._items,symbol,g)
-                if len(items) > 0:
-                    new_state = LR0State(items,len(result)) # type:ignore
-                    if not new_state in result:
-                        change = True # type:ignore
-                        result.add(new_state)
+        state = worklist.pop()
+
+        # for state in copy:
+        for symbol in g._symbols:
+            if symbol == augmented._end_symbol: continue
+            items = _goto_lr0(state._items,symbol,g)
+            if len(items) > 0:
+                new_state = LR0State(items,len(result)) # type:ignore
+                if not new_state in result:
+                    result.add(new_state)
+                    worklist.append(new_state)
     
     return result
 
