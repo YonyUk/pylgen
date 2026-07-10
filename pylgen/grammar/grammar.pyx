@@ -1,6 +1,6 @@
 from typing import List,Tuple,Set,Callable
 from hashlib import sha256
-from ..common.types cimport Symbol,AST
+from ..common.types cimport Symbol,AST,ASTListView
 import inspect
 
 cdef class SymbolNotPresentInGrammarException(Exception):
@@ -113,14 +113,14 @@ cdef class AttributedProductionsSet(ProductionsSet):
         self._add_production(production)
         self._last_reductor_added = reductor
     
-    def __iadd__(self, production_redutor_pair:Tuple[Tuple[Symbol, ...],Callable[[List[AST]],AST]]) -> ProductionsSet:
+    def __iadd__(self, production_redutor_pair:Tuple[Tuple[Symbol, ...],Callable[[ASTListView],AST]]) -> ProductionsSet:
         cdef tuple production
         cdef object reductor
 
         production,reductor = production_redutor_pair
         sig = inspect.signature(reductor)
         params = list(sig.parameters.values())
-        if params[0].annotation is inspect.Signature.empty or params[0].annotation != List[AST]:
+        if params[0].annotation is inspect.Signature.empty or params[0].annotation != ASTListView:
             raise ValueError('Invalid signature for second item of tuple, reduction must have annotation (List[AST]) -> AST')
         if sig.return_annotation is inspect.Signature.empty or sig.return_annotation != AST:
             raise ValueError('Invalid signature for second item of tuple, reduction must have annotation (List[AST]) -> AST')
