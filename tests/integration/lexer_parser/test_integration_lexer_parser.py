@@ -2,7 +2,7 @@ import pytest
 from typing import Iterable, List
 from string import digits
 
-from pylgen.common.types import Symbol,AST,Token
+from pylgen.common.types import Symbol,AST,Token,ASTListView
 from pylgen.common.enums import TokenType
 from pylgen.grammar.grammar import Grammar,Production
 from pylgen.parser.parser_builder import ParserBuilder
@@ -122,46 +122,46 @@ class ExpAST(BinaryAST):
     def __init__(self,line: int, column: int):
         super().__init__(exp, line, column)
 
-def reductor_E_plus_T(asts:List[AST]) -> AST:
+def reductor_E_plus_T(asts:ASTListView) -> AST:
     result = PlusAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
 
-def reductor_E_minus_T(asts:List[AST]) -> AST:
+def reductor_E_minus_T(asts:ASTListView) -> AST:
     result = MinusAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
 
-def reductor_E_mod_T(asts:List[AST]) -> AST:
+def reductor_E_mod_T(asts:ASTListView) -> AST:
     result = ModAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
 
-def reductor_E_T(asts:List[AST]) -> AST:
+def reductor_E_T(asts:ASTListView) -> AST:
     return asts[0]
         
-def reductor_T_mul_F(asts:List[AST]) -> AST:
+def reductor_T_mul_F(asts:ASTListView) -> AST:
     result = MulAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
 
-def reductor_T_div_F(asts:List[AST]) -> AST:
+def reductor_T_div_F(asts:ASTListView) -> AST:
     result = DivAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
 
-def reductor_F_exp_P(asts:List[AST]) -> AST:
+def reductor_F_exp_P(asts:ASTListView) -> AST:
     result = ExpAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
 
-def reductor_F_lp_E_rp(asts:List[AST]) -> AST:
+def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
     return asts[1]
 
 class TokenTypeEnum(TokenType):
