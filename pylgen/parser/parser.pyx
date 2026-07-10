@@ -336,7 +336,7 @@ cdef class BottomUpParser(Parser):
         params = list(sig.parameters.values())
         if len(params) != 1:
             raise ValueError('invalid reductor function signature')
-        if not params[0].annotation is inspect.Parameter.empty and params[0].annotation != List[AST]:
+        if not params[0].annotation is inspect.Parameter.empty and params[0].annotation != ASTListView:
             raise ValueError('invalid reductor function signature')
         if sig.return_annotation != AST:
             raise ValueError('invalid reductor function signature')

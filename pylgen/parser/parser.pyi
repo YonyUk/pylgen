@@ -1,5 +1,5 @@
 from typing import Callable, Dict, Iterable, List, Set, Tuple
-from ..common.types import Token,AST,Symbol
+from ..common.types import ASTListView, Token,AST,Symbol
 from ..grammar.grammar import Production
 from ..analisis.error import SintaxError
 
@@ -42,4 +42,4 @@ class BottomUpParser(Parser):
 
     def reset(self) -> None: ...
 
-    def __setitem__(self,production:Production,reductor:Callable[[List[AST]],AST]): ...
+    def __setitem__(self,production:Production,reductor:Callable[[ASTListView],AST]): ...
