@@ -3,9 +3,9 @@ from typing import Any, List
 import pytest
 
 from pylgen.grammar.grammar import AttributedProductionsSet
-from pylgen.common.types import Symbol,AST
+from pylgen.common.types import Symbol,AST,ASTListView
 
-def comodin_reductor(asts:List[AST]) -> AST:
+def comodin_reductor(asts:ASTListView) -> AST:
     return AST(Symbol('s'),0,0)
 
 class TestProductionsSet:
@@ -51,7 +51,7 @@ class TestProductionsSet:
         def invalid_reductor_2(asts:List[Any]) -> Any:
             return AST(Symbol('s'),0,0)
 
-        def invalid_reductor_3(asts:List[AST]) -> Any:
+        def invalid_reductor_3(asts:ASTListView) -> Any:
             return AST(Symbol('s'),0,0)
 
         def invalid_reductor_4(asts:Any) -> AST:

@@ -2,7 +2,7 @@ import pytest
 from typing import Iterable, List
 from string import digits
 
-from pylgen.common.types import Symbol,AST,Token
+from pylgen.common.types import Symbol,AST,Token,ASTListView
 from pylgen.common.enums import TokenType
 from pylgen.grammar.grammar import Grammar,Production
 from pylgen.parser.parser_builder import ParserBuilder
@@ -122,46 +122,46 @@ class ExpAST(BinaryAST):
     def __init__(self,line: int, column: int):
         super().__init__(exp, line, column)
 
-def reductor_E_plus_T(asts:List[AST]) -> AST:
+def reductor_E_plus_T(asts:ASTListView) -> AST:
     result = PlusAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
 
-def reductor_E_minus_T(asts:List[AST]) -> AST:
+def reductor_E_minus_T(asts:ASTListView) -> AST:
     result = MinusAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
 
-def reductor_E_mod_T(asts:List[AST]) -> AST:
+def reductor_E_mod_T(asts:ASTListView) -> AST:
     result = ModAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
 
-def reductor_E_T(asts:List[AST]) -> AST:
+def reductor_E_T(asts:ASTListView) -> AST:
     return asts[0]
         
-def reductor_T_mul_F(asts:List[AST]) -> AST:
+def reductor_T_mul_F(asts:ASTListView) -> AST:
     result = MulAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
 
-def reductor_T_div_F(asts:List[AST]) -> AST:
+def reductor_T_div_F(asts:ASTListView) -> AST:
     result = DivAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
 
-def reductor_F_exp_P(asts:List[AST]) -> AST:
+def reductor_F_exp_P(asts:ASTListView) -> AST:
     result = ExpAST(asts[1].line,asts[1].column)
     result.left = asts[0]
     result.right = asts[2]
     return result
 
-def reductor_F_lp_E_rp(asts:List[AST]) -> AST:
+def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
     return asts[1]
 
 class TokenTypeEnum(TokenType):
@@ -254,6 +254,7 @@ class TestIntegrationLexerParser:
         lexer[0,TokenTypeEnum.NUMBER] = '\\d+'
         lexer[1,TokenTypeEnum.SYMBOL] = '\\(|\\)'
         lexer[2,TokenTypeEnum.OPERATOR] = '\\+|\\*\\*?|\\-|/|%'
+        lexer.set_eof_token(END_SYMBOL,TokenTypeEnum.SYMBOL)
         return lexer
     
     @pytest.fixture
@@ -320,7 +321,7 @@ class TestIntegrationLexerParser:
     ])
     def test_simple_arithmetic_parser_2(self,text:str,lexer1:Lexer,parser1:BottomUpParser):
         lexer1.load_text(text)
-        ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+        ast = parser1.parse(lexer1.tokens)
     
     @pytest.mark.parametrize("text",[
         "1-2",
@@ -342,7 +343,7 @@ class TestIntegrationLexerParser:
     ])
     def test_normal_arithmetic_parser_2(self,text:str,lexer1:Lexer,parser2:BottomUpParser):
         lexer1.load_text(text)
-        ast = parser2.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+        ast = parser2.parse(lexer1.tokens)
 
 
     @pytest.mark.parametrize("text",[
@@ -359,9 +360,9 @@ class TestIntegrationLexerParser:
         " 3 ** 2",
         " 23+342 / (4**9 + 10) -235/4 + 20**3%3"
     ])
-    def test_extended_arithmetic_parser_2(self,text:str,lexer1:BaseLexer,parser3:BottomUpParser):
+    def test_extended_arithmetic_parser_2(self,text:str,lexer1:Lexer,parser3:BottomUpParser):
         lexer1.load_text(text)
-        ast = parser3.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+        ast = parser3.parse(lexer1.tokens)
 
     def test_error_detecting_1(self,lexer1:Lexer,parser1:BottomUpParser):
         text = "(01 + 3)* (5+7) *(2 +010 * 15)"
@@ -369,7 +370,7 @@ class TestIntegrationLexerParser:
         
         lexer1.load_text(text)
         try:
-            ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+            ast = parser1.parse(lexer1.tokens)
         except ParsingException:
             pass
 
@@ -381,7 +382,7 @@ class TestIntegrationLexerParser:
         text = "(1 + 3) * (5++7) *(2 + 10 * * 15)"
         lexer1.load_text(text)
         try:
-            ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+            ast = parser1.parse(lexer1.tokens)
         except ParsingException:
             pass
         assert len(parser1.errors) == 2
@@ -392,7 +393,7 @@ class TestIntegrationLexerParser:
 
         lexer1.load_text(text)
         try:
-            ast = parser3.parse(get_tokens(Symbol(END_SYMBOL,True),lexer1.tokens))
+            ast = parser3.parse(lexer1.tokens)
         except ParsingException:
             pass
         

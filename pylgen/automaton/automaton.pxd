@@ -4,6 +4,7 @@ cdef class State:
     cdef bint _is_accept
     cdef object _value
     cdef str _id
+    cdef int _hash
 
 cdef class Automaton:
     cdef dict[str,State] _states_by_id

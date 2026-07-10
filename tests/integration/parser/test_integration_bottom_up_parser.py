@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple
 
-from pylgen.common.types import AST, Token,Symbol
+from pylgen.common.types import AST, Token,Symbol,ASTListView
 from pylgen.common.enums import TokenType
 from pylgen.grammar.grammar import Grammar, Production
 from pylgen.parser.parser import BottomUpParser,ParsingException
@@ -31,7 +31,7 @@ class TestIntegrationBottomUpParser:
 
     def test_parsing_1(self):
         
-        def reductor(asts:List[AST]) -> AST:
+        def reductor(asts:ASTListView) -> AST:
             return AST(E,1,1)
 
         E = Symbol('E')
@@ -68,13 +68,13 @@ class TestIntegrationBottomUpParser:
         n = Symbol('n',True)
         end = Symbol('$',True)
 
-        def reductor_E_plus_T(asts:List[AST]) -> AST:
+        def reductor_E_plus_T(asts:ASTListView) -> AST:
             return AST(E,asts[1].line,asts[1].column)
         
-        def reductor_E_T(asts:List[AST]) -> AST:
+        def reductor_E_T(asts:ASTListView) -> AST:
             return AST(E,asts[0].line,asts[0].column)
         
-        def reductor_T_n(asts:List[AST]) -> AST:
+        def reductor_T_n(asts:ASTListView) -> AST:
             return AST(T,asts[0].line,asts[0].column)
 
         t1 = Token('12',TokenTypeEnum.NUMBER,n,1,1)
@@ -139,22 +139,22 @@ class TestIntegrationBottomUpParser:
         G[F] += lp,E,rp
         G[F] += n,
 
-        def reductor_E_plus_T(asts:List[AST]) -> AST:
+        def reductor_E_plus_T(asts:ASTListView) -> AST:
             return AST(E,asts[1].line,asts[1].column)
         
-        def reductor_E_T(asts:List[AST]) -> AST:
+        def reductor_E_T(asts:ASTListView) -> AST:
             return AST(E,asts[0].line,asts[0].column)
         
-        def reductor_T_mul_F(asts:List[AST]) -> AST:
+        def reductor_T_mul_F(asts:ASTListView) -> AST:
             return AST(T,asts[1].line,asts[1].column)
         
-        def reductor_T_F(asts:List[AST]) -> AST:
+        def reductor_T_F(asts:ASTListView) -> AST:
             return AST(T,asts[0].line,asts[0].column)
         
-        def reductor_F_lp_E_rp(asts:List[AST]) -> AST:
+        def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
             return AST(F,asts[1].line,asts[1].column)
         
-        def reductor_F_n(asts:List[AST]) -> AST:
+        def reductor_F_n(asts:ASTListView) -> AST:
             return AST(F,asts[0].line,asts[0].column)
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
@@ -223,22 +223,22 @@ class TestIntegrationBottomUpParser:
         G[F] += lp,E,rp
         G[F] += n,
 
-        def reductor_E_plus_T(asts:List[AST]) -> AST:
+        def reductor_E_plus_T(asts:ASTListView) -> AST:
             return AST(E,asts[1].line,asts[1].column)
         
-        def reductor_E_T(asts:List[AST]) -> AST:
+        def reductor_E_T(asts:ASTListView) -> AST:
             return AST(E,asts[0].line,asts[0].column)
         
-        def reductor_T_mul_F(asts:List[AST]) -> AST:
+        def reductor_T_mul_F(asts:ASTListView) -> AST:
             return AST(T,asts[1].line,asts[1].column)
         
-        def reductor_T_F(asts:List[AST]) -> AST:
+        def reductor_T_F(asts:ASTListView) -> AST:
             return AST(T,asts[0].line,asts[0].column)
         
-        def reductor_F_lp_E_rp(asts:List[AST]) -> AST:
+        def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
             return AST(F,asts[1].line,asts[1].column)
         
-        def reductor_F_n(asts:List[AST]) -> AST:
+        def reductor_F_n(asts:ASTListView) -> AST:
             return AST(F,asts[0].line,asts[0].column)
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
@@ -298,22 +298,22 @@ class TestIntegrationBottomUpParser:
         G[F] += lp,E,rp
         G[F] += n,
 
-        def reductor_E_plus_T(asts:List[AST]) -> AST:
+        def reductor_E_plus_T(asts:ASTListView) -> AST:
             return AST(E,asts[1].line,asts[1].column)
         
-        def reductor_E_T(asts:List[AST]) -> AST:
+        def reductor_E_T(asts:ASTListView) -> AST:
             return AST(E,asts[0].line,asts[0].column)
         
-        def reductor_T_mul_F(asts:List[AST]) -> AST:
+        def reductor_T_mul_F(asts:ASTListView) -> AST:
             return AST(T,asts[1].line,asts[1].column)
         
-        def reductor_T_F(asts:List[AST]) -> AST:
+        def reductor_T_F(asts:ASTListView) -> AST:
             return AST(T,asts[0].line,asts[0].column)
         
-        def reductor_F_lp_E_rp(asts:List[AST]) -> AST:
+        def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
             return AST(F,asts[1].line,asts[1].column)
         
-        def reductor_F_n(asts:List[AST]) -> AST:
+        def reductor_F_n(asts:ASTListView) -> AST:
             return AST(F,asts[0].line,asts[0].column)
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)

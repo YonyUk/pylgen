@@ -1,7 +1,7 @@
 from typing import List,Set
 from string import ascii_letters,digits,printable,whitespace
 
-from ..common.types cimport Symbol as cSymbol ,AST,Token
+from ..common.types cimport Symbol as cSymbol ,AST,Token,ASTListView
 from ..common.types import Symbol
 from ..automaton.automaton cimport (
     get_word_automaton,
@@ -533,38 +533,38 @@ cdef class PostOrderStrategy(TraversalStrategy):
 #                                  REDUCTORS
 ###################################################################################################
 
-def single_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def single_ast_reductor(asts:ASTListView) -> RegexAST:
     return asts[0]
 
-def concatenation_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def concatenation_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef RegexAST left,right
     left = asts[0]
     right = asts[1]
     return ConcatenationAST(left,right,cSymbol('CONCATENATION'),left._line,left._column) # type:ignore
 
-def char_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def char_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef Token token = asts[0] # type:ignore
     if token._type == ReTokenType.ESCAPE_CHAR:
         return CharAST(token._text[1],token._line,token._column)
     return CharAST(token._text,token._line,token._column)
 
-def re_constant_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def re_constant_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef Token token = asts[0] # type:ignore
     return ConstantRegexAST(token._text,token._line,token._column)
 
-def kleene_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def kleene_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef RegexAST regex = asts[0]
     return KleeneStarAST(regex,regex._line,regex._column)
 
-def positive_clousure_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def positive_clousure_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef RegexAST regex = asts[0]
     return PositiveClousureAST(regex,regex._line,regex._column)
 
-def optional_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def optional_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef RegexAST regex = asts[0]
     return OptionalAST(regex,regex._line,regex._column)
 
-def union_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def union_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef RegexAST left,right
     cdef Token token = asts[1] # type:ignore
 
@@ -573,10 +573,10 @@ def union_ast_reductor(asts:List[RegexAST]) -> RegexAST:
 
     return OrAST(left,right,token._line,token._column)
 
-def group_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def group_ast_reductor(asts:ASTListView) -> RegexAST:
     return asts[1]
 
-def repeat_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def repeat_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef RegexAST regex = asts[0]
     cdef StringAST min_,max_
 
@@ -585,7 +585,7 @@ def repeat_ast_reductor(asts:List[RegexAST]) -> RegexAST:
 
     return RepeatPatternAST(regex,min_,max_,regex._line,regex._column)
 
-def repeat_re_constant_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def repeat_re_constant_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef Token constant = asts[0] # type:ignore
     cdef StringAST min_,max_
     cdef RegexAST regex = ConstantRegexAST(constant._text,constant._line,constant._column)
@@ -595,7 +595,7 @@ def repeat_re_constant_ast_reductor(asts:List[RegexAST]) -> RegexAST:
 
     return RepeatPatternAST(regex,min_,max_,constant._line,constant._column)
 
-def char_set_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def char_set_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef RegexAST regex
     cdef Token token = asts[0] # type:ignore
 
@@ -605,7 +605,7 @@ def char_set_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     regex = asts[2]
     return ComplementCharSetAST(regex,token._line,token._column) # type:ignore
 
-def char_set_sequence_atom_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def char_set_sequence_atom_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef Token token
     cdef CharSetExplicitAST explicit
     cdef CharRangeAST char_range
@@ -628,7 +628,7 @@ def char_set_sequence_atom_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     char_range = CharRangeAST(char_ast,char_ast1,token._line,token._column)
     return char_range
 
-def char_set_sequence_ast_reductor(asts:List[RegexAST]) -> RegexAST:
+def char_set_sequence_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef CharSetExplicitAST explicit1,explicit2
     cdef CharRangeAST char_range1
     cdef CharSetAST result,new_result
@@ -680,7 +680,7 @@ def char_set_sequence_ast_reductor(asts:List[RegexAST]) -> RegexAST:
     new_result._next = char_range1 # type:ignore
     return new_result
 
-def string_ast_reductor(asts:List[RegexAST]) -> AST:
+def string_ast_reductor(asts:ASTListView) -> AST:
     cdef StringAST string
     cdef CharAST char
 

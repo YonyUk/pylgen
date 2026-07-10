@@ -4,14 +4,14 @@ from random import choice, randint, random
 
 import pytest
 import time
-from pylgen.common.types import AST, Symbol
+from pylgen.common.types import AST, Symbol,ASTListView
 from pylgen.grammar.grammar import Grammar,AttributedGrammar,Production
 from pylgen.parser.parser_builder import LALRReduceReduceConflictException, LALRShiftReduceConflictException, ParserBuilder
 from pylgen.parser.bottom_up_parser_actions import BottomUpParserAction
 from pylgen.parser.lr0_parser import LR0Item,LR0State
 from pylgen.parser.lalr_parser import LALRItem,LALRState
 
-def comodin_reductor(asts:List[AST]) -> AST:
+def comodin_reductor(asts:ASTListView) -> AST:
     return AST(Symbol('s'),0,0)
 
 class TestParserBuilderWithAttributedGrammars:

@@ -1,5 +1,5 @@
 from typing import Callable, Dict, Iterable, List, Set, Tuple
-from ..common.types import Token,AST,Symbol
+from ..common.types import ASTListView, Token,AST,Symbol
 from ..grammar.grammar import Production
 from ..analisis.error import SintaxError
 
@@ -33,10 +33,13 @@ class Parser:
     @property
     def errors(self) -> List[SintaxError]: ...
 
+    def set_draw_parse_tree_flag(self,flag:bool) -> None: ...
+
+
 class BottomUpParser(Parser):
 
     def __init__(self,start_state:str,goto_table:Dict[Tuple[str,Symbol],str],action_table:Dict[Tuple[str,Symbol],tuple[str,str | Production]]): ...
 
     def reset(self) -> None: ...
 
-    def __setitem__(self,production:Production,reductor:Callable[[List[AST]],AST]): ...
+    def __setitem__(self,production:Production,reductor:Callable[[ASTListView],AST]): ...

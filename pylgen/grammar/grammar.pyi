@@ -1,6 +1,6 @@
 from typing import Callable, Dict, List, Set, Tuple
 
-from ..common.types import AST, Symbol
+from ..common.types import AST, Symbol, ASTListView
 
 class SymbolNotPresentInGrammarException(Exception):
     
@@ -38,7 +38,7 @@ class ProductionsSet:
 
 class AttributedProductionsSet(ProductionsSet):
     
-    def __iadd__(self, production_redutor_pair:Tuple[Tuple[Symbol, ...],Callable[[List[AST]],AST]]) -> AttributedProductionsSet: ... # type:ignore
+    def __iadd__(self, production_redutor_pair:Tuple[Tuple[Symbol, ...],Callable[[ASTListView],AST]]) -> AttributedProductionsSet: ... # type:ignore
 
 class Grammar:
 

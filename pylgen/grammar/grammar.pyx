@@ -1,6 +1,6 @@
 from typing import List,Tuple,Set,Callable
 from hashlib import sha256
-from ..common.types cimport Symbol,AST
+from ..common.types cimport Symbol,AST,ASTListView
 import inspect
 
 cdef class SymbolNotPresentInGrammarException(Exception):
@@ -22,11 +22,20 @@ cdef class Production:
         '''
         cdef Symbol symbol
         cdef list[str] prod = [symbol._symbol for symbol in production]
+        cdef bytes digest
+        cdef long long h = 0 # type:ignore
+        cdef int i
+
         if head._is_terminal:
             raise ValueError("head can't be a terminal symbol")
         self._head = head
         self._production = production
         self._id = f'{head} -> {" ".join(prod)}'
+        
+        digest = sha256(self._id.encode()).digest()
+        for i in range(8):
+            h = (h << 8) | digest[i]
+        self._hash = h
     
     @property
     def id(self) -> str:
@@ -56,12 +65,7 @@ cdef class Production:
         return self._production == other._production
     
     def __hash__(self) -> int:
-        cdef bytes digest = sha256(self._id.encode()).digest()
-        cdef long long h = 0 # type:ignore
-        cdef int i
-        for i in range(8):
-            h = (h << 8) | digest[i]
-        return h # type:ignore
+        return self._hash
 
 cdef class ProductionsSet:
 
@@ -109,14 +113,14 @@ cdef class AttributedProductionsSet(ProductionsSet):
         self._add_production(production)
         self._last_reductor_added = reductor
     
-    def __iadd__(self, production_redutor_pair:Tuple[Tuple[Symbol, ...],Callable[[List[AST]],AST]]) -> ProductionsSet:
+    def __iadd__(self, production_redutor_pair:Tuple[Tuple[Symbol, ...],Callable[[ASTListView],AST]]) -> ProductionsSet:
         cdef tuple production
         cdef object reductor
 
         production,reductor = production_redutor_pair
         sig = inspect.signature(reductor)
         params = list(sig.parameters.values())
-        if params[0].annotation is inspect.Signature.empty or params[0].annotation != List[AST]:
+        if params[0].annotation is inspect.Signature.empty or params[0].annotation != ASTListView:
             raise ValueError('Invalid signature for second item of tuple, reduction must have annotation (List[AST]) -> AST')
         if sig.return_annotation is inspect.Signature.empty or sig.return_annotation != AST:
             raise ValueError('Invalid signature for second item of tuple, reduction must have annotation (List[AST]) -> AST')
