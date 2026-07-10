@@ -1,6 +1,6 @@
 from typing import List
 
-from pylgen.common.types import Symbol,AST,Token
+from pylgen.common.types import Symbol,AST,Token,ASTListView
 from pylgen.common.enums import TokenType
 from pylgen.grammar.grammar import Grammar,AttributedGrammar,Production
 from pylgen.parser.parser_builder import ParserBuilder
@@ -33,22 +33,22 @@ class TestIntegrationParserBuilder:
         G[F] += lp,E,rp
         G[F] += n,
 
-        def reductor_E_plus_T(asts:List[AST]) -> AST:
+        def reductor_E_plus_T(asts:ASTListView) -> AST:
             return AST(E,asts[1].line,asts[1].column)
                 
-        def reductor_E_T(asts:List[AST]) -> AST:
+        def reductor_E_T(asts:ASTListView) -> AST:
             return AST(E,asts[0].line,asts[0].column)
                 
-        def reductor_T_mul_F(asts:List[AST]) -> AST:
+        def reductor_T_mul_F(asts:ASTListView) -> AST:
             return AST(T,asts[1].line,asts[1].column)
                 
-        def reductor_T_F(asts:List[AST]) -> AST:
+        def reductor_T_F(asts:ASTListView) -> AST:
             return AST(T,asts[0].line,asts[0].column)
                 
-        def reductor_F_lp_E_rp(asts:List[AST]) -> AST:
+        def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
             return AST(F,asts[1].line,asts[1].column)
                 
-        def reductor_F_n(asts:List[AST]) -> AST:
+        def reductor_F_n(asts:ASTListView) -> AST:
             return AST(F,asts[0].line,asts[0].column)
 
         parser:BottomUpParser = ParserBuilder.build_parser(G,ParserType.LALR1) # type:ignore
