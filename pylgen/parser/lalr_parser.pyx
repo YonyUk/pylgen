@@ -6,23 +6,36 @@ from .lr0_parser cimport LR0Item
 cdef class LALRItem(LR0Item):
     
     def __init__(self, head: Symbol, left: Sequence[Symbol], right: Sequence[Symbol],lookaheads:Set[Symbol]=set()):
+        cdef str _left,_right
+        cdef list[str] left_l,right_l
+        cdef Symbol sym
+        cdef bytes digest
+        cdef long long h = 0 # type:ignore
+        cdef int i
+
         super().__init__(head, left, right)
+        
         self._lookaheads = lookaheads.copy()
-    
+
+        left_l = [sym._symbol for sym in self._left]
+        right_l = [sym._symbol for sym in self._right]
+        _left = ' '.join(left_l)
+        _right = ' '.join(right_l)
+
+        self._id = f'{self._head} -> {_left} ◦ {_right} {self._lookaheads}'
+
+        digest = sha256(self._id.encode()).digest()
+        for i in range(8):
+            h = (h << 8) | digest[i]
+        
+        self._hash = h
+
     @property
     def lookaheads(self) -> Set[Symbol]:
         return self._lookaheads.copy()
 
     def __str__(self) -> str:
-        cdef str left,right
-        cdef list[str] left_l,right_l
-        cdef Symbol sym
-
-        left_l = [sym._symbol for sym in self._left]
-        right_l = [sym._symbol for sym in self._right]
-        left = ' '.join(left_l)
-        right = ' '.join(right_l)
-        return f'{self._head} -> {left} ◦ {right} {self._lookaheads}'
+        return self._id
     
     def __repr__(self) -> str:
         return str(self)
@@ -35,20 +48,16 @@ cdef class LALRItem(LR0Item):
         return self._head == other._head and self._left == other._left and self._right == other._right and other._lookaheads == self._lookaheads
     
     def __hash__(self) -> int:
-        cdef bytes digest = sha256(self.id.encode()).digest()
-        cdef long long h = 0 # type:ignore
-        cdef int i
-
-        for i in range(8):
-            h = (h << 8) | digest[i]
-        
-        return h # type:ignore
+        return self._hash
 
 cdef class LALRState:
 
     def __init__(self,items:Set[LALRItem],index:int=0):
         cdef list[str] ids = []
         cdef LALRItem item
+        cdef bytes digest
+        cdef long long h = 0 # type:ignore
+        cdef int i
 
         for item in items:
             ids.append(str(item))
@@ -57,6 +66,12 @@ cdef class LALRState:
         self._id = sha256('-'.join(ids).encode()).hexdigest()
         self._items = items.copy()
         self._index = index
+
+        digest = sha256(self._id.encode()).digest()
+        for i in range(8):
+            h = (h << 8) | digest[i]
+        
+        self._hash = h
     
     @property
     def id(self) -> str:
@@ -80,11 +95,4 @@ cdef class LALRState:
         return self._id == other._id
     
     def __hash__(self) -> int:
-        cdef bytes digest = sha256(self._id.encode()).digest()
-        cdef long long h = 0 # type:ignore
-        cdef int i
-        
-        for i in range(8):
-            h = (h << 8) | digest[i]
-        
-        return h # type:ignore
+        return self._hash

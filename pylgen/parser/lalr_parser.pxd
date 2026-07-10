@@ -8,3 +8,4 @@ cdef class LALRState:
     cdef set[LALRItem] _items
     cdef str _id
     cdef int _index
+    cdef int _hash
