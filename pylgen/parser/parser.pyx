@@ -59,10 +59,8 @@ cdef class Parser:
         for token in tokens:
             self._try_parse(token)
         if self._parsed:
-            if len(self._errors) > 0:
-                raise ParsingException('The parsing ended with errors')
             return self._ast
-        raise ParsingException('Nothing parsed')
+        return None # type:ignore
 
     cdef void _try_parse(self,Token token):
         raise NotImplementedError()
