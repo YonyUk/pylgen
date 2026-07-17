@@ -311,7 +311,7 @@ cdef class BottomUpParser(Parser):
             if not errors:
                 self._ast = self._stack_ast[self._stack_ast_top - 1]
                 if self._draw_parse_tree:
-                    self._parse_tree = self._parse_tree_nodes[-1]
+                    self._parse_tree = self._parse_tree_nodes[len(self._parse_tree_nodes) - 1]
 
     cpdef void reset(self):
         '''
