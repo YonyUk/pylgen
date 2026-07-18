@@ -1,9 +1,9 @@
-include *.pyx *.c *.py
-recursive-include pylgen/common *.c *.pyx *.py
-recursive-include pylgen/automaton *.c *.pyx *.py
-recursive-include pylgen/grammar *.c *.pyx *.py
-recursive-include pylgen/regex *.c *.pyx *.py
-recursive-include pylgen/parser *.c *.pyx *.py
-recursive-include pylgen/lexer *.c *.pyx *.py
-recursive-include pylgen/analisis *.c *.pyx *.py
+include *.pyx *.c *.py *.pxd
+recursive-include pylgen/common *.c *.pyx *.py *.pxd
+recursive-include pylgen/automaton *.c *.pyx *.py *.pxd
+recursive-include pylgen/grammar *.c *.pyx *.py *.pxd
+recursive-include pylgen/regex *.c *.pyx *.py *.pxd
+recursive-include pylgen/parser *.c *.pyx *.py *.pxd
+recursive-include pylgen/lexer *.c *.pyx *.py *.pxd
+recursive-include pylgen/analisis *.c *.pyx *.py *.pxd
 include requirements.txt

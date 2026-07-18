@@ -77,7 +77,7 @@ cdef class RuntimeError:
         return str(self)
     
     def __str__(self) -> str:
-        return f'{self._msg} at line {self._line}, column {self._column}'
+        return f'RUNTIME ERROR: {self._msg} at line {self._line}, column {self._column}'
     
     def __repr__(self) -> str:
         return str(self)

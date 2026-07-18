@@ -1,0 +1,3 @@
+from pylgen.parser.parser import BottomUpParser
+
+def build_parser() -> BottomUpParser: ...

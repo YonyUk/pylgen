@@ -59,10 +59,8 @@ cdef class Parser:
         for token in tokens:
             self._try_parse(token)
         if self._parsed:
-            if len(self._errors) > 0:
-                raise ParsingException('The parsing ended with errors')
             return self._ast
-        raise ParsingException('Nothing parsed')
+        return None # type:ignore
 
     cdef void _try_parse(self,Token token):
         raise NotImplementedError()
@@ -313,7 +311,7 @@ cdef class BottomUpParser(Parser):
             if not errors:
                 self._ast = self._stack_ast[self._stack_ast_top - 1]
                 if self._draw_parse_tree:
-                    self._parse_tree = self._parse_tree_nodes[-1]
+                    self._parse_tree = self._parse_tree_nodes[len(self._parse_tree_nodes) - 1]
 
     cpdef void reset(self):
         '''

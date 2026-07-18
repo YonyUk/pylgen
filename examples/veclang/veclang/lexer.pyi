@@ -1,0 +1,3 @@
+from pylgen.lexer.lexer import Lexer
+
+def build_lexer() -> Lexer: ...
