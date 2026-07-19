@@ -16,8 +16,8 @@ cdef class RegexBinaryAST(RegexAST):
     cdef RegexAST _left
     cdef RegexAST _right
 
-cdef class ConcatenationAST(RegexBinaryAST):
-    pass
+cdef class ConcatenationAST(RegexAST):
+    cdef list[RegexAST] _sequence
 
 cdef class OrAST(RegexBinaryAST):
     pass
