@@ -140,13 +140,24 @@ cdef class RegexBinaryAST(RegexAST):
     cpdef list[AST] children(self):
         return [self._left,self._right]
 
-cdef class ConcatenationAST(RegexBinaryAST):
+cdef class ConcatenationAST(RegexAST):
 
-    def __init__(self, RegexAST left, RegexAST right, cSymbol symbol, int line, int column):
-        super().__init__(left, right, symbol, line, column)
+    def __init__(self, list[RegexAST] sequence, cSymbol symbol, int line, int column):
+        super().__init__(symbol, line, column)
+        self._sequence = sequence
 
     cdef Automaton _get_automaton(self):
-        return _automaton_concatenation(self._left._get_automaton(),self._right._get_automaton())
+        cdef RegexAST regex = self._sequence[0]
+        cdef Automaton result = regex._get_automaton()
+        cdef int idx
+
+        for idx in range(1,len(self._sequence)):
+            regex = self._sequence[idx]
+            result = _automaton_concatenation(result,regex._get_automaton())
+        return result
+    
+    cpdef list[AST] children(self):
+        return self._sequence # type:ignore
 
 cdef class OrAST(RegexBinaryAST):
 
@@ -537,10 +548,15 @@ def single_ast_reductor(asts:ASTListView) -> RegexAST:
     return asts[0]
 
 def concatenation_ast_reductor(asts:ASTListView) -> RegexAST:
-    cdef RegexAST left,right
-    left = asts[0]
-    right = asts[1]
-    return ConcatenationAST(left,right,cSymbol('CONCATENATION'),left._line,left._column) # type:ignore
+    cdef ConcatenationAST conc
+    
+    if isinstance(asts[0],ConcatenationAST): # type:ignore
+        conc = asts[0]
+        conc._sequence.append(asts[1])
+    else:
+        conc = ConcatenationAST([asts[0],asts[1]],cSymbol('CONCATENATION'),(<AST>asts[0])._line,(<AST>asts[0])._column) # type:ignore
+    
+    return conc
 
 def char_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef Token token = asts[0] # type:ignore
