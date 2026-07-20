@@ -1,7 +1,7 @@
-from .error cimport LexicError
+from .error cimport LexicalError
 from ..common.types cimport Token
 
 cdef class LexicalRule:
     cdef str _msg
     cpdef bool _check(self,str text)
-    cpdef LexicError check(self,Token token)
+    cpdef LexicalError check(self,Token token)
