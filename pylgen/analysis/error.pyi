@@ -22,11 +22,11 @@ class Error:
     
     def __repr__(self) -> str: ...
 
-class LexicError(Error):
+class LexicalError(Error):
 
     def __init__(self, msg:str, line:int, column:int) -> None: ...
 
-class SintaxError(Error):
+class SyntaxError(Error):
 
     def __init__(self, msg:str ,line:int, column:int) -> None: ...
 

@@ -37,15 +37,15 @@ cdef class Error:
     def __repr__(self) -> str:
         return self.message
 
-cdef class LexicError(Error):
+cdef class LexicalError(Error):
 
     def __init__(self, str msg,int line, int column) -> None:
-        super().__init__(ErrorType.LEXIC, line, column, msg)
+        super().__init__(ErrorType.LEXICAL, line, column, msg)
 
-cdef class SintaxError(Error):
+cdef class SyntaxError(Error):
 
     def __init__(self, str msg,int line, int column) -> None:
-        super().__init__(ErrorType.SINTAX, line, column, msg)
+        super().__init__(ErrorType.SYNTAX, line, column, msg)
 
 cdef class SemanticError(Error):
 
