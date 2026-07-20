@@ -1,7 +1,7 @@
 import pytest
 
-from pylgen.analisis.context import Context
-from pylgen.analisis.error import RuntimeError
+from pylgen.analysis.context import Context
+from pylgen.analysis.error import RuntimeError
 from pylgen.common.types import AST,Symbol
 
 class TestContext:

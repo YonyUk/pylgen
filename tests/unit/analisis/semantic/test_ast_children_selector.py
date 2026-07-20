@@ -1,7 +1,7 @@
 import pytest
 
-from pylgen.analisis.context import Context
-from pylgen.analisis.visitor import ASTChildrenSelector
+from pylgen.analysis.context import Context
+from pylgen.analysis.visitor import ASTChildrenSelector
 from pylgen.common.types import AST,Symbol
 
 class ValidContext(Context):

@@ -1,7 +1,7 @@
 import pytest
 
-from pylgen.analisis.visitor import TraversalStrategy
-from pylgen.analisis.context import Context
+from pylgen.analysis.visitor import TraversalStrategy
+from pylgen.analysis.context import Context
 from pylgen.common.types import Symbol,AST
 
 class ValidContext(Context):
