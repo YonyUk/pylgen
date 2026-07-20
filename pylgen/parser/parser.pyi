@@ -1,7 +1,7 @@
 from typing import Callable, Dict, Iterable, List, Set, Tuple
 from ..common.types import ASTListView, Token,AST,Symbol
 from ..grammar.grammar import Production
-from ..analisis.error import SintaxError
+from ..analysis.error import SyntaxError
 
 class ParsingException(Exception):
     
@@ -31,7 +31,7 @@ class Parser:
     def parse_tree(self) -> ParseTreeNode: ...
 
     @property
-    def errors(self) -> List[SintaxError]: ...
+    def errors(self) -> List[SyntaxError]: ...
 
     def set_draw_parse_tree_flag(self,flag:bool) -> None: ...
 
