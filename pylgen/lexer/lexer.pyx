@@ -6,8 +6,8 @@ from typing import Callable,Any,Tuple,Iterable,Set
 from ..common.types cimport Symbol,Token
 from ..automaton.automaton cimport DFA,State
 from ..regex.engine cimport _parse
-from ..analisis.lexical cimport LexicRule
-from ..analisis.error cimport LexicError
+from ..analysis.lexical cimport LexicRule
+from ..analysis.error cimport LexicError
 from .base_lexer cimport BaseLexer
 
 cdef class Lexer(BaseLexer):

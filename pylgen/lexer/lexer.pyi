@@ -2,8 +2,8 @@ from typing import Callable,Any,Tuple,Set
 
 from ..common.types import Symbol
 from ..automaton.automaton import DFA
-from ..analisis.lexical import LexicRule
-from ..analisis.error import LexicError
+from ..analysis.lexical import LexicRule
+from ..analysis.error import LexicError
 from .base_lexer import BaseLexer
 
 class Lexer(BaseLexer):

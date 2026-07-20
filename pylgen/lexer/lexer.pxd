@@ -1,6 +1,6 @@
 from ..common.types cimport Token
-from ..analisis.lexical cimport LexicRule
-from ..analisis.error cimport LexicError
+from ..analysis.lexical cimport LexicRule
+from ..analysis.error cimport LexicError
 from .base_lexer cimport BaseLexer
 
 cdef class Lexer(BaseLexer):
