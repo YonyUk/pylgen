@@ -2,10 +2,10 @@ from typing import Any,List
 import sys
 import os
 
-from pylgen.analisis.context import Context
+from pylgen.analysis.context import Context
 from pylgen.common.types import AST,Token
-from pylgen.analisis.visitor import ASTChildrenSelector,ASTVisitor,TraversalStrategy
-from pylgen.analisis.error import RuntimeError,SemanticError
+from pylgen.analysis.visitor import ASTChildrenSelector,ASTVisitor,TraversalStrategy
+from pylgen.analysis.error import RuntimeError,SemanticError
 from .context import ArithmeticExpressionContext
 from .asts import BinaryAST,VarAST
 from .errors import (

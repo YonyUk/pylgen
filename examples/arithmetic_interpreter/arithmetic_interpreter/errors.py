@@ -1,5 +1,5 @@
 from typing import List
-from pylgen.analisis.error import RuntimeError
+from pylgen.analysis.error import RuntimeError
 
 class DivisionByZeroError(RuntimeError):
 

@@ -1,5 +1,5 @@
 from pylgen.common.types import Token
-from pylgen.analisis.visitor import ASTWalker
+from pylgen.analysis.visitor import ASTWalker
 
 from .context import ArithmeticExpressionContext
 from .visitors import (

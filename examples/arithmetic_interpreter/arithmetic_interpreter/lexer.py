@@ -4,7 +4,7 @@ from pylgen.automaton import DFA
 from pylgen.lexer.lexer import Lexer
 from pylgen.common.types import Symbol,Token
 from pylgen.common.enums import TokenType
-from pylgen.analisis.lexical import LexicRule
+from pylgen.analysis.lexical import LexicalRule
 from .grammar_symbols import (
     number,
     variable
@@ -17,7 +17,7 @@ class TokenTypeEnum(TokenType):
     VARIABLE = 'VARIABLE'
     KEYWORD = 'KEYWORD'
 
-class NumberLexicRule(LexicRule):
+class NumberLexicRule(LexicalRule):
 
     def __init__(self) -> None:
         super().__init__('number must be 0 or star with a non-zero digit')
@@ -27,7 +27,7 @@ class NumberLexicRule(LexicRule):
             return str(float(text)) == text
         return str(int(text)) == text
 
-class VariableLexicRule(LexicRule):
+class VariableLexicRule(LexicalRule):
 
     def __init__(self) -> None:
         super().__init__('variables names can\'t star with a number')
