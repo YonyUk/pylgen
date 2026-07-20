@@ -10,7 +10,7 @@ from pylgen.parser.parser_type import ParserType
 from pylgen.parser.parser import BottomUpParser,ParsingException
 from pylgen.lexer.base_lexer import BaseLexer
 from pylgen.lexer.lexer import Lexer
-from pylgen.analisis.lexical import LexicRule
+from pylgen.analysis.lexical import LexicalRule
 from pylgen.automaton.automaton import NFA, State,DFA,get_words_automaton_with_value
 
 END_SYMBOL = '$'
@@ -169,7 +169,7 @@ class TokenTypeEnum(TokenType):
     SYMBOL = 'SYMBOL'
     OPERATOR = 'OPERATOR'
 
-class NumberLexicRule(LexicRule):
+class NumberLexicalRule(LexicalRule):
 
     def __init__(self) -> None:
         super().__init__('number must be 0 or star with a non-zero digit')
@@ -366,7 +366,7 @@ class TestIntegrationLexerParser:
 
     def test_error_detecting_1(self,lexer1:Lexer,parser1:BottomUpParser):
         text = "(01 + 3)* (5+7) *(2 +010 * 15)"
-        lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicRule())
+        lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicalRule())
         
         lexer1.load_text(text)
         try:
@@ -388,7 +388,7 @@ class TestIntegrationLexerParser:
         assert len(parser1.errors) == 2
     
     def test_error_detecting_2(self,lexer1:Lexer,parser3:BottomUpParser):
-        lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicRule())
+        lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicalRule())
         text = '23+0342 / (4**9 + + 10) -0235//4 9 + 20**3%3'
 
         lexer1.load_text(text)
