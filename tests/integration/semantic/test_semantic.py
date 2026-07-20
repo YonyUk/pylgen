@@ -2,8 +2,8 @@ from typing import List
 
 import pytest
 
-from pylgen.analisis.context import Context
-from pylgen.analisis.visitor import ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
+from pylgen.analysis.context import Context
+from pylgen.analysis.visitor import ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
 from pylgen.common.types import Symbol,AST
 
 class CounterContext(Context):
