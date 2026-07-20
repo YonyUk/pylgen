@@ -6,8 +6,8 @@ from typing import Callable,Any,Tuple,Iterable,Set
 from ..common.types cimport Symbol,Token
 from ..automaton.automaton cimport DFA,State
 from ..regex.engine cimport _parse
-from ..analysis.lexical cimport LexicRule
-from ..analysis.error cimport LexicError
+from ..analysis.lexical cimport LexicalRule
+from ..analysis.error cimport LexicalError
 from .base_lexer cimport BaseLexer
 
 cdef class Lexer(BaseLexer):
@@ -24,8 +24,8 @@ cdef class Lexer(BaseLexer):
 
     @property
     def tokens(self) -> Iterable[Token]:
-        cdef LexicError error
-        cdef LexicRule rule
+        cdef LexicalError error
+        cdef LexicalRule rule
         cdef int line,column
         self.initialize()
         while self._move_next():
@@ -48,8 +48,8 @@ cdef class Lexer(BaseLexer):
         return True # type:ignore
     
     cdef Token _current(self):
-        cdef LexicRule rule
-        cdef LexicError error
+        cdef LexicalRule rule
+        cdef LexicalError error
         cdef int line,column
 
         if self._current_token._type in self._rules:
@@ -82,5 +82,5 @@ cdef class Lexer(BaseLexer):
     def __setitem__(self, key: Tuple[int, object], re:str):
         self.add_token_regex(key[0],key[1],re)
     
-    cpdef void add_rule(self,object type_,LexicRule rule):
+    cpdef void add_rule(self,object type_,LexicalRule rule):
         self._rules[type_].add(rule)
