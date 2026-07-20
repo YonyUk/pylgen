@@ -11,7 +11,7 @@ from pylgen.common.enums import TokenType
 from pylgen.lexer.base_lexer import BaseLexer
 from pylgen.lexer.lexer import Lexer
 from pylgen.automaton.automaton import NFA,DFA,State,create_dfa,get_words_automaton_with_value
-from pylgen.analisis.lexical import LexicRule
+from pylgen.analysis.lexical import LexicalRule
 
 class TokenTypeTestEnum(TokenType):
     NUMBER = 'NUMBER'
@@ -561,7 +561,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
     
     def test_lexer_tokenization_with_error_collecting_1(self,ignore_dfa:DFA):
 
-        class IntegerRule(LexicRule):
+        class IntegerRule(LexicalRule):
 
             def __init__(self) -> None:
                 super().__init__('integers must star with a non-zero digit or be zero')
@@ -586,7 +586,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
 
     def test_lexer_tokenization_with_error_collecting_2(self,ignore_dfa:DFA):
 
-        class IntegerRule(LexicRule):
+        class IntegerRule(LexicalRule):
 
             def __init__(self) -> None:
                 super().__init__('integers must star with a non-zero digit or be zero')
@@ -594,7 +594,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             def _check(self, text: str):
                 return str(int(text)) == text
         
-        class VariableRule(LexicRule):
+        class VariableRule(LexicalRule):
 
             def __init__(self) -> None:
                 super().__init__('variables names can\'t star with a number')
