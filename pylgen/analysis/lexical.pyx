@@ -1,7 +1,7 @@
 from .error cimport LexicError
 from ..common.types cimport Token
 
-cdef class LexicRule:
+cdef class LexicalRule:
     
     def __init__(self,str msg) -> None:
         self._msg = msg
