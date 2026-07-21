@@ -1,5 +1,5 @@
-from pylgen.analisis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
-from pylgen.analisis.context cimport Context
+from pylgen.analysis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
+from pylgen.analysis.context cimport Context
 from pylgen.common.types cimport AST
 
 from .asts cimport (

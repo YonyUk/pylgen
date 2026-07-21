@@ -144,7 +144,8 @@ lexer_extensions = Extension(
     ]
 )
 ###################################################################################
-#                                  ANALySIS
+
+#                                  ANALYSIS
 ###################################################################################
 error_extensions = Extension(
     name='pylgen.analysis.error',
@@ -172,7 +173,7 @@ context_extension = Extension(
 
 setup(
     name='pylgen',
-    version='0.3.3',
+    version='0.4.0',
     description='test',
     author='YonyUk',
     packages=[

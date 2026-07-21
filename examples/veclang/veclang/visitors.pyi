@@ -1,8 +1,8 @@
 from typing import Any, Tuple,List
 
-from pylgen.analisis.visitor import ASTWalker
-from pylgen.analisis.error import RuntimeError
-from pylgen.analisis.context import Context
+from pylgen.analysis.visitor import ASTWalker
+from pylgen.analysis.error import RuntimeError
+from pylgen.analysis.context import Context
 from pylgen.common.types import AST
 
 class VecLangContext(Context):

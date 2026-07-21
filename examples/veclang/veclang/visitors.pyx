@@ -1,6 +1,6 @@
-from pylgen.analisis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
-from pylgen.analisis.error cimport RuntimeError,SemanticError
-from pylgen.analisis.context cimport Context
+from pylgen.analysis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
+from pylgen.analysis.error cimport RuntimeError,SemanticError
+from pylgen.analysis.context cimport Context
 from pylgen.common.types cimport AST
 
 import numpy as np # type:ignore
