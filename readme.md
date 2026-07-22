@@ -63,16 +63,21 @@ You can find examples of how to use ***pylgen*** in <-link-to-the-minimal-exampl
 
 ### 🔎 analysis
 
-Provides the essential infrastructure for **semantic analysis, validation, and execution** of languages built with ***pylgen***. It bridges the gap between raw syntax (**ASTs**) and meaningful behavior
+Supplies the essential foundation for **semantic analysis, validation, and execution** of languages built with ***pylgen***. It bridges the gap between raw syntax (the **AST**) and meaningfull program behaviour 
 
 > #### Core Components
- - `Context`: Provides a base class with basic behavior, designed to be extended by users. Its purpose is to manage global state (variables,functions,scopes,errors,stacks,etc.) across AST traversals.
- - `ASTVisitor`: Base class for each specific AST node type visitor.
- - `TraversalStrategy`:  Defines an interface for every traversal strategy.
- - `ASTWalker`: Base class for an AST walker.
- - `LexicError,SintaxError,SemanticError`: Base errors implementations for each phase of code analysis.
- - `RuntimeError`: Base class for every error raised in run time.
- - `LexicRule`: Abstraction for a lexical rule. Used in ***pylgen.lexer*** module to define rules for ***Token*** pylgen's objects.
+ - `Context(abstract base class)`: Manages global state during **AST** traversal: 
+> [!important]
+`push_new_scope,pop_scope,clear_runtime_errors,add_runtime_error` and `get_runtime_errors` must be implemented by users.
+ - `Error and its subclasses (LexicalError,SyntaxError,SemanticError)`: A hierarchy for errors that occur during lexical, syntactic, and semantic analysis. All inherit from `Error`, which includes line, column, a descriptive message, and categorisation via the `ErrorType` enum.
+ - `RuntimeError`: Represents errors that happen during program execution. It includes a stack trace to aid debugging.
+ - `LexicalRule`: An abstraction to defining validation rules on tokens. Used in `pylgen.lexer` module to check token properties. The `check` method returns a `LexicalError` if the rule is violated, or `None` otherwise.
+ - `ASTVisitor(abstract class)`: Defines the contract for visitors that operate on `AST` nodes. Each visitor must implement `visit(ast,context)`, where it can inspect or modify the node and the context.
+ - `ASTChildrenSelector(abstract class)`: Specifies which children (or the node itself) should be considered during traversal, and in what order. It is used by the traversal strategy to determine the next node to visit.
+ - `TraversalStrategy(asbtract class)`: Defines the interface for traversal strategies (e.g. depth-first, breadth-first, custom-order). Key methods: `init(root),has_next(),current(context)` and `reset()`.
+> [!important]
+The interface does not explicitly define where the iterator's advance mechanism should be implemented; this responsibility is left to the developer.
+ - `ASTWalker`: Orchestrates the **AST** traversal by combining a `TraversalStrategy` with a collection of `ASTVisitor` instances associated with specific node types. During `walk(ast)`, it iterates over nodes according to the strategy and applies the corresponding visitor (or a default visitor if it was supplied and none visitor was registered for a node type).
 
 ### :robot: automaton
 
