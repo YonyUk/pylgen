@@ -126,6 +126,7 @@ from pylgen.lexer.lexer import Lexer
 from pylgen.common.types import Symbol,Token
 from pylgen.common.enums import TokenType
 from pylgen.analysis.lexical import LexicalRule
+from .grammar_symbols import END_SYMBOL
 from .grammar_symbols import (
     number,
     variable
@@ -167,21 +168,13 @@ def get_symbol_function(t:TokenTypeEnum,tx:str) -> Symbol:
         return Symbol(tx,True)
     return Symbol(tx,True)
 
-def get_tokens(end_symbol:Symbol,tokens:Iterable[Token]):
-    line = 0
-    column = 0
-    for token in tokens:
-        line = token.line
-        column = token.column
-        yield token
-    yield Token(end_symbol.symbol,TokenTypeEnum.SYMBOL,end_symbol,line,column + 1)
-
 ignore_dfa = DFA('start','start',{' ','\n','\t'},True)
 ignore_dfa += ignore_dfa.start_state,' ',ignore_dfa.start_state
 ignore_dfa += ignore_dfa.start_state,'\n',ignore_dfa.start_state
 ignore_dfa += ignore_dfa.start_state,'\t',ignore_dfa.start_state
 
 lexer = Lexer(get_symbol_function,ignore_dfa)
+lexer.set_eof_token(END_SYMBOL,TokenTypeEnum.SYMBOL)
 lexer[0,TokenTypeEnum.NUMBER] = '\\d+|\\d+\\.\\d+'
 lexer[1,TokenTypeEnum.SYMBOL] = '\\(|\\)'
 lexer[2,TokenTypeEnum.OPERATOR] = '\\+|\\*\\*?|\\-|/|%|='
@@ -842,6 +835,42 @@ evaluator_ast_walker.add_visitor(Token,AtomicASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(AssigmentAST,AssigmentASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(ExitAST,ExitASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(ClearAST,ClearASTEvaluatorVisitor())
+```
+
+> ### Define execution loop
+```python
+# file: main.py
+from pylgen.parser.parser import ParsingException
+
+from arithmetic_interpreter.grammar import parser
+from arithmetic_interpreter.lexer import lexer
+from arithmetic_interpreter.semantic import context,evaluator_ast_walker,error_collector_ast_walker
+
+while True:
+    context.clear_garbage()
+    parser.reset()
+    lexer.clear_errors()
+    
+    text = input('>>> ')
+    if len(text) == 0:
+        continue
+    lexer.load_text(text)
+    try:
+        ast = parser.parse(lexer.tokens)
+        error_collector_ast_walker.walk(ast)
+        if not context.errors:
+            evaluator_ast_walker.walk(ast)
+    except ParsingException:
+        pass
+
+    errors = list(lexer.errors) + parser.errors + context.errors
+    if errors:
+        for error in errors:
+            print(error)
+    else:
+        result = context.get_ast_value(ast) # type: ignore
+        if result is not None:
+            print(result)
 ```
 > ## Architecture
 
