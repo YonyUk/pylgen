@@ -855,15 +855,16 @@ while True:
     if len(text) == 0:
         continue
     lexer.load_text(text)
-    try:
-        ast = parser.parse(lexer.tokens)
+    ast = parser.parse(lexer.tokens)
+    errors = list(lexer.errors) + parser.errors
+    if not errors:
         error_collector_ast_walker.walk(ast)
-        if not context.errors:
-            evaluator_ast_walker.walk(ast)
-    except ParsingException:
-        pass
+    errors += context.errors
+    if not errors:
+        evaluator_ast_walker.walk(ast)
 
-    errors = list(lexer.errors) + parser.errors + context.errors
+    errors += context.errors
+    errors = list(set(errors))
     if errors:
         for error in errors:
             print(error)
