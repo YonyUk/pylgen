@@ -21,6 +21,7 @@ cdef class VecLangContext(Context):
     cdef list[tuple[list[object],list[type],list[bint],dict[str,int],list[object]]] _scopes
 
     cdef tuple[bint,object] look_for_var(self,str var_name)
+    cdef void assign_var(self,str var_name,object value)
 
     cpdef void reset(self)
 

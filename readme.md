@@ -906,9 +906,12 @@ while True:
 python ./main.py
 ```
 
+<<<<<<< Updated upstream
 > ## 📉 Benchmark
 
 
+=======
+>>>>>>> Stashed changes
 > ## Architecture
 
 ***PyLGEN*** is a collection of Python modules featuring a high-performance core written in Cython. Together, they offer comprehensive tools for constructing interpreters and compilers from scratch, all while maintaining full compatibility with the broader Python ecosystem

@@ -96,6 +96,34 @@ cdef class VecLangContext(Context):
                 return True, values[idxs[var_name]]
         
         return False,None
+    
+    cdef void assign_var(self,str var_name,object value):
+        cdef int idx,tidx
+        cdef int length = len(self._scopes)
+        cdef tuple[list[object],list[type],list[bint],dict[str,int],list[object]] scope
+        cdef list[object] values
+        cdef list[type] types
+        cdef list[bint] flags
+        cdef dict[str,int] idxs
+        cdef list[object] stack
+
+        if var_name in self._vars_index:
+            idx = self._vars_index[var_name]
+            self._var_flags[idx] = True # type:ignore
+            self._var_types[idx] = type(value)
+            self._var_values[idx] = value
+        else:
+            for idx in range(length - 1, -1, -1):
+                scope = self._scopes[idx]
+                values,types,flags,idxs,stack = scope
+                if var_name in idxs:
+                    tidx = idxs[var_name]
+                    values[tidx] = value
+                    flags[tidx] = True # type:ignore
+                    types[tidx] = type(value)
+                    scope = (values,types,flags,idxs,stack)
+                    self._scopes[idx] = scope
+                    break
 
     cpdef list[RuntimeError] get_runtime_errors(self):
         return list(self._runtime_errors.values()) # type:ignore
@@ -684,9 +712,7 @@ cdef class AssigmentASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         cdef VariableExpressionAST var = assigment._left # type:ignore
 
         super(AssigmentASTEvaluatorVisitor,self).visit(ast,context)
-        (<VecLangContext>context)._var_flags[var._index] = True # type:ignore
-        (<VecLangContext>context)._var_values[var._index] = self._right_value
-        (<VecLangContext>context)._var_types[var._index] = self._right_type
+        (<VecLangContext>context).assign_var(var._name,self._right_value)
 
 cdef class PlusASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -976,7 +1002,6 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
         
         if arg._symbol == VariableExpression:
             var = arg # type:ignore
-            var._index = context._vars_index[var._name]
             var_val = context.look_for_var(var._name)[1]
             var_type = type(var_val)
             if var_type != np.ndarray and not var_val is None:
