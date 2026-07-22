@@ -10,7 +10,7 @@ cdef class Error:
         if isinstance(type_,str):
             self._type = ErrorType[type_] # type:ignore
         else:
-            self._type = type
+            self._type = type_
         self._line = line
         self._column = column
         self._msg = msg
