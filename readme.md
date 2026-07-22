@@ -53,8 +53,8 @@ You can find examples of how to use ***pylgen*** in <-link-to-the-minimal-exampl
 ***PyLGEN*** is a collection of Python modules featuring a high-performance core written in Cython. Together, they offer comprehensive tools for constructing interpreters and compilers from scratch, all while maintaining full compatibility with the broader Python ecosystem
 
  - [`🔎 pylgen.analysis`](#-analysis)
- - [`🤖 pylgen.automaton`](#-automaton)
  - [`🧱 pylgen.common`](#-common)
+ - [`🤖 pylgen.automaton`](#-automaton)
  - :books: [`pylgen.grammar`](#-grammar)
  - :books: [`pylgen.lexer`](#-lexer)
  - :books: [`pylgen.parser`](#-parser)
@@ -79,14 +79,6 @@ Supplies the essential foundation for **semantic analysis, validation, and execu
 The interface does not explicitly define where the iterator's advance mechanism should be implemented; this responsibility is left to the developer.
  - `ASTWalker`: Orchestrates the **AST** traversal by combining a `TraversalStrategy` with a collection of `ASTVisitor` instances associated with specific node types. During `walk(ast)`, it iterates over nodes according to the strategy and applies the corresponding visitor (or a default visitor if it was supplied and none visitor was registered for a node type).
 
-### :robot: automaton
-
-Provides the **core finite automata infrastructure** for pattern matching, forming the bedrock of the lexer and lexical analysis pipeline. It bridges regular expressions to executable state machines
-
-> #### Core capabilities
- - `Automaton Construction`: Provides several ways for DFAs and NFAs constructing, and support for standard operations: ***union*** ( | ), ***concatenation*** ( . ), and ***Kleene star*** ( * )
- - `Determinization and Minimization`: Transforms NFAs to DFAs ( ***to_deterministic()*** ) and minimizes them ( ***minimize()*** ) to produce the most efficent tokenization engine, drastically reducing state count and lookup overhead. 
-
 ### 🧱 common
 
 Provides the ***core data types*** that are shared across all modules of the framework, forming the common language that ties parsing,analysis, and code generation together
@@ -96,6 +88,96 @@ Provides the ***core data types*** that are shared across all modules of the fra
  - `AST`: The abstract base class for all ***Abstract Syntax Tree*** nodes. Every AST node inherits from it and stores its symbol, source location ( line/column ), and provides a ***children()*** method to get its children nodes.
  - `Token`: Encapsulates lexical tokens, carrying the token type, text, symbol, and position information. Used by the lexer and parser.
  - `ASTListView`: A ligthweight, read-only view over a list of AST nodes, passed to reductor functions during parsing to build the AST from production reductions.
+
+### :robot: automaton
+
+Provides the **core finite automata infrastructure** for pattern matching, forming the bedrock of the lexer and lexical analysis pipeline. It efficiently bridges regular expressions to executable state machines.
+
+> #### Core capabilities
+ - **Automaton Construction**: Provides several factory methods to build DFAs and NFAs, supporting standard regular language operations out-of-the-box, including **union** ( `|` ), **concatenation** ( `.` ), **intersection** ( `&` ), and **Kleene star** ( `*` ).
+ - **Determinization and Minimization**: Transforms NFAs to DFAs via the `to_deterministic()` method and applies **Hopcroft's algorithm** for DFA minimization (`minimize()`). This yields an extremely efficient tokenization engine, drastically reducing state count and lookup overhead.
+
+> #### Usage
+
+ - #### Creating a DFA explicitly
+
+```python
+from pylgen.automaton import create_dfa,State
+from pylgen.common import Table
+
+# create the states
+q0 = State('q0','q0')
+q1 = State('q1','q1',True)
+
+# create the transition table
+table = Table()
+# q0 -- 0 --> q1
+table['q0','0'] = 'q1'
+# q0 -- 1 --> q0
+table['q0','1'] = 'q0'
+# q1 -- 0 --> q1
+table['q1','0'] = 'q1'
+# q1 -- 1 --> q0
+table['q1','1'] = 'q0'
+
+# create the dfa
+
+aut = create_dfa({q0,q1},table,'q0',{'0','1'})
+```
+
+ - #### Creating a DFA incrementally
+```python
+from pylgen.automaton import DFA,State
+
+aut = DFA('q0','q0',{'0','1'})
+
+# gets the start state
+q0 = aut.start_state
+# creates a new state
+q1 = State('q1','q1',True)
+
+# adds transitions
+aut.add_transition(q0,q1,'0')
+aut.add_transition(q0,q0,'1')
+aut.add_transition(q1,q1,'0')
+aut.add_transition(q1,q0,'1')
+```
+> [!tip]
+ `1` - Alternatively, this can be done this way:
+```python
+from pylgen.automaton import create_dfa,State
+from pylgen.common import Table
+
+q0 = State('q0','q0')
+q1 = State('q1','q1',True)
+
+# create the dfa
+aut = create_dfa({q0,q1},Table(),'q0',{'0','1'})
+
+# adds transitions
+aut.add_transition(q0,q1,'0')
+aut.add_transition(q0,q0,'1')
+aut.add_transition(q1,q1,'0')
+aut.add_transition(q1,q0,'1')
+```
+> [!tip]
+ `2` - More easily
+```python
+from pylgen.automaton import create_dfa,State
+from pylgen.common import Table
+
+q0 = State('q0','q0')
+q1 = State('q1','q1',True)
+
+# create the dfa
+aut = create_dfa({q0,q1},Table(),'q0',{'0','1'})
+
+# adds transitions
+aut += q0,'0',q1
+aut += q0,'1',q0
+aut += q1,'0',q1
+aut += q1,'1',q0
+```
 
 ### :books: grammar
 
