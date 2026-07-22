@@ -19,6 +19,7 @@
 > ## Summary
  - [:rocket: Fast Installation](#-fast-installation)
  - [:book: Minimal example](#-minimal-example)
+ - [📉 Benchmark]
  - [Architecture](#-architecture)
 
 
@@ -46,7 +47,7 @@ python setup.py build_ext --inplace
 
 > ## :book: Minimal example
 
-To build an **interpreter** or **compiler** from scratch with `pylgen`, the recomendation is to follow this roadmap:
+This guide walks you through building a complete interpreter for a small arithmetic language with variables, assignments, and REPL commands (exit and clear). The architecture follows a classic three‑stage pipeline:
 
 ```mermaid
 %%{init:{ 'flowchart': { 'rankSpacing': 150, 'nodeSpacing': 50 } } }%%
@@ -65,6 +66,7 @@ flowchart TB
         H[define reducer functions] --> G
         I[define <b>ASTs</b>] --> H
         G --> J[Build the parser]
+        F --> I
         end
     
     subgraph Semantic_Analysis_State["Semantic Analysis State(visitors,traversal strategies)"]
@@ -102,7 +104,7 @@ flowchart TB
     I --> O
 ```
 
-Let's see an example for an arithmetic language **REPL** with support for variables definition. Let's assume this filesystem hierarchy:
+The file structure is organised as follows:
 
     arithmetic_interpreter
         |--- asts.py
@@ -117,6 +119,9 @@ Let's see an example for an arithmetic language **REPL** with support for variab
     main.py
 
 > ### **`State 1(Lexical analysis)`**: Build the lexer
+
+The lexer converts raw source code into a stream of tokens. We define token types, regular expressions, and optional validation rules.
+
 ```python
 # file: lexer.py
 from typing import Iterable
@@ -186,6 +191,9 @@ lexer.add_rule(TokenTypeEnum.VARIABLE,VariableLexicRule())
 ```
 
 > ### **State 2(Syntax analysis)**:
+
+Syntax analysis defines the grammar, builds AST nodes, and attaches reducer functions that produce ASTs from productions.
+
  - `Define symbols`:
 ```python
 # file: grammar_symbols.py
@@ -215,6 +223,8 @@ exit = Symbol('exit',True)
 clear = Symbol('clear',True)
 ```
  - `Define ASTs`:
+
+AST nodes hold the structure of the parsed input and are later visited for semantic analysis.
 ```python
 # file: asts.py
 from typing import List
@@ -323,6 +333,9 @@ class ClearAST(AST):
 The order in which children are returned by `children()` method is the order in which traversals will get the childs for the current node.
 
  - `Define reductors`:
+
+Reducers transform a list of ASTs (the right‑hand side of a production) into a single AST.
+
 ```python
 # file: reductors.py
 from typing import List
@@ -385,6 +398,9 @@ def clear_reductor(asts:ASTListView) -> AST:
 ```
 
  - `Define the grammar and build the parser`:
+
+We define an attributed grammar and build an LALR(1) parser.
+
 ```python
 # file: grammar.py
 from pylgen.parser.parser import BottomUpParser
@@ -453,6 +469,8 @@ parser:BottomUpParser = ParserBuilder.build_parser_from_attributed(G3,ParserType
 
 > ### **State 3(Semantic analysis)**:
 
+Semantic analysis consists of two passes: Semantic error collection(detect undeclared variables and static arithmetic errors); Evaluation (compute the result).
+
  - `Define errors`
 ```python
 # file: errors.py
@@ -481,6 +499,9 @@ class ModuleWithComplexNumberError(RuntimeError):
 ```
 
  - `Define the context`
+
+The context holds variables and stores computed values for each AST node (or errors).
+
 ```python
 # file: context.py
 from typing import Any, Dict, List
@@ -541,6 +562,9 @@ class ArithmeticExpressionContext(Context):
 ```
 
  - `Define visitors and traversal strategies`:
+
+We define a post‑order traversal strategy (children visited before parent) and multiple visitors for error collection and evaluation.
+
 ```python
 # file: visitors.py
 from typing import Any,List
@@ -838,6 +862,9 @@ evaluator_ast_walker.add_visitor(ClearAST,ClearASTEvaluatorVisitor())
 ```
 
 > ### Define execution loop
+
+The REPL ties everything together.
+
 ```python
 # file: main.py
 from pylgen.parser.parser import ParsingException
@@ -873,6 +900,15 @@ while True:
         if result is not None:
             print(result)
 ```
+
+> ### Run the interpreter
+```bash
+python ./main.py
+```
+
+> ## 📉 Benchmark
+
+
 > ## Architecture
 
 ***PyLGEN*** is a collection of Python modules featuring a high-performance core written in Cython. Together, they offer comprehensive tools for constructing interpreters and compilers from scratch, all while maintaining full compatibility with the broader Python ecosystem
