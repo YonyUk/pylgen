@@ -46,8 +46,803 @@ python setup.py build_ext --inplace
 
 > ## :book: Minimal example
 
-You can find examples of how to use ***pylgen*** in <-link-to-the-minimal-example->
+To build an **interpreter** or **compiler** from scratch with `pylgen`, the recomendation is to follow this roadmap:
 
+```mermaid
+%%{init:{ 'flowchart': { 'rankSpacing': 150, 'nodeSpacing': 50 } } }%%
+flowchart TB
+    subgraph Lexical_Analysis_State["Lexical Analysis State(tokens definitions)"]
+        direction TB
+        B[explicit token's types] --> A[Define tokens<br><center>and</center>configure lexer]
+        C[mapping function] --> A
+        D[tokens regex] --> A
+        E[tokens lexical rules<br><center>optional</center>] --> A
+        end
+
+    subgraph Syntax_Analysis_State["Syntax Analysis State(symbols,<b>ASTs</b>,grammar and <b>reducer functions</b>)"]
+        direction TB
+        F[<center>define symbols</center><br>terminals and non-terminals] --> G[define attributed grammar]
+        H[define reducer functions] --> G
+        I[define <b>ASTs</b>] --> H
+        G --> J[Build the parser]
+        end
+    
+    subgraph Semantic_Analysis_State["Semantic Analysis State(visitors,traversal strategies)"]
+        direction TB
+        K[define children selectors] --> L[<center>add selectors to</center><br>traversal strategies]
+        M[<center>define a context] --> N[Define walkers]
+        M --> K
+        L --> N
+        M --> O[define visitors]
+        N --> P[adds visitors]
+        O --> P
+        end
+
+    subgraph Execution["Execution flow"]
+        direction TB
+        A --> Lexer["Lexer"]
+        J --> Parser["Parser"]
+        M --> Context["Context"]
+        P --> Walkers["Walkers"]
+        RawCode["Raw code"] --> Lexer
+        Lexer -- token's stream --> Parser
+        Parser --> AST
+        Walkers --> AST_Processing["AST processing"]
+        AST --> AST_Processing
+        Context --> AST_Processing
+        AST_Processing --> Result["Code execution result"]
+        end
+    
+    Lexical_Analysis_State --> Execution
+    Syntax_Analysis_State --> Execution
+    Semantic_Analysis_State --> Execution
+    
+    F --> C
+    I --> K
+    I --> O
+```
+
+Let's see an example for an arithmetic language **REPL** with support for variables definition. Let's assume this filesystem hierarchy:
+
+    arithmetic_interpreter
+        |--- asts.py
+        |--- context.py
+        |--- errors.py
+        |--- grammar_symbols.py
+        |--- grammar.py
+        |--- lexer.py
+        |--- reductors.py
+        |--- semantic.py
+        |--- visitors.py
+    main.py
+
+> ### **`State 1(Lexical analysis)`**: Build the lexer
+```python
+# file: lexer.py
+from typing import Iterable
+
+from pylgen.automaton import DFA
+from pylgen.lexer.lexer import Lexer
+from pylgen.common.types import Symbol,Token
+from pylgen.common.enums import TokenType
+from pylgen.analysis.lexical import LexicalRule
+from .grammar_symbols import (
+    number,
+    variable
+)
+
+class TokenTypeEnum(TokenType):
+    NUMBER = 'NUMBER'
+    SYMBOL = 'SYMBOL'
+    OPERATOR = 'OPERATOR'
+    VARIABLE = 'VARIABLE'
+    KEYWORD = 'KEYWORD'
+
+class NumberLexicRule(LexicalRule):
+
+    def __init__(self) -> None:
+        super().__init__('number must be 0 or star with a non-zero digit')
+    
+    def _check(self, text: str):
+        if '.' in text:
+            return str(float(text)) == text
+        return str(int(text)) == text
+
+class VariableLexicRule(LexicalRule):
+
+    def __init__(self) -> None:
+        super().__init__('variables names can\'t star with a number')
+    
+    def _check(self, text: str):
+        return not text[0].isdigit()
+
+def get_symbol_function(t:TokenTypeEnum,tx:str) -> Symbol:
+    if t == TokenTypeEnum.NUMBER:
+        return number
+    if t == TokenTypeEnum.SYMBOL:
+        return Symbol(tx,True)
+    if t == TokenTypeEnum.VARIABLE:
+        return variable
+    if t == TokenTypeEnum.KEYWORD:
+        return Symbol(tx,True)
+    return Symbol(tx,True)
+
+def get_tokens(end_symbol:Symbol,tokens:Iterable[Token]):
+    line = 0
+    column = 0
+    for token in tokens:
+        line = token.line
+        column = token.column
+        yield token
+    yield Token(end_symbol.symbol,TokenTypeEnum.SYMBOL,end_symbol,line,column + 1)
+
+ignore_dfa = DFA('start','start',{' ','\n','\t'},True)
+ignore_dfa += ignore_dfa.start_state,' ',ignore_dfa.start_state
+ignore_dfa += ignore_dfa.start_state,'\n',ignore_dfa.start_state
+ignore_dfa += ignore_dfa.start_state,'\t',ignore_dfa.start_state
+
+lexer = Lexer(get_symbol_function,ignore_dfa)
+lexer[0,TokenTypeEnum.NUMBER] = '\\d+|\\d+\\.\\d+'
+lexer[1,TokenTypeEnum.SYMBOL] = '\\(|\\)'
+lexer[2,TokenTypeEnum.OPERATOR] = '\\+|\\*\\*?|\\-|/|%|='
+lexer[3,TokenTypeEnum.KEYWORD] = 'exit|clear'
+lexer[4,TokenTypeEnum.VARIABLE] = '\\w+'
+
+lexer.add_rule(TokenTypeEnum.NUMBER,NumberLexicRule())
+lexer.add_rule(TokenTypeEnum.VARIABLE,VariableLexicRule())
+```
+
+> ### **State 2(Syntax analysis)**:
+ - `Define symbols`:
+```python
+# file: grammar_symbols.py
+from pylgen.common.types import Symbol
+
+END_SYMBOL = '$'
+
+ArithmeticExpression = Symbol('ArithmeticExpression')
+E = Symbol('E')
+T = Symbol('T')
+F = Symbol('F')
+P = Symbol('P')
+VAR = Symbol('VAR')
+
+plus = Symbol('+',True)
+minus = Symbol('-',True)
+mod = Symbol('%',True)
+mul = Symbol('*',True)
+div = Symbol('/',True)
+exp = Symbol('**',True)
+number = Symbol('number',True)
+lp = Symbol('(',True)
+rp = Symbol(')',True)
+eq = Symbol('=',True)
+variable = Symbol('variable',True)
+exit = Symbol('exit',True)
+clear = Symbol('clear',True)
+```
+ - `Define ASTs`:
+```python
+# file: asts.py
+from typing import List
+
+from pylgen.common.types import AST,Symbol
+from .grammar_symbols import (
+    clear,
+    plus,
+    minus,
+    mul,
+    mod,
+    div,
+    exp,
+    eq,
+    variable,
+    exit
+)
+
+class BinaryAST(AST):
+
+    def __init__(self, left:AST,right:AST,symbol: Symbol, line: int, column: int):
+        super().__init__(symbol, line, column)
+        self._left:AST = left
+        self._right:AST = right
+
+    @property
+    def left(self) -> AST:
+        return self._left # type:ignore
+    
+    @property
+    def right(self) -> AST:
+        return self._right # type: ignore
+    
+    def children(self) -> List[AST]:
+        return [self._left,self._right]
+
+class PlusAST(BinaryAST):
+
+    def __init__(self, left:AST,right:AST, line: int, column: int):
+        super().__init__(left,right,plus, line, column)
+
+class MinusAST(BinaryAST):
+    
+    def __init__(self, left:AST,right:AST, line: int, column: int):
+        super().__init__(left,right,minus, line, column)
+
+class ModAST(BinaryAST):
+
+    def __init__(self, left:AST,right:AST, line: int, column: int):
+        super().__init__(left,right,mod, line, column)
+
+class MulAST(BinaryAST):
+
+    def __init__(self, left:AST,right:AST, line: int, column: int):
+        super().__init__(left,right,mul, line, column)
+
+class DivAST(BinaryAST):
+
+    def __init__(self, left:AST,right:AST, line: int, column: int):
+        super().__init__(left,right,div, line, column)
+
+class ExpAST(BinaryAST):
+
+    def __init__(self, left:AST,right:AST, line: int, column: int):
+        super().__init__(left,right,exp, line, column)
+
+class AssigmentAST(BinaryAST):
+
+    def __init__(self, left: AST, right: AST, line: int, column: int):
+        super().__init__(left, right, eq, line, column)
+
+    def children(self) -> List[AST]:
+        return [self._right]
+
+class VarAST(AST):
+
+    def __init__(self,name:str,line:int,column:int):
+        super().__init__(variable,line,column)
+        self._name = name
+    
+    @property
+    def name(self) -> str:
+        return self._name
+    
+    def children(self) -> List[AST]:
+        return []
+
+class ExitAST(AST):
+
+    def __init__(self,line: int, column: int):
+        super().__init__(exit, line, column)
+    
+    def children(self) -> List[AST]:
+        return []
+
+class ClearAST(AST):
+
+    def __init__(self, line: int, column: int):
+        super().__init__(clear, line, column)
+    
+    def children(self) -> List[AST]:
+        return []
+```
+
+> [!important]
+The order in which children are returned by `children()` method is the order in which traversals will get the childs for the current node.
+
+ - `Define reductors`:
+```python
+# file: reductors.py
+from typing import List
+
+from pylgen.common.types import AST,ASTListView
+from .grammar_symbols import (
+    minus,
+    plus,
+    mul,
+    div,
+    exp,
+    mod,
+    eq
+)
+from .asts import (
+    ClearAST,
+    PlusAST,
+    MinusAST,
+    MulAST,
+    DivAST,
+    ExpAST,
+    ModAST,
+    VarAST,
+    AssigmentAST,
+    ExitAST
+)
+
+def binary_reductor(asts:ASTListView) -> AST:
+    ast_type:type = None  # type: ignore
+    if asts[1].symbol == plus:
+        ast_type = PlusAST
+    if asts[1].symbol == minus:
+        ast_type = MinusAST
+    if asts[1].symbol == mul:
+        ast_type = MulAST
+    if asts[1].symbol == div:
+        ast_type = DivAST
+    if asts[1].symbol == exp:
+        ast_type = ExpAST
+    if asts[1].symbol == mod:
+        ast_type = ModAST
+    if asts[1].symbol == eq:
+        ast_type = AssigmentAST
+    return ast_type(asts[0],asts[2],asts[1].line,asts[1].column)
+
+def single_reductor(asts:ASTListView) -> AST:
+    return asts[0]
+
+def parenthesis_reductor(asts:ASTListView) -> AST:
+    return asts[1]
+
+def variable_reductor(asts:ASTListView) -> AST:
+    return VarAST(asts[0].text,asts[0].line,asts[0].column) # type: ignore
+
+def exit_reductor(asts:ASTListView) -> AST:
+    return ExitAST(asts[0].line,asts[0].column)
+
+def clear_reductor(asts:ASTListView) -> AST:
+    return ClearAST(asts[0].line,asts[0].column)
+```
+
+ - `Define the grammar and build the parser`:
+```python
+# file: grammar.py
+from pylgen.parser.parser import BottomUpParser
+from pylgen.parser.parser_builder import ParserBuilder
+from pylgen.parser.parser_type import ParserType
+from pylgen.grammar.grammar import AttributedGrammar
+from .grammar_symbols import (
+    END_SYMBOL,
+    VAR,
+    ArithmeticExpression,
+    E,
+    T,
+    F,
+    P,
+    plus,
+    minus,
+    mul,
+    div,
+    exp,
+    mod,
+    lp,
+    rp,
+    number,
+    variable,
+    eq,
+    exit,
+    clear
+)
+from .reductors import (
+    binary_reductor,
+    single_reductor,
+    parenthesis_reductor,
+    variable_reductor,
+    exit_reductor,
+    clear_reductor
+)
+
+G3 = AttributedGrammar(ArithmeticExpression,END_SYMBOL)
+
+G3[ArithmeticExpression] += (E,),single_reductor
+G3[ArithmeticExpression] += (VAR,eq,E),binary_reductor
+G3[ArithmeticExpression] += (exit,lp,rp),exit_reductor
+G3[ArithmeticExpression] += (clear,lp,rp),clear_reductor
+
+G3[E] += (E,plus,T),binary_reductor
+G3[E] += (E,minus,T),binary_reductor
+G3[E] += (T,),single_reductor
+
+
+G3[T] += (T,mul,F),binary_reductor
+G3[T] += (T,div,F),binary_reductor
+G3[T] += (T,mod,F),binary_reductor
+G3[T] += (F,),single_reductor
+
+G3[F] += (F,exp,P),binary_reductor
+G3[F] += (P,),single_reductor
+
+G3[P] += (lp,E,rp),parenthesis_reductor
+G3[P] += (number,),single_reductor
+G3[P] += (VAR,),single_reductor
+
+G3[VAR] += (variable,),variable_reductor
+
+parser:BottomUpParser = ParserBuilder.build_parser_from_attributed(G3,ParserType.LALR1)
+```
+
+> ### **State 3(Semantic analysis)**:
+
+ - `Define errors`
+```python
+# file: errors.py
+from typing import List
+from pylgen.analysis.error import RuntimeError
+
+class DivisionByZeroError(RuntimeError):
+
+    def __init__(self, stack_trace: List[str], line: int, column: int) -> None:
+        super().__init__(stack_trace, line, column, 'division by zero not allowed')
+
+class ModuleByZeroError(RuntimeError):
+    
+    def __init__(self, stack_trace: List[str], line: int, column: int) -> None:
+        super().__init__(stack_trace, line, column, 'module by zero not allowed')
+
+class ModuleByNotIntegereError(RuntimeError):
+
+    def __init__(self, stack_trace: List[str], line: int, column: int) -> None:
+        super().__init__(stack_trace, line, column, 'module by a not-integer not allowed')
+
+class ModuleWithComplexNumberError(RuntimeError):
+
+    def __init__(self, stack_trace: List[str], line: int, column: int) -> None:
+        super().__init__(stack_trace, line, column, 'module operation not supported for complex numbers')
+```
+
+ - `Define the context`
+```python
+# file: context.py
+from typing import Any, Dict, List
+
+from pylgen.common.types import AST
+from pylgen.analysis.context import Context
+from pylgen.analysis.error import RuntimeError
+
+from .asts import VarAST
+
+class ArithmeticExpressionContext(Context):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._variables:Dict[str,Any] = {}
+        self._values:Dict[AST,Any] = {}
+
+    def reset(self) -> None:
+        super().reset()
+        self._variables.clear()
+        self._values.clear()
+    
+    def clear_garbage(self) -> None:
+        super().clear_errors()
+        self._values.clear()
+
+    def define_variable(self,var_name:str):
+        self._variables[var_name] = None
+    
+    def check_variable_in_context(self,var_name:str) -> bool:
+        return var_name in self._variables
+
+    def add_runtime_error(self, ast: AST, error: RuntimeError) -> None:
+        self._values[ast] = error
+
+    def clear_runtime_errors(self) -> None:
+        pass
+
+    def get_runtime_errors(self) -> List[RuntimeError]:
+        return [value for value in self._values.values() if isinstance(value,RuntimeError)]
+
+    def add_variable(self,name:str,value:Any) -> None:
+        self._variables[name] = value
+    
+    def exists_variable(self,name:str) -> bool:
+        return name in self._variables
+    
+    def get_variable_value(self,name:str) -> Any:
+        return self._variables[name]
+    
+    def add_ast_value(self,ast:AST,value:Any) -> None:
+        self._values[ast] = value
+    
+    def get_ast_value(self,ast:AST) -> Any:
+        if isinstance(ast,VarAST):
+            return self._variables[ast.name]
+        return self._values.get(ast,None)
+```
+
+ - `Define visitors and traversal strategies`:
+```python
+# file: visitors.py
+from typing import Any,List
+import sys
+import os
+
+from pylgen.analysis.context import Context
+from pylgen.common.types import AST,Token
+from pylgen.analysis.visitor import ASTChildrenSelector,ASTVisitor,TraversalStrategy
+from pylgen.analysis.error import RuntimeError,SemanticError
+from .context import ArithmeticExpressionContext
+from .asts import BinaryAST,VarAST
+from .errors import (
+    DivisionByZeroError,
+    ModuleByZeroError,
+    ModuleByNotIntegereError,
+    ModuleWithComplexNumberError
+)
+
+class ArithmeticExpressionASTChildrenSelector(ASTChildrenSelector):
+
+    def __init__(self) -> None:
+        super().__init__(ArithmeticExpressionContext)
+    
+    def select_children(self, ast: AST, context: ArithmeticExpressionContext) -> List[AST]: # type: ignore
+        self._check_context_type(context)
+        return ast.children()
+
+class BinaryASTEvaluatorVisitor(ASTVisitor):
+    _left_type:type
+    _right_type:type
+    _left_value:Any
+    _right_value:Any
+    _runtime_error = False
+
+    def __init__(self) -> None:
+        super().__init__(ArithmeticExpressionContext)
+    
+    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None: # type: ignore
+        self._check_context_type(context)
+        self._runtime_error = False
+        self._left_type = type(context.get_ast_value(ast.left))
+        self._left_value = context.get_ast_value(ast.left)
+        self._right_type = type(context.get_ast_value(ast.right))
+        self._right_value = context.get_ast_value(ast.right)
+        
+        if isinstance(self._left_value,RuntimeError):
+            context.add_runtime_error(ast,self._left_value)
+            self._runtime_error = True
+        if isinstance(self._right_value,RuntimeError):
+            context.add_runtime_error(ast,self._right_value)
+            self._runtime_error = True
+
+class PlusASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
+
+    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+        super().visit(ast,context)
+        if not self._runtime_error:
+            context.add_ast_value(ast,self._left_value + self._right_value)
+
+class MinusASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
+
+    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+        super().visit(ast,context)
+        if not self._runtime_error:
+            context.add_ast_value(ast,self._left_value - self._right_value)
+
+class MulASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
+
+    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+        super().visit(ast,context)
+        if not self._runtime_error:
+            context.add_ast_value(ast,self._left_value * self._right_value)
+
+class DivASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
+
+    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+        super().visit(ast,context)
+        if self._runtime_error:
+            return
+        if self._right_value == 0:
+            context.add_runtime_error(ast,DivisionByZeroError(context.stack_trace,ast.line,ast.column))
+        else:
+            context.add_ast_value(ast,self._left_value / self._right_value)
+
+class ExpASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
+
+    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+        super().visit(ast,context)
+        if not self._runtime_error:
+            context.add_ast_value(ast,self._left_value ** self._right_value)
+
+class ModASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
+
+    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+        super().visit(ast,context)
+        if self._runtime_error:
+            return
+        if self._right_value == 0:
+            context.add_runtime_error(ast,ModuleByZeroError(context.stack_trace,ast.line,ast.column))
+        elif self._right_type == complex or self._left_type == complex:
+            context.add_runtime_error(ast,ModuleWithComplexNumberError(context.stack_trace,ast.line,ast.column))
+        elif self._right_type != int:
+            context.add_runtime_error(ast,ModuleByNotIntegereError(context.stack_trace,ast.line,ast.column))
+        else:
+            context.add_ast_value(ast,self._left_value % self._right_value)
+
+class AssigmentASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
+
+    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+        self._check_context_type(context)
+        self._right_value = context.get_ast_value(ast.right)
+        if isinstance(self._right_value,RuntimeError):
+            context.add_runtime_error(ast,self._right_value)
+            return
+        context.add_variable(ast.left.name,self._right_value) # type: ignore
+
+class AtomicASTEvaluatorVisitor(ASTVisitor):
+
+    def __init__(self) -> None:
+        super().__init__(ArithmeticExpressionContext)
+    
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+        self._check_context_type(context)
+        if '.' in ast.text: # type: ignore
+            context.add_ast_value(ast,float(ast.text)) # type: ignore
+        else:
+            context.add_ast_value(ast,int(ast.text)) # type: ignore
+
+class ExitASTEvaluatorVisitor(ASTVisitor):
+
+    def __init__(self) -> None:
+        super().__init__(ArithmeticExpressionContext)
+    
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+        self._check_context_type(context)
+        sys.exit(0)
+
+class ClearASTEvaluatorVisitor(ASTVisitor):
+
+    def __init__(self) -> None:
+        super().__init__(ArithmeticExpressionContext)
+    
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+        self._check_context_type(context)
+        if os.sep == '\\':
+            os.system('cls')
+        else:
+            os.system('clear')
+
+class DivASTSemanticErrorCollectorVisitor(ASTVisitor):
+
+    def __init__(self) -> None:
+        super().__init__(ArithmeticExpressionContext)
+    
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+        self._check_context_type(context)
+        if isinstance(ast.right,Token) and float(ast.right.text) == 0: # type: ignore
+            error = SemanticError('division by zero not allowed',ast.line,ast.column)
+            context.add_semantic_error(error)
+
+class ModASTSemanticErrorCollectorVisitor(ASTVisitor):
+
+    def __init__(self) -> None:
+        super().__init__(ArithmeticExpressionContext)
+    
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+        self._check_context_type(context)
+        if isinstance(ast.right,Token): # type: ignore
+            if float(ast.right.text) == 0: # type: ignore
+                error = SemanticError('module by zero not allowed',ast.line,ast.column)
+                context.add_semantic_error(error)
+            if int(float(ast.right.text)) != float(ast.right.text): # type: ignore
+                error = SemanticError('module by not-integer not allowed',ast.line,ast.column)
+                context.add_semantic_error(error)
+
+class VariableASTSemanticErrorCollectorVisitor(ASTVisitor):
+
+    def __init__(self) -> None:
+        super().__init__(ArithmeticExpressionContext)
+    
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+        self._check_context_type(context)
+        if not context.check_variable_in_context(ast.name): # type: ignore
+            error = SemanticError(f'undeclared variable "{ast.name}"',ast.line,ast.column) # type: ignore
+            context.add_semantic_error(error)
+
+class AssigmentASTSemanticErrorCollectorVisitor(ASTVisitor):
+
+    def __init__(self) -> None:
+        super().__init__(ArithmeticExpressionContext)
+    
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+        self._check_context_type(context)
+        if isinstance(ast.right,VarAST): # type: ignore
+            if not context.check_variable_in_context(ast.right.name): # type: ignore
+                error = SemanticError(f'undeclared variable "{ast.right.name}"',ast.right.line,ast.right.column) # type: ignore
+                context.add_semantic_error(error)
+
+class PostOrderStrategy(TraversalStrategy):
+
+    def __init__(self) -> None:
+        super().__init__(ArithmeticExpressionContext)
+        self._stack = []
+        self._seen = []
+    
+    def init(self, root: AST) -> None:
+        super().init(root)
+        self._stack.append(root)
+    
+    def has_next(self) -> bool:
+        return len(self._stack) > 0
+    
+    def current(self,context:ArithmeticExpressionContext) -> AST: # type: ignore
+        self._check_context_type(context)
+        selector = self._get_selector(self._stack[-1])
+        children = selector.select_children(self._stack[-1],context)
+        seen = self._stack[-1] in self._seen
+        while children and not seen:
+            self._seen.append(self._stack[-1])
+            for child in children:
+                self._stack.append(child)
+            selector = self._get_selector(self._stack[-1])
+            children = selector.select_children(self._stack[-1],context)
+            seen = self._stack[-1] in self._seen
+        return self._stack.pop()
+    
+    def reset(self) -> None:
+        self._seen.clear()
+        self._stack.clear()
+```
+
+ - `Define the semantic rules`:
+```python
+# file: semantic.py
+from pylgen.common.types import Token
+from pylgen.analysis.visitor import ASTWalker
+
+from .context import ArithmeticExpressionContext
+from .visitors import (
+    ClearASTEvaluatorVisitor,
+    PostOrderStrategy,
+    ArithmeticExpressionASTChildrenSelector,
+    DivASTSemanticErrorCollectorVisitor,
+    ModASTSemanticErrorCollectorVisitor,
+    VariableASTSemanticErrorCollectorVisitor,
+    AssigmentASTSemanticErrorCollectorVisitor,
+    PlusASTEvaluatorVisitor,
+    MinusASTEvaluatorVisitor,
+    MulASTEvaluatorVisitor,
+    DivASTEvaluatorVisitor,
+    ExpASTEvaluatorVisitor,
+    ModASTEvaluatorVisitor,
+    AtomicASTEvaluatorVisitor,
+    AssigmentASTEvaluatorVisitor,
+    ExitASTEvaluatorVisitor
+)
+from .asts import (
+    AssigmentAST,
+    ClearAST,
+    PlusAST,
+    MinusAST,
+    MulAST,
+    DivAST,
+    ExpAST,
+    ModAST,
+    VarAST,
+    ExitAST
+)
+
+context = ArithmeticExpressionContext()
+traversal_strategy = PostOrderStrategy()
+
+traversal_strategy.set_default_selector(ArithmeticExpressionASTChildrenSelector())
+
+error_collector_ast_walker = ASTWalker(context,traversal_strategy)
+
+error_collector_ast_walker.add_visitor(DivAST,DivASTSemanticErrorCollectorVisitor())
+error_collector_ast_walker.add_visitor(ModAST,ModASTSemanticErrorCollectorVisitor())
+error_collector_ast_walker.add_visitor(VarAST,VariableASTSemanticErrorCollectorVisitor())
+error_collector_ast_walker.add_visitor(AssigmentAST,AssigmentASTSemanticErrorCollectorVisitor())
+
+evaluator_ast_walker = ASTWalker(context,traversal_strategy)
+
+evaluator_ast_walker.add_visitor(PlusAST,PlusASTEvaluatorVisitor())
+evaluator_ast_walker.add_visitor(MinusAST,MinusASTEvaluatorVisitor())
+evaluator_ast_walker.add_visitor(MulAST,MulASTEvaluatorVisitor())
+evaluator_ast_walker.add_visitor(DivAST,DivASTEvaluatorVisitor())
+evaluator_ast_walker.add_visitor(ExpAST,ExpASTEvaluatorVisitor())
+evaluator_ast_walker.add_visitor(ModAST,ModASTEvaluatorVisitor())
+evaluator_ast_walker.add_visitor(Token,AtomicASTEvaluatorVisitor())
+evaluator_ast_walker.add_visitor(AssigmentAST,AssigmentASTEvaluatorVisitor())
+evaluator_ast_walker.add_visitor(ExitAST,ExitASTEvaluatorVisitor())
+evaluator_ast_walker.add_visitor(ClearAST,ClearASTEvaluatorVisitor())
+```
 > ## Architecture
 
 ***PyLGEN*** is a collection of Python modules featuring a high-performance core written in Cython. Together, they offer comprehensive tools for constructing interpreters and compilers from scratch, all while maintaining full compatibility with the broader Python ecosystem
