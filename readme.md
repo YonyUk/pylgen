@@ -124,11 +124,8 @@ The lexer converts raw source code into a stream of tokens. We define token type
 
 ```python
 # file: lexer.py
-from typing import Iterable
-
-from pylgen.automaton import DFA
 from pylgen.lexer.lexer import Lexer
-from pylgen.common.types import Symbol,Token
+from pylgen.common.types import Symbol
 from pylgen.common.enums import TokenType
 from pylgen.analysis.lexical import LexicalRule
 from .grammar_symbols import END_SYMBOL
@@ -173,12 +170,7 @@ def get_symbol_function(t:TokenTypeEnum,tx:str) -> Symbol:
         return Symbol(tx,True)
     return Symbol(tx,True)
 
-ignore_dfa = DFA('start','start',{' ','\n','\t'},True)
-ignore_dfa += ignore_dfa.start_state,' ',ignore_dfa.start_state
-ignore_dfa += ignore_dfa.start_state,'\n',ignore_dfa.start_state
-ignore_dfa += ignore_dfa.start_state,'\t',ignore_dfa.start_state
-
-lexer = Lexer(get_symbol_function,ignore_dfa)
+lexer = Lexer(get_symbol_function,'\n|\t| ')
 lexer.set_eof_token(END_SYMBOL,TokenTypeEnum.SYMBOL)
 lexer[0,TokenTypeEnum.NUMBER] = '\\d+|\\d+\\.\\d+'
 lexer[1,TokenTypeEnum.SYMBOL] = '\\(|\\)'
