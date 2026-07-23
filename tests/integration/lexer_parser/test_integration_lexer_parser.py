@@ -222,6 +222,10 @@ class TestIntegrationLexerParser:
         return ignore_dfa
     
     @pytest.fixture
+    def ignore_pattern(self) -> str:
+        return r'\n|\t| '
+    
+    @pytest.fixture
     def numbers_dfa(self) -> DFA:
         number_dfa = DFA('start','start',set(digits))
         number = State('number',TokenTypeEnum.NUMBER,True)
@@ -249,8 +253,8 @@ class TestIntegrationLexerParser:
         return lexer
 
     @pytest.fixture
-    def lexer1(self,ignore_dfa:DFA):
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+    def lexer1(self,ignore_pattern:str):
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeEnum.NUMBER] = '\\d+'
         lexer[1,TokenTypeEnum.SYMBOL] = '\\(|\\)'
         lexer[2,TokenTypeEnum.OPERATOR] = '\\+|\\*\\*?|\\-|/|%'
