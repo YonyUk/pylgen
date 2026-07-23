@@ -144,40 +144,41 @@ lexer_extensions = Extension(
     ]
 )
 ###################################################################################
-#                                  ANALISIS
+
+#                                  ANALYSIS
 ###################################################################################
 error_extensions = Extension(
-    name='pylgen.analisis.error',
+    name='pylgen.analysis.error',
     sources=[
-        'pylgen/analisis/error.pyx'
+        'pylgen/analysis/error.pyx'
     ]
 )
 
 lexical_rule_extension = Extension(
-    name='pylgen.analisis.lexical',
+    name='pylgen.analysis.lexical',
     sources=[
-        'pylgen/analisis/lexical.pyx',
+        'pylgen/analysis/lexical.pyx',
     ]
 )
 
 visitor_extension = Extension(
-    name='pylgen.analisis.visitor',
-    sources=['pylgen/analisis/visitor.pyx']
+    name='pylgen.analysis.visitor',
+    sources=['pylgen/analysis/visitor.pyx']
 )
 
 context_extension = Extension(
-    name='pylgen.analisis.context',
-    sources=['pylgen/analisis/context.pyx']
+    name='pylgen.analysis.context',
+    sources=['pylgen/analysis/context.pyx']
 )
 
 setup(
     name='pylgen',
-    version='0.3.3',
+    version='0.4.1',
     description='test',
     author='YonyUk',
     packages=[
         'pylgen',
-        'pylgen.analisis',
+        'pylgen.analysis',
         'pylgen.automaton',
         'pylgen.common',
         'pylgen.grammar',

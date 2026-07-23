@@ -1,5 +1,5 @@
-from pylgen.analisis.visitor import ASTWalker,TraversalStrategy
-from pylgen.analisis.context import Context
+from pylgen.analysis.visitor import ASTWalker,TraversalStrategy
+from pylgen.analysis.context import Context
 
 class TestASTWalker:
 

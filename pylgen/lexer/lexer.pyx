@@ -6,14 +6,24 @@ from typing import Callable,Any,Tuple,Iterable,Set
 from ..common.types cimport Symbol,Token
 from ..automaton.automaton cimport DFA,State
 from ..regex.engine cimport _parse
-from ..analisis.lexical cimport LexicRule
-from ..analisis.error cimport LexicError
+from ..analysis.lexical cimport LexicalRule
+from ..analysis.error cimport LexicalError
+from ..regex.engine import RegexParsingException
 from .base_lexer cimport BaseLexer
 
 cdef class Lexer(BaseLexer):
     
-    def __init__(self, get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: DFA,check_annotation:bool=True) -> None:
-        super().__init__(get_symbol_function, ignore_pattern,check_annotation)
+    def __init__(self, get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: str,check_annotation:bool=True) -> None:
+        cdef DFA ignore_dfa
+        try:
+            ignore_dfa = _parse(ignore_pattern)
+        except RegexParsingException:
+            raise
+        except ValueError:
+            raise ValueError('invalid regex provided')
+        except Exception:
+            raise
+        super().__init__(get_symbol_function, ignore_dfa,check_annotation)
         self._rules = {}
         self._errors = set()
         self._eof = None # type:ignore
@@ -24,8 +34,8 @@ cdef class Lexer(BaseLexer):
 
     @property
     def tokens(self) -> Iterable[Token]:
-        cdef LexicError error
-        cdef LexicRule rule
+        cdef LexicalError error
+        cdef LexicalRule rule
         cdef int line,column
         self.initialize()
         while self._move_next():
@@ -48,8 +58,8 @@ cdef class Lexer(BaseLexer):
         return True # type:ignore
     
     cdef Token _current(self):
-        cdef LexicRule rule
-        cdef LexicError error
+        cdef LexicalRule rule
+        cdef LexicalError error
         cdef int line,column
 
         if self._current_token._type in self._rules:
@@ -82,5 +92,5 @@ cdef class Lexer(BaseLexer):
     def __setitem__(self, key: Tuple[int, object], re:str):
         self.add_token_regex(key[0],key[1],re)
     
-    cpdef void add_rule(self,object type_,LexicRule rule):
+    cpdef void add_rule(self,object type_,LexicalRule rule):
         self._rules[type_].add(rule)

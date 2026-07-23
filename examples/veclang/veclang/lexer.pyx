@@ -90,13 +90,8 @@ cdef Symbol get_symbol_function(object t,str tx):
         return comment
     raise NotImplementedError()
 
-aut1 = get_words_automaton(['',' ','\t'])
-aut2 = _parse('//.*\n')
-
-ignore_dfa = (aut1 | aut2).to_deterministic().minimize()
-
 cpdef Lexer build_lexer():
-    lexer = Lexer(get_symbol_function,ignore_dfa,False) # type:ignore
+    lexer = Lexer(get_symbol_function,'\t| |//.*\n',False) # type:ignore
     lexer._enum_type = TokenTypeEnum
     lexer.add_token_regex(0,TokenTypeEnum.INTEGER,'\\d+')
     lexer.add_token_regex(1,TokenTypeEnum.FLOAT,'\\d*\\.\\d+|\\d+e(\\+|\\-)\\d+')

@@ -16,9 +16,9 @@ from ..automaton.automaton cimport (
 from ..grammar.grammar cimport AttributedGrammar
 from ..parser.parser_builder cimport _build_lalr_parser_from_attributed
 from ..lexer.base_lexer cimport BaseLexer
-from ..analisis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
-from ..analisis.context cimport Context
-from ..analisis.error cimport RuntimeError
+from ..analysis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
+from ..analysis.context cimport Context
+from ..analysis.error cimport RuntimeError
 
 from .enums import ReTokenType
 

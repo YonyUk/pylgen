@@ -5,7 +5,7 @@ import inspect
 from typing import Iterable,Callable,List
 from ..common.types cimport Token,AST,Symbol,ASTListView
 from ..grammar.grammar cimport Production
-from ..analisis.error cimport SintaxError
+from ..analysis.error cimport SyntaxError
 from .bottom_up_parser_actions import BottomUpParserAction
 
 _offset:int = 32
@@ -78,7 +78,7 @@ cdef class Parser:
         raise ParsingException('Nothing parsed')
     
     @property
-    def errors(self) -> List[SintaxError]:
+    def errors(self) -> List[SyntaxError]:
         return self._errors
 
     cpdef void reset(self):
@@ -144,7 +144,7 @@ cdef class BottomUpParser(Parser):
         cdef Symbol stack_symbol,follow_symbol
         cdef tuple[str,Symbol] key
         cdef set[Symbol] expected_symbols = set()
-        cdef SintaxError error
+        cdef SyntaxError error
         cdef int state
         cdef int idx
 
@@ -154,7 +154,7 @@ cdef class BottomUpParser(Parser):
                 if follow_symbol._is_terminal:
                     expected_symbols.add(follow_symbol)
 
-        error = SintaxError(f'Unexpected symbol "{symbol}"; expected {expected_symbols}',line,column) # type:ignore
+        error = SyntaxError(f'Unexpected symbol "{symbol}"; expected {expected_symbols}',line,column) # type:ignore
         self._errors.append(error)
         self._panic_mode = True # type:ignore
         self._current_syncronization_set = set()

@@ -1,7 +1,7 @@
 from .error import LexicError
 from ..common.types import Token
 
-class LexicRule:
+class LexicalRule:
     
     def __init__(self,msg:str) -> None: ...
 

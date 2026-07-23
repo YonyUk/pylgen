@@ -4,10 +4,10 @@ cdef class Error:
     cdef int _column
     cdef str _msg
 
-cdef class LexicError(Error):
+cdef class LexicalError(Error):
     pass
 
-cdef class SintaxError(Error):
+cdef class SyntaxError(Error):
     pass
 
 cdef class SemanticError(Error):

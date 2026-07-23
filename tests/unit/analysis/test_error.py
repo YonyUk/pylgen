@@ -1,13 +1,13 @@
-from pylgen.analisis.error import Error,LexicError,SintaxError,SemanticError
-from pylgen.analisis.error_type import ErrorType
+from pylgen.analysis.error import Error,LexicalError,SyntaxError,SemanticError
+from pylgen.analysis.error_type import ErrorType
 
 import pytest
 
 class TestError:
     
     @pytest.mark.parametrize("error_type,line,column,msg",[
-        (ErrorType.LEXIC,1,1,'nada'),
-        (ErrorType.SINTAX,1,20,'nuevo'),
+        (ErrorType.LEXICAL,1,1,'nada'),
+        (ErrorType.SYNTAX,1,20,'nuevo'),
         (ErrorType.SEMANTIC,2,13,'aqui'),
     ])
     def test_error_creation(self,error_type:ErrorType,line:int,column:int,msg:str):
@@ -25,17 +25,17 @@ class TestError:
             error = Error('nada',0,0,'') # type:ignore
     
     def test_lexic_error(self):
-        error = LexicError('nada',1,1)
+        error = LexicalError('nada',1,1)
         assert error.line == 1
         assert error.column == 1
-        assert error.type == ErrorType.LEXIC
+        assert error.type == ErrorType.LEXICAL
         assert 'nada' in error.message
 
     def test_sintax_error(self):
-        error = SintaxError('nada',1,1)
+        error = SyntaxError('nada',1,1)
         assert error.line == 1
         assert error.column == 1
-        assert error.type == ErrorType.SINTAX
+        assert error.type == ErrorType.SYNTAX
         assert 'nada' in error.message
 
     def test_semantic_error(self):

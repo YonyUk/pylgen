@@ -1,5 +1,5 @@
-from pylgen.analisis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
-from pylgen.analisis.context cimport Context
+from pylgen.analysis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
+from pylgen.analysis.context cimport Context
 from pylgen.common.types cimport AST
 
 from .asts cimport (
@@ -21,6 +21,7 @@ cdef class VecLangContext(Context):
     cdef list[tuple[list[object],list[type],list[bint],dict[str,int],list[object]]] _scopes
 
     cdef tuple[bint,object] look_for_var(self,str var_name)
+    cdef void assign_var(self,str var_name,object value)
 
     cpdef void reset(self)
 

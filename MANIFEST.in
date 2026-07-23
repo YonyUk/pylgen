@@ -5,5 +5,5 @@ recursive-include pylgen/grammar *.c *.pyx *.py *.pxd
 recursive-include pylgen/regex *.c *.pyx *.py *.pxd
 recursive-include pylgen/parser *.c *.pyx *.py *.pxd
 recursive-include pylgen/lexer *.c *.pyx *.py *.pxd
-recursive-include pylgen/analisis *.c *.pyx *.py *.pxd
+recursive-include pylgen/analysis *.c *.pyx *.py *.pxd
 include requirements.txt
