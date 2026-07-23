@@ -1,7 +1,6 @@
 from pylgen.common.types import Symbol
 from pylgen.common.enums import TokenType
 from pylgen.lexer.lexer import Lexer
-from pylgen.automaton import DFA
 
 class TokenTypeEnum(TokenType):
     NUMBER = 'NUMBER'
@@ -15,6 +14,6 @@ class TestLexer:
         def valid_get_symbol(t:TokenTypeEnum,tx:str) -> Symbol:
             return Symbol('$',True)
         
-        lexer = Lexer(valid_get_symbol,DFA('0','0',{''}))
+        lexer = Lexer(valid_get_symbol,'nada')
 
         lexer[0,TokenTypeEnum.NUMBER] = 'hello'
