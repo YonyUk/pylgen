@@ -44,7 +44,7 @@ def get_symbol_function(t:TokenTypeEnum,tx:str) -> Symbol:
         return Symbol(tx,True)
     return Symbol(tx,True)
 
-lexer = Lexer(get_symbol_function,r'\n|\t| ')
+lexer = Lexer(get_symbol_function,'\n|\t| ')
 lexer.set_eof_token(END_SYMBOL,TokenTypeEnum.SYMBOL)
 lexer[0,TokenTypeEnum.NUMBER] = '\\d+|\\d+\\.\\d+'
 lexer[1,TokenTypeEnum.SYMBOL] = '\\(|\\)'
