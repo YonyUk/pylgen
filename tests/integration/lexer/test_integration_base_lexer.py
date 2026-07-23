@@ -53,6 +53,10 @@ class TestIntegrationBaseLexer:
         dfa += dfa.start_state,'\n',dfa.start_state
         dfa += dfa.start_state,'\t',dfa.start_state
         return dfa
+    
+    @pytest.fixture
+    def ignore_pattern(self):
+        return r'\n|\t| '
 
     @pytest.fixture
     def number_dfa(self) -> DFA:
@@ -106,8 +110,8 @@ class TestIntegrationBaseLexer:
         
         assert not dfa.accept([])
 
-    def test_lexer_initialization_1_2(self,ignore_dfa:DFA):
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+    def test_lexer_initialization_1_2(self,ignore_pattern:str):
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
         lexer.initialize()
 
@@ -136,8 +140,8 @@ class TestIntegrationBaseLexer:
             else:
                 assert dfa.accept(word)
     
-    def test_lexer_initialization_2_2(self,keywords:list[str],ignore_dfa:DFA):
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+    def test_lexer_initialization_2_2(self,keywords:list[str],ignore_pattern:str):
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeTestEnum.KEYWORD] = '|'.join(keywords)
         lexer.initialize()
 
@@ -178,8 +182,8 @@ class TestIntegrationBaseLexer:
             else:
                 assert dfa.accept(word)
 
-    def test_lexer_initialization_3_2(self,keywords:list[str],ignore_dfa:DFA):
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+    def test_lexer_initialization_3_2(self,keywords:list[str],ignore_pattern:str):
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
         lexer[1,TokenTypeTestEnum.KEYWORD] = '|'.join(keywords)
         lexer.initialize()
@@ -212,8 +216,8 @@ class TestIntegrationBaseLexer:
         
         assert len(tokens) == 0
 
-    def test_lexer_tokenization_1_2(self,ignore_dfa:DFA):
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+    def test_lexer_tokenization_1_2(self,ignore_pattern:str):
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
         lexer.initialize()
 
@@ -252,8 +256,8 @@ class TestIntegrationBaseLexer:
             assert tokens[i].column == pos[i][0]
             assert tokens[i].line == pos[i][1]
 
-    def test_lexer_tokenization_2_2(self,ignore_dfa:DFA):
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+    def test_lexer_tokenization_2_2(self,ignore_pattern:str):
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
         lexer.initialize()
 
@@ -307,8 +311,8 @@ len input print
             assert tokens[i].column == pos[i][0]
             assert tokens[i].line == pos[i][1]
 
-    def test_lexer_tokenization_3_2(self,keywords:list[str],ignore_dfa:DFA):
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+    def test_lexer_tokenization_3_2(self,keywords:list[str],ignore_pattern:str):
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeTestEnum.KEYWORD] = '|'.join(keywords)
         lexer.initialize()
 
@@ -357,8 +361,8 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             assert tokens[i].column == pos[i][0]
             assert tokens[i].line == pos[i][1]
 
-    def test_lexer_tokenization_4_2(self,ignore_dfa:DFA):
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+    def test_lexer_tokenization_4_2(self,ignore_pattern:str):
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeTestEnum.VARIABLE] = '[a-zA-Z_]\\w*'
         lexer.initialize()
 
@@ -415,8 +419,8 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             assert token.column == column
             assert token.line == line
 
-    def test_lexer_tokenization_5_2(self,keywords:list[str],ignore_dfa:DFA):
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+    def test_lexer_tokenization_5_2(self,keywords:list[str],ignore_pattern:str):
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeTestEnum.KEYWORD] = '|'.join(keywords)
         lexer[1,TokenTypeTestEnum.VARIABLE] = '[a-zA-Z_]\\w*'
         lexer[2,TokenTypeTestEnum.NUMBER] = '\\d+'
@@ -476,8 +480,8 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             assert token.column == column
             assert token.line == line
 
-    def test_lexer_tokenization_6_2(self,operators:List[str],symbols:List[str],ignore_dfa:DFA):
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+    def test_lexer_tokenization_6_2(self,ignore_pattern:str):
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
         lexer[1,TokenTypeTestEnum.SYMBOL] = '\\(|\\)'
         lexer[2,TokenTypeTestEnum.OPERATOR] = '\\*|\\+'
@@ -532,8 +536,8 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             assert token.column == column
             assert token.line == line
 
-    def test_lexer_tokenization_7_2(self,symbols:List[str],operators:List[str],ignore_dfa:DFA):
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+    def test_lexer_tokenization_7_2(self,ignore_pattern:str):
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
         lexer[1,TokenTypeTestEnum.SYMBOL] = '\\(|\\)'
         lexer[2,TokenTypeTestEnum.OPERATOR] = '\\*|\\+'
@@ -559,7 +563,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             assert token.column == column
             assert token.line == line
     
-    def test_lexer_tokenization_with_error_collecting_1(self,ignore_dfa:DFA):
+    def test_lexer_tokenization_with_error_collecting_1(self,ignore_pattern:str):
 
         class IntegerRule(LexicalRule):
 
@@ -569,7 +573,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             def _check(self, text: str):
                 return str(int(text)) == text
 
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
         lexer.add_rule(TokenTypeTestEnum.NUMBER,IntegerRule())
 
@@ -584,7 +588,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         for error in lexer.errors:
             assert (error.line,error.column) in errors
 
-    def test_lexer_tokenization_with_error_collecting_2(self,ignore_dfa:DFA):
+    def test_lexer_tokenization_with_error_collecting_2(self,ignore_pattern:str):
 
         class IntegerRule(LexicalRule):
 
@@ -602,7 +606,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             def _check(self, text: str):
                 return not text[0].isdigit()
 
-        lexer = Lexer(get_symbol_function,ignore_dfa)
+        lexer = Lexer(get_symbol_function,ignore_pattern)
         lexer[0,TokenTypeTestEnum.NUMBER] = '\\d+'
         lexer[1,TokenTypeTestEnum.VARIABLE] = '\\w+'
         
