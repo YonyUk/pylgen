@@ -142,7 +142,7 @@ Consequently, the direct head-to-head comparision between the two tools is stric
 | |Syntactic analysis|AST construction|Symbol collection|Semantic validation|Final evaluation|
 |:---:|:---:|:---:|:---:|:---:|:---:|
 |**`lark` + `lark_cython`**|148.459452 s| --- | --- | --- | --- |
-|**`pylgen`**|55.078121 s|simultaneously with parsing|0.952746 s|1.445209 s|3.502622|
+|**`pylgen`**|55.078121 s|Simultaneous with parsing|0.952746 s|1.445209 s|3.502622 s|
 |speedup|~2.7x| --- | --- | --- | --- |
 
 > ## :book: Minimal example
