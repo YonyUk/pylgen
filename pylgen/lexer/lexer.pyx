@@ -8,12 +8,22 @@ from ..automaton.automaton cimport DFA,State
 from ..regex.engine cimport _parse
 from ..analysis.lexical cimport LexicalRule
 from ..analysis.error cimport LexicalError
+from ..regex.engine import RegexParsingException
 from .base_lexer cimport BaseLexer
 
 cdef class Lexer(BaseLexer):
     
-    def __init__(self, get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: DFA,check_annotation:bool=True) -> None:
-        super().__init__(get_symbol_function, ignore_pattern,check_annotation)
+    def __init__(self, get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: str,check_annotation:bool=True) -> None:
+        cdef DFA ignore_dfa
+        try:
+            ignore_dfa = _parse(ignore_pattern)
+        except RegexParsingException:
+            raise
+        except ValueError:
+            raise ValueError('invalid regex provided')
+        except Exception:
+            raise
+        super().__init__(get_symbol_function, ignore_dfa,check_annotation)
         self._rules = {}
         self._errors = set()
         self._eof = None # type:ignore
