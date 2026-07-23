@@ -93,6 +93,7 @@ cpdef BottomUpParser build_parser():
     VecLangGrammar._add_attributed_production(VecLangInstruction,[ArithmeticExpressionLevel1],single_reductor)
     VecLangGrammar._add_attributed_production(VecLangInstruction,[FunctionDecl],single_reductor)
     VecLangGrammar._add_attributed_production(VecLangInstruction,[VariableExpression,eq,ArithmeticExpressionLevel1],assigment_reductor)
+    VecLangGrammar._add_attributed_production(VecLangInstruction,[print_keyword,lp,FunctionArgs,rp],built_in_function_call_reductor)
 
     VecLangGrammar._add_attributed_production(ArithmeticExpressionLevel1,[ArithmeticExpressionLevel1,plus,ArithmeticExpressionLevel2],plus_reductor)
     VecLangGrammar._add_attributed_production(ArithmeticExpressionLevel1,[ArithmeticExpressionLevel1,minus,ArithmeticExpressionLevel2],minus_reductor)
@@ -149,7 +150,6 @@ cpdef BottomUpParser build_parser():
     VecLangGrammar._add_attributed_production(FunctionCall,[sum_keyword,lp,FunctionArgs,rp],built_in_function_call_reductor)
     VecLangGrammar._add_attributed_production(FunctionCall,[mean_keyword,lp,FunctionArgs,rp],built_in_function_call_reductor)
     VecLangGrammar._add_attributed_production(FunctionCall,[dot_keyword,lp,FunctionArgs,rp],built_in_function_call_reductor)
-    VecLangGrammar._add_attributed_production(FunctionCall,[print_keyword,lp,FunctionArgs,rp],built_in_function_call_reductor)
 
     VecLangGrammar._add_attributed_production(FunctionArgs,[ArithmeticExpressionLevel1],function_args_reductor)
     VecLangGrammar._add_attributed_production(FunctionArgs,[FunctionArgs,com,ArithmeticExpressionLevel1],function_args_reductor)
