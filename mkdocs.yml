@@ -3,12 +3,13 @@ site_name: PyLGEN
 nav:
   - Overview: index.md
   - Meeting PyLGEN:
-    - Quick Start: section-1/quick_start.md
+    - 🚀 Quick Start: section-1/quick_start.md
     - Example 1: 
       - Introduction: section-1/example-1-first-approach.md
       - Step 1 (Lexical Analysis): section-1/example-1-step-1.md
       - Step 2 (Syntax Analysis): section-1/example-1-step-2.md
       - Pause and Reflect (Visualizing Our Progress): section-1/example-1-pause-and-reflect.md
+      - Step 3 (Semantic Analysis): section-1/example-1-step-3.md
 
 theme:
   name: material

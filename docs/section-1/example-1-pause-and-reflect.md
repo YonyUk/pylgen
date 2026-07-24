@@ -6,7 +6,7 @@ Before diving into semantic analysis and execution, let's explore a few visualiz
 
 ## Putting It All Together
 
-With the lexer, grammar, reductors, and AST nodes fully defined, we've reached the moment where everything converges into a single, coherent pipeline. The script below, our main.py, loads a sample expression, runs it through the entire lexer-parser chain, and produces visual representations of both the parse tree and the abstract syntax tree.
+With the lexer, grammar, reductors, and AST nodes fully defined, we've reached the moment where everything converges into a single, coherent pipeline. The script below, our `main.py`, loads a sample expression, runs it through the entire lexer-parser chain, and produces visual representations of both the parse tree and the abstract syntax tree.
 
 File: `main.py`
 ```python
@@ -84,6 +84,6 @@ By visually inspecting both trees, you can immediately verify:
 
 ## What's Next?
 
-With our pipeline fully validated and visualized, we have a rock‑solid foundation. The next phase is Semantic Analysis, where we'll check that variables are defined before, followed by Execution, where we'll finally evaluate expressions, manage a symbol table, and bring our REPL to life.
+With our pipeline fully validated and visualized, we have a rock‑solid foundation. The next phase is **Semantic Analysis**, where we'll check that variables are defined before, followed by Execution, where we'll finally evaluate expressions, manage a symbol table, and bring our REPL to life.
 
 Take a moment to experiment: change the text variable in `main.py` and re-run the script. Watch how both trees adapt to new expressions. It's a fantastic way to internalize how your language design translates into actual data structures, and the `pylgen.visual` module makes that exploration effortless. Ready to move forward? Let's go!

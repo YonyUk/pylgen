@@ -394,7 +394,7 @@ parser: BottomUpParser = ParserBuilder.build_parser_from_attributed(G, ParserTyp
 ```
 
 !!! note
-    In this file, we are importing `binary_reductor`, `single_reductor`, and the others from the reductors module. We haven't written them yet, we'll do that in the next step. For now, it's enough to know that each reductor receives a list of child AST nodes (and their associated symbols) and returns a new AST node for the left‑hand side. For example, `binary_reductor` will combine two operands with an operator to produce a `PlusAST`, `MinusAST`, or similar, depending on the specific production.
+    In this file, we are importing `binary_reductor`, `single_reductor`, and the others from the reductors module. We haven't written them yet, we'll do that in the next step. For now, it's enough to know that each reductor receives a view over a list of child AST nodes (and their associated symbols) and returns a new AST node for the left‑hand side. For example, `binary_reductor` will combine two operands with an operator to produce a `PlusAST`, `MinusAST`, or similar, depending on the specific production.
 
 With the grammar defined and the parser built, we're almost ready to start evaluating code. The next logical step is implementing the reductors themselves, which will bridge the gap between the syntactic structure and the actual AST nodes we designed earlier.
 

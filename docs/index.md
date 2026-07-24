@@ -1,6 +1,11 @@
-# PyLGEN: From zero to language
+# PyLGEN
 
 *From prototype to production: a **Python-native compiler framework** that brings the "**Dragon Book**" to life in Python, with clarity throughout.*
+
+ - Build **interpreters** and **compilers** from scratch, without leaving the **Python's ecosystem**
+ - Keep total control of what's going on at every step
+ - Build **fast and easy** with python for prototyping and debugging
+ - Compile and get more speed with cython
 
 > ## What is PyLGEN?
 
@@ -21,7 +26,7 @@ PyLGEN is a toolbox for building **interpreters and compilers** from scratch, wi
 Building a language should be **fun,educational and productive**. That's why PyLGEN focuses on:
 
  - **`Transparency`**: No black boxes. Every step, from token definitions to AST visitation, is under your control.
- - **`Python native`**: Write your logic in in pure Python, leverage its ecosystem, and debug just as you always do.
+ - **`Python native`**: Write your logic in pure Python, leverage its ecosystem, and debug just as you always do.
  - **`Performance on demand`**: The framework's core is optimized in Cython, giving you significant speedups. And if you need more, you can compile your own extensions in Cython to squeeze out every last drop of performance.
 
 > ## What you get out of the box
