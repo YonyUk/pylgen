@@ -8,6 +8,7 @@ nav:
       - Introduction: section-1/example-1-first-approach.md
       - Step 1 (Lexical Analysis): section-1/example-1-step-1.md
       - Step 2 (Syntax Analysis): section-1/example-1-step-2.md
+      - Pause and Reflect (Visualizing Our Progress): section-1/example-1-pause-and-reflect.md
 
 theme:
   name: material
