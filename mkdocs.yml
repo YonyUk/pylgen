@@ -1,8 +1,20 @@
 site_name: PyLGEN
-# nav:
+
+nav:
+  - Overview: index.md
+  - Meeting PyLGEN:
+    - Quick Start: section-1/quick_start.md
+    - Example 1: 
+      - Introduction: section-1/example-1-first-approach.md
+      - Step 1: section-1/example-1-step-1.md
 
 theme:
   name: material
+  features:
+    - navigation.sections
+    - toc.integrate
+    - navigation.footer
+
   palette:
     
     - scheme: default
@@ -18,3 +30,8 @@ theme:
       toggle:
         icon: material/brightness-4
         name: light mode
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences

@@ -11,7 +11,7 @@ PyLGEN is a toolbox for building **interpreters and compilers** from scratch, wi
 *What makes PyLGEN different from other parser generators or compiler frameworks?*
 
  - **`Prototype fast, optimize smart`**: Write your entire language logic in pure python first. Only when performance becomes critical, compile your critical path with Cython.
- - **`Full visibility, zero magic`**: See exactly what happens at each stage. You build your own **ASTs**, define your own visitors, and control traversal order. There ar no hidden transformations, you own the pipeline.
+ - **`Full visibility, zero magic`**: See exactly what happens at each stage. You build your own **ASTs**, define your own visitors, and control traversal order. There are no hidden transformations, you own the pipeline.
  - **`Enterprise-ready parsing`**: A robust LALR(1) engine with built-in conflict detection and ***panic-mode error recovery*** means  your **DSL** handles real-world, messy input without falling over.
  - **`Instant visual feedback`**: Turn your **automata,ASTs** and **parse trees** into interactive HTML graphs with a single command. Debug visually, not just via logs, a game changer for understanding and teaching.
  - **`Feels like Python`**: No weird configuration files, no custom DSLs for your grammar. Just Python code, all the way down. Use your favorite libraries, test with pytest, and deploy as a standard package.
