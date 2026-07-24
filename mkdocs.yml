@@ -1,0 +1,20 @@
+site_name: PyLGEN
+# nav:
+
+theme:
+  name: material
+  palette:
+    
+    - scheme: default
+      primary: 'teal'
+      accent: 'amber'
+      toggle:
+        icon: material/brightness-7
+        name: dark mode
+
+    - scheme: slate
+      primary: 'teal'
+      accent: 'amber'
+      toggle:
+        icon: material/brightness-4
+        name: light mode
