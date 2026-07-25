@@ -103,7 +103,7 @@ class ModASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         else:
             context.add_ast_value(ast,self._left_value % self._right_value)
 
-class AssigmentASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
+class AssignmentASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
     def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
         self._check_context_type(context)
@@ -183,7 +183,7 @@ class VariableASTSemanticErrorCollectorVisitor(ASTVisitor):
             error = SemanticError(f'undeclared variable "{ast.name}"',ast.line,ast.column) # type: ignore
             context.add_semantic_error(error)
 
-class AssigmentASTSemanticErrorCollectorVisitor(ASTVisitor):
+class AssignmentASTSemanticErrorCollectorVisitor(ASTVisitor):
 
     def __init__(self) -> None:
         super().__init__(ArithmeticExpressionContext)

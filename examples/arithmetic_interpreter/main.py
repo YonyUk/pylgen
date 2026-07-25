@@ -1,5 +1,3 @@
-from pylgen.parser.parser import ParsingException
-
 from arithmetic_interpreter.grammar import parser
 from arithmetic_interpreter.lexer import lexer
 from arithmetic_interpreter.semantic import context,evaluator_ast_walker,error_collector_ast_walker

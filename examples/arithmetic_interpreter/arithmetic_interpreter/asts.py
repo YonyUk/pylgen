@@ -62,7 +62,7 @@ class ExpAST(BinaryAST):
     def __init__(self, left:AST,right:AST, line: int, column: int):
         super().__init__(left,right,exp, line, column)
 
-class AssigmentAST(BinaryAST):
+class AssignmentAST(BinaryAST):
 
     def __init__(self, left: AST, right: AST, line: int, column: int):
         super().__init__(left, right, eq, line, column)

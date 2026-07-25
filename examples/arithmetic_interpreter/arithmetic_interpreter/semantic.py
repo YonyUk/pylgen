@@ -9,7 +9,7 @@ from .visitors import (
     DivASTSemanticErrorCollectorVisitor,
     ModASTSemanticErrorCollectorVisitor,
     VariableASTSemanticErrorCollectorVisitor,
-    AssigmentASTSemanticErrorCollectorVisitor,
+    AssignmentASTSemanticErrorCollectorVisitor,
     PlusASTEvaluatorVisitor,
     MinusASTEvaluatorVisitor,
     MulASTEvaluatorVisitor,
@@ -17,11 +17,11 @@ from .visitors import (
     ExpASTEvaluatorVisitor,
     ModASTEvaluatorVisitor,
     AtomicASTEvaluatorVisitor,
-    AssigmentASTEvaluatorVisitor,
+    AssignmentASTEvaluatorVisitor,
     ExitASTEvaluatorVisitor
 )
 from .asts import (
-    AssigmentAST,
+    AssignmentAST,
     ClearAST,
     PlusAST,
     MinusAST,
@@ -43,7 +43,7 @@ error_collector_ast_walker = ASTWalker(context,traversal_strategy)
 error_collector_ast_walker.add_visitor(DivAST,DivASTSemanticErrorCollectorVisitor())
 error_collector_ast_walker.add_visitor(ModAST,ModASTSemanticErrorCollectorVisitor())
 error_collector_ast_walker.add_visitor(VarAST,VariableASTSemanticErrorCollectorVisitor())
-error_collector_ast_walker.add_visitor(AssigmentAST,AssigmentASTSemanticErrorCollectorVisitor())
+error_collector_ast_walker.add_visitor(AssignmentAST,AssignmentASTSemanticErrorCollectorVisitor())
 
 evaluator_ast_walker = ASTWalker(context,traversal_strategy)
 
@@ -54,6 +54,6 @@ evaluator_ast_walker.add_visitor(DivAST,DivASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(ExpAST,ExpASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(ModAST,ModASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(Token,AtomicASTEvaluatorVisitor())
-evaluator_ast_walker.add_visitor(AssigmentAST,AssigmentASTEvaluatorVisitor())
+evaluator_ast_walker.add_visitor(AssignmentAST,AssignmentASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(ExitAST,ExitASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(ClearAST,ClearASTEvaluatorVisitor())

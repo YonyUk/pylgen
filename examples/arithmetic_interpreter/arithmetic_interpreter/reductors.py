@@ -19,7 +19,7 @@ from .asts import (
     ExpAST,
     ModAST,
     VarAST,
-    AssigmentAST,
+    AssignmentAST,
     ExitAST
 )
 
@@ -38,7 +38,7 @@ def binary_reductor(asts:ASTListView) -> AST:
     if asts[1].symbol == mod:
         ast_type = ModAST
     if asts[1].symbol == eq:
-        ast_type = AssigmentAST
+        ast_type = AssignmentAST
     return ast_type(asts[0],asts[2],asts[1].line,asts[1].column)
 
 def single_reductor(asts:ASTListView) -> AST:
