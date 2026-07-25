@@ -150,58 +150,114 @@ Consequently, the direct head-to-head comparision between the two tools is stric
 This guide walks you through building a complete interpreter for a small arithmetic language with variables, assignments, and REPL commands (exit and clear). The architecture follows a classic three‑stage pipeline:
 
 ```mermaid
-%%{init:{ 'flowchart': { 'rankSpacing': 150, 'nodeSpacing': 50 } } }%%
+%%{init:{ 'flowchart': { 'rankSpacing': 800, 'nodeSpacing': 30 } }%%
 flowchart TB
-    subgraph Lexical_Analysis_State["Lexical Analysis State(tokens definitions)"]
-        direction TB
-        B[explicit token's types] --> A[Define tokens<br><center>and</center>configure lexer]
-        C[mapping function] --> A
-        D[tokens regex] --> A
-        E[tokens lexical rules<br><center>optional</center>] --> A
-        end
+    %% Definición de todos los nodos (globales)
+    A["Define tokens y configura lexer"]
+    B["Tipos de tokens explícitos"]
+    C["Función de mapeo"]
+    D["Regex de tokens"]
+    E["Reglas léxicas (opcional)"]
+    F["Define símbolos (terminales y no terminales)"]
+    G["Define gramática atribuida"]
+    H["Define funciones reductoras"]
+    I["Define ASTs"]
+    J["Construye el parser"]
+    K["Define selectores de hijos"]
+    L["Añade selectores a estrategias de recorrido"]
+    M["Define un contexto"]
+    N["Define walkers"]
+    O["Define visitors"]
+    P["Añade visitors"]
+    RawCode["Código fuente"]
+    Lexer["Lexer"]
+    Parser["Parser"]
+    Context["Contexto"]
+    Walkers["Walkers"]
+    AST["AST"]
+    AST_Processing["Procesamiento AST"]
+    Result["Resultado de ejecución"]
 
-    subgraph Syntax_Analysis_State["Syntax Analysis State(symbols,<b>ASTs</b>,grammar and <b>reducer functions</b>)"]
-        direction TB
-        F[<center>define symbols</center><br>terminals and non-terminals] --> G[define attributed grammar]
-        H[define reducer functions] --> G
-        I[define <b>ASTs</b>] --> H
-        G --> J[Build the parser]
-        F --> I
-        end
-    
-    subgraph Semantic_Analysis_State["Semantic Analysis State(visitors,traversal strategies)"]
-        direction TB
-        K[define children selectors] --> L[<center>add selectors to</center><br>traversal strategies]
-        M[<center>define a context] --> N[Define walkers]
-        M --> K
-        L --> N
-        M --> O[define visitors]
-        N --> P[adds visitors]
-        O --> P
-        end
+    %% Subgrafos (solo contienen nodos)
+    subgraph Lexical_Analysis_State["Análisis Léxico (definición de tokens)"]
+        A
+        B
+        C
+        D
+        E
+    end
 
-    subgraph Execution["Execution flow"]
-        direction TB
-        A --> Lexer["Lexer"]
-        J --> Parser["Parser"]
-        M --> Context["Context"]
-        P --> Walkers["Walkers"]
-        RawCode["Raw code"] --> Lexer
-        Lexer -- token's stream --> Parser
-        Parser --> AST
-        Walkers --> AST_Processing["AST processing"]
-        AST --> AST_Processing
-        Context --> AST_Processing
-        AST_Processing --> Result["Code execution result"]
-        end
-    
-    Lexical_Analysis_State --> Execution
-    Syntax_Analysis_State --> Execution
-    Semantic_Analysis_State --> Execution
-    
+    subgraph Syntax_Analysis_State["Análisis Sintáctico (símbolos, gramática, ASTs)"]
+        F
+        G
+        H
+        I
+        J
+    end
+
+    subgraph Semantic_Analysis_State["Análisis Semántico (visitantes, estrategias)"]
+        K
+        L
+        M
+        N
+        O
+        P
+    end
+
+    subgraph Execution["Flujo de ejecución"]
+        RawCode
+        Lexer
+        Parser
+        Context
+        Walkers
+        AST
+        AST_Processing
+        Result
+    end
+
+    %% Conexiones dentro de cada subgrafo (opcional)
+    B --> A
+    C --> A
+    D --> A
+    E --> A
+
+    F --> G
+    H --> G
+    I --> H
+    G --> J
+    F --> I
+
+    K --> L
+    M --> N
+    M --> K
+    L --> N
+    M --> O
+    N --> P
+    O --> P
+
+    %% Conexiones entre subgrafos (usando nodos específicos)
+    A --> Lexer
+    J --> Parser
+    M --> Context
+    P --> Walkers
+    RawCode --> Lexer
+    Lexer -- "token stream" --> Parser
+    Parser --> AST
+    Walkers --> AST_Processing
+    AST --> AST_Processing
+    Context --> AST_Processing
+    AST_Processing --> Result
+
+    %% Dependencias entre fases (con nodos representativos)
     F --> C
     I --> K
     I --> O
+
+    Syntax_Analysis_State ~~~ Lexical_Analysis_State
+    Syntax_Analysis_State ~~~ Semantic_Analysis_State
+    Lexical_Analysis_State ~~~ Execution
+    Syntax_Analysis_State ~~~ Execution
+    Semantic_Analysis_State ~~~ Execution
 ```
 
 The file structure is organised as follows:
@@ -383,7 +439,7 @@ class ExpAST(BinaryAST):
     def __init__(self, left:AST,right:AST, line: int, column: int):
         super().__init__(left,right,exp, line, column)
 
-class AssigmentAST(BinaryAST):
+class AssignmentAST(BinaryAST):
 
     def __init__(self, left: AST, right: AST, line: int, column: int):
         super().__init__(left, right, eq, line, column)
@@ -451,7 +507,7 @@ from .asts import (
     ExpAST,
     ModAST,
     VarAST,
-    AssigmentAST,
+    AssignmentAST,
     ExitAST
 )
 
@@ -470,7 +526,7 @@ def binary_reductor(asts:ASTListView) -> AST:
     if asts[1].symbol == mod:
         ast_type = ModAST
     if asts[1].symbol == eq:
-        ast_type = AssigmentAST
+        ast_type = AssignmentAST
     return ast_type(asts[0],asts[2],asts[1].line,asts[1].column)
 
 def single_reductor(asts:ASTListView) -> AST:
@@ -764,7 +820,7 @@ class ModASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         else:
             context.add_ast_value(ast,self._left_value % self._right_value)
 
-class AssigmentASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
+class AssignmentASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
     def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
         self._check_context_type(context)
@@ -844,7 +900,7 @@ class VariableASTSemanticErrorCollectorVisitor(ASTVisitor):
             error = SemanticError(f'undeclared variable "{ast.name}"',ast.line,ast.column) # type: ignore
             context.add_semantic_error(error)
 
-class AssigmentASTSemanticErrorCollectorVisitor(ASTVisitor):
+class AssignmentASTSemanticErrorCollectorVisitor(ASTVisitor):
 
     def __init__(self) -> None:
         super().__init__(ArithmeticExpressionContext)
@@ -903,7 +959,7 @@ from .visitors import (
     DivASTSemanticErrorCollectorVisitor,
     ModASTSemanticErrorCollectorVisitor,
     VariableASTSemanticErrorCollectorVisitor,
-    AssigmentASTSemanticErrorCollectorVisitor,
+    AssignmentASTSemanticErrorCollectorVisitor,
     PlusASTEvaluatorVisitor,
     MinusASTEvaluatorVisitor,
     MulASTEvaluatorVisitor,
@@ -911,11 +967,11 @@ from .visitors import (
     ExpASTEvaluatorVisitor,
     ModASTEvaluatorVisitor,
     AtomicASTEvaluatorVisitor,
-    AssigmentASTEvaluatorVisitor,
+    AssignmentASTEvaluatorVisitor,
     ExitASTEvaluatorVisitor
 )
 from .asts import (
-    AssigmentAST,
+    AssignmentAST,
     ClearAST,
     PlusAST,
     MinusAST,
@@ -937,7 +993,7 @@ error_collector_ast_walker = ASTWalker(context,traversal_strategy)
 error_collector_ast_walker.add_visitor(DivAST,DivASTSemanticErrorCollectorVisitor())
 error_collector_ast_walker.add_visitor(ModAST,ModASTSemanticErrorCollectorVisitor())
 error_collector_ast_walker.add_visitor(VarAST,VariableASTSemanticErrorCollectorVisitor())
-error_collector_ast_walker.add_visitor(AssigmentAST,AssigmentASTSemanticErrorCollectorVisitor())
+error_collector_ast_walker.add_visitor(AssignmentAST,AssignmentASTSemanticErrorCollectorVisitor())
 
 evaluator_ast_walker = ASTWalker(context,traversal_strategy)
 
@@ -948,7 +1004,7 @@ evaluator_ast_walker.add_visitor(DivAST,DivASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(ExpAST,ExpASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(ModAST,ModASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(Token,AtomicASTEvaluatorVisitor())
-evaluator_ast_walker.add_visitor(AssigmentAST,AssigmentASTEvaluatorVisitor())
+evaluator_ast_walker.add_visitor(AssignmentAST,AssignmentASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(ExitAST,ExitASTEvaluatorVisitor())
 evaluator_ast_walker.add_visitor(ClearAST,ClearASTEvaluatorVisitor())
 ```
