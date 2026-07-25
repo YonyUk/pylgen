@@ -19,6 +19,13 @@ Let's start by declaring our basic building blocks.
 
 With the overall structure in mind, let's start by declaring the actual symbols of our grammar. These symbols,both terminals (like `+` or `number`) and non-terminals (like `E` for expression), will serve as the alphabet for our syntactic rules.
 
+Before we dive into the code, it's helpful to distinguish between the two types of symbol we'll encounter:
+
+ - **Terminals** are the actual tokens that appear in your source code, things like `+`,`-`,`number`, or `variable`. They are the "atoms" of your language; the parser consumes them directly from lexer's output, and they cannot be broken down further. Think of them as the **words** of your language.
+ - **Non-terminals** are abstract categories that represents groups of terminals and/or other non-terminals. They don't appear directly in the source code; instead, they are placeholders that the parser uses to build structure. For example, `E` (expression) or `T` (term) are non-terminals, they stand for a pattern of symbols that, when expanded through grammar rules, eventually produce actual terminals. Think of them as **gramatical categories** (like "noun phrase" in natural language).
+
+In practice, terminals are written with lowercase style (or quoted), while non-terminals are often uppercase, though this is just a convention. You can spot terminals in our list by the `True` flag passed to symbol, that's how PyLGEN knows they are not expandable.
+
 File `grammar_symbols.py`
 ```python
 from pylgen.common.types import Symbol

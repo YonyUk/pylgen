@@ -10,6 +10,7 @@ nav:
       - Step 2 (Syntax Analysis): section-1/example-1-step-2.md
       - Pause and Reflect (Visualizing Our Progress): section-1/example-1-pause-and-reflect.md
       - Step 3 (Semantic Analysis): section-1/example-1-step-3.md
+      - Step 4 (The Final Step): section-1/example-1-step-4.md
 
 theme:
   name: material
@@ -36,6 +37,12 @@ theme:
         name: light mode
 
 markdown_extensions:
+  - pymdownx.highlight:
+        use_pygments: true
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format

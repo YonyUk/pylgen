@@ -20,7 +20,7 @@ The language supports:
  - Variables (assignment and usage).
  - Built-in commands: `exit()` and `clear()`.
 
-We'll build it in six steps, following the classic compiler pipeline: **Lexer** -> **Parser** -> **Semantic Analysis** -> **Execution**. The project file structure is organized as follows:
+We'll build it in four steps, following the classic compiler pipeline: **Lexer** -> **Parser** -> **Semantic Analysis** -> **Execution**. The project file structure is organized as follows:
 
     arithmetic_interpreter
         |--- asts.py
