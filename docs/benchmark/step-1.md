@@ -46,14 +46,18 @@ class TokenTypeEnum(TokenType):
 
 Now we build the lexer. It's similar to the arithmetic example, but we add more token patterns.
 
-!!! tip
+!!! tip "Good practices"
     This structure is typical for projects that leverage **Cython** to compile the interpreter into a high-performance extension:
 
     - **`.pxd` files**: contain **C-level** declarations that expose functions and variables to other Cython modules.
-    - **`.pyx` files**: hold the actual implementation (the code tht gets compiled).
+    - **`.pyx` files**: hold the actual implementation (the code that gets compiled).
     - **`.pyi` files**: provide Python type stubs for static type checkers (e.g., mypy) and better IDE support.
 
     Separating interface from implementation like this keeps the codebase modular and makes compilation faster, both critical when scaling to production workloads. 
+
+> ### Declaration (`lexer.pxd`)
+
+This file tells Cython what functions are aviable to other modules.
 
 File: `lexer.pxd`
 ```cython
@@ -64,6 +68,10 @@ cpdef Lexer build_lexer()
 
 cdef Symbol get_symbol_function(object t,str tx)
 ```
+
+> ### Implementation (`lexer.pyx`)
+
+Here we define the actual logic. One key design choice for performance is to **predefine every grammar symbol** as a `cdef` variable, rather than creating them on the fly. This eliminates object allocation overhead in the tokenisation hot path, a crucial optimisation when processing millions of lines.
 
 File: `lexer.pyx`
 ```cython
@@ -165,6 +173,13 @@ cpdef Lexer build_lexer():
 
 !!! important
     In example 1, during the lexer definition, the mapping function was written in Python. This allowed the lexer to infer the type of the enum used for tokens from its typing. However, in this case, the mapping function is written in Cython, so the enum type cannot be inferred. This is the reason for the line `lexer._enum_type = TokenTypeEnum`.
+
+!!! tip "The `COMMENT` safety net"
+    You'll notice in the next section that the `comment` symbol is defined but never appears in the grammar. This is intentional. We already strip comments using the skip pattern `'\t| |//.*\n'`. However, if that pattern ever fails (e.g., due to a mistake or an edge case), the lexer will produce a COMMENT token. Since this symbol is absent from the grammar, the parser will raise a clear error immediately, alerting us to the issue before it silently corrupts the AST. It's a proactive debugging aid.
+
+> ### Stubs for static typing (`lexer.pyi`)
+
+This file provides type hints for Python consumers of the module.
 
 File: `lexer.pyi`
 ```python

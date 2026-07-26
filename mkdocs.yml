@@ -15,6 +15,7 @@ nav:
       - Introduction: benchmark/benchmark-intro.md
       - Getting to know VecLang: benchmark/getting-to-know-veclang.md
       - Step 1: benchmark/step-1.md
+      - Step 2: benchmark/step-2.md
 
 theme:
   name: material
