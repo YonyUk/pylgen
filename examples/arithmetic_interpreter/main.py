@@ -6,7 +6,7 @@ while True:
     context.clear_garbage()
     parser.reset()
     lexer.clear_errors()
-    
+
     text = input('>>> ')
     if len(text) == 0:
         continue

@@ -1,8 +1,6 @@
 from typing import Any,List
 import sys
-import os
 
-from pylgen.analysis.context import Context
 from pylgen.common.types import AST,Token
 from pylgen.analysis.visitor import ASTChildrenSelector,ASTVisitor,TraversalStrategy
 from pylgen.analysis.error import RuntimeError,SemanticError
@@ -11,16 +9,17 @@ from .asts import BinaryAST,VarAST
 from .errors import (
     DivisionByZeroError,
     ModuleByZeroError,
-    ModuleByNotIntegereError,
+    ModuleByNotIntegerError,
     ModuleWithComplexNumberError
 )
+from .grammar_symbols import VAR
 
 class ArithmeticExpressionASTChildrenSelector(ASTChildrenSelector):
 
     def __init__(self) -> None:
         super().__init__(ArithmeticExpressionContext)
-    
-    def select_children(self, ast: AST, context: ArithmeticExpressionContext) -> List[AST]: # type: ignore
+
+    def select_children(self, ast: AST, context: ArithmeticExpressionContext) -> List[AST]:
         self._check_context_type(context)
         return ast.children()
 
@@ -33,15 +32,15 @@ class BinaryASTEvaluatorVisitor(ASTVisitor):
 
     def __init__(self) -> None:
         super().__init__(ArithmeticExpressionContext)
-    
-    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None: # type: ignore
+
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         self._check_context_type(context)
         self._runtime_error = False
         self._left_type = type(context.get_ast_value(ast.left))
         self._left_value = context.get_ast_value(ast.left)
         self._right_type = type(context.get_ast_value(ast.right))
         self._right_value = context.get_ast_value(ast.right)
-        
+
         if isinstance(self._left_value,RuntimeError):
             context.add_runtime_error(ast,self._left_value)
             self._runtime_error = True
@@ -51,28 +50,28 @@ class BinaryASTEvaluatorVisitor(ASTVisitor):
 
 class PlusASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
-    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         super().visit(ast,context)
         if not self._runtime_error:
             context.add_ast_value(ast,self._left_value + self._right_value)
 
 class MinusASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
-    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         super().visit(ast,context)
         if not self._runtime_error:
             context.add_ast_value(ast,self._left_value - self._right_value)
 
 class MulASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
-    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         super().visit(ast,context)
         if not self._runtime_error:
             context.add_ast_value(ast,self._left_value * self._right_value)
 
 class DivASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
-    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         super().visit(ast,context)
         if self._runtime_error:
             return
@@ -83,14 +82,14 @@ class DivASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
 class ExpASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
-    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         super().visit(ast,context)
         if not self._runtime_error:
             context.add_ast_value(ast,self._left_value ** self._right_value)
 
 class ModASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
-    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         super().visit(ast,context)
         if self._runtime_error:
             return
@@ -99,38 +98,38 @@ class ModASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         elif self._right_type == complex or self._left_type == complex:
             context.add_runtime_error(ast,ModuleWithComplexNumberError(context.stack_trace,ast.line,ast.column))
         elif self._right_type != int:
-            context.add_runtime_error(ast,ModuleByNotIntegereError(context.stack_trace,ast.line,ast.column))
+            context.add_runtime_error(ast,ModuleByNotIntegerError(context.stack_trace,ast.line,ast.column))
         else:
             context.add_ast_value(ast,self._left_value % self._right_value)
 
 class AssignmentASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
-    def visit(self, ast: BinaryAST, context: ArithmeticExpressionContext) -> None:
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         self._check_context_type(context)
         self._right_value = context.get_ast_value(ast.right)
         if isinstance(self._right_value,RuntimeError):
             context.add_runtime_error(ast,self._right_value)
             return
-        context.add_variable(ast.left.name,self._right_value) # type: ignore
+        context.add_variable(ast.left.name,self._right_value)
 
 class AtomicASTEvaluatorVisitor(ASTVisitor):
 
     def __init__(self) -> None:
         super().__init__(ArithmeticExpressionContext)
-    
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         self._check_context_type(context)
-        if '.' in ast.text: # type: ignore
-            context.add_ast_value(ast,float(ast.text)) # type: ignore
+        if '.' in ast.text:
+            context.add_ast_value(ast,float(ast.text))
         else:
-            context.add_ast_value(ast,int(ast.text)) # type: ignore
+            context.add_ast_value(ast,int(ast.text))
 
 class ExitASTEvaluatorVisitor(ASTVisitor):
 
     def __init__(self) -> None:
         super().__init__(ArithmeticExpressionContext)
-    
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         self._check_context_type(context)
         sys.exit(0)
 
@@ -138,22 +137,19 @@ class ClearASTEvaluatorVisitor(ASTVisitor):
 
     def __init__(self) -> None:
         super().__init__(ArithmeticExpressionContext)
-    
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         self._check_context_type(context)
-        if os.sep == '\\':
-            os.system('cls')
-        else:
-            os.system('clear')
+        print('\033c',end="")
 
 class DivASTSemanticErrorCollectorVisitor(ASTVisitor):
 
     def __init__(self) -> None:
         super().__init__(ArithmeticExpressionContext)
-    
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         self._check_context_type(context)
-        if isinstance(ast.right,Token) and float(ast.right.text) == 0: # type: ignore
+        if isinstance(ast.right,Token) and float(ast.right.text) == 0:
             error = SemanticError('division by zero not allowed',ast.line,ast.column)
             context.add_semantic_error(error)
 
@@ -161,14 +157,14 @@ class ModASTSemanticErrorCollectorVisitor(ASTVisitor):
 
     def __init__(self) -> None:
         super().__init__(ArithmeticExpressionContext)
-    
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         self._check_context_type(context)
-        if isinstance(ast.right,Token): # type: ignore
-            if float(ast.right.text) == 0: # type: ignore
+        if isinstance(ast.right,Token):
+            if float(ast.right.text) == 0:
                 error = SemanticError('module by zero not allowed',ast.line,ast.column)
                 context.add_semantic_error(error)
-            if int(float(ast.right.text)) != float(ast.right.text): # type: ignore
+            if int(float(ast.right.text)) != float(ast.right.text):
                 error = SemanticError('module by not-integer not allowed',ast.line,ast.column)
                 context.add_semantic_error(error)
 
@@ -176,23 +172,23 @@ class VariableASTSemanticErrorCollectorVisitor(ASTVisitor):
 
     def __init__(self) -> None:
         super().__init__(ArithmeticExpressionContext)
-    
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         self._check_context_type(context)
-        if not context.check_variable_in_context(ast.name): # type: ignore
-            error = SemanticError(f'undeclared variable "{ast.name}"',ast.line,ast.column) # type: ignore
+        if not context.check_variable_in_context(ast.name):
+            error = SemanticError(f'undeclared variable "{ast.name}"',ast.line,ast.column)
             context.add_semantic_error(error)
 
 class AssignmentASTSemanticErrorCollectorVisitor(ASTVisitor):
 
     def __init__(self) -> None:
         super().__init__(ArithmeticExpressionContext)
-    
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None: # type: ignore
+
+    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
         self._check_context_type(context)
-        if isinstance(ast.right,VarAST): # type: ignore
-            if not context.check_variable_in_context(ast.right.name): # type: ignore
-                error = SemanticError(f'undeclared variable "{ast.right.name}"',ast.right.line,ast.right.column) # type: ignore
+        if ast.right.symbol == VAR:
+            if not context.check_variable_in_context(ast.right.name):
+                error = SemanticError(f'undeclared variable "{ast.right.name}"',ast.right.line,ast.right.column)
                 context.add_semantic_error(error)
 
 class PostOrderStrategy(TraversalStrategy):
@@ -201,15 +197,15 @@ class PostOrderStrategy(TraversalStrategy):
         super().__init__(ArithmeticExpressionContext)
         self._stack = []
         self._seen = []
-    
+
     def init(self, root: AST) -> None:
         super().init(root)
         self._stack.append(root)
-    
+
     def has_next(self) -> bool:
         return len(self._stack) > 0
-    
-    def current(self,context:ArithmeticExpressionContext) -> AST: # type: ignore
+
+    def current(self,context:ArithmeticExpressionContext) -> AST:
         self._check_context_type(context)
         selector = self._get_selector(self._stack[-1])
         children = selector.select_children(self._stack[-1],context)
@@ -222,7 +218,7 @@ class PostOrderStrategy(TraversalStrategy):
             children = selector.select_children(self._stack[-1],context)
             seen = self._stack[-1] in self._seen
         return self._stack.pop()
-    
+
     def reset(self) -> None:
         self._seen.clear()
         self._stack.clear()
