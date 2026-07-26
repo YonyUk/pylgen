@@ -397,7 +397,7 @@ G[VAR] += (variable,), variable_reductor
 Once all rules are in place, we instruct PyLGEN to construct an LALR(1) parser from our attributed grammar. The resulting parser will be able to parse any valid input and produce an AST.
 
 ```python
-parser: BottomUpParser = ParserBuilder.build_parser_from_attributed(G, ParserType.LALR1)
+parser = ParserBuilder.build_parser_from_attributed(G, ParserType.LALR1)
 ```
 
 !!! note
@@ -455,7 +455,6 @@ G[E] += (E,plus,T),binary_reductor
 G[E] += (E,minus,T),binary_reductor
 G[E] += (T,),single_reductor
 
-
 G[T] += (T,mul,F),binary_reductor
 G[T] += (T,div,F),binary_reductor
 G[T] += (T,mod,F),binary_reductor
@@ -470,7 +469,7 @@ G[P] += (VAR,),single_reductor
 
 G[VAR] += (variable,),variable_reductor
 
-parser:BottomUpParser = ParserBuilder.build_parser_from_attributed(G,ParserType.LALR1)
+parser = ParserBuilder.build_parser_from_attributed(G,ParserType.LALR1)
 ```
 
 ## Connecting the Dots (The reductors)
@@ -501,7 +500,7 @@ from .asts import (
     ExpAST,
     ModAST,
     VarAST,
-    AssigmentAST,
+    AssignmentAST,
     ExitAST
 )
 ```
@@ -516,18 +515,20 @@ def binary_reductor(asts:ASTListView) -> AST:
     ast_type:type = None  # type: ignore
     if asts[1].symbol == plus:
         ast_type = PlusAST
-    if asts[1].symbol == minus:
+    elif asts[1].symbol == minus:
         ast_type = MinusAST
-    if asts[1].symbol == mul:
+    elif asts[1].symbol == mul:
         ast_type = MulAST
-    if asts[1].symbol == div:
+    elif asts[1].symbol == div:
         ast_type = DivAST
-    if asts[1].symbol == exp:
+    elif asts[1].symbol == exp:
         ast_type = ExpAST
-    if asts[1].symbol == mod:
+    elif asts[1].symbol == mod:
         ast_type = ModAST
-    if asts[1].symbol == eq:
-        ast_type = AssigmentAST
+    elif asts[1].symbol == eq:
+        ast_type = AssignmentAST
+    else:
+        raise ValueError()
     return ast_type(asts[0],asts[2],asts[1].line,asts[1].column)
 ```
 
@@ -595,7 +596,7 @@ from .asts import (
     ExpAST,
     ModAST,
     VarAST,
-    AssigmentAST,
+    AssignmentAST,
     ExitAST
 )
 
@@ -603,18 +604,20 @@ def binary_reductor(asts:ASTListView) -> AST:
     ast_type:type = None  # type: ignore
     if asts[1].symbol == plus:
         ast_type = PlusAST
-    if asts[1].symbol == minus:
+    elif asts[1].symbol == minus:
         ast_type = MinusAST
-    if asts[1].symbol == mul:
+    elif asts[1].symbol == mul:
         ast_type = MulAST
-    if asts[1].symbol == div:
+    elif asts[1].symbol == div:
         ast_type = DivAST
-    if asts[1].symbol == exp:
+    elif asts[1].symbol == exp:
         ast_type = ExpAST
-    if asts[1].symbol == mod:
+    elif asts[1].symbol == mod:
         ast_type = ModAST
-    if asts[1].symbol == eq:
-        ast_type = AssigmentAST
+    elif asts[1].symbol == eq:
+        ast_type = AssignmentAST
+    else:
+        raise ValueError()
     return ast_type(asts[0],asts[2],asts[1].line,asts[1].column)
 
 def single_reductor(asts:ASTListView) -> AST:

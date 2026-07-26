@@ -30,6 +30,7 @@ To connect the lexer's output with the grammar rules, we need a mapping function
 from pylgen.common.types import Symbol
 # this will be defined later
 from .grammar_symbols import (
+    END_SYMBOL,
     number,
     variable
 )
@@ -109,8 +110,8 @@ class VariableLexicalRule(LexicalRule):
 
 # ...
 
-lexer.add_rule(TokenTypeEnum.NUMBER,NumberLexicRule())
-lexer.add_rule(TokenTypeEnum.VARIABLE,VariableLexicRule())
+lexer.add_rule(TokenTypeEnum.NUMBER,NumberLexicalRule())
+lexer.add_rule(TokenTypeEnum.VARIABLE,VariableLexicalRule())
 ```
 
 ## Recap
@@ -125,6 +126,7 @@ from pylgen.common.enums import TokenType
 from pylgen.analysis.lexical import LexicalRule
 from .grammar_symbols import END_SYMBOL
 from .grammar_symbols import (
+    END_SYMBOL,
     number,
     variable
 )
@@ -173,8 +175,8 @@ lexer[2,TokenTypeEnum.OPERATOR] = '\\+|\\*\\*?|\\-|/|%|='
 lexer[3,TokenTypeEnum.KEYWORD] = 'exit|clear'
 lexer[4,TokenTypeEnum.VARIABLE] = '\\w+'
 
-lexer.add_rule(TokenTypeEnum.NUMBER,NumberLexicRule())
-lexer.add_rule(TokenTypeEnum.VARIABLE,VariableLexicRule())
+lexer.add_rule(TokenTypeEnum.NUMBER,NumberLexicalRule())
+lexer.add_rule(TokenTypeEnum.VARIABLE,VariableLexicalRule())
 ```
 
 Our lexer is now ready to tokenize input. Next, we’ll move on to defining the grammar and building the parser.

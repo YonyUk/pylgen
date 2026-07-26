@@ -238,34 +238,32 @@ The diagram below illustrates the complete pipeline, from raw source code to exe
 ```mermaid
 %%{init:{ 'flowchart': { 'rankSpacing': 800, 'nodeSpacing': 30 } }%%
 flowchart TB
-    %% Definición de todos los nodos (globales)
-    A["Define tokens y configura lexer"]
-    B["Tipos de tokens explícitos"]
-    C["Función de mapeo"]
-    D["Regex de tokens"]
-    E["Reglas léxicas (opcional)"]
-    F["Define símbolos (terminales y no terminales)"]
-    G["Define gramática atribuida"]
-    H["Define funciones reductoras"]
-    I["Define ASTs"]
-    J["Construye el parser"]
-    K["Define selectores de hijos"]
-    L["Añade selectores a estrategias de recorrido"]
-    M["Define un contexto"]
-    N["Define walkers"]
-    O["Define visitors"]
-    P["Añade visitors"]
-    RawCode["Código fuente"]
+    A["tokens definitions and lexer configuration"]
+    B["explicit token types"]
+    C["mapping function"]
+    D["tokens regex"]
+    E["lexical rules (optional)"]
+    F["define symbols (terminals and non-terminals)"]
+    G["define attributed grammar"]
+    H["define reducer functions"]
+    I["define ASTs"]
+    J["builds the parser"]
+    K["define children selectors"]
+    L["adds selectors a traversal strategies"]
+    M["define a context"]
+    N["define walkers"]
+    O["define visitors"]
+    P["adds visitors"]
+    RawCode["source code"]
     Lexer["Lexer"]
     Parser["Parser"]
-    Context["Contexto"]
+    Context["Context"]
     Walkers["Walkers"]
     AST["AST"]
-    AST_Processing["Procesamiento AST"]
-    Result["Resultado de ejecución"]
+    AST_Processing["AST Processing"]
+    Result["execution result"]
 
-    %% Subgrafos (solo contienen nodos)
-    subgraph Lexical_Analysis_State["Análisis Léxico (definición de tokens)"]
+    subgraph Lexical_Analysis_State["Lexical Analysis (tokens definition)"]
         A
         B
         C
@@ -273,7 +271,7 @@ flowchart TB
         E
     end
 
-    subgraph Syntax_Analysis_State["Análisis Sintáctico (símbolos, gramática, ASTs)"]
+    subgraph Syntax_Analysis_State["Syntactic Analysis (symbols, grammar, ASTs)"]
         F
         G
         H
@@ -281,7 +279,7 @@ flowchart TB
         J
     end
 
-    subgraph Semantic_Analysis_State["Análisis Semántico (visitantes, estrategias)"]
+    subgraph Semantic_Analysis_State["Semantic Analysis (visitors, traversal strategies)"]
         K
         L
         M
@@ -290,7 +288,7 @@ flowchart TB
         P
     end
 
-    subgraph Execution["Flujo de ejecución"]
+    subgraph Execution["Execution flow"]
         RawCode
         Lexer
         Parser
@@ -301,7 +299,6 @@ flowchart TB
         Result
     end
 
-    %% Conexiones dentro de cada subgrafo (opcional)
     B --> A
     C --> A
     D --> A
@@ -321,7 +318,6 @@ flowchart TB
     N --> P
     O --> P
 
-    %% Conexiones entre subgrafos (usando nodos específicos)
     A --> Lexer
     J --> Parser
     M --> Context
@@ -334,7 +330,6 @@ flowchart TB
     Context --> AST_Processing
     AST_Processing --> Result
 
-    %% Dependencias entre fases (con nodos representativos)
     F --> C
     I --> K
     I --> O
