@@ -35,6 +35,8 @@ class Parser:
 
     def set_draw_parse_tree_flag(self,flag:bool) -> None: ...
 
+    def reset(self) -> None: ...
+
 
 class BottomUpParser(Parser):
 
