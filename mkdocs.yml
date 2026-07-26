@@ -14,6 +14,7 @@ nav:
     - From Prototype to Production:
       - Introduction: benchmark/benchmark-intro.md
       - Getting to know VecLang: benchmark/getting-to-know-veclang.md
+      - Step 1: benchmark/step-1.md
 
 theme:
   name: material
