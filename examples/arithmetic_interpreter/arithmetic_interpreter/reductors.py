@@ -1,5 +1,3 @@
-from typing import List
-
 from pylgen.common.types import AST,ASTListView
 from .grammar_symbols import (
     minus,
@@ -23,22 +21,25 @@ from .asts import (
     ExitAST
 )
 
+# ...
 def binary_reductor(asts:ASTListView) -> AST:
     ast_type:type = None  # type: ignore
     if asts[1].symbol == plus:
         ast_type = PlusAST
-    if asts[1].symbol == minus:
+    elif asts[1].symbol == minus:
         ast_type = MinusAST
-    if asts[1].symbol == mul:
+    elif asts[1].symbol == mul:
         ast_type = MulAST
-    if asts[1].symbol == div:
+    elif asts[1].symbol == div:
         ast_type = DivAST
-    if asts[1].symbol == exp:
+    elif asts[1].symbol == exp:
         ast_type = ExpAST
-    if asts[1].symbol == mod:
+    elif asts[1].symbol == mod:
         ast_type = ModAST
-    if asts[1].symbol == eq:
+    elif asts[1].symbol == eq:
         ast_type = AssignmentAST
+    else:
+        raise ValueError()
     return ast_type(asts[0],asts[2],asts[1].line,asts[1].column)
 
 def single_reductor(asts:ASTListView) -> AST:

@@ -33,30 +33,30 @@ from .reductors import (
     clear_reductor
 )
 
-G3 = AttributedGrammar(ArithmeticExpression,END_SYMBOL)
+# Create the attributed grammar with the start symbol and end marker
+G = AttributedGrammar(ArithmeticExpression, END_SYMBOL)
 
-G3[ArithmeticExpression] += (E,),single_reductor
-G3[ArithmeticExpression] += (VAR,eq,E),binary_reductor
-G3[ArithmeticExpression] += (exit,lp,rp),exit_reductor
-G3[ArithmeticExpression] += (clear,lp,rp),clear_reductor
+G[ArithmeticExpression] += (E,), single_reductor
+G[ArithmeticExpression] += (VAR, eq, E), binary_reductor
+G[ArithmeticExpression] += (exit, lp, rp), exit_reductor
+G[ArithmeticExpression] += (clear, lp, rp), clear_reductor
 
-G3[E] += (E,plus,T),binary_reductor
-G3[E] += (E,minus,T),binary_reductor
-G3[E] += (T,),single_reductor
+G[E] += (E, plus, T), binary_reductor
+G[E] += (E, minus, T), binary_reductor
+G[E] += (T,), single_reductor
 
+G[T] += (T, mul, F), binary_reductor
+G[T] += (T, div, F), binary_reductor
+G[T] += (T, mod, F), binary_reductor
+G[T] += (F,), single_reductor
 
-G3[T] += (T,mul,F),binary_reductor
-G3[T] += (T,div,F),binary_reductor
-G3[T] += (T,mod,F),binary_reductor
-G3[T] += (F,),single_reductor
+G[F] += (F, exp, P), binary_reductor
+G[F] += (P,), single_reductor
 
-G3[F] += (F,exp,P),binary_reductor
-G3[F] += (P,),single_reductor
+G[P] += (lp, E, rp), parenthesis_reductor
+G[P] += (number,), single_reductor
+G[P] += (VAR,), single_reductor
 
-G3[P] += (lp,E,rp),parenthesis_reductor
-G3[P] += (number,),single_reductor
-G3[P] += (VAR,),single_reductor
+G[VAR] += (variable,), variable_reductor
 
-G3[VAR] += (variable,),variable_reductor
-
-parser:BottomUpParser = ParserBuilder.build_parser_from_attributed(G3,ParserType.LALR1) # type: ignore
+parser = ParserBuilder.build_parser_from_attributed(G, ParserType.LALR1)

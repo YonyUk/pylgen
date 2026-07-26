@@ -1,5 +1,4 @@
-from typing import Any, Dict, List
-
+from typing import List,Any,Dict
 from pylgen.common.types import AST
 from pylgen.analysis.context import Context
 from pylgen.analysis.error import RuntimeError
@@ -17,20 +16,21 @@ class ArithmeticExpressionContext(Context):
         super().reset()
         self._variables.clear()
         self._values.clear()
-    
+
     def clear_garbage(self) -> None:
         super().clear_errors()
         self._values.clear()
 
     def define_variable(self,var_name:str):
         self._variables[var_name] = None
-    
+
     def check_variable_in_context(self,var_name:str) -> bool:
         return var_name in self._variables
 
     def add_runtime_error(self, ast: AST, error: RuntimeError) -> None:
         self._values[ast] = error
 
+    # the base method Context.clear_runtime_errors() raises NotImplementedError()
     def clear_runtime_errors(self) -> None:
         pass
 
@@ -39,16 +39,16 @@ class ArithmeticExpressionContext(Context):
 
     def add_variable(self,name:str,value:Any) -> None:
         self._variables[name] = value
-    
+
     def exists_variable(self,name:str) -> bool:
         return name in self._variables
-    
+
     def get_variable_value(self,name:str) -> Any:
         return self._variables[name]
-    
+
     def add_ast_value(self,ast:AST,value:Any) -> None:
         self._values[ast] = value
-    
+
     def get_ast_value(self,ast:AST) -> Any:
         if isinstance(ast,VarAST):
             return self._variables[ast.name]
