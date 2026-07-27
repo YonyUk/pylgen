@@ -16,6 +16,9 @@ nav:
       - Getting to know VecLang: benchmark/getting-to-know-veclang.md
       - Step 1: benchmark/step-1.md
       - Step 2: benchmark/step-2.md
+      - Step 3: benchmark/step-3.md
+      - Language Evolution: benchmark/from-arithmetic-to-veclang.md
+      - Step 4: benchmark/step-4.md
 
 theme:
   name: material
