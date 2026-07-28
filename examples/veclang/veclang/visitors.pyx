@@ -14,7 +14,7 @@ from .asts cimport (
     IndexingAST,
     BinaryAST,
     VariableExpressionAST,
-    AssigmentAST,
+    AssignmentAST,
     PlusAST,
     MinusAST,
     MulAST,
@@ -650,8 +650,8 @@ cdef class VariableIndexerVisitor(ASTVisitor):
         super().__init__(VecLangContext)
     
     cpdef void visit(self,AST ast,Context context):
-        cdef AssigmentAST assigment = ast # type:ignore
-        cdef VariableExpressionAST var = assigment._left # type:ignore
+        cdef AssignmentAST assignment = ast # type:ignore
+        cdef VariableExpressionAST var = assignment._left # type:ignore
         cdef int idx
 
         if not (<VecLangContext>context).look_for_var(var._name)[0]:
@@ -705,13 +705,13 @@ cdef class BinaryASTEvaluatorVisitor(ASTVisitor):
                 context.add_runtime_error(ast,error)
                 self._runtime_error = True # type:ignore
 
-cdef class AssigmentASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
+cdef class AssignmentASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
     cpdef void visit(self,AST ast, Context context):
-        cdef AssigmentAST assigment = ast # type:ignore
-        cdef VariableExpressionAST var = assigment._left # type:ignore
+        cdef AssignmentAST assignment = ast # type:ignore
+        cdef VariableExpressionAST var = assignment._left # type:ignore
 
-        super(AssigmentASTEvaluatorVisitor,self).visit(ast,context)
+        super(AssignmentASTEvaluatorVisitor,self).visit(ast,context)
         (<VecLangContext>context).assign_var(var._name,self._right_value)
 
 cdef class PlusASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
@@ -977,7 +977,7 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
         self._evaluator = ASTWalker(VecLangContext(),eval_strategy) # type:ignore
 
         self._evaluator.add_visitor_without_signature_checking(NumberAST,NumberASTEvaluatorVisitor())
-        self._evaluator.add_visitor_without_signature_checking(AssigmentAST,AssigmentASTEvaluatorVisitor())
+        self._evaluator.add_visitor_without_signature_checking(AssignmentAST,AssignmentASTEvaluatorVisitor())
         self._evaluator.add_visitor_without_signature_checking(PlusAST,PlusASTEvaluatorVisitor())
         self._evaluator.add_visitor_without_signature_checking(MinusAST,MinusASTEvaluatorVisitor())
         self._evaluator.add_visitor_without_signature_checking(MulAST,MulASTEvaluatorVisitor())
@@ -1209,7 +1209,7 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
             else:
                 (<VecLangContext>context)._eval_stack.append(None)
 
-cpdef tuple[VecLangContext,ASTWalker,ASTWalker] build_walkers():
+cpdef tuple[VecLangContext,ASTWalker,ASTWalker,ASTWalker] build_walkers():
     cdef VecLangContext context = VecLangContext()
     cdef TraversalStrategy strategy = PostOrderTraversalStrategy()
     cdef TraversalStrategy eval_strategy = PostOrderTraversalEvaluatorStrategy()
@@ -1233,13 +1233,13 @@ cpdef tuple[VecLangContext,ASTWalker,ASTWalker] build_walkers():
     error_collector_walker.add_visitor_without_signature_checking(ExpAST,BinaryASTErrorCollectorVisitor())
     error_collector_walker.add_visitor_without_signature_checking(DivAST,DivASTErrorCollectorVisitor())
     error_collector_walker.add_visitor_without_signature_checking(ModAST,ModASTErrorCollectorVisitor())
-    error_collector_walker.add_visitor_without_signature_checking(AssigmentAST,BinaryASTErrorCollectorVisitor())
-    error_collector_walker.add_visitor_without_signature_checking(AssigmentAST,VariableIndexerVisitor())
+    error_collector_walker.add_visitor_without_signature_checking(AssignmentAST,BinaryASTErrorCollectorVisitor())
+    error_collector_walker.add_visitor_without_signature_checking(AssignmentAST,VariableIndexerVisitor())
     error_collector_walker.add_visitor_without_signature_checking(RangeAST,RangeASTErrorCollectorVisitor())
     error_collector_walker.add_visitor_without_signature_checking(VectorComponentsAST,VectorComponentsASTErrorCollector())
 
     evaluator_walker.add_visitor_without_signature_checking(NumberAST,NumberASTEvaluatorVisitor())
-    evaluator_walker.add_visitor_without_signature_checking(AssigmentAST,AssigmentASTEvaluatorVisitor())
+    evaluator_walker.add_visitor_without_signature_checking(AssignmentAST,AssignmentASTEvaluatorVisitor())
     evaluator_walker.add_visitor_without_signature_checking(PlusAST,PlusASTEvaluatorVisitor())
     evaluator_walker.add_visitor_without_signature_checking(MinusAST,MinusASTEvaluatorVisitor())
     evaluator_walker.add_visitor_without_signature_checking(MulAST,MulASTEvaluatorVisitor())

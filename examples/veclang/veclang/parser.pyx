@@ -60,7 +60,7 @@ from .asts cimport (
     div_reductor,
     mod_reductor,
     exp_reductor,
-    assigment_reductor,
+    assignment_reductor,
     extractor_reductor,
     number_reductor,
     variable_reductor,
@@ -92,7 +92,7 @@ cpdef BottomUpParser build_parser():
 
     VecLangGrammar._add_attributed_production(VecLangInstruction,[ArithmeticExpressionLevel1],single_reductor)
     VecLangGrammar._add_attributed_production(VecLangInstruction,[FunctionDecl],single_reductor)
-    VecLangGrammar._add_attributed_production(VecLangInstruction,[VariableExpression,eq,ArithmeticExpressionLevel1],assigment_reductor)
+    VecLangGrammar._add_attributed_production(VecLangInstruction,[VariableExpression,eq,ArithmeticExpressionLevel1],assignment_reductor)
     VecLangGrammar._add_attributed_production(VecLangInstruction,[print_keyword,lp,FunctionArgs,rp],built_in_function_call_reductor)
 
     VecLangGrammar._add_attributed_production(ArithmeticExpressionLevel1,[ArithmeticExpressionLevel1,plus,ArithmeticExpressionLevel2],plus_reductor)

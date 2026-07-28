@@ -122,7 +122,7 @@ cdef class DivASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 cdef class ModASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
     pass
 
-cdef class AssigmentASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
+cdef class AssignmentASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
     pass
 
 cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
@@ -157,6 +157,6 @@ cdef class IndexingASTEvaluatorVisitor(ASTVisitor):
 cdef class NumberASTEvaluetorVisitor(ASTVisitor):
     pass
 
-cpdef tuple[VecLangContext,ASTWalker,ASTWalker] build_walkers()
+cpdef tuple[VecLangContext,ASTWalker,ASTWalker,ASTWalker] build_walkers()
 
 cpdef object get_ast_value(AST ast,VecLangContext context)

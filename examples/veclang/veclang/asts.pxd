@@ -134,7 +134,7 @@ cdef class ModAST(BinaryAST):
 cdef class ExpAST(BinaryAST):
     pass
 
-cdef class AssigmentAST(BinaryAST):
+cdef class AssignmentAST(BinaryAST):
     pass
 
 cdef AST single_reductor(ASTListView asts)
@@ -151,7 +151,7 @@ cdef AST mod_reductor(ASTListView asts)
 
 cdef AST exp_reductor(ASTListView asts)
 
-cdef AST assigment_reductor(ASTListView asts)
+cdef AST assignment_reductor(ASTListView asts)
 
 cdef AST extractor_reductor(ASTListView asts)
 

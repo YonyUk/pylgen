@@ -1,5 +1,5 @@
 from pylgen.common.types cimport AST,Symbol,Token,ASTListView
-from .lexer import TokenTypeEnum
+from .tokens_enum import TokenTypeEnum
 
 import numpy as np # type:ignore
 
@@ -319,20 +319,10 @@ cdef class ExpAST(BinaryAST):
     def __init__(self, AST left, AST right, int line, int column):
         super().__init__(exp, left, right, line, column)
 
-cdef class AssigmentAST(BinaryAST):
+cdef class AssignmentAST(BinaryAST):
 
     def __init__(self, AST left, AST right, int line, int column):
         super().__init__(eq, left, right, line, column)
-
-asts_by_symbol = {
-    plus:PlusAST,
-    minus:MinusAST,
-    mod:ModAST,
-    mul:MulAST,
-    div:DivAST,
-    exp:ExpAST,
-    eq:AssigmentAST
-}
 
 cdef AST single_reductor(ASTListView asts):
     return asts._get(0)
@@ -361,9 +351,9 @@ cdef AST exp_reductor(ASTListView asts):
     cdef AST ast = asts._get(1)
     return ExpAST(asts._get(0),asts._get(2),ast._line,ast._column)
 
-cdef AST assigment_reductor(ASTListView asts):
+cdef AST assignment_reductor(ASTListView asts):
     cdef AST ast = asts._get(1)
-    return AssigmentAST(asts._get(0),asts._get(2),ast._line,ast._column)
+    return AssignmentAST(asts._get(0),asts._get(2),ast._line,ast._column)
 
 cdef AST extractor_reductor(ASTListView asts):
     return asts._get(1)

@@ -1,8 +1,5 @@
 from pylgen.lexer.lexer cimport Lexer
-from pylgen.common.enums import TokenType
 from pylgen.common.types cimport Symbol
-from pylgen.automaton.automaton cimport get_words_automaton
-from pylgen.regex.engine cimport _parse
 from .tokens_enum import TokenTypeEnum
 
 cdef Symbol new_line = Symbol('new_line',True) # type:ignore
@@ -25,11 +22,7 @@ cdef Symbol double_dot = Symbol(':',True) # type:ignore
 cdef Symbol sum_keyword = Symbol('sum_keyword',True) # type:ignore
 cdef Symbol mean_keyword = Symbol('mean_keyword',True) # type:ignore
 cdef Symbol dot_keyword = Symbol('dot_keyword',True) # type:ignore
-cdef Symbol transpose_keyword = Symbol('transpose_keyword',True) # type:ignore
-cdef Symbol reshape_keyword = Symbol('reshape_keyword',True) # type:ignore
 cdef Symbol print_keyword = Symbol('print_keyword',True) # type:ignore
-cdef Symbol exit_keyword = Symbol('exit_keyword',True) # type:ignore
-cdef Symbol clear_keyword = Symbol('clear_keyword',True) # type:ignore
 cdef Symbol type_int = Symbol('int_keyword',True) # type:ignore
 cdef Symbol type_float = Symbol('float_keyword',True) # type:ignore
 cdef Symbol type_complex = Symbol('complex_keyword',True) # type:ignore
@@ -60,11 +53,7 @@ cdef dict[str,Symbol] _keywords = {
     'sum':sum_keyword,
     'mean':mean_keyword,
     'dot':dot_keyword,
-    'transpose':transpose_keyword,
-    'reshape':reshape_keyword,
     'print':print_keyword,
-    'exit':exit_keyword,
-    'clear':clear_keyword,
     'int':type_int,
     'float':type_float,
     'complex':type_complex,
@@ -93,12 +82,13 @@ cdef Symbol get_symbol_function(object t,str tx):
 cpdef Lexer build_lexer():
     lexer = Lexer(get_symbol_function,'\t| |//.*\n',False) # type:ignore
     lexer._enum_type = TokenTypeEnum
+    lexer.set_eof_token('\x00',TokenTypeEnum.EOF)
     lexer.add_token_regex(0,TokenTypeEnum.INTEGER,'\\d+')
     lexer.add_token_regex(1,TokenTypeEnum.FLOAT,'\\d*\\.\\d+|\\d+e(\\+|\\-)\\d+')
     lexer.add_token_regex(2,TokenTypeEnum.JUMPLINE,'\n')
     lexer.add_token_regex(3,TokenTypeEnum.KEYWORD,'sum|mean|dot|print|int|float|complex|vector')
     lexer.add_token_regex(4,TokenTypeEnum.VARIABLE,'[a-zA-Z_]\\w*')
-    lexer.add_token_regex(5,TokenTypeEnum.OPERATOR,'\\+|\\-|\\*|/|\\*\\*?|%|=')
+    lexer.add_token_regex(5,TokenTypeEnum.OPERATOR,'\\+|\\-|/|\\*\\*?|%|=')
     lexer.add_token_regex(6,TokenTypeEnum.SYMBOL,'\\[|\\]|:|\\(|\\)|\\,')
     lexer.add_token_regex(7,TokenTypeEnum.COMMENT,'//.*\n')
     return lexer

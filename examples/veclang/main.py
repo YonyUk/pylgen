@@ -2,7 +2,6 @@ import os
 from sys import argv
 
 from veclang.lexer import build_lexer
-from veclang.tokens_enum import TokenTypeEnum
 from veclang.parser import build_parser
 from veclang.visitors import build_walkers,get_ast_value
 
@@ -18,9 +17,11 @@ file = argv[1]
 if not (os.path.exists(file) or os.path.isfile(file)):
     raise ValueError('Invalid argument')
 
-
-lexer.set_eof_token('\x00',TokenTypeEnum.EOF)
-lexer.initialize()
+help_flag = False
+if len(argv) >= 3 and argv[2] == '--help':
+    from pylgen.visual import set_cache_file,draw_ast
+    help_flag = True
+    set_cache_file('cache')
 
 with open(file,'r') as f:
     text = f.read()
@@ -31,6 +32,8 @@ with open(file,'r') as f:
     errors += VecLangParser.errors
 
     if not errors:
+        if help_flag:
+            draw_ast(ast,show=True,cache=True,select_menu=True) # type: ignore
         functions_collector.walk(ast)
 
     if not errors:
