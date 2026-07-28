@@ -1,6 +1,6 @@
 # Step 3: Semantic Analysis and Evaluation
 
-VecLang is far richer than a simple arithmetic language: it supports vectors, slicing, indexing, compex numbers, user-defined functions, and built-ins. This complexity demands a robust semantic framework. We'll build on the same **Visitor** and **Strategy** patterns we used before, but this time we'll leverage Cython to achieve near-native performance.
+VecLang is far richer than a simple arithmetic language: it supports vectors, slicing, indexing, complex numbers, user-defined functions, and built-ins. This complexity demands a robust semantic framework. We'll build on the same **Visitor** and **Strategy** patterns we used before, but this time we'll leverage Cython to achieve near-native performance.
 
 ## Custom Runtime Errors (`errors.pxd`,`errors.pyx`)
 
@@ -121,6 +121,12 @@ The context provides methods to look up variables (`look_for_var`), assign varia
 
 We use PyLGEN's visitor framework, but with a Cython twist: all visitors classes are `cdef` and their `visit` methods are `cpdef`. This allows them to be called from Cython code without Python function call overhead.
 
+| **Pass** | **Visitors involved** | **Objective** |
+| :--- | :--- | :--- |
+| **Function Collection** | `FunctionDeclASTCollectorVisitor` | Register all user-defined functions in the context. |
+| **Semantic Error Collection** | `FunctionCallASTErrorCollector`, `VectorComponentsASTErrorCollector`, `BinaryASTErrorCollectorVisitor`, etc. | Validate types, variables existence, infinite loops, valid ranges and division by zero in compilation time. |
+| **Evaluation** | `PlusASTEvaluatorVisitor`, `RangeASTEvaluatorVisitor`, `FunctionCallASTEvaluatorVisitor`, etc. | Execute the code, operate with NumPy and manage the evaluation stack (`_eval_stack`). |
+
 ## Function Collector
 
 Before the **semantic error collector** pass, we need to collect all functions defined by the user. This task is done by the `FunctionDeclASTCollectorVisitor` visitor. It scans the AST for function definitions and stores them in the context. This must happen before any function call checks. This visitor is registered in the `functions_collector` walker.
@@ -170,7 +176,7 @@ We use two custom traversal strategies, both implementing post-order (children b
  - `PostOrderTraversalStrategy`: a standard post-order walk used for function collection and error collection. It uses a stack of `(node,processed)` flags.
  - `PostOrderTraversalEvaluatorStrategy`: similar, but it stops the traversal as soon as any runtime error is added to the context. This prevents cascading errors and saves time.
 
-Both strategies are implemented in Cython with `cdef` methods and use efficent list operations. This strategy works with a **selector** to decide which children to visit. We use `DefaultChildrenSelector` for most nodes, but for `FunctionDeclAST` we use a custom selector that returns no children during function collection (so that function bodies are not checked until the semantic error collection).
+Both strategies are implemented in Cython with `cdef` methods and use efficient list operations. This strategy works with a **selector** to decide which children to visit. We use `DefaultChildrenSelector` for most nodes, but for `FunctionDeclAST` we use a custom selector that returns no children during function collection (so that function bodies are not checked until the semantic error collection).
 
 ## Building the Walkers
 
@@ -1673,7 +1679,7 @@ Compared to the pure-Python implementation in the earlier tutorial, the VecLang 
 
 > ### 1. Typed Attributes in Visitors
 
-All visitor classes declare their attributes as `cdef` with excplicit types. This eliminates Python attribute lookups and allows Cython to generate efficent C code.
+All visitor classes declare their attributes as `cdef` with explicit types. This eliminates Python attribute lookups and allows Cython to generate efficient C code.
 
 > ### 2. Separate Visitor per Operation
 

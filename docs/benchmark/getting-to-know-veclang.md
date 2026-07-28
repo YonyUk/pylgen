@@ -17,7 +17,7 @@ Before diving into the code, let's examine why VecLang is an excellent choice fo
 
  - **Diverse Syntax**: It includes many token types (numbers, operators, keywords, identifiers,symbols like `[` and `]`, etc.).
  - **Rich Grammar**: Operator precedence, function definitions, vector literals, and slicing require a non-trivial LALR(1) grammar with many productions. This tests the parser's efficiency.
- **Multiple AST Node Types**: The parser builds many different AST classes (binary ops, function calls, vector literals, indexing, slicing, etc.). This forces the reducer functions to work with diverse structures.
+ - **Multiple AST Node Types**: The parser builds many different AST classes (binary ops, function calls, vector literals, indexing, slicing, etc.). This forces the reducer functions to work with diverse structures.
  - **Semantic Checks**: function argument count, and variable declaration validation stress the visitor pattern.
  - **Heavy Evaluation**: Vectors and operations on them (element-wise arithmetic, dot product, mean) involve loops and array operations, which are computationally intensive and test the evaluator.
  - **Realistic code size**: The benchmark file (**~2 million lines**) simulates a production-scale input, revealing performance bottlenecks that only appear under load.

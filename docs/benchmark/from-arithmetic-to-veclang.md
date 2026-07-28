@@ -19,11 +19,11 @@ In VecLang, we've scaled that same approach to a much richer language. The key i
 
 Crucially, **existing visitors, selectors, and the traversal strategy remain unchanged**. The new visitors simply register with the existing walkers. In Cython, we also need to declare the new classes in `.pxd` files and recompile, but the logical steps are identical to the pure-Python case.
 
-The added complexity in Cython comes from managing type declarations and ensuring that all new classes are properly `cdef`-ed for performance. However, this is a one-time cost per new feature; the runtime performnce benefits far outweigh the development overhead. Moreover, because the framework is generic and type-aware, the compiler catches many mistakes early (e.g., mismatched types in visitor signatures), reducing debugging time.
+The added complexity in Cython comes from managing type declarations and ensuring that all new classes are properly `cdef`-ed for performance. However, this is a one-time cost per new feature; the runtime performance benefits far outweigh the development overhead. Moreover, because the framework is generic and type-aware, the compiler catches many mistakes early (e.g., mismatched types in visitor signatures), reducing debugging time.
 
 ## Reflection: Is it ***always*** that easy?
 
-Not quite. If a new feature requires changes to the traversal strategy (e.g., a different visiting order) or to the context (e.g., a new kind of storage), then we might need to modify existing code. But in practice, most language extensions fit cleanly into the existing visitor skeleton. The design we've built is robust enough to accommodate a wide range of features without forcing rewrites, a string indicator of a well-architected system.
+Not quite. If a new feature requires changes to the traversal strategy (e.g., a different visiting order) or to the context (e.g., a new kind of storage), then we might need to modify existing code. But in practice, most language extensions fit cleanly into the existing visitor skeleton. The design we've built is robust enough to accommodate a wide range of features without forcing rewrites, a **strong** indicator of a well-architected system.
 
 ## Leveraging the Python Ecosystem
 
@@ -35,7 +35,7 @@ The pure-Python arithmetic interpreter didn't need NumPy because it only handled
 
 > ### Trade-offs:
 
-Relying on NumPy adds a dependency and increases the interpreter's footprint. For environments where NumPy is not avialable, this would be a problem. However, for a DSL aimed at data science or numerical computing, it's a natural fit. Additionally, for very small vectors (size < 10), the overhead of calling NumPy might outweigh the benefits; in such cases, a pure-Python loop could be faster. VecLang could be enhanced to choose the implementation based on vector size, but we haven't implemented that optimisation.
+Relying on NumPy adds a dependency and increases the interpreter's footprint. For environments where NumPy is not available, this would be a problem. However, for a DSL aimed at data science or numerical computing, it's a natural fit. Additionally, for very small vectors (size < 10), the overhead of calling NumPy might outweigh the benefits; in such cases, a pure-Python loop could be faster. VecLang could be enhanced to choose the implementation based on vector size, but we haven't implemented that optimisation.
 
 > ### Counter-argument
 

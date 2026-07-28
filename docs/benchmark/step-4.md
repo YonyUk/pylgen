@@ -1,8 +1,8 @@
 # Step 4: Running VecLang from a File
 
-Our interpreter is now fully functional: we have a lexer, a parser, an AST, semantic checks, and evaluator. But an interpreter that only works in an interactive console is just a toy, a real world languages are used to process files, run scripts, and produce output. In this final step, we'll build a **batch-mode interpreter** that reads a VecLang source file, executes it, and reports results or errors.
+Our interpreter is now fully functional: we have a lexer, a parser, an AST, semantic checks, and evaluator. But an interpreter that only works in an interactive console is just a toy, a real-world languages are used to process files, run scripts, and produce output. In this final step, we'll build a **batch-mode interpreter** that reads a VecLang source file, executes it, and reports results or errors.
 
-Unlike the previous tutorial, which ended with a REPL (Read-Eval-Print-Loop), VecLang is designed for production-scale workloads: processing millions of lines of code, running complex numerical computations, or generating data. The REPL is great for experimentation, but for automationand performance, we need a file-based runner.
+Unlike the previous tutorial, which ended with a REPL (Read-Eval-Print-Loop), VecLang is designed for production-scale workloads: processing millions of lines of code, running complex numerical computations, or generating data. The REPL is great for experimentation, but for automation and performance, we need a file-based runner.
 
 ## From Interactive to Batch
 
@@ -62,7 +62,7 @@ We'll run the `functions_collector` first to register all function definitions, 
 
 If all checks pass, we run the `evaluator_walker` on the program AST. The evaluator will process each instruction in order, updating the context (variables, scopes, etc.).
 
-## Implementation Skecth
+## Implementation Sketch
 
 Before write our main runner, we must to compile **veclang**, this is made through a `setup.py`.
 
@@ -187,6 +187,9 @@ with open(file,'r') as f:
             print(error)
 ```
 
+!!! tip "CLI scalability"
+    In this example, we use a simple `sys.argv` check for clarity. However, for a robust tool, consider using Python's `argparse` module, which allows for easy management of subcommands, optional flags, and automatic help messages.
+
 > ### Differences from the REPL
 
 | **Aspect** | **REPL (tutorial)** | **Batch (VecLang)** |
@@ -200,7 +203,7 @@ with open(file,'r') as f:
 
 ## Performance Considerations
 
-In batch mode, the entire file is parsed and processed in one go. This allows the lexer and parser to be built only once, and the context is reused for all instructions. The evaluator benefits from having the full AST in memory, enabling optimisations like constant folding or dead-code elimination (which we haven't implemented, but could be added later). The use of Cython ensures that all passes are fast. The semantic checks and evaluation run in native code, making VecLang suitable for processing larga datasets.
+In batch mode, the entire file is parsed and processed in one go. This allows the lexer and parser to be built only once, and the context is reused for all instructions. The evaluator benefits from having the full AST in memory, enabling optimisations like constant folding or dead-code elimination (which we haven't implemented, but could be added later). The use of Cython ensures that all passes are fast. The semantic checks and evaluation run in native code, making VecLang suitable for processing large datasets.
 
 ## Access to the Python Ecosystem in Batch Mode
 
@@ -208,7 +211,7 @@ The batch interpreter inherits all the ecosystem advantages we discussed earlier
 
 ## Error Reporting in Batch Mode
 
-In batch mode, it's crucial to report errors with enough context to fix them. The error classes we defined carry line and column numbers, and the stack trace helps locate the source of runtime errors. The main script prints each error with its location, making easy to identify issues.
+In batch mode, it's crucial to report errors with enough context to fix them. The error classes we defined carry line and column numbers, and the stack trace helps locate the source of runtime errors. The main script prints each error with its location, making it easy to identify issues.
 
 For example:
 

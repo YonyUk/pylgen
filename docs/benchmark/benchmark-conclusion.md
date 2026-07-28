@@ -134,7 +134,7 @@ Timings were obtained from the code's own `datetime` measurements, not from the 
 | **Evaluation** | 3.74 s |
 | **Total (per-file)** | **64.83 s** |
 
-**Interpretation**: The parser is the dominant phase (~88% of total time). Semantic checks and evaluation add a combined ~8 seconds. This is a remarkably low overhead for a full interpreter, it proves that the visitor pattern, when implemented in Cython, is extremely efficent.
+**Interpretation**: The parser is the dominant phase (~88% of total time). Semantic checks and evaluation add a combined ~8 seconds. This is a remarkably low overhead for a full interpreter, it proves that the visitor pattern, when implemented in Cython, is extremely efficient.
 
 > ### 3. Correctness Validation
 
@@ -194,8 +194,8 @@ The benchmark results are clear and robust:
  - **The speedup is attributable to fundamental architectural advantages**: Cython compilation, integrated AST construction; not just superficial tweaks.
  - **Memory usage is significantly lower**: PyLGEN uses **~887 MB** peak vs. Lark's **~4 GB**, making it more suitable for memory-constrained environments.
 
-> ### Final Though
+> ### Final Thought
 
 This is not about declaring a "winner", it's about understanding trade-offs. Lark is simpler to use and has a larger community, making it excellent for prototyping and smaller projects. PyLGEN is more complex to set up but delivers **substantially higher performance** for production-scale workloads.
 
-If you are building a high-throughput parser, a data-processing DSL, or a language that must handle millions of lines, PyLGEN offers a compelling advantage. The journey from a simple REPL to this benchmark demostrates that with careful design, Cython, and the right abstractions, you can achieve near-C performance while staying within the Python ecosystem.
+If you are building a high-throughput parser, a data-processing DSL, or a language that must handle millions of lines, PyLGEN offers a compelling advantage. The journey from a simple REPL to this benchmark demonstrates that with careful design, Cython, and the right abstractions, you can achieve near-C performance while staying within the Python ecosystem.
