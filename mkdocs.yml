@@ -11,6 +11,15 @@ nav:
       - Pause and Reflect (Visualizing Our Progress): section-1/example-1-pause-and-reflect.md
       - Step 3 (Semantic Analysis): section-1/example-1-step-3.md
       - Step 4 (The Final Step): section-1/example-1-step-4.md
+    - From Prototype to Production:
+      - Introduction: benchmark/benchmark-intro.md
+      - Getting to know VecLang: benchmark/getting-to-know-veclang.md
+      - Step 1: benchmark/step-1.md
+      - Step 2: benchmark/step-2.md
+      - Step 3: benchmark/step-3.md
+      - Language Evolution: benchmark/from-arithmetic-to-veclang.md
+      - Step 4: benchmark/step-4.md
+      - Benchmark: benchmark/benchmark-conclusion.md
 
 theme:
   name: material
