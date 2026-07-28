@@ -169,6 +169,27 @@ Let's trace through a few examples.
 
 `5` - `20` is printed.
 
+### Lexical and Syntax error
+
+```bash
+001 + )
+```
+
+`1` - Lexer produces tokens: `001`, `+`, `)`.
+
+`2` - A `LexicalError` is detected at token `001`.
+
+`3` - A `SyntaxError` is detected at token `)`.
+
+`4` - Evaluation is aborted.
+
+`5` - The errors are printed:
+
+```bash
+LEXICAL ERROR at line 1, column 1: number must be 0 or star with a non-zero digit
+SYNTAX ERROR at line 1, column 7: Unexpected symbol ")"; expected {number, variable, (}
+```
+
 ### Semantic error
 
 ```bash
