@@ -19,6 +19,7 @@ nav:
       - Step 3: benchmark/step-3.md
       - Language Evolution: benchmark/from-arithmetic-to-veclang.md
       - Step 4: benchmark/step-4.md
+      - Benchmark: benchmark/benchmark-conclusion.md
 
 theme:
   name: material

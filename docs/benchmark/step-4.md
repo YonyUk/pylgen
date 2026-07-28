@@ -64,6 +64,67 @@ If all checks pass, we run the `evaluator_walker` on the program AST. The evalua
 
 ## Implementation Skecth
 
+Before write our main runner, we must to compile **veclang**, this is made through a `setup.py`.
+
+```python
+from setuptools.extension import Extension
+from setuptools import setup
+from Cython.Build import cythonize
+
+interpreter_extensions = Extension(
+    name='veclang.parser',
+    sources=[
+        'veclang/parser.pyx'
+    ]
+)
+
+asts_extensions = Extension(
+    name='veclang.asts',
+    sources=[
+        'veclang/asts.pyx'
+    ]
+)
+
+visitors_extensions = Extension(
+    name='veclang.visitors',
+    sources=[
+        'veclang/visitors.pyx'
+    ]
+)
+
+errors_extension = Extension(
+    name='veclang.errors',
+    sources=[
+        'veclang/errors.pyx'
+    ]
+)
+
+lexer_extensions = Extension(
+    name='veclang.lexer',
+    sources=[
+        'veclang/lexer.pyx'
+    ]
+)
+
+setup(
+    ext_modules=cythonize([
+        interpreter_extensions,
+        asts_extensions,
+        visitors_extensions,
+        errors_extension,
+        lexer_extensions
+    ]),
+    language_level=3
+)
+```
+Then run this command in your terminal inside the `veclang` folder:
+
+```bash
+python setup.py build_ext --inplace
+```
+
+This will compile the `.pyx` files into `.pyd` files extensions that Python can import by `import` statement.
+
 Here's how the main runner might look.
 
 File: `main.py`
