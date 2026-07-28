@@ -50,7 +50,7 @@ This section evaluates the parsing performance of `pylgen` under a realistic, la
 
 > ### Test Language & Input Data
 
-The benchmark is build around ***VecLang***, a minimal but feature-rich **DSL** designed specifically for this test. (Full details are aviable in the official documentation, and the reference implementation can be found in the `examples/veclang` folder of this repository.)
+The benchmark is build around ***VecLang***, a minimal but feature-rich **DSL** designed specifically for this test. (Full details are available in the official documentation, and the reference implementation can be found in the `examples/veclang` folder of this repository.)
 
 To stress-test both parsers, a source file with a total decompressed size of **39,163 KB**. The structure of this files is as follows:
 
