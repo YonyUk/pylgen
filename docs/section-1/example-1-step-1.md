@@ -49,6 +49,9 @@ def get_symbol_function(t:TokenTypeEnum,tx:str) -> Symbol:
     return Symbol(tx,True)
 ```
 
+!!! important
+    It is important that the mapping function is fully annotated so that the lexer can infer the enum type; otherwise, the lexer may fail.
+
 Here, we receive a token type and its lexeme (tx), and return the corresponding grammar symbol.
 
 ## Creating the lexer
