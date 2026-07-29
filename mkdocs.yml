@@ -21,7 +21,8 @@ nav:
       - Step 4: benchmark/step-4.md
       - Benchmark: benchmark/benchmark-conclusion.md
     - A Practical Tour for PyLGEN Framework:
-      - Common: api/common/common.md
+      - Introduction: api/intro.md
+      - Common Module: api/common/common.md
 
 theme:
   name: material
@@ -57,3 +58,5 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
