@@ -309,4 +309,4 @@ To illustrate combined usage, let us build an automaton that recognizes integers
 
 The `automaton` module in PyLGEN not only implements the fundamental concepts of automata theory but does so with a design that prioritizes clarity, efficiency, and extensibility. From the immutability of states to the integration of complex operations such as minimization and determinization, every piece is built to offer a smooth and reliable development experience.
 
-Whether used to build lexical analyzers, validate patterns, or explore properties of regular languages, this module provides a solid foundation that directly connects to the mathematical underpinnings presented at the beginning of this documentation.
+Whether used to build lexical analyzers, validate patterns, or explore properties of regular languages, this module provides a solid foundation that directly connects to the mathematical underpinnings presented.
