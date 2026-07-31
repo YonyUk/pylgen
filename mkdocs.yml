@@ -23,6 +23,10 @@ nav:
     - A Practical Tour for PyLGEN Framework:
       - Introduction: api/intro.md
       - Common Module: api/common/common.md
+      - Automaton Module:
+        - The Engine of Pattern Matching: api/automaton/intro.md
+        - Automata Theory: api/automaton/theory.md
+        - The Theory in Action: api/automaton/automaton.md
 
 theme:
   name: material
@@ -60,3 +64,15 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.tilde
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_css:
+    - stylesheets/extra.css
+    - https://unpkg.com/katex@0/dist/katex.min.css
+
+extra_javascript:
+  - javascripts/katex.js
+  - https://unpkg.com/katex@0/dist/katex.min.js
+  - https://unpkg.com/katex@0/dist/contrib/auto-render.min.js

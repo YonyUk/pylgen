@@ -1,0 +1,20 @@
+/* Fuerza bordes en todas las celdas */
+.md-typeset table:not([class]) td,
+.md-typeset table:not([class]) th {
+    border: 1px solid var(--md-typeset-table-color) !important;
+}
+
+/* Opcional: bordes más finos */
+.md-typeset table:not([class]) {
+    border-collapse: collapse;
+}
+
+/* Modo claro: filas alternadas */
+.md-typeset__table tr:nth-child(2n) {
+    background-color: #f8f8f8;
+}
+
+/* Modo oscuro: filas alternadas */
+[data-md-color-scheme="slate"] .md-typeset__table tr:nth-child(2n) {
+    background-color: hsla(var(--md-hue), 17%, 17%, 1);
+}
