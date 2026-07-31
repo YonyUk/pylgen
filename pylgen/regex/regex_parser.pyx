@@ -7,7 +7,7 @@ from ..automaton.automaton cimport (
     get_word_automaton,
     _automaton_concatenation,
     _automaton_union,
-    _automaton_clousure,
+    _automaton_closure,
     get_words_automaton_with_value,
     DFA,
     NFA,
@@ -33,7 +33,7 @@ re_rb = cSymbol('}',True) # type:ignore
 re_lc = cSymbol('[',True) # type:ignore
 re_rc = cSymbol(']',True) # type:ignore
 re_kleene_star = cSymbol('*',True) # type:ignore
-re_positive_clousure = cSymbol('+',True) # type:ignore
+re_positive_closure = cSymbol('+',True) # type:ignore
 re_or = cSymbol('|',True) # type:ignore
 re_optional = cSymbol('?',True) # type:ignore
 re_char = cSymbol('char',True) # type:ignore
@@ -57,7 +57,7 @@ symbols_by_text:dict[str,cSymbol] = {
 }
 operatos_by_text:dict[str,cSymbol] = {
     '*':re_kleene_star,
-    '+':re_positive_clousure,
+    '+':re_positive_closure,
     '|':re_or,
     '?':re_optional,
     '^':re_accent
@@ -227,15 +227,15 @@ cdef class KleeneStarAST(RegexUnaryAST):
         self._regex = regex # type:ignore
 
     cdef Automaton _get_automaton(self):
-        return _automaton_clousure(self._regex._get_automaton(),0)
+        return _automaton_closure(self._regex._get_automaton(),0)
 
-cdef class PositiveClousureAST(RegexUnaryAST):
+cdef class PositiveClosureAST(RegexUnaryAST):
 
     def __init__(self, RegexAST regex, int line, int column):
-        super().__init__(regex, re_positive_clousure, line, column)
+        super().__init__(regex, re_positive_closure, line, column)
     
     cdef Automaton _get_automaton(self):
-        return _automaton_clousure(self._regex._get_automaton(),1)
+        return _automaton_closure(self._regex._get_automaton(),1)
 
 cdef class OptionalAST(RegexUnaryAST):
 
@@ -243,7 +243,7 @@ cdef class OptionalAST(RegexUnaryAST):
         super().__init__(regex, re_optional, line, column)
     
     cdef Automaton _get_automaton(self):
-        return _automaton_clousure(self._regex._get_automaton(),2)
+        return _automaton_closure(self._regex._get_automaton(),2)
 
 cdef class CharSetAST(RegexAST):
 
@@ -572,9 +572,9 @@ def kleene_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef RegexAST regex = asts[0]
     return KleeneStarAST(regex,regex._line,regex._column)
 
-def positive_clousure_ast_reductor(asts:ASTListView) -> RegexAST:
+def positive_closure_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef RegexAST regex = asts[0]
-    return PositiveClousureAST(regex,regex._line,regex._column)
+    return PositiveClosureAST(regex,regex._line,regex._column)
 
 def optional_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef RegexAST regex = asts[0]
@@ -759,7 +759,7 @@ cdef BottomUpParser _build_regex_parser():
     # ATOM -> ATOM *
     ReGrammar._add_attributed_production(ATOM,[ATOM,re_kleene_star],kleene_ast_reductor)
     # ATOM -> ATOM +
-    ReGrammar._add_attributed_production(ATOM,[ATOM,re_positive_clousure],positive_clousure_ast_reductor)
+    ReGrammar._add_attributed_production(ATOM,[ATOM,re_positive_closure],positive_closure_ast_reductor)
     # ATOM -> ATOM ?
     ReGrammar._add_attributed_production(ATOM,[ATOM,re_optional],optional_ast_reductor)
 

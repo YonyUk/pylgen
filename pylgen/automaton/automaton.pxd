@@ -12,7 +12,7 @@ cdef class Automaton:
     cdef State _start_state,_current_state
     cdef Table _trans_func
     cdef dict[str,set[str]] _epsilons
-    cdef dict[str,set[State]] _clousures
+    cdef dict[str,set[State]] _closures
     cdef list[tuple[str,str]] _transitions_added_while_completing
     cdef bint _is_complete,_is_stuck
     cdef str _fault_id
@@ -22,7 +22,7 @@ cdef class Automaton:
     cpdef bint has_transition(self,State state,str symbol)
     cpdef State next(self,State state,str symbol)
     cpdef void reset(self)
-    cpdef set[State] clousure(self,State state)
+    cpdef set[State] closure(self,State state)
     cpdef void make_complete(self)
     cpdef void restore_to_before_complete(self)
 
@@ -51,7 +51,7 @@ cdef DFA _nfa_complement(NFA automaton)
 cdef DFA _automaton_complement(Automaton automaton)
 cdef DFA _automaton_intersection(set[Automaton] automatons)
 cdef NFA _automaton_concatenation(Automaton first,Automaton second)
-cdef NFA _automaton_clousure(Automaton automaton,int type_)
+cdef NFA _automaton_closure(Automaton automaton,int type_)
 cdef NFA _automaton_reverse(Automaton automaton)
 
 cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet)

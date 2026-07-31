@@ -206,7 +206,7 @@ cdef class Automaton:
         cdef set[State] seen = set()
         cdef State current_state,to_state
 
-        stack.extend(self.clousure(start))
+        stack.extend(self.closure(start))
 
         while stack:
             current_state = stack.pop(0)
@@ -217,7 +217,7 @@ cdef class Automaton:
             for symbol in self._alphabet:
                 transition = (current_state._id,symbol)
                 if transition in self._trans_func._table:
-                    for to_state in self.clousure(self.next(current_state,symbol)):
+                    for to_state in self.closure(self.next(current_state,symbol)):
                         if not to_state in seen:
                             stack.append(to_state)
         
@@ -243,7 +243,7 @@ cdef class Automaton:
         cdef set[State] recursion_stack
 
         # reachable states from start
-        stack = list(self.clousure(self._start_state))
+        stack = list(self.closure(self._start_state))
         while stack:
             st = stack.pop()
             if st in reachable_from_start:
@@ -252,7 +252,7 @@ cdef class Automaton:
             for symbol in self._alphabet:
                 if self.has_transition(st, symbol):
                     to_st = self.next(st, symbol)
-                    for clo_st in self.clousure(to_st):
+                    for clo_st in self.closure(to_st):
                         if clo_st not in reachable_from_start:
                             stack.append(clo_st)
 
@@ -261,7 +261,7 @@ cdef class Automaton:
             for symbol in self._alphabet:
                 if self.has_transition(st, symbol):
                     to_st = self.next(st, symbol)
-                    for clo_st in self.clousure(to_st):
+                    for clo_st in self.closure(to_st):
                         rev_graph[clo_st].add(st)
 
         stack = list(final_states)
@@ -284,7 +284,7 @@ cdef class Automaton:
             for symbol in self._alphabet:
                 if self.has_transition(st, symbol):
                     to_st = self.next(st, symbol)
-                    for clo_st in self.clousure(to_st):
+                    for clo_st in self.closure(to_st):
                         if clo_st in subgraph:
                             adj[st].append(clo_st)
 
@@ -363,10 +363,10 @@ cdef class Automaton:
         Returns:
             NFA: the automaton equivalent to L(automaton)* language
         '''
-        return _automaton_clousure(automaton,0)
+        return _automaton_closure(automaton,0)
     
     @staticmethod
-    def PositiveClousure(automaton:Automaton) -> NFA:
+    def PositiveClosure(automaton:Automaton) -> NFA:
         '''
         Args:
             automaton (Automaton)
@@ -374,7 +374,7 @@ cdef class Automaton:
         Returns:
             NFA: the automaton equivalent to L(automaton)+ language
         '''
-        return _automaton_clousure(automaton,1)
+        return _automaton_closure(automaton,1)
     
     @staticmethod
     def Optional(automaton:Automaton) -> NFA:
@@ -385,7 +385,7 @@ cdef class Automaton:
         Returns:
             NFA: the automaton equivalent to L(automaton)? language
         '''
-        return _automaton_clousure(automaton,2)
+        return _automaton_closure(automaton,2)
     
     @staticmethod
     def Reverse(automaton:Automaton) -> NFA:
@@ -468,19 +468,19 @@ cdef class Automaton:
         self._current_state = self._start_state
         self._is_stuck = False # type:ignore
     
-    cpdef set[State] clousure(self,State state):
+    cpdef set[State] closure(self,State state):
         '''
         Args:
             state (State):
         
         Returns:
-            Set[State]: the clousure-set of the given state
+            Set[State]: the closure-set of the given state
         '''
         cdef str state_id = state._id
         cdef object state_value = state._value
         cdef set[State] result
         cdef State current_state,loop_state,inner_loop_state
-        cdef set[State] current_clousure,loop_state_clousure
+        cdef set[State] current_closure,loop_state_closure
         cdef int last_state_idx
         cdef int idx = 0
         cdef tuple[State,set[State],int,list[State]] stack_head
@@ -492,35 +492,35 @@ cdef class Automaton:
         cdef bint entered = False # type:ignore
         cdef dict[str,set[str]] notify = {}
 
-        # if clousure is already computed for this state
-        if state_id in self._clousures:
-            return self._clousures[state_id]
+        # if closure is already computed for this state
+        if state_id in self._closures:
+            return self._closures[state_id]
         # if this state has not epsilon-transitions
         if state_id not in self._epsilons:
-            # clousure is a set with only this state inside
-            self._clousures[state_id] = { state }
-            return self._clousures[state_id]
+            # closure is a set with only this state inside
+            self._closures[state_id] = { state }
+            return self._closures[state_id]
 
-        # initialize clousure
-        current_clousure = { state }
+        # initialize closure
+        current_closure = { state }
         # put in all states reachable from the given state with one epsilon-transition into
-        # the clousure, put in this states into states_to_check
+        # the closure, put in this states into states_to_check
         for loop_state_id in self._epsilons[state_id]:
-            current_clousure.add(self._states_by_id[loop_state_id])
+            current_closure.add(self._states_by_id[loop_state_id])
             states_to_check.append(self._states_by_id[loop_state_id])
         
-        stack_head = (state,current_clousure,idx,states_to_check)
+        stack_head = (state,current_closure,idx,states_to_check)
         stack.append(stack_head)
         in_progress.add(state_id)
 
-        # while there is clousures to compute
+        # while there is closures to compute
         while stack:
             entered = False # type:ignore
             # pop the current computing process
             stack_head = stack[-1]
 
             current_state = <State>stack_head[0]
-            current_clousure = <set[State]>stack_head[1]
+            current_closure = <set[State]>stack_head[1]
             last_state_idx = <int>stack_head[2]
             states_to_check = <list[State]>stack_head[3]
 
@@ -530,51 +530,51 @@ cdef class Automaton:
                 loop_state = <State>states_to_check[idx]
                 loop_state_id = loop_state._id
 
-                # if this state clousure is already in progress, ignore it
+                # if this state closure is already in progress, ignore it
                 if loop_state_id in in_progress:
                     if not loop_state_id in notify:
                         notify[loop_state_id] = set()
                     notify[loop_state_id].add(current_state._id)
                     continue
 
-                # if the current state has not clousure already computed
-                if not loop_state_id in self._clousures:
+                # if the current state has not closure already computed
+                if not loop_state_id in self._closures:
                     new_states_to_check = []
-                    # initialize its clousure
-                    loop_state_clousure = { loop_state }
+                    # initialize its closure
+                    loop_state_closure = { loop_state }
                     # if this state has epsilon-transitions
                     if loop_state_id in self._epsilons:
-                        # adds all reachable states with an epsilon-transition to the clousure
+                        # adds all reachable states with an epsilon-transition to the closure
                         # of the state and put it to new_states_to_check
                         for inner_loop_state_id in self._epsilons[loop_state_id]:
-                            loop_state_clousure.add(self._states_by_id[inner_loop_state_id])
+                            loop_state_closure.add(self._states_by_id[inner_loop_state_id])
                             new_states_to_check.append(self._states_by_id[inner_loop_state_id])
                         
-                        # create the clousure computation instance
-                        stack_head = (loop_state,loop_state_clousure,0,new_states_to_check)
+                        # create the closure computation instance
+                        stack_head = (loop_state,loop_state_closure,0,new_states_to_check)
                         # updates the top of the stack
-                        stack[-1] = (current_state, current_clousure, idx, states_to_check)
+                        stack[-1] = (current_state, current_closure, idx, states_to_check)
                         # push the new instance
                         stack.append(stack_head)
                         in_progress.add(loop_state_id)
                         entered = True # type:ignore
                         break
                     else:
-                        self._clousures[loop_state_id] = loop_state_clousure
-                # adds the states on the clousure of loop_state
-                current_clousure.update(self._clousures[loop_state_id])
+                        self._closures[loop_state_id] = loop_state_closure
+                # adds the states on the closure of loop_state
+                current_closure.update(self._closures[loop_state_id])
                 # advance the idx counter in 1
-                stack_head = (current_state,current_clousure,idx + 1,states_to_check)
+                stack_head = (current_state,current_closure,idx + 1,states_to_check)
             
             if not entered:
-                self._clousures[current_state._id] = current_clousure
+                self._closures[current_state._id] = current_closure
                 stack.pop()
                 in_progress.discard(current_state._id)
                 if current_state._id in notify:
                     for loop_state_id in notify[current_state._id]:
-                        self._clousures[loop_state_id].update(current_clousure)
+                        self._closures[loop_state_id].update(current_closure)
             
-        return self._clousures[state_id]
+        return self._closures[state_id]
     
     cpdef void make_complete(self):
         '''
@@ -658,7 +658,7 @@ cdef class DFA(Automaton):
         self._alphabet = set(alphabet)
         self._current_state = self._start_state
         self._states_by_id = { start_id:self._start_state }
-        self._clousures = {}
+        self._closures = {}
         self._epsilons = {}
         self._is_complete = False # type:ignore
         self._is_stuck = False # type:ignore
@@ -901,7 +901,7 @@ cdef class NFA(Automaton):
         self._alphabet = set(alphabet)
         self._current_state = self._start_state
         self._states_by_id = { start_id:self._start_state }
-        self._clousures = {}
+        self._closures = {}
         self._epsilons = {}
         self._is_complete = False # type:ignore
         self._is_stuck = False # type:ignore
@@ -938,7 +938,7 @@ cdef class NFA(Automaton):
             for st in state_value:
                 key = (st._id,symbol)
                 if key in self._trans_func._table:
-                    new_states.update(self.clousure(self.next(st,symbol)))
+                    new_states.update(self.closure(self.next(st,symbol)))
             
             if len(new_states) == 0:
                 continue
@@ -991,7 +991,7 @@ cdef class NFA(Automaton):
         cdef bint change = True # type:ignore
         cdef Table table = Table()
         cdef set[State] new_states = set()
-        cdef State start_state = self._build_state(self.clousure(self._start_state))
+        cdef State start_state = self._build_state(self.closure(self._start_state))
         cdef State state,new_state
 
         if not self._epsilons:
@@ -1052,7 +1052,7 @@ cdef NFA _copy_nfa(NFA nfa):
     cdef str state_id
     cdef object state_value
     cdef set[str] epsilons
-    cdef set[State] clousure
+    cdef set[State] closure
 
     if isinstance(nfa._start_state._value,set):
         state_value = set(nfa._start_state._value)
@@ -1072,10 +1072,10 @@ cdef NFA _copy_nfa(NFA nfa):
     for state_id,epsilons in nfa._epsilons.items():
         result._epsilons[state_id] = set(epsilons)
     
-    for state_id,clousure in nfa._clousures.items():
-        result._clousures[state_id] = set()
-        for state in nfa._clousures[state_id]:
-            result._clousures[state_id].add(result._states_by_id[state._id])
+    for state_id,closure in nfa._closures.items():
+        result._closures[state_id] = set()
+        for state in nfa._closures[state_id]:
+            result._closures[state_id].add(result._states_by_id[state._id])
     
     result._is_complete = nfa._is_complete
     return result
@@ -1350,10 +1350,10 @@ cdef NFA _automaton_concatenation(Automaton first,Automaton second):
 
     return result
 
-cdef NFA _automaton_clousure(Automaton automaton, int type_):
+cdef NFA _automaton_closure(Automaton automaton, int type_):
     '''
-    type_ = 0: Kleene Star clousure
-    type_ = 1: Positive Clousure
+    type_ = 0: Kleene Star closure
+    type_ = 1: Positive Closure
     type_ = 2: Optional
     '''
     cdef set[State] new_states = set()

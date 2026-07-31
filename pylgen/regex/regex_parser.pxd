@@ -31,7 +31,7 @@ cdef class RegexUnaryAST(RegexAST):
 cdef class KleeneStarAST(RegexUnaryAST):
     pass
 
-cdef class PositiveClousureAST(RegexUnaryAST):
+cdef class PositiveClosureAST(RegexUnaryAST):
     pass
 
 cdef class OptionalAST(RegexUnaryAST):
