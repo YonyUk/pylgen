@@ -5804,10 +5804,10 @@ class TestAutomatonOperations:
 
     def test_edge_case_intersection(self):
         w1 = ['hello','world']
-        w2 = ['from','python']
+        w2 = ['world','python']
         a1 = get_words_automaton(w1).to_deterministic().minimize()
         a2 = get_words_automaton(w2).to_deterministic().minimize()
 
         a = a1 & a2
         for w in w1 + w2:
-            assert a.accept(list(w))
+            assert a.accept(list(w)) == (w in w1 and w in w2)
