@@ -1,7 +1,7 @@
 import pytest
 from typing import Set
 
-from pylgen.automaton import Automaton,NFA,DFA,State, create_dfa
+from pylgen.automaton import Automaton,NFA,DFA,State, create_dfa,get_words_automaton
 from pylgen.common.table import Table
 
 class TestAutomatonOperations:
@@ -5801,3 +5801,13 @@ class TestAutomatonOperations:
                 assert q3 not in state.value
             if q3 in state.value:
                 assert q2 not in state.value
+
+    def test_edge_case_intersection(self):
+        w1 = ['hello','world']
+        w2 = ['from','python']
+        a1 = get_words_automaton(w1).to_deterministic().minimize()
+        a2 = get_words_automaton(w2).to_deterministic().minimize()
+
+        a = a1 & a2
+        for w in w1 + w2:
+            assert a.accept(list(w))
