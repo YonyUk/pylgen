@@ -200,7 +200,7 @@ $$
  - **Recursive step**(string $w = xa$, with $x \in \Sigma^*$, $a \in \Sigma $): Let $S = \hat{\delta}\lparen q,x \rparen$. Since $\delta$ is deterministic, we define:
 
 $$
-move\lparen S, a \rparen = \lbrace \delta \lparen p, a\rparen | p \in S \rbrace
+move\lparen S, a \rparen = \lbrace \delta \lparen p, a\rparen : p \in S \rbrace
 $$
 
 Then:
@@ -264,7 +264,7 @@ The hybrid $\epsilon$‑DFA is not a new class of languages; it is computational
 
 #### Every DFA is a Trivial Hybrid $\epsilon$‑DFA
 
-Given a DFA $A_D = \lparen Q,\Sigma,\delta_D,q_0,F \rparen$, construct a hybrid $\epsilon$‑DFA $A_H$ with the same $Q,\Sigma,q_0,F$, set $\delta_H\lparen q,a \rparen = \delta_D \lparen q,a \rparen$, and define the epsilon relation $\epsilon = \varnothing$. Then $\epsilon-Closure \lparen S \rparen = S$ for all $S$, and $\hat{\delta_H}$ behaves exactly like $\hat{\delta_D}$.
+Given a DFA $A_D = \lparen Q,\Sigma,\delta_D,q_0,F \rparen$, construct a hybrid $\epsilon$‑DFA $A_H$ with the same $Q,\Sigma,q_0,F$, set $\delta_H\lparen q,a \rparen = \delta_D \lparen q,a \rparen$, and define the epsilon relation $\epsilon = \varnothing$. Then $\epsilon-Closure \lparen S \rparen = S$ for all $S$, and $\hat{\delta}_H$ behaves exactly like $\hat{\delta}_D$.
 
 Therefore $L\lparen A_D \rparen = L \lparen A_H \rparen$.
 
