@@ -9,8 +9,8 @@ from .lr0_parser cimport LR0Item,LR0State
 from .lalr_parser cimport LALRState
 from .bottom_up_parser_actions import BottomUpParserAction
 
-_clousures:dict[tuple[str,frozenset],set[LR0Item]] = {}
-_clousures_lalr:dict[tuple[str,frozenset],set[LALRItem]] = {}
+_closures:dict[tuple[str,frozenset],set[LR0Item]] = {}
+_closures_lalr:dict[tuple[str,frozenset],set[LALRItem]] = {}
 
 cdef class ParserBuildingConflictException(Exception):
     pass
@@ -63,30 +63,30 @@ cdef class ParserBuilder:
 
     @staticmethod
     def clear_cache() -> None:
-        _clousures.clear()
-        _clousures_lalr.clear()
+        _closures.clear()
+        _closures_lalr.clear()
 
     @staticmethod
-    def clousure_lr0(items:Set[LR0Item],g:Grammar) -> Set[LR0Item]:
+    def closure_lr0(items:Set[LR0Item],g:Grammar) -> Set[LR0Item]:
         '''
         Args:
             items (Set[LR0Item])
         
         Returns:
-            Set[LR0Item]: the clousure of the given set
+            Set[LR0Item]: the closure of the given set
         '''
-        return _clousure_lr0(items,g)
+        return _closure_lr0(items,g)
     
     @staticmethod
-    def clousure_lalr(items:Set[LALRItem],g:Grammar) -> Set[LALRItem]:
+    def closure_lalr(items:Set[LALRItem],g:Grammar) -> Set[LALRItem]:
         '''
         Args:
             items (Set[LALRItem])
         
         Returns:
-            Set[LALRItem]: the clousure of the given set
+            Set[LALRItem]: the closure of the given set
         '''
-        return _clousure_lalr(items,g)
+        return _closure_lalr(items,g)
     
     @staticmethod
     def goto_lr0(items:Set[LR0Item],x:Symbol,g:Grammar) -> Set[LR0Item]:
@@ -213,7 +213,7 @@ cdef class ParserBuilder:
             return _build_lalr_parser_from_attributed(g)
         raise NotImplementedError()
 
-cdef set[LR0Item] _clousure_lr0(set[LR0Item] items,Grammar g):
+cdef set[LR0Item] _closure_lr0(set[LR0Item] items,Grammar g):
     cdef LR0Item item,new_item
     cdef Production production
     cdef Symbol head
@@ -223,8 +223,8 @@ cdef set[LR0Item] _clousure_lr0(set[LR0Item] items,Grammar g):
 
     key = (g._id(),frozenset(items))
     # checks for a precomputed value
-    if key in _clousures:
-        return _clousures[key] # type:ignore
+    if key in _closures:
+        return _closures[key] # type:ignore
     
     while worklist:
         item = worklist.pop()
@@ -238,10 +238,10 @@ cdef set[LR0Item] _clousure_lr0(set[LR0Item] items,Grammar g):
                         result.add(new_item)
                         worklist.append(new_item)
     
-    _clousures[key] = result
+    _closures[key] = result
     return result
 
-cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
+cdef set[LALRItem] _closure_lalr(set[LALRItem] items,Grammar g):
     cdef LALRItem item,new_item
     cdef Production production
     cdef Symbol head,lookahead_symbol,new_lookahead
@@ -257,8 +257,8 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
 
     key = (g._id(),frozenset(items))
     # checks for a precomputed value
-    if key in _clousures_lalr:
-        return _clousures_lalr[key] # type:ignore
+    if key in _closures_lalr:
+        return _closures_lalr[key] # type:ignore
 
     for item in items:
         kernel = (item._head,tuple(item._left),tuple(item._right))
@@ -292,7 +292,7 @@ cdef set[LALRItem] _clousure_lalr(set[LALRItem] items,Grammar g):
                             change = True # type:ignore
                         item_by_kernel[kernel] = new_item
 
-    _clousures_lalr[key] = result
+    _closures_lalr[key] = result
     return result
 
 cdef set[LR0Item] _goto_lr0(set[LR0Item] items,Symbol x,Grammar g):
@@ -303,7 +303,7 @@ cdef set[LR0Item] _goto_lr0(set[LR0Item] items,Symbol x,Grammar g):
     for item in items:
         if len(item._right) > 0 and item._right[0] == x:
             new_item = LR0Item(item._head,item._left + [x],item._right[1:]) # type:ignore
-            result.update(_clousure_lr0({new_item},g))
+            result.update(_closure_lr0({new_item},g))
     
     return result
 
@@ -315,7 +315,7 @@ cdef set[LALRItem] _goto_lalr(set[LALRItem] items,Symbol x,Grammar g):
     for item in items:
         if len(item._right) > 0 and item._right[0] == x:
             new_item = LALRItem(item._head,item._left + [x],item._right[1:],item._lookaheads.copy()) # type:ignore
-            result.update(_clousure_lalr({new_item},g))
+            result.update(_closure_lalr({new_item},g))
 
     return result
 
@@ -323,7 +323,7 @@ cdef set[LR0State] _get_canonical_lr0_states(Grammar g):
     cdef Grammar augmented = _augment_grammar(g)
     cdef LR0Item start = LR0Item(augmented._start_symbol,[],[g._start_symbol]) # type:ignore
     cdef LR0State state,new_state
-    cdef set[LR0State] result = { LR0State(_clousure_lr0({start},augmented)) } # type:ignore
+    cdef set[LR0State] result = { LR0State(_closure_lr0({start},augmented)) } # type:ignore
     cdef list[LR0State] worklist = list(result)
     cdef set[LR0Item] items
     cdef Symbol symbol
@@ -376,17 +376,17 @@ cdef tuple[dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]],se
     cdef LR0Item item,next_item
     cdef set[LR0Item] kernel_items
     cdef tuple[LR0Item,Symbol] edge
-    cdef set[LR0Item] clousure
+    cdef set[LR0Item] closure
 
     for state in states:
         kernel_items = _get_kernel_items_lr0(state,g)
         result[LR0State(kernel_items,state._index)] = {} # type:ignore
     
     for state in result:
-        clousure = _clousure_lr0(state._items,g)
-        for item in clousure:
+        closure = _closure_lr0(state._items,g)
+        for item in closure:
             if len(item._right) > 0:
-                next_state = LR0State(_goto_lr0(clousure,item._right[0],g)) # type:ignore
+                next_state = LR0State(_goto_lr0(closure,item._right[0],g)) # type:ignore
                 edge = (item,item._right[0])
                 if not edge in result[state]:
                     result[state][edge] = (next_state,LR0Item(item._head,item._left + [item._right[0]],item._right[1:])) # type:ignore
@@ -428,17 +428,17 @@ cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
             # compute the lookaheads
             if lr0_item._head not in g._non_terminals and len(lr0_item._left) == 0:
                 lalr_item = LALRItem(lr0_item._head,[],[g._start_symbol],{g._end_symbol}) # type:ignore
-                lalr_state = LALRState(_clousure_lalr({lalr_item},g)) # type:ignore
+                lalr_state = LALRState(_closure_lalr({lalr_item},g)) # type:ignore
             else:
                 # lets the lookaheads empty
                 lalr_item = LALRItem(lr0_item._head,lr0_item._left,lr0_item._right) # type:ignore
-                lalr_state = LALRState(_clousure_lalr({lalr_item},g),lr0_state._index) # type:ignore
+                lalr_state = LALRState(_closure_lalr({lalr_item},g),lr0_state._index) # type:ignore
         else:
             lalr_items = set()
             for lr0_item in lr0_kernel_items:
                 lalr_item = LALRItem(lr0_item._head,lr0_item._left,lr0_item._right) # type:ignore
                 lalr_items.add(lalr_item)
-            lalr_state = LALRState(_clousure_lalr(lalr_items,g),lr0_state._index) # type:ignore
+            lalr_state = LALRState(_closure_lalr(lalr_items,g),lr0_state._index) # type:ignore
 
         # sets the lookahead initial value
         for lalr_item in lalr_state._items:
@@ -460,8 +460,8 @@ cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
                 lookahead_set = lookaheads[key]
                 lalr_item = LALRItem(lr0_item._head,lr0_item._left,lr0_item._right,lookahead_set) # type:ignore
                 lalr_items.add(lalr_item)
-            # make the state with the clousure, generating espontaneous lookaheads
-            lalr_state = LALRState(_clousure_lalr(lalr_items,g),lr0_state._index) # type:ignore
+            # make the state with the closure, generating espontaneous lookaheads
+            lalr_state = LALRState(_closure_lalr(lalr_items,g),lr0_state._index) # type:ignore
             # update the lookaheads
             for lalr_item in lalr_state._items:
                 lr0_item = LR0Item(lalr_item._head,lalr_item._left,lalr_item._right) # type:ignore
@@ -478,10 +478,10 @@ cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
         for lr0_state in propagation_edges:
             for (lr0_item,_),(lr0_state_to,lr0_item_to) in propagation_edges[lr0_state].items(): # type:ignore
                 # edge that propagate lookaheads
-                lr0_state = LR0State(_clousure_lr0(lr0_state._items,g),lr0_state._index) # type:ignore
+                lr0_state = LR0State(_closure_lr0(lr0_state._items,g),lr0_state._index) # type:ignore
                 key = (lr0_state,lr0_item)
                 if len(lookaheads[key]) == 0: continue
-                lr0_state_to = LR0State(_clousure_lr0(lr0_state_to._items,g),lr0_state_to._index) # type:ignore
+                lr0_state_to = LR0State(_closure_lr0(lr0_state_to._items,g),lr0_state_to._index) # type:ignore
                 key_to = (lr0_state_to,lr0_item_to)
                 for lookahead_symbol in lookaheads[key]:
                     if not lookahead_symbol in lookaheads[key_to]:
