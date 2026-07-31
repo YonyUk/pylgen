@@ -5107,9 +5107,9 @@ class TestAutomatonOperations:
         ('11',False),
         ('010101010111110',True)
     ])
-    def test_automaton_positive_clousure_operation_1_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA):
+    def test_automaton_positive_closure_operation_1_1(self,string:str,should_accept:bool,zero_terminated_dfa:DFA):
 
-        kleene = Automaton.PositiveClousure(zero_terminated_dfa).to_deterministic()
+        kleene = Automaton.PositiveClosure(zero_terminated_dfa).to_deterministic()
 
         assert kleene.accept(list(string)) == should_accept
     @pytest.mark.parametrize("string,should_accept",[
@@ -5122,9 +5122,9 @@ class TestAutomatonOperations:
         ('11',False),
         ('010101010111110',True)
     ])
-    def test_automaton_positive_clousure_operation_1_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA):
+    def test_automaton_positive_closure_operation_1_2(self,string:str,should_accept:bool,zero_terminated_dfa:DFA):
 
-        kleene = Automaton.PositiveClousure(zero_terminated_dfa).to_deterministic().minimize()
+        kleene = Automaton.PositiveClosure(zero_terminated_dfa).to_deterministic().minimize()
 
         assert kleene.accept(list(string)) == should_accept
 
@@ -5138,9 +5138,9 @@ class TestAutomatonOperations:
         ('11',True),
         ('01001011001001',True)
     ])
-    def test_automaton_positive_clousure_operation_2_1(self,string:str,should_accept:bool,one_terminated_dfa:DFA):
+    def test_automaton_positive_closure_operation_2_1(self,string:str,should_accept:bool,one_terminated_dfa:DFA):
 
-        kleene = Automaton.PositiveClousure(one_terminated_dfa).to_deterministic()
+        kleene = Automaton.PositiveClosure(one_terminated_dfa).to_deterministic()
 
         assert kleene.accept(list(string)) == should_accept
     
@@ -5154,9 +5154,9 @@ class TestAutomatonOperations:
         ('11',True),
         ('01001011001001',True)
     ])
-    def test_automaton_positive_clousure_operation_2_2(self,string:str,should_accept:bool,one_terminated_dfa:DFA):
+    def test_automaton_positive_closure_operation_2_2(self,string:str,should_accept:bool,one_terminated_dfa:DFA):
 
-        kleene = Automaton.PositiveClousure(one_terminated_dfa).to_deterministic()
+        kleene = Automaton.PositiveClosure(one_terminated_dfa).to_deterministic()
 
         assert kleene.accept(list(string)) == should_accept
     
@@ -5172,9 +5172,9 @@ class TestAutomatonOperations:
         ('1011010',True),
         ('10101111',True)
     ])
-    def test_automaton_positive_clousure_operation_3_1(self,string:str,should_accept:bool,five_multiplo_dfa:DFA):
+    def test_automaton_positive_closure_operation_3_1(self,string:str,should_accept:bool,five_multiplo_dfa:DFA):
 
-        kleene = Automaton.PositiveClousure(five_multiplo_dfa).to_deterministic()
+        kleene = Automaton.PositiveClosure(five_multiplo_dfa).to_deterministic()
 
         assert kleene.accept(list(string)) == should_accept
 
@@ -5190,9 +5190,9 @@ class TestAutomatonOperations:
         ('1011010',True),
         ('10101111',True)
     ])
-    def test_automaton_positive_clousure_operation_3_2(self,string:str,should_accept:bool,five_multiplo_dfa:DFA):
+    def test_automaton_positive_closure_operation_3_2(self,string:str,should_accept:bool,five_multiplo_dfa:DFA):
 
-        kleene = Automaton.PositiveClousure(five_multiplo_dfa).to_deterministic().minimize()
+        kleene = Automaton.PositiveClosure(five_multiplo_dfa).to_deterministic().minimize()
 
         assert kleene.accept(list(string)) == should_accept
     
@@ -5207,9 +5207,9 @@ class TestAutomatonOperations:
         ('111111111',True),
         ('000000000',True)
     ])
-    def test_automaton_positive_clousure_operation_4_1(self,string:str,should_accept:bool,alternate_dfa:DFA):
+    def test_automaton_positive_closure_operation_4_1(self,string:str,should_accept:bool,alternate_dfa:DFA):
 
-        kleene = Automaton.PositiveClousure(alternate_dfa).to_deterministic()
+        kleene = Automaton.PositiveClosure(alternate_dfa).to_deterministic()
 
         assert kleene.accept(list(string)) == should_accept
 
@@ -5224,28 +5224,9 @@ class TestAutomatonOperations:
         ('111111111',True),
         ('000000000',True)
     ])
-    def test_automaton_positive_clousure_operation_4_2(self,string:str,should_accept:bool,alternate_dfa:DFA):
+    def test_automaton_positive_closure_operation_4_2(self,string:str,should_accept:bool,alternate_dfa:DFA):
 
-        kleene = Automaton.PositiveClousure(alternate_dfa).to_deterministic()
-
-        assert kleene.accept(list(string)) == should_accept
-    
-    @pytest.mark.parametrize("string,should_accept",[
-        ('',False),
-        ('0',False),
-        ('1',False),
-        ('00',False),
-        ('01',True),
-        ('10',False),
-        ('11',False),
-        ('0010100101',True),
-        ('111111111101',True),
-        ('00000000',False),
-        ('00000101010111101',True)
-    ])
-    def test_automaton_positive_clousure_operation_5_1(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
-
-        kleene = Automaton.PositiveClousure(nfa_0_1_terminated).to_deterministic()
+        kleene = Automaton.PositiveClosure(alternate_dfa).to_deterministic()
 
         assert kleene.accept(list(string)) == should_accept
     
@@ -5262,28 +5243,9 @@ class TestAutomatonOperations:
         ('00000000',False),
         ('00000101010111101',True)
     ])
-    def test_automaton_positive_clousure_operation_5_2(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
+    def test_automaton_positive_closure_operation_5_1(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
 
-        kleene = Automaton.PositiveClousure(nfa_0_1_terminated).to_deterministic().minimize()
-
-        assert kleene.accept(list(string)) == should_accept
-    
-    @pytest.mark.parametrize("string,should_accept",[
-        ('',False),
-        ('0',False),
-        ('1',False),
-        ('00',False),
-        ('01',True),
-        ('10',False),
-        ('11',False),
-        ('0010100101',True),
-        ('111111111101',True),
-        ('00000000',False),
-        ('00000101010111101',True)
-    ])
-    def test_automaton_positive_clousure_operation_5_3(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
-
-        kleene = Automaton.PositiveClousure(nfa_0_1_terminated.to_deterministic()).to_deterministic()
+        kleene = Automaton.PositiveClosure(nfa_0_1_terminated).to_deterministic()
 
         assert kleene.accept(list(string)) == should_accept
     
@@ -5300,28 +5262,9 @@ class TestAutomatonOperations:
         ('00000000',False),
         ('00000101010111101',True)
     ])
-    def test_automaton_positive_clousure_operation_5_4(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
+    def test_automaton_positive_closure_operation_5_2(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
 
-        kleene = Automaton.PositiveClousure(nfa_0_1_terminated.to_deterministic()).to_deterministic().minimize()
-
-        assert kleene.accept(list(string)) == should_accept
-    
-    @pytest.mark.parametrize("string,should_accept",[
-        ('',False),
-        ('0',False),
-        ('1',False),
-        ('00',False),
-        ('01',True),
-        ('10',False),
-        ('11',False),
-        ('0010100101',True),
-        ('111111111101',True),
-        ('00000000',False),
-        ('00000101010111101',True)
-    ])
-    def test_automaton_positive_clousure_operation_5_5(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
-
-        kleene = Automaton.PositiveClousure(nfa_0_1_terminated.to_deterministic().minimize()).to_deterministic()
+        kleene = Automaton.PositiveClosure(nfa_0_1_terminated).to_deterministic().minimize()
 
         assert kleene.accept(list(string)) == should_accept
     
@@ -5338,9 +5281,66 @@ class TestAutomatonOperations:
         ('00000000',False),
         ('00000101010111101',True)
     ])
-    def test_automaton_positive_clousure_operation_5_6(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
+    def test_automaton_positive_closure_operation_5_3(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
 
-        kleene = Automaton.PositiveClousure(nfa_0_1_terminated.to_deterministic().minimize()).to_deterministic().minimize()
+        kleene = Automaton.PositiveClosure(nfa_0_1_terminated.to_deterministic()).to_deterministic()
+
+        assert kleene.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',True),
+        ('10',False),
+        ('11',False),
+        ('0010100101',True),
+        ('111111111101',True),
+        ('00000000',False),
+        ('00000101010111101',True)
+    ])
+    def test_automaton_positive_closure_operation_5_4(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
+
+        kleene = Automaton.PositiveClosure(nfa_0_1_terminated.to_deterministic()).to_deterministic().minimize()
+
+        assert kleene.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',True),
+        ('10',False),
+        ('11',False),
+        ('0010100101',True),
+        ('111111111101',True),
+        ('00000000',False),
+        ('00000101010111101',True)
+    ])
+    def test_automaton_positive_closure_operation_5_5(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
+
+        kleene = Automaton.PositiveClosure(nfa_0_1_terminated.to_deterministic().minimize()).to_deterministic()
+
+        assert kleene.accept(list(string)) == should_accept
+    
+    @pytest.mark.parametrize("string,should_accept",[
+        ('',False),
+        ('0',False),
+        ('1',False),
+        ('00',False),
+        ('01',True),
+        ('10',False),
+        ('11',False),
+        ('0010100101',True),
+        ('111111111101',True),
+        ('00000000',False),
+        ('00000101010111101',True)
+    ])
+    def test_automaton_positive_closure_operation_5_6(self,string:str,should_accept:bool,nfa_0_1_terminated:NFA):
+
+        kleene = Automaton.PositiveClosure(nfa_0_1_terminated.to_deterministic().minimize()).to_deterministic().minimize()
 
         assert kleene.accept(list(string)) == should_accept
     
@@ -5386,9 +5386,9 @@ class TestAutomatonOperations:
         ('hihihihihihihihi',True),
         ('hhhhhiiiii',False)
     ])
-    def test_automaton_positive_clousure_operation_hi_dfa_1(self,string:str,should_accept:bool,hi_dfa:DFA):
+    def test_automaton_positive_closure_operation_hi_dfa_1(self,string:str,should_accept:bool,hi_dfa:DFA):
 
-        kleene = Automaton.PositiveClousure(hi_dfa).to_deterministic()
+        kleene = Automaton.PositiveClosure(hi_dfa).to_deterministic()
 
         assert kleene.accept(list(string)) == should_accept
     
@@ -5402,9 +5402,9 @@ class TestAutomatonOperations:
         ('hihihihihihihihi',True),
         ('hhhhhiiiii',False)
     ])
-    def test_automaton_positive_clousure_operation_hi_dfa_2(self,string:str,should_accept:bool,hi_dfa:DFA):
+    def test_automaton_positive_closure_operation_hi_dfa_2(self,string:str,should_accept:bool,hi_dfa:DFA):
 
-        kleene = Automaton.PositiveClousure(hi_dfa).to_deterministic().minimize()
+        kleene = Automaton.PositiveClosure(hi_dfa).to_deterministic().minimize()
 
         assert kleene.accept(list(string)) == should_accept
 
@@ -5417,7 +5417,7 @@ class TestAutomatonOperations:
         ('hihi',False),
         ('hii',False)
     ])
-    def test_automaton_optional_clousure_operation_1(self,string:str,should_accept:bool,hi_dfa:DFA):
+    def test_automaton_optional_closure_operation_1(self,string:str,should_accept:bool,hi_dfa:DFA):
 
         opt = Automaton.Optional(hi_dfa).to_deterministic()
 
@@ -5432,7 +5432,7 @@ class TestAutomatonOperations:
         ('hihi',False),
         ('hii',False)
     ])
-    def test_automaton_optional_clousure_operation_2(self,string:str,should_accept:bool,hi_dfa:DFA):
+    def test_automaton_optional_closure_operation_2(self,string:str,should_accept:bool,hi_dfa:DFA):
 
         opt = Automaton.Optional(hi_dfa).to_deterministic().minimize()
 
