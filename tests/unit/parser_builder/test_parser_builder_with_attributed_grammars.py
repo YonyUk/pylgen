@@ -162,19 +162,19 @@ class TestParserBuilderWithAttributedGrammars:
             tokens.pop(0)
         return False
 
-    def test_lr0_clousure_1(self):
-        clousure = ParserBuilder.clousure_lr0(set(),AttributedGrammar(Symbol('S')))
-        assert len(clousure) == 0
+    def test_lr0_closure_1(self):
+        closure = ParserBuilder.closure_lr0(set(),AttributedGrammar(Symbol('S')))
+        assert len(closure) == 0
     
-    def test_lr0_clousure_2(self):
+    def test_lr0_closure_2(self):
         A = Symbol('A')
         a = Symbol('a',True)
         b = Symbol('b',True)
         lr0_item = LR0Item(A,[a],[b])
-        clousure = ParserBuilder.clousure_lr0({lr0_item},AttributedGrammar(Symbol('S')))
-        assert clousure == { lr0_item }
+        closure = ParserBuilder.closure_lr0({lr0_item},AttributedGrammar(Symbol('S')))
+        assert closure == { lr0_item }
     
-    def test_lr0_clousure_3(self):
+    def test_lr0_closure_3(self):
         S = Symbol('S')
         E = Symbol('E')
         id_ = Symbol('id',True)
@@ -186,10 +186,10 @@ class TestParserBuilderWithAttributedGrammars:
 
         lr0_item = LR0Item(S,[],[E])
         new_item = LR0Item(E,[],[id_])
-        clousure = ParserBuilder.clousure_lr0({lr0_item},G)
-        assert clousure == { new_item, lr0_item }
+        closure = ParserBuilder.closure_lr0({lr0_item},G)
+        assert closure == { new_item, lr0_item }
     
-    def test_lr0_clousure_4(self):
+    def test_lr0_closure_4(self):
         S = Symbol('S')
         A = Symbol('A')
         B = Symbol('B')
@@ -202,10 +202,10 @@ class TestParserBuilderWithAttributedGrammars:
 
         item1 = LR0Item(A,[],[B])
         item2 = LR0Item(B,[],[A])
-        clousure = ParserBuilder.clousure_lr0({ item1, item2 },G)
-        assert clousure == { item1, item2 }
+        closure = ParserBuilder.closure_lr0({ item1, item2 },G)
+        assert closure == { item1, item2 }
     
-    def test_lr0_clousure_5(self):
+    def test_lr0_closure_5(self):
         S = Symbol('S')
         A = Symbol('A')
         eps = Symbol('ε',True,True)
@@ -216,10 +216,10 @@ class TestParserBuilderWithAttributedGrammars:
         G[A] += (eps,),comodin_reductor
 
         item = LR0Item(A,[],[eps])
-        clousure = ParserBuilder.clousure_lr0({item},G)
-        assert clousure == { item }
+        closure = ParserBuilder.closure_lr0({item},G)
+        assert closure == { item }
 
-    def test_lr0_clousure_6(self,classic_lalr_1_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+    def test_lr0_closure_6(self,classic_lalr_1_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
         G,(S,L,R,mul,id_,eq,end_symbol) = classic_lalr_1_grammar
 
         item1 = LR0Item(Symbol("S'"),[],[S])
@@ -229,10 +229,10 @@ class TestParserBuilderWithAttributedGrammars:
         item5 = LR0Item(L,[],[id_])
         item6 = LR0Item(R,[],[L])
 
-        clousure = ParserBuilder.clousure_lr0({item1},G)
-        assert clousure == {item1,item2,item3,item4,item5,item6}
+        closure = ParserBuilder.closure_lr0({item1},G)
+        assert closure == {item1,item2,item3,item4,item5,item6}
 
-    def test_lr0_clousure_7(self,arithmetic_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+    def test_lr0_closure_7(self,arithmetic_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
         G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
 
         item1 = LR0Item(Symbol("E'"),[],[E])
@@ -248,10 +248,10 @@ class TestParserBuilderWithAttributedGrammars:
         item11 = LR0Item(P,[],[lp,E,rp])
         item12 = LR0Item(P,[],[id_])
 
-        clousure = ParserBuilder.clousure_lr0({item1},G)
-        assert clousure == {item1,item2,item3,item4,item5,item6,item7,item8,item9,item10,item11,item12}
+        closure = ParserBuilder.closure_lr0({item1},G)
+        assert closure == {item1,item2,item3,item4,item5,item6,item7,item8,item9,item10,item11,item12}
 
-    def test_lr0_clousure_cache_1(self):
+    def test_lr0_closure_cache_1(self):
         S = Symbol('S')
         E = Symbol('E')
         id_ = Symbol('id',True)
@@ -263,52 +263,52 @@ class TestParserBuilderWithAttributedGrammars:
 
         lr0_item = LR0Item(S,[],[E])
         t = datetime.now()
-        clousure1 = ParserBuilder.clousure_lr0({lr0_item},G)
+        closure1 = ParserBuilder.closure_lr0({lr0_item},G)
         t0 = datetime.now() - t
         t = datetime.now()
-        clousure2 = ParserBuilder.clousure_lr0({lr0_item},G)
+        closure2 = ParserBuilder.closure_lr0({lr0_item},G)
         t1 = datetime.now() - t
         assert t1 < t0
-        assert clousure1 == clousure2
+        assert closure1 == closure2
 
-    def test_lr0_clousure_cache_2(self,classic_lalr_1_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+    def test_lr0_closure_cache_2(self,classic_lalr_1_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
         G,(S,L,R,mul,id_,eq,end_symbol) = classic_lalr_1_grammar
 
         lr0_item = LR0Item(Symbol("S'"),[],[S])
         t = datetime.now()
-        clousure1 = ParserBuilder.clousure_lr0({lr0_item},G)
+        closure1 = ParserBuilder.closure_lr0({lr0_item},G)
         t0 = datetime.now() - t
         t = datetime.now()
-        clousure2 = ParserBuilder.clousure_lr0({lr0_item},G)
+        closure2 = ParserBuilder.closure_lr0({lr0_item},G)
         t1 = datetime.now() - t
         assert t1 < t0
-        assert clousure1 == clousure2
+        assert closure1 == closure2
     
-    def test_lr0_clousure_cache_3(self,arithmetic_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+    def test_lr0_closure_cache_3(self,arithmetic_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
         G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
 
         item1 = LR0Item(Symbol("E'"),[],[E])
 
         t = datetime.now()
-        clousure1 = ParserBuilder.clousure_lr0({item1},G)
+        closure1 = ParserBuilder.closure_lr0({item1},G)
         t0 = datetime.now() - t
         t = datetime.now()
-        clousure2 = ParserBuilder.clousure_lr0({item1},G)
+        closure2 = ParserBuilder.closure_lr0({item1},G)
         t1 = datetime.now() - t
 
         assert t1 < t0
-        assert clousure1 == clousure2
+        assert closure1 == closure2
     
-    def test_lalr1_clousure_1(self,classic_lalr_1_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+    def test_lalr1_closure_1(self,classic_lalr_1_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
         G,(S,L,R,mul,id_,eq,end_symbol) = classic_lalr_1_grammar
 
         item = LALRItem(Symbol("S'"),[],[S])
 
-        clousure = ParserBuilder.clousure_lalr({item},G)
-        for i in clousure:
+        closure = ParserBuilder.closure_lalr({item},G)
+        for i in closure:
             assert len(i.lookaheads) == 0
     
-    def test_lalr1_clousure_2(self):
+    def test_lalr1_closure_2(self):
         S = Symbol('S')
         A = Symbol('A')
         B = Symbol('B')
@@ -321,14 +321,14 @@ class TestParserBuilderWithAttributedGrammars:
 
         item = LALRItem(Symbol("S'"),[],[S],{G.end_symbol})
 
-        clousure = ParserBuilder.clousure_lalr({item},G)
-        for i in clousure:
+        closure = ParserBuilder.closure_lalr({item},G)
+        for i in closure:
             if i.head == A and len(i.left) == 0 and i.right == [a]:
                 first = G.first([B,G.end_symbol])
                 assert first.issubset(i.lookaheads)
                 break
     
-    def test_lalr1_clousure_3(self):
+    def test_lalr1_closure_3(self):
         S = Symbol('S')
         A = Symbol('A')
         B = Symbol('B')
@@ -346,14 +346,14 @@ class TestParserBuilderWithAttributedGrammars:
 
         item = LALRItem(A,[],[B,a],{a,b})
 
-        clousure = ParserBuilder.clousure_lalr({item},G)
+        closure = ParserBuilder.closure_lalr({item},G)
         
-        for i in clousure:
+        for i in closure:
             if i.head == B and len(i.left) == 0:
                 subset = G.first([a,a]).union(G.first([a,b]))
                 assert subset.issubset(i.lookaheads)
     
-    def test_lalr1_clousure_4(self):
+    def test_lalr1_closure_4(self):
         S = Symbol('S')
         A = Symbol('A')
         B = Symbol('B')
@@ -375,14 +375,14 @@ class TestParserBuilderWithAttributedGrammars:
 
         item = LALRItem(A,[],[B,C],{a,b})
 
-        clousure = ParserBuilder.clousure_lalr({item},G)
+        closure = ParserBuilder.closure_lalr({item},G)
         
-        for i in clousure:
+        for i in closure:
             if i.head == B and len(i.left) == 0:
                 subset = G.first([C,a]).union(G.first([C,b]))
                 assert subset.issubset(i.lookaheads)
     
-    def test_lalr1_clousure_5(self):
+    def test_lalr1_closure_5(self):
         E = Symbol('E')
         T = Symbol('T')
         plus = Symbol('+',True)
@@ -397,10 +397,10 @@ class TestParserBuilderWithAttributedGrammars:
 
         item = LALRItem(T,[id_],[],{plus,G.end_symbol})
 
-        clousure = ParserBuilder.clousure_lalr({item},G)
-        assert clousure == { item }
+        closure = ParserBuilder.closure_lalr({item},G)
+        assert closure == { item }
     
-    def test_lalr1_clousure_6(self):
+    def test_lalr1_closure_6(self):
         S = Symbol('S')
         A = Symbol('A')
         B = Symbol('B')
@@ -419,39 +419,39 @@ class TestParserBuilderWithAttributedGrammars:
         item1 = LALRItem(S,[A],[B],{G.end_symbol})
         item2 = LALRItem(S,[A],[B],{plus})
 
-        clousure = ParserBuilder.clousure_lalr({item1,item2},G)
+        closure = ParserBuilder.closure_lalr({item1,item2},G)
 
-        for it in clousure:
+        for it in closure:
             if it.head == B and len(it.left) == 0 and it.right == [b]:
                 assert it.lookaheads == {G.end_symbol, plus}
     
-    def test_lalr1_clousure_cache_2(self,classic_lalr_1_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+    def test_lalr1_closure_cache_2(self,classic_lalr_1_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
         G,(S,L,R,mul,id_,eq,end_symbol) = classic_lalr_1_grammar
 
         lalr_item = LALRItem(Symbol("S'"),[],[S],{end_symbol})
         t = datetime.now()
-        clousure1 = ParserBuilder.clousure_lr0({lalr_item},G)
+        closure1 = ParserBuilder.closure_lr0({lalr_item},G)
         t0 = datetime.now() - t
         t = datetime.now()
-        clousure2 = ParserBuilder.clousure_lr0({lalr_item},G)
+        closure2 = ParserBuilder.closure_lr0({lalr_item},G)
         t1 = datetime.now() - t
         assert t1 < t0
-        assert clousure1 == clousure2
+        assert closure1 == closure2
     
-    def test_lalr1_clousure_cache_3(self,arithmetic_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+    def test_lalr1_closure_cache_3(self,arithmetic_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
         G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
 
         item1 = LALRItem(Symbol("E'"),[],[E],{end_symbol})
 
         t = datetime.now()
-        clousure1 = ParserBuilder.clousure_lr0({item1},G)
+        closure1 = ParserBuilder.closure_lr0({item1},G)
         t0 = datetime.now() - t
         t = datetime.now()
-        clousure2 = ParserBuilder.clousure_lr0({item1},G)
+        closure2 = ParserBuilder.closure_lr0({item1},G)
         t1 = datetime.now() - t
 
         assert t1 < t0
-        assert clousure1 == clousure2
+        assert closure1 == closure2
    
     def test_lr0_goto_1(self):
         E = Symbol('E')
@@ -947,7 +947,7 @@ class TestParserBuilderWithAttributedGrammars:
         with pytest.raises(LALRReduceReduceConflictException):
             _,_ = ParserBuilder.get_goto_action_tables_lalr(G)
     
-    def test_cache_clousure_lr0(self):
+    def test_cache_closure_lr0(self):
         S = Symbol('S')
         a = Symbol('a',True)
 
@@ -957,12 +957,12 @@ class TestParserBuilderWithAttributedGrammars:
 
         item = LR0Item(S,[],[a])
 
-        cl1 = ParserBuilder.clousure_lr0({item},G)
-        cl2 = ParserBuilder.clousure_lr0({item},G)
+        cl1 = ParserBuilder.closure_lr0({item},G)
+        cl2 = ParserBuilder.closure_lr0({item},G)
 
         assert cl1 is cl2
     
-    def test_cache_clousure_lalr(self):
+    def test_cache_closure_lalr(self):
         S = Symbol('S')
         a = Symbol('a',True)
 
@@ -972,12 +972,12 @@ class TestParserBuilderWithAttributedGrammars:
 
         item = LALRItem(S,[],[a],{G.end_symbol})
 
-        cl1 = ParserBuilder.clousure_lalr({item},G)
-        cl2 = ParserBuilder.clousure_lalr({item},G)
+        cl1 = ParserBuilder.closure_lalr({item},G)
+        cl2 = ParserBuilder.closure_lalr({item},G)
 
         assert cl1 is cl2
     
-    def test_clear_cache_clousure_1(self):
+    def test_clear_cache_closure_1(self):
         S = Symbol('S')
         a = Symbol('a',True)
 
@@ -987,12 +987,12 @@ class TestParserBuilderWithAttributedGrammars:
 
         item = LR0Item(S,[],[a])
 
-        cl1 = ParserBuilder.clousure_lr0({item},G)
+        cl1 = ParserBuilder.closure_lr0({item},G)
         ParserBuilder.clear_cache()
-        cl2 = ParserBuilder.clousure_lr0({item},G)
+        cl2 = ParserBuilder.closure_lr0({item},G)
         assert cl1 is not cl2
     
-    def test_clear_cache_clousure_2(self):
+    def test_clear_cache_closure_2(self):
         S = Symbol('S')
         a = Symbol('a',True)
 
@@ -1002,9 +1002,9 @@ class TestParserBuilderWithAttributedGrammars:
 
         item = LALRItem(S,[],[a],{G.end_symbol})
 
-        cl1 = ParserBuilder.clousure_lalr({item},G)
+        cl1 = ParserBuilder.closure_lalr({item},G)
         ParserBuilder.clear_cache()
-        cl2 = ParserBuilder.clousure_lalr({item},G)
+        cl2 = ParserBuilder.closure_lalr({item},G)
 
         assert cl1 is not cl2
     
@@ -1022,11 +1022,11 @@ class TestParserBuilderWithAttributedGrammars:
 
         item1 = LR0Item(S,[],[a])
         item2 = LR0Item(S,[],[b])
-        cl1 = ParserBuilder.clousure_lr0({item1},G1)
-        cl2 = ParserBuilder.clousure_lr0({item1},G2)
+        cl1 = ParserBuilder.closure_lr0({item1},G1)
+        cl2 = ParserBuilder.closure_lr0({item1},G2)
         assert cl1 is not cl2
-        cl1 = ParserBuilder.clousure_lr0({item2},G1)
-        cl2 = ParserBuilder.clousure_lr0({item2},G2)
+        cl1 = ParserBuilder.closure_lr0({item2},G1)
+        cl2 = ParserBuilder.closure_lr0({item2},G2)
         assert cl1 is not cl2
     
     def test_cyclic_grammar(self):
