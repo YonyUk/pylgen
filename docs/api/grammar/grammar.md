@@ -354,3 +354,17 @@ Here is a minimal complete example that defines a simple arithmetic grammar with
     ```
 
 This grammar correctly handles precedence (multiplication before addition) and parentheses.
+
+## Summary
+
+The `grammar` module is the linchpin that connects the lexical and syntactic phases. It provides a clean, Pythonic interface for defining context‑free and attributed grammars, computing essential sets, and preparing the grammar for parser generation. Its design emphasizes:
+
+ - **Clarity**: Intuitive syntax for adding productions and reductors.
+
+ - **Performance**: Lazy computation and Cython acceleration.
+
+ - **Extensibility**: Easy to subclass or extend for custom grammar types (e.g., ambiguous grammars, with conflict resolution).
+
+With this module, you can specify any context‑free language and automatically generate an efficient parser, complete with semantic actions. The rest of the pipeline, lexical analysis, parsing, and semantic processing, then integrates seamlessly to produce a full language implementation.
+
+In the next module, we will explore the `regex` engine, which underpins the lexer's pattern matching. But first, take a moment to experiment with the grammar API, it is the heart of your language definition.
