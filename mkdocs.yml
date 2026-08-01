@@ -27,6 +27,10 @@ nav:
         - The Engine of Pattern Matching: api/automaton/intro.md
         - Automata Theory: api/automaton/theory.md
         - The Theory in Action: api/automaton/automaton.md
+      - Grammar Module:
+        - The Syntactic Blueprint: api/grammar/intro.md
+        - The Formal Foundation: api/grammar/theory.md
+        - From Theory to Implementation: api/grammar/grammar.md
 
 theme:
   name: material
