@@ -538,8 +538,8 @@ cdef class Grammar:
         
         result['terminals'] = _terminals
         result['non-terminals'] = _non_terminals
-
-        result['productiones'] = _productions
+        result['start'] = self._start_symbol._symbol
+        result['productions'] = _productions
 
         if self._epsilon:
             result['epsilon'] = self._epsilon._symbol
@@ -620,7 +620,7 @@ cdef class AttributedGrammar(Grammar):
             production (Production)
         
         Returns:
-            Callable[[List[AST]],AST]: the associated reductor to the given production
+            Callable[[ASTListView],AST]: the associated reductor to the given production
         '''
         return self._reductors_by_production[production]
 
