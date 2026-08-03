@@ -18,12 +18,12 @@ PyLGEN is a toolbox for building **interpreters and compilers** from scratch, wi
  - **Prototype fast, optimize smart**: Write your entire language logic in pure python first. Only when performance becomes critical, compile your critical path with Cython.
  - **Full visibility, zero magic**: See exactly what happens at each stage. You build your own **ASTs**, define your own visitors, and control traversal order. There are no hidden transformations, you own the pipeline.
  - **Enterprise-ready parsing**: A robust LALR(1) engine with built-in conflict detection and ***panic-mode error recovery*** means  your **DSL** handles real-world, messy input without falling over.
- - **Instant visual feedback**: Turn your **automata,ASTs** and **parse trees** into interactive HTML graphs with a single command. Debug visually, not just via logs, a game changer for understanding and teaching.
+ - **Instant visual feedback**: Turn your **automata, ASTs** and **parse trees** into interactive HTML graphs with a single command. Debug visually, not just via logs, a game changer for understanding and teaching.
  - **Feels like Python**: No weird configuration files, no custom DSLs for your grammar. Just Python code, all the way down. Use your favorite libraries, test with pytest, and deploy as a standard package.
 
 > ## Philosophy: Clarity and control
 
-Building a language should be **fun,educational and productive**. That's why PyLGEN focuses on:
+Building a language should be **fun, educational and productive**. That's why PyLGEN focuses on:
 
  - **Transparency**: No black boxes. Every step, from token definitions to AST visitation, is under your control.
  - **Python native**: Write your logic in pure Python, leverage its ecosystem, and debug just as you always do.

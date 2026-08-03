@@ -6,20 +6,36 @@ There is no better way to master a language-building tool than by actually build
 
 First, let's create our development environment. Open a terminal in your chosen directory and create a virtual environment. Then, navigate into the newly created folder, activate the environment, and install PyLGEN.
 
-```bash
-# create virtual environment
-python -m venv pylgen-example
+=== "Windows"
 
-# move into the folder
-cd pylgen-example
+    ```batch
+    # create virtual environment
+    python -m venv pylgen-example
 
-# activate environment
-Scripts\activate # Windows
+    # move into the folder
+    cd pylgen-example
 
-source bin/activate # Linux/macOS
+    # activate environment
+    Scripts\activate
 
-# install PyLGEN
-pip install pylgen
-```
+    # install PyLGEN
+    pip install pylgen
+    ```
+
+=== "Linux/macOS"
+
+    ```bash
+    # create virtual environment
+    python3 -m venv pylgen-example
+
+    # move into the folder
+    cd pylgen-example
+
+    # activate environment
+    source bin/activate
+
+    # install PyLGEN
+    pip install pylgen
+    ```
 
 With these steps complete, you are ready to start building!

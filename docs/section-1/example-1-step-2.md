@@ -176,7 +176,7 @@ class ClearAST(AST):
         return []
 ```
 
-Putting it all together, here is the complete asts.py module:
+Putting it all together, here is the complete `asts.py` module:
 
 File `asts.py`
 ```python
@@ -507,7 +507,7 @@ from .asts import (
 
 > ### The Binary Reductor
 
-The binary_reductor handles all binary operations: addition, subtraction, multiplication, division, exponentiation, modulo, and assignment. It inspects the symbol of the middle child (asts[1]), which is the operator token, to determine which AST class to instantiate. It then constructs the new node using the left child (asts[0]), the right child (asts[2]), and the operator's position information.
+The `binary_reductor` handles all binary operations: addition, subtraction, multiplication, division, exponentiation, modulo, and assignment. It inspects the symbol of the middle child (`asts[1]`), which is the operator token, to determine which AST class to instantiate. It then constructs the new node using the left child (`asts[0]`), the right child (`asts[2]`), and the operator's position information.
 
 ```python
 # ...
