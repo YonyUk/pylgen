@@ -47,13 +47,13 @@ A `Symbol` represents a **grammar symbol**, which can be a **terminal** (a token
     from pylgen.common.types cimport Symbol
 
     # Non-terminal: 'E' (expression)
-    E = Symbol('E')
+    cdef Symbol E = Symbol('E')
 
     # Terminal: the '+' sign
-    plus = Symbol('+', is_terminal=True)
+    cdef Symbol plus = Symbol('+', is_terminal=True)
 
     # Epsilon (always a terminal)
-    eps = Symbol('ε', is_terminal=True, is_epsilon=True)
+    cdef Symbol eps = Symbol('ε', is_terminal=True, is_epsilon=True)
     ```
 
 | **Attribute** | **Type** | **Description** | **Default value** |
@@ -166,7 +166,7 @@ The hash is calculated once in the constructor and stored in a private `_hash` f
     from pylgen.common.types cimport Token
     from your_tokens import TokenTypeEnum   # your enumeration
 
-    token = Token("123", TokenTypeEnum.INTEGER, int_symbol, 1, 5)
+    cdef Token token = Token("123", TokenTypeEnum.INTEGER, int_symbol, 1, 5)
     ```
 
 > ### 2. Usage in Reducers
