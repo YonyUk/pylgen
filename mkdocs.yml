@@ -33,6 +33,7 @@ nav:
         - From Theory to Implementation: api/grammar/grammar.md
       - Regex Module: api/regex/regex.md
       - Lexer Module: api/lexer/lexer.md
+      - Parser Module: api/parser/parser.md
 
 theme:
   name: material
