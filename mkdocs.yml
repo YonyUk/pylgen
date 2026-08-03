@@ -32,6 +32,7 @@ nav:
         - The Formal Foundation: api/grammar/theory.md
         - From Theory to Implementation: api/grammar/grammar.md
       - Regex Module: api/regex/regex.md
+      - Lexer Module: api/lexer/lexer.md
 
 theme:
   name: material
