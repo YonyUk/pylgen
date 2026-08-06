@@ -35,6 +35,7 @@ nav:
       - Lexer Module: api/lexer/lexer.md
       - Parser Module: api/parser/parser.md
       - Analysis Module: api/analysis/analysis.md
+      - Visual Module (Bonus): api/visual/visual.md
 
 theme:
   name: material
