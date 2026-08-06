@@ -176,6 +176,8 @@ cdef class BaseLexer:
             while True:
                 # advance the dfa one step
                 self._dfa.walk(current_symbol)
+                # advance the ignore_dfa one step
+                self._ignore.walk(current_symbol)
                 # if the dfa is stuck
                 if self._dfa._is_stuck:
                     break
@@ -183,8 +185,6 @@ cdef class BaseLexer:
                 if self._fault_state and self._dfa._current_state._id == self._fault_state._id:
                     break
                 last_state = self._dfa._current_state
-                # advance the ignore_dfa one step
-                self._ignore.walk(current_symbol)
                 # updates the pointer
                 self._text_position_pointer += 1
                 # if the text has been ended
@@ -194,6 +194,8 @@ cdef class BaseLexer:
                 current_symbol = self._text[self._text_position_pointer]
 
             self._text_readed = self._text[start:self._text_position_pointer]
+            if len(self._text_readed) == 0:
+                self._text_readed = self._text[self._text_position_pointer]
             self._dfa._current_state = last_state
             self._current_token = self._get_token(self._text_readed,self._line,self._column)
             if not self._current_token or self._current_token._type == 'INVALID_TOKEN':
