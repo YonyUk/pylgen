@@ -168,6 +168,7 @@ class TokenTypeEnum(TokenType):
     NUMBER = 'NUMBER'
     SYMBOL = 'SYMBOL'
     OPERATOR = 'OPERATOR'
+    COMMENT = 'COMMENT'
 
 class NumberLexicalRule(LexicalRule):
 
@@ -223,7 +224,7 @@ class TestIntegrationLexerParser:
     
     @pytest.fixture
     def ignore_pattern(self) -> str:
-        return r'\n|\t| '
+        return '\n|\t| '
     
     @pytest.fixture
     def numbers_dfa(self) -> DFA:
@@ -403,3 +404,19 @@ class TestIntegrationLexerParser:
         
         assert len(lexer1.errors) == 2
         assert len(parser3.errors) == 3
+
+    def test_token_ignoring(self,parser3:BottomUpParser):
+        lexer = Lexer(get_symbol_function,'\n|\t| |//.*\n')
+        lexer[0,TokenTypeEnum.NUMBER] = '\\d+'
+        lexer[1,TokenTypeEnum.SYMBOL] = '\\(|\\)'
+        lexer[2,TokenTypeEnum.OPERATOR] = '\\+|\\*\\*?|\\-|/|%'
+        lexer[3,TokenTypeEnum.COMMENT] = '//.*\n'
+
+        text = '// comentario de prueba\n'
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        assert len(tokens) == 0
+        text = '// comentario de prueba\n12 + 3'
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        assert len(tokens) == 3
