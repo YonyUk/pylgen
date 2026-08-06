@@ -56,7 +56,7 @@ class TestIntegrationBaseLexer:
     
     @pytest.fixture
     def ignore_pattern(self):
-        return r'\n|\t| '
+        return '\n|\t| '
 
     @pytest.fixture
     def number_dfa(self) -> DFA:
@@ -624,3 +624,17 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         assert len(lexer.errors) != 0
         for error in lexer.errors:
             assert (error.line,error.column) in errors
+
+    def test_lexer_tokenization_with_invalid_tokens_collecting(self,ignore_pattern:str):
+        lexer = Lexer(get_symbol_function,ignore_pattern)
+        lexer[0,TokenTypeTestEnum.NUMBER] = r'\d+(\.\d+)?'
+
+        lexer.initialize()
+
+        text = '0.1 4. .5 199.289 2138. .2319'
+
+        lexer.load_text(text)
+
+        for _ in lexer.tokens: pass
+
+        assert len(lexer.errors) == 4
