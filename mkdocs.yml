@@ -34,6 +34,7 @@ nav:
       - Regex Module: api/regex/regex.md
       - Lexer Module: api/lexer/lexer.md
       - Parser Module: api/parser/parser.md
+      - Analysis Module: api/analysis/analysis.md
 
 theme:
   name: material
