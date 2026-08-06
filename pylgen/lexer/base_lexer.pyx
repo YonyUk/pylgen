@@ -140,6 +140,9 @@ cdef class BaseLexer:
         cdef int priority
         cdef Symbol symbol
 
+        if len(text) == 0:
+            return None # type:ignore
+
         if not self._dfa._current_state._is_accept:
             symbol = self._get_symbol(self._enum_type.INVALID_TOKEN,text) # type:ignore
             return Token(text,self._enum_type.INVALID_TOKEN,symbol,self._line,self._column) # type:ignore
