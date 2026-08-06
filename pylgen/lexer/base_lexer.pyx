@@ -140,6 +140,10 @@ cdef class BaseLexer:
         cdef int priority
         cdef Symbol symbol
 
+        if not self._dfa._current_state._is_accept:
+            symbol = self._get_symbol(self._enum_type.INVALID_TOKEN,text) # type:ignore
+            return Token(text,self._enum_type.INVALID_TOKEN,symbol,self._line,self._column) # type:ignore
+
         for priority in self._priorities_sorted:
             if self._priorites[priority] in self._types_by_state[self._dfa._current_state._id]:
                 symbol = self._get_symbol(self._priorites[priority],text)
@@ -189,7 +193,7 @@ cdef class BaseLexer:
             self._text_readed = self._text[start:self._text_position_pointer]
             self._dfa._current_state = last_state
             self._current_token = self._get_token(self._text_readed,self._line,self._column)
-            if not self._current_token:
+            if not self._current_token or self._current_token._type == 'INVALID_TOKEN':
                 if self._text[self._text_position_pointer] == '\n':
                     self._line += 1
                     self._column = 1
