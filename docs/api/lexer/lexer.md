@@ -66,6 +66,15 @@ BaseLexer(get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: DFA
 
  - `get_symbol_function`: A function that maps a token type (the enumeration value) and its lexeme (string) to a `Symbol` (terminal) for the parser. This bridges the lexer and the grammar.
 
+!!! important
+    The lexer validates that `get_symbol_function` has the correct annotations:
+
+    - First parameter: must be a subclass of `TokenType`.
+
+    - Second parameter: must be `str`.
+
+    - Return: must be `Symbol`.
+
  - `ignore_pattern`: A DFA that recognizes characters to ignore (e.g., whitespace). The lexer will skip matches of this DFA during tokenization.
 
  - `check_annotation`: If True, the constructor validates that `get_symbol_function` has the correct annotations (first arg is a subclass of `TokenType`, second is `str`, return is `Symbol`). This catches configuration errors early.
