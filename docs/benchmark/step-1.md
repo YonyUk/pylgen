@@ -104,6 +104,7 @@ cdef Symbol type_int = Symbol('int_keyword',True) # type:ignore
 cdef Symbol type_float = Symbol('float_keyword',True) # type:ignore
 cdef Symbol type_complex = Symbol('complex_keyword',True) # type:ignore
 cdef Symbol type_vector = Symbol('vector_keyword',True) # type:ignore
+cdef Symbol invalid = Symbol('INVALID TOKEN',True) # type:ignore
 
 cdef Symbol comment = Symbol('COMMENT',True) # type:ignore
 
@@ -154,6 +155,8 @@ cdef Symbol get_symbol_function(object t,str tx):
         return _keywords[tx]
     if t == TokenTypeEnum.COMMENT:
         return comment
+    if t == TokenTypeEnum.INVALID_TOKEN:
+        return invalid
     raise NotImplementedError()
 
 cpdef Lexer build_lexer():
@@ -170,6 +173,9 @@ cpdef Lexer build_lexer():
     lexer.add_token_regex(7,TokenTypeEnum.COMMENT,'//.*\n')
     return lexer
 ```
+
+!!! note "The automatic member `INVALID_TOKEN`"
+    The base class `TokenType`, through its custom metaclass `TokenTypeMeta`, automatically injects an `INVALID_TOKEN` member into each subclass. This member is used internally to represent tokens that don't match any defined pattern. In the `get_symbol_function`, we map `TokenTypeEnum.INVALID_TOKEN` to a dedicated invalid symbol, so that any malformed input produces a clear and identifiable token instead of causing a failure or silent corruption. This design acts as a proactive safety net, catching lexical errors in the early stages of the pipeline.
 
 !!! warning
     In example 1, during the lexer definition, the mapping function was written in Python. This allowed the lexer to infer the type of the enum used for tokens from its typing. However, in this case, the mapping function is written in Cython, so the enum type cannot be inferred. This is the reason for the line `lexer._enum_type = TokenTypeEnum`.
