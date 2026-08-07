@@ -52,32 +52,12 @@ cdef class SemanticError(Error):
     def __init__(self, str msg,int line, int column) -> None:
         super().__init__(ErrorType.SEMANTIC, line, column, msg)
 
-cdef class RuntimeError:
+cdef class RuntimeError(Error):
 
     def __init__(self,list[str] stack_trace,int line,int column,str msg) -> None:
+        super().__init__(ErrorType.RUNTIME,line,column,msg)
         self._stack_trace = stack_trace
-        self._line = line
-        self._column = column
-        self._msg = msg
     
     @property
     def stack_trace(self) -> list[str]:
         return self._stack_trace
-    
-    @property
-    def line(self) -> int:
-        return self._line
-    
-    @property
-    def column(self) -> int:
-        return self._column
-    
-    @property
-    def message(self) -> str:
-        return str(self)
-    
-    def __str__(self) -> str:
-        return f'RUNTIME ERROR: {self._msg} at line {self._line}, column {self._column}'
-    
-    def __repr__(self) -> str:
-        return str(self)
