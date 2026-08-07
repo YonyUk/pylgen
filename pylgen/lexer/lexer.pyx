@@ -29,7 +29,7 @@ cdef class Lexer(BaseLexer):
         self._eof = None # type:ignore
     
     @property
-    def errors(self) -> Set[LexicError]:
+    def errors(self) -> Set[LexicalError]:
         return self._errors.copy()
 
     @property
