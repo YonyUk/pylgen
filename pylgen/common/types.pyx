@@ -55,7 +55,7 @@ cdef class Symbol:
         return o._symbol == self._symbol and o._is_terminal == self._is_terminal and o._is_epsilon == self._is_epsilon
     
     def __hash__(self) -> int:
-        self._hash
+        return self._hash
 
 cdef class AST:
     '''
