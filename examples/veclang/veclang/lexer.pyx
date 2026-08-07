@@ -27,6 +27,7 @@ cdef Symbol type_int = Symbol('int_keyword',True) # type:ignore
 cdef Symbol type_float = Symbol('float_keyword',True) # type:ignore
 cdef Symbol type_complex = Symbol('complex_keyword',True) # type:ignore
 cdef Symbol type_vector = Symbol('vector_keyword',True) # type:ignore
+cdef Symbol invalid = Symbol('INVALID TOKEN',True) # type:ignore
 
 cdef Symbol comment = Symbol('COMMENT',True) # type:ignore
 
@@ -77,6 +78,8 @@ cdef Symbol get_symbol_function(object t,str tx):
         return _keywords[tx]
     if t == TokenTypeEnum.COMMENT:
         return comment
+    if t == TokenTypeEnum.INVALID_TOKEN:
+        return invalid
     raise NotImplementedError()
 
 cpdef Lexer build_lexer():
