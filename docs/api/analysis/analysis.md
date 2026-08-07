@@ -245,6 +245,9 @@ When `walk` is called:
 
  - `3`: The strategy is reset.
 
+!!! important
+    `TraversalStrategy.add_selector`, `TraversalStrategy.set_default_selector`, `ASTWalker.add_visitor` and `ASTWalker.set_default_visitor` use `inspect` to check that the second parameter of the `select_children` and `visit` methods is annotated with the expected context type.
+
 ## Extensibility and Best Practices
 
 The analysis framework is designed to be extended in several ways:
