@@ -39,7 +39,7 @@ At its core, the regex module implements the **Kleene algebra** of regular expre
 
 By **Kleene's theorem**, every regular expression has an equivalent finite automaton (DFA or NFA), and every finite automaton corresponds to a regular expression. The `regex` module implements constructive proofs of this theorem:
 
- - **Regex → Automaton**: builds an NFA using the standard Thompson construction (with $\epsilon$‑transitions), then determinizes and minimizes it.
+ - **Regex → Automaton**: builds an NFA using a construction method equivalent to the **standard Thompson construction** (with $\epsilon$‑transitions), then determinizes and minimizes it.
 
  - **Automaton → Regex**: The module implements the **state elimination algorithm** (also known as the **Brzozowski‑McCluskey method** or **Arden's lemma**) to derive a regular expression from a DFA.
 
@@ -83,6 +83,7 @@ The `GetRegex(automaton: Automaton) -> str` method implements the state eliminat
 > ### Parsing a Regex into a DFA
 
 === "Python"
+
     ```python
     from pylgen.regex import RegexEngine
 
@@ -98,6 +99,7 @@ The `GetRegex(automaton: Automaton) -> str` method implements the state eliminat
     assert dfa.accept(['a', 'b', 'b'])       # False (missing final 'd')
     ```
 === "Cython"
+
     ```cython
     from pylgen.regex.engine cimport _parse
     from pylgen.automaton.automaton cimport DFA 
@@ -113,6 +115,18 @@ The `GetRegex(automaton: Automaton) -> str` method implements the state eliminat
     assert dfa.accept(['a', 'c', 'd'])       # True
     assert dfa.accept(['a', 'b', 'b'])       # False (missing final 'd')
     ```
+
+#### Supported Syntax
+
+ - **Character classes**: `[abc]`, `[^abc]`, `[a-z]`.
+
+ - **Predefined constants**: `\d`, `\D`, `\s`, `\S`, `\w`, `\W`, .
+
+ - **Quantifiers**: `*`, `+`, `?`, `{min,max}`.
+
+ - **Grouping**: `(regex)`.
+
+ - **Escape special characters**: `\(`, `\)`, `\[`, `\]`, `\{`, `\}`, `\-`, `\*`, `\+`, `\?`, `\^`, `\|`, `\.`, `\,`.
 
 > ### Converting a Regular Grammar to a DFA
 
