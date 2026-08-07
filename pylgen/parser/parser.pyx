@@ -329,7 +329,7 @@ cdef class BottomUpParser(Parser):
         self._panic_mode = False # type:ignore
         self._current_syncronization_set.clear()
         
-    def __setitem__(self,production:Production,reductor:Callable[[List[AST]],AST]):
+    def __setitem__(self,production:Production,reductor:Callable[[ASTListView],AST]):
         sig = inspect.signature(reductor)
         params = list(sig.parameters.values())
         if len(params) != 1:
