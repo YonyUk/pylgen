@@ -259,7 +259,7 @@ table['q0','a'] = 'q1'
 table['q1','b'] = 'q2'
 
 print(table['q0','a'])      # 'q1'
-print(table.entries)        # [('q0','a','q1'),('q1','b','q2')]
+print(table.items)        # [('q0','a','q1'),('q1','b','q2')]
 ```
 
 !!! note "In Cython"
@@ -281,6 +281,9 @@ class MyTokenType(TokenType):
 ```
 
 Later, when configuring your lexer, you will use this enumeration to associate each regex pattern with a token type.
+
+!!! important "The automatic member `INVALID_TOKEN`"
+    The base class `TokenType`, through its custom metaclass `TokenTypeMeta`, automatically injects an `INVALID_TOKEN` member into each subclass. This member is used internally to represent invalid tokens.
 
 ## Integration with the Rest of PyLGEN
 
