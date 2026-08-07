@@ -56,10 +56,10 @@ A `Production` represents a context‑free production rule: `head -> production`
     ```
 
 !!! warning
-    The `head` symbol in the production cannot be a non-terminal; a `ValueError` is thrown if you attempt this.
+    The `head` symbol in the production must be a **non‑terminal**; a `ValueError` is thrown if you attempt to use a terminal.
 
     ```python
-    p = Production(plus,[E,T])
+    p = Production(plus,[E,T]) # ValueError is thrown
     ```
 
 #### Equality and Hashing
@@ -183,6 +183,10 @@ When a new production is added:
 
  - `FIRST` and `FOLLOW` caches are invalidated (if previously computed), forcing recomputation on demand.
 
+
+!!! warning
+    Only one `epsilon` symbol can exist per grammar; the code throws a `ValueError` if you try to add another one.
+
 #### Computing `FIRST` and `FOLLOW`
 
 The grammar computes these sets lazily when `first()` or `follow()` is called for the first time. They are also used internally by the parser generator.
@@ -267,6 +271,9 @@ Same as `Grammar`.
     G._add_attributed_production(E,[E, plus, T], add_reductor)
     G._add_attributed_production(E, [T], single_reductor)   # single reductor
     ```
+
+!!! warning
+    In pure python, the reducer's signature is verified at addition time and must comply with the annotation `(ASTListView) -> AST`.
 
 The parser builder uses the reductors stored in the attributed grammar to construct the AST during parsing.
 
