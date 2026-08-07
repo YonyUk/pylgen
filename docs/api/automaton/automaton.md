@@ -30,7 +30,7 @@ Each state of an automaton is represented by an object of the `State` class. Its
 
     print(s2.id)                # 's2'
     print(s2.value)             # 10
-    print(s2,is_accept)         # True
+    print(s2.is_accept)         # True
     ```
 === "Cython"
     ```cython
@@ -45,7 +45,7 @@ Each state of an automaton is represented by an object of the `State` class. Its
 
     print(s2._id)                # 's2'
     print(s2._value)             # 10
-    print(s2,_is_accept)         # True
+    print(s2._is_accept)         # True
 
     ```
 
