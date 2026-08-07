@@ -1067,8 +1067,7 @@ Supplies the essential foundation for **semantic analysis, validation, and execu
  - **`Context(abstract base class)`**: Manages global state during **AST** traversal: 
 > [!important]
 `push_new_scope,pop_scope,clear_runtime_errors,add_runtime_error` and `get_runtime_errors` must be implemented by users.
- - **`Error and its subclasses (LexicalError,SyntaxError,SemanticError)`**: A hierarchy for errors that occur during lexical, syntactic, and semantic analysis. All inherit from `Error`, which includes line, column, a descriptive message, and categorisation via the `ErrorType` enum.
- - **`RuntimeError`**: Represents errors that happen during program execution. It includes a stack trace to aid debugging.
+ - **`Error and its subclasses (LexicalError,SyntaxError,SemanticError)`**: A hierarchy for errors that occur during lexical, syntactic, and semantic analysis, and runtime errors. All inherit from `Error`, which includes line, column, a descriptive message, and categorisation via the `ErrorType` enum.
  - **`LexicalRule`**: An abstraction to defining validation rules on tokens. Used in `pylgen.lexer` module to check token properties. The `check` method returns a `LexicalError` if the rule is violated, or `None` otherwise.
  - **`ASTVisitor(abstract class)`**: Defines the contract for visitors that operate on `AST` nodes. Each visitor must implement `visit(ast,context)`, where it can inspect or modify the node and the context.
  - **`ASTChildrenSelector(abstract class)`**: Specifies which children (or the node itself) should be considered during traversal, and in what order. It is used by the traversal strategy to determine the next node to visit.
