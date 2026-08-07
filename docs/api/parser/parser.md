@@ -103,6 +103,9 @@ The abstract base class for all parsers. It defines the public interface that al
 | **`reset()`** | Resets the parser to its initial state, clearing the stack and errors.
 | **`set_draw_parse_tree_flag(flag: bool)`** | If `True`, the parser builds a parse tree during parsing (available via the `parse_tree` property). |
 
+!!! important
+    The token's stream must always end with an `EOF` token, so the parser can accept it. This token comes from the lexer.
+
 #### Properties
 
 | **Property** | **Type** | **Description** |
@@ -126,6 +129,10 @@ BottomUpParser(start_state: str, goto_table: Dict[Tuple[str, Symbol], str], acti
 
  - **`action_table`**: Maps `(state_id, terminal)` to a tuple `(action, value)` where `action` is `'SHIFT'`, `'REDUCE'`, or `'ACCEPT'`, and `value` is either a state ID (for shift) or a `Production` (for reduce).
 
+#### Methods
+
+ - **`__setitem__(self,production:Production,reductor:Callable[[ASTListView],AST])`**: sets the reducer function for the given production.
+
 > ### `ParserBuilder` (The Parser Generator)
 
 `ParserBuilder` is a static class that constructs parsers from grammars. It implements the LALR(1) construction algorithm, including:
@@ -147,6 +154,9 @@ BottomUpParser(start_state: str, goto_table: Dict[Tuple[str, Symbol], str], acti
 | **`build_parser(g: Grammar, type_: ParserType) -> Parser`** | Builds a parser from a grammar (without reductors). Currently supports `ParserType.LALR1`; others raise `NotImplementedError`. |
 | **`build_parser_from_attributed(g: AttributedGrammar, type_: ParserType) -> Parser`** | Builds a parser from an attributed grammar, attaching reductors to productions. |
 | **`clear_cache()`** | Clears the internal cache of closures and states. Useful when modifying grammars dynamically. |
+
+!!! note
+    `build_parser` and `build_parser_from_attributed` automatically augments the grammar. 
 
 > ### Conflict Exceptions
 
