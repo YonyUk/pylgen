@@ -25,6 +25,7 @@ cdef class Automaton:
     cpdef set[State] closure(self,State state)
     cpdef void make_complete(self)
     cpdef void restore_to_before_complete(self)
+    cpdef void extend_alphabet(self,set[str] symbols)
 
 cdef class DFA(Automaton):
     cdef set[State] _state_preimage_for_symbol(self,State state,str symbol)
@@ -55,6 +56,7 @@ cdef NFA _automaton_closure(Automaton automaton,int type_)
 cdef NFA _automaton_reverse(Automaton automaton)
 
 cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,set[str] alphabet)
+cpdef NFA create_nfa(set[State] states,Table transition_function,dict[str,set[str]] epsilon_transitions,str start_id,set[str] alphabet)
 cpdef DFA get_word_automaton(str word)
 cpdef NFA get_words_automaton(list[str] words)
 cpdef DFA get_word_automaton_with_value(str word,object value,bint only_finals=*)

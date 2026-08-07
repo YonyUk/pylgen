@@ -613,6 +613,9 @@ cdef class Automaton:
                 del self._trans_func._table[transition]
             self._is_complete = False # type:ignore
             self._transitions_added_while_completing.clear()
+    
+    cpdef void extend_alphabet(self,set[str] symbols):
+        self._alphabet.update(symbols)
 
     def __or__(self, other: Automaton) -> NFA:
         '''
@@ -1505,6 +1508,39 @@ cpdef DFA create_dfa(set[State] states,Table transition_function,str start_id,se
         dfa._states_by_id[state._id] = state
     dfa._is_complete = len(transition_function._table) == len(states) * len(alphabet) # type:ignore
     return dfa
+
+cpdef NFA create_nfa(set[State] states,Table transition_function,dict[str,set[str]] epsilon_transitions,str start_id,set[str] alphabet):
+    '''
+    Args:
+        states (Set[State]): the states of the automaton
+        transition_function (Table): transition function of the automaton
+        epsilon_transitions (dict[str,set[str]]): epsilon transitions of the automaton
+        start_id (str): id of the initial state of the automaton
+        alphabet (Set[str]): alphabet of the automaton
+    
+    Returns:
+        NFA: the just created NFA with the given description
+    '''
+    cdef State state,start_state
+
+    for state in states:
+        if state._id == start_id:
+            start_state = state
+            break
+    
+    if not start_state:
+        raise ValueError(f'A initial state is needed, not found any state with given id {start_id}')
+
+    nfa = NFA(start_id,None,alphabet,start_state._is_accept)
+    nfa._start_state = start_state
+    nfa._current_state = nfa._start_state
+    nfa._states_by_id[start_id] = start_state
+    nfa._trans_func = transition_function
+    for state in states:
+        nfa._states_by_id[state._id] = state
+    nfa._is_complete = len(transition_function._table) == len(states) * len(alphabet) # type:ignore
+    nfa._epsilons = epsilon_transitions
+    return nfa
 
 cpdef DFA get_word_automaton(str word):
     '''
