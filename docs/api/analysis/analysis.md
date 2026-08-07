@@ -36,7 +36,53 @@ This module is **generic and extensible**: it does not impose any particular sem
 
 ## Error Hierarchy
 
-> TODO: Escribir la jerarquia de errores
+A robust error handling system is essential for any language implementation. PyLGEN provides a unified, hierarchical error model that spans all phases of the compilation pipeline, from lexing to runtime execution. Every error carries precise location information (line and column) and a descriptive message, making it easy to report problems directly to the user.
+
+The hierarchy is built around a common base class `Error`, with specialized subclasses for each stage of processing. All errors are collected in the `Context` (semantic and runtime) or in the lexer/parser themselves (lexical and syntax), allowing you to aggregate and report multiple issues in a single pass.
+
+> ### `ErrorType` (Enumeration)
+
+The `ErrorType` enum categorises errors by their origin:
+
+```python
+from enum import StrEnum
+
+class ErrorType(StrEnum):
+    LEXICAL = 'LEXICAL'
+    SYNTAX = 'SYNTAX'
+    SEMANTIC = 'SEMANTIC'
+    RUNTIME = 'RUNTIME'
+```
+
+These values are used internally to tag each error and to format user‑friendly messages.
+
+> ### The `Error` Base Class
+
+`Error` is the abstract base class for all compile‑time errors (lexical, syntax, semantic) and also for runtime errors. It provides the common attributes and formatting logic.
+
+| **Attribute/Property** | **Type** | **Description** |
+| :---: | :---: | :---: |
+| **`line`** | `int` | The source line number where the error occurred (1‑indexed). |
+| **`column`** | `int` | The source column number where the error occurred (1‑indexed). |
+| **`type`** | `ErrorType` | The category of the error. |
+| **`message`** | `str` | A human‑readable error message, formatted as `"{type} ERROR at line {line}, column {column}: {msg}"`. |
+
+The constructor accepts the error type, line, column, and a custom message. The `message` property builds a standardised string that is also returned by `__str__` and `__repr__`.
+
+> ### Concrete Error Classes
+
+| **Class** | **Description** |
+| :---: | :---: |
+| **`LexicalError`** | Raised during lexing when a token does not match any pattern or fails a lexical rule (e.g., malformed number, invalid character). |
+| **`SyntaxError`** | Raised during parsing when the token stream does not conform to the grammar (e.g., unexpected token, missing semicolon). |
+| **`SemanticError`** | Raised during semantic analysis for violations that cannot be detected by the grammar (e.g., undeclared variable, type mismatch, duplicate definition). |
+| **`RuntimeError`** | Raised during evaluation or execution of the AST (e.g., division by zero, invalid operation, out‑of‑bounds access). Unlike the other errors, it includes a stack trace to help debug the execution context. |
+
+All of these classes inherit directly from `Error` and simply forward their arguments to the base class constructor, providing a consistent interface.
+
+> ### Runtime Errors and Stack Traces
+
+`RuntimeError` adds a `stack_trace` property, which is a list of strings representing the call stack at the point where the error occurred. This is particularly useful for debugging interpreted languages, as it allows you to trace back through nested function calls or expression evaluations. The stack trace is maintained by the `Context` (via `push_trace` and `pop_trace`) and can be passed to the error when it is raised.
 
 ## Context Management
 
