@@ -6,12 +6,16 @@ from typing import Any, Dict, Tuple
 import networkx as nx
 from html.parser import HTMLParser
 import json
+import hashlib
 
 from pyvis.network import Network
 from ..automaton.automaton import Automaton
 from ..lexer.base_lexer import BaseLexer
 from ..parser.parser import ParseTreeNode, Parser
 from ..common.types import AST
+from ..grammar.grammar import Grammar
+
+from .table import build_propagation_edges_table
 
 CACHE_FILE:str | None = None
 
@@ -26,7 +30,11 @@ class ResourceEmbedder(HTMLParser):
         self._cache = cache
     
     def _download(self,url:str) -> str:
-        response = urllib.request.urlopen(url)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        req = urllib.request.Request(url,headers=headers)
+        response = urllib.request.urlopen(req)
         content = response.read().decode()
         response.close()
         return content
@@ -316,7 +324,7 @@ def draw_automaton(automaton:Automaton,**kwargs) -> None:
         label = node_attrs.get('label',str(node_id))
         title = node_attrs.get('title','')
 
-        net.add_node(node_id,label=label,title=title,color=color)
+        net.add_node(node_id,label=label,title=title,color=color) # type:ignore
     
     for u,v,edge_attrs in G.edges(data=True):
         label = edge_attrs.get('label','')
@@ -333,11 +341,20 @@ def draw_automaton(automaton:Automaton,**kwargs) -> None:
             with open(CACHE_FILE,'rb') as f:
                 cache = pickle.load(f)
         html = net.generate_html(output_path)
+
+        json_str_or = json.dumps(cache,sort_keys=True,ensure_ascii=True)
+        digest_or = hashlib.sha256(json_str_or.encode()).hexdigest()
+
         embedder = ResourceEmbedder(cache)
         embedder.feed(html)
-        if not os.path.exists(CACHE_FILE):
+
+        json_str = json.dumps(cache,sort_keys=True,ensure_ascii=True)
+        digest = hashlib.sha256(json_str.encode()).hexdigest()
+        
+        if not os.path.exists(CACHE_FILE) or digest_or != digest:
             with open(CACHE_FILE,'wb') as f:
                 pickle.dump(cache,f)
+
         html = embedder.output
         with open(output_path,'w',encoding='utf-8') as f:
             f.write(html)
@@ -482,12 +499,22 @@ def draw_ast(ast:AST,**kwargs) -> None:
         if os.path.exists(CACHE_FILE):
             with open(CACHE_FILE,'rb') as f:
                 cache = pickle.load(f)
+
         html = net.generate_html(output_path)
+
+        json_str_or = json.dumps(cache,sort_keys=True,ensure_ascii=True)
+        digest_or = hashlib.sha256(json_str_or.encode()).hexdigest()
+
         embedder = ResourceEmbedder(cache)
         embedder.feed(html)
-        if not os.path.exists(CACHE_FILE):
+
+        json_str = json.dumps(cache,sort_keys=True,ensure_ascii=True)
+        digest = hashlib.sha256(json_str.encode()).hexdigest()
+        
+        if not os.path.exists(CACHE_FILE) or digest_or != digest:
             with open(CACHE_FILE,'wb') as f:
                 pickle.dump(cache,f)
+        
         html = embedder.output
         with open(output_path,'w',encoding='utf-8') as f:
             f.write(html)
@@ -601,11 +628,20 @@ def draw_parse_tree_from_parser(parser:Parser,**kwargs) -> None:
             with open(CACHE_FILE,'rb') as f:
                 cache = pickle.load(f)
         html = net.generate_html(output_path)
+
+        json_str_or = json.dumps(cache,sort_keys=True,ensure_ascii=True)
+        digest_or = hashlib.sha256(json_str_or.encode()).hexdigest()
+
         embedder = ResourceEmbedder(cache)
         embedder.feed(html)
-        if not os.path.exists(CACHE_FILE):
+
+        json_str = json.dumps(cache,sort_keys=True,ensure_ascii=True)
+        digest = hashlib.sha256(json_str.encode()).hexdigest()
+        
+        if not os.path.exists(CACHE_FILE) or digest_or != digest:
             with open(CACHE_FILE,'wb') as f:
                 pickle.dump(cache,f)
+
         html = embedder.output
         with open(output_path,'w',encoding='utf-8') as f:
             f.write(html)
@@ -614,6 +650,64 @@ def draw_parse_tree_from_parser(parser:Parser,**kwargs) -> None:
     
     if show:
         webbrowser.open(output_path,2)
+
+def show_propagation_edges_table(g:Grammar,**kwargs) -> None:
+    '''
+    Args:
+        parser (Parser): parser to draw
+        
+        kwargs (dict): optional values
+
+            filename:str filename of the output file with the ast drawed
+            
+            show:bool tells if the result will be opened after created
+            
+            cache:bool tells if the cache will be used
+    
+        Returns:
+            None: creates an interactive graphic showing the propagation edges for the given grammar.
+    '''
+
+    filename = kwargs.get('filename','parse tree')
+    if not isinstance(filename,str):
+        raise ValueError('filename must be an string value')
+    show = kwargs.get('show',False)
+    if not isinstance(show,bool):
+        raise ValueError('edges argument must be a boolean value')
+    cache = kwargs.get('cache',False)
+    if not isinstance(cache,bool):
+        raise ValueError('edges argument must be a boolean value')
+
+    output_path = f'{filename}.html'
+    html = build_propagation_edges_table(g)
+
+    if cache:
+        cache = {}
+        if not CACHE_FILE:
+            raise ValueError('cache file not set')
+        if os.path.exists(CACHE_FILE):
+            with open(CACHE_FILE,'rb') as f:
+                cache = pickle.load(f)
+        
+        json_str_or = json.dumps(cache,sort_keys=True,ensure_ascii=True)
+        digest_or = hashlib.sha256(json_str_or.encode()).hexdigest()
+        
+        embedder = ResourceEmbedder(cache)
+        embedder.feed(html)
+
+        json_str = json.dumps(cache,sort_keys=True,ensure_ascii=True)
+        digest = hashlib.sha256(json_str.encode()).hexdigest()
+
+        if not os.path.exists(CACHE_FILE) or digest_or != digest:
+            with open(CACHE_FILE,'wb') as f:
+                pickle.dump(cache,f)
+        html = embedder.output
+
+    with open(output_path,'w',encoding='utf-8') as f:
+        f.write(html)    
+
+    if show:
+            webbrowser.open(output_path,2)
 
 def set_cache_file(filename:str) -> None:
     '''
