@@ -80,3 +80,6 @@ class ParserBuilder:
 
     @staticmethod
     def build_parser_from_attributed(g:AttributedGrammar,type_:ParserType) -> Parser: ...
+
+    @staticmethod
+    def get_propagated_lookaheads(g:Grammar) -> Dict[Tuple[LR0State,LR0Item],Set[Symbol]]: ...

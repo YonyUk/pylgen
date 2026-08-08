@@ -212,6 +212,17 @@ cdef class ParserBuilder:
         if type_ == ParserType.LALR1:
             return _build_lalr_parser_from_attributed(g)
         raise NotImplementedError()
+    
+    @staticmethod
+    def get_propagated_lookaheads(g:Grammar) -> dict[tuple[LR0State,LR0Item],set[Symbol]]:
+        '''
+        Args:
+            g (Grammar)
+        
+        Returns:
+            Dict[Tuple[LR0State,LR0Item],Set[Symbol]]
+        '''
+        return _get_canonical_lalr_states(g)[1] # type:ignore
 
 cdef set[LR0Item] _closure_lr0(set[LR0Item] items,Grammar g):
     cdef LR0Item item,new_item
@@ -634,4 +645,8 @@ cdef BottomUpParser _build_lalr_parser_from_attributed(AttributedGrammar g):
         for production in productions:
             result._set_reductor(production,g.get_reductor(production))
     
+    return result
+
+cdef dict[tuple[LR0State,LR0Item],set[Symbol]] _get_propagated_lookaheads(Grammar g):
+    cdef dict[tuple[LR0State,LR0Item],set[Symbol]] result = _get_canonical_lalr_states(g)[1]
     return result

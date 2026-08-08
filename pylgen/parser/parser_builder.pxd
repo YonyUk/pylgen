@@ -37,3 +37,4 @@ cdef dict[tuple[str,Symbol],str] _plain_goto_table_lalr(dict[tuple[LALRState,Sym
 cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_lalr(dict[tuple[LALRState,Symbol],tuple] table)
 cdef BottomUpParser _build_lalr_parser(Grammar g)
 cdef BottomUpParser _build_lalr_parser_from_attributed(AttributedGrammar g)
+cdef dict[tuple[LR0State,LR0Item],set[Symbol]] _get_propagated_lookaheads(Grammar g)
