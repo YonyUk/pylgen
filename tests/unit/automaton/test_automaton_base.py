@@ -91,3 +91,13 @@ class TestAutomaton:
         automaton.restore_to_before_complete()
         assert not automaton.is_complete
         assert len(automaton.transition_function) != len(automaton.states) * len(automaton.alphabet)
+
+    @pytest.mark.parametrize("symbols",[
+        set('asdj'),
+        set('23843209'),
+        set('sdfsfsef2083jsda9iasd129gwmzxcvhb ')
+    ])
+    def test_automaton_extend_alphabet(self,symbols:Set[str],automaton:Automaton):
+        automaton.extend_alphabet(symbols)
+
+        assert symbols.issubset(automaton.alphabet)

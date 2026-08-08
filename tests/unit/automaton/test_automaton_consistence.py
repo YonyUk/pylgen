@@ -1,7 +1,7 @@
 import pytest
 from typing import Set
 
-from pylgen.automaton import Automaton,DFA,NFA,State
+from pylgen.automaton import Automaton,DFA,NFA,State,get_words_automaton
 
 class TestAutomatonConsistence:
 
@@ -732,6 +732,46 @@ class TestAutomatonConsistence:
         intersection = Automaton.Complement(c).minimize()
 
         assert intersection.accept(list(string)) == (zero_terminated_dfa.accept(list(string)) and alternate_dfa.accept(list(string)))
+
+    def test_intersection_regular_proof_by_construction_15(self):
+        w1 = ['hello','world']
+        w2 = ['from','python']
+
+        a1 = get_words_automaton(w1)
+        a2 = get_words_automaton(w2)
+
+        a1.extend_alphabet(a2.alphabet)
+        a2.extend_alphabet(a1.alphabet)
+
+        c1 = Automaton.Complement(a1)
+        c2 = Automaton.Complement(a2)
+
+        c = a1 | a2
+
+        C = Automaton.Complement(c)
+
+        for word in w1 + w2:
+            assert not C.accept(list(word))
+
+    def test_intersection_regular_proof_by_construction_16(self):
+        w1 = ['hello','world']
+        w2 = ['world','python']
+
+        a1 = get_words_automaton(w1)
+        a2 = get_words_automaton(w2)
+
+        a1.extend_alphabet(a2.alphabet)
+        a2.extend_alphabet(a1.alphabet)
+
+        c1 = Automaton.Complement(a1)
+        c2 = Automaton.Complement(a2)
+
+        c = c1 | c2
+
+        C = Automaton.Complement(c)
+
+        for word in w1 + w2:
+            assert C.accept(list(word)) == (word in w1 and word in w2)
     
     def test_is_empty_method(self,zero_terminated_dfa:DFA,empyt_dfa_1:DFA,no_empty_nfa:NFA):
 
