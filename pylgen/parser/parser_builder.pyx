@@ -171,7 +171,7 @@ cdef class ParserBuilder:
         Returns:
             Set[LALRState]: canonical states for LALR(1) parser
         '''
-        return _get_canonical_lalr_states(g)
+        return _get_canonical_lalr_states(g)[0]
     
     @staticmethod
     def get_goto_action_tables_lalr(g:Grammar) -> Tuple[Dict[Tuple[LALRState,Symbol],LALRState],dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]]]:
@@ -398,7 +398,7 @@ cdef tuple[dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]],se
 
     return result,states
 
-cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
+cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]]] _get_canonical_lalr_states(Grammar g):
     cdef set[LR0State] lr0_states
     cdef dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]] propagation_edges
     cdef bint change = True # type:ignore
@@ -499,12 +499,12 @@ cdef set[LALRState] _get_canonical_lalr_states(Grammar g):
         lalr_state = LALRState(lalr_items,lr0_state._index) # type:ignore
         result.add(lalr_state)
     
-    return result
+    return result,lookaheads
 
 cdef tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],tuple]] _get_goto_action_tables_lalr(Grammar g):
     cdef dict[tuple[LALRState,Symbol],LALRState] goto = {}
     cdef dict[tuple[LALRState,Symbol],tuple] action = {}
-    cdef set[LALRState] states = _get_canonical_lalr_states(g)
+    cdef set[LALRState] states = _get_canonical_lalr_states(g)[0]
     cdef dict[LR0State,LALRState] states_by_kernel = {}
     cdef dict[tuple[LALRState,LR0Item],set[Symbol]] lookaheads_by_kernel_item = {}
     cdef tuple[LALRState,LR0Item] lookahead_key
