@@ -91,6 +91,7 @@ assert s1 == s2                                         # True, because they sha
  - `closure(state) -> Set[State]`: Computes the ε‑closure of the given state, using an internal cache to avoid recomputation. It implements an iterative stack-based traversal, correctly handling cyclic dependencies through a notification system.
  - `make_complete() -> None`: Completes the automaton by adding a sink state (`FAULT`) and missing transitions pointing to it. It records the added transitions so the automaton can be restored to its previous state.
  - `restore_to_before_complete() -> None`: Removes the sink state and the added transitions, reverting the automaton to its original incomplete state.
+ - `extend_alphabet(Set[str]) -> None`: Extends the alphabet with the new given symbols.
 
 > ### Overloaded Operators
 
@@ -231,6 +232,8 @@ Identical to the one for `DFA`.
 The module provides several helper functions to create automata from high-level specifications.
 
  - `create_dfa(states, transition_function, start_id, alphabet) -> DFA`: Builds a DFA from a set of states, a transition table (a `Table` object), the initial state identifier, and the alphabet. Useful for reconstructing automata from serialized representations.
+
+ - `create_nfa(states, transition_function, epsilon_transitions, start_id, alphabet) -> NFA`: Similar to `create_dfa`, but receives an `epsilon_transitions` parameter with the epsilon transitions of the automata.
 
  - `get_word_automaton(word: str) -> DFA`: Returns a DFA that recognizes exactly the given word (a string of characters). The alphabet is the set of characters in the word.
 
