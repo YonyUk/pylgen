@@ -3,9 +3,9 @@
 # cython: nonecheck=False
 import inspect
 from typing import Iterable,Callable,List
-from ..common.types cimport Token,AST,Symbol,ASTListView
+from ..common.types cimport Token,AST,Symbol,ASTListView,ErrorAST
 from ..grammar.grammar cimport Production
-from ..analysis.error cimport SyntaxError
+from ..analysis.error cimport SyntaxError,Error
 from .bottom_up_parser_actions import BottomUpParserAction
 
 _offset:int = 32
@@ -78,7 +78,7 @@ cdef class Parser:
         raise ParsingException('Nothing parsed')
     
     @property
-    def errors(self) -> List[SyntaxError]:
+    def errors(self) -> List[Error]:
         return self._errors
 
     cpdef void reset(self):
@@ -221,6 +221,8 @@ cdef class BottomUpParser(Parser):
             self._view._end = self._stack_ast_top
             self._view._start = self._stack_ast_top - production_len
             new_ast = self._reductor_by_production[p._hash](self._view) # type:ignore
+            if new_ast._is_error:
+                self._errors.append((<ErrorAST>new_ast)._error)
             if not errors and self._draw_parse_tree:
                 # build the parse tree
                 childrens = self._parse_tree_nodes[-1*production_len:]

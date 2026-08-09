@@ -1,6 +1,6 @@
 from ..common.types cimport Token,AST,Symbol,ASTListView
 from ..grammar.grammar cimport Production
-from ..analysis.error cimport SyntaxError
+from ..analysis.error cimport Error
 
 cdef class ParsingException(Exception):
     pass
@@ -16,7 +16,7 @@ cdef class Parser:
     cdef bint _draw_parse_tree
     cdef ParseTreeNode _parse_tree
     cdef list[ParseTreeNode] _parse_tree_nodes
-    cdef list[SyntaxError] _errors
+    cdef list[Error] _errors
 
     cdef void _try_parse(self,Token token)
     cpdef void reset(self)
