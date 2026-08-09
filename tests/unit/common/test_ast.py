@@ -1,5 +1,7 @@
 import pytest
 from pylgen.common.types import AST,Symbol,ErrorAST
+from pylgen.analysis.error import SyntaxError,SemanticError
+from pylgen.analysis.error_type import ErrorType
 
 class TestAST:
 
@@ -33,8 +35,20 @@ class TestAST:
         with pytest.raises(NotImplementedError):
             ast.children()
 
-        error_ast = ErrorAST(symbol,line,column)
+        error = SyntaxError('error 1',line,column)
+        error_ast = ErrorAST(symbol,line,column,error)
+
         assert error_ast.symbol == symbol
         assert error_ast.line == line
         assert error_ast.column == column
         assert error_ast.children() == []
+        assert error_ast.error_type == ErrorType.SYNTAX
+
+        error = SemanticError('error 2',line,column)
+        error_ast = ErrorAST(symbol,line,column,error)
+
+        assert error_ast.symbol == symbol
+        assert error_ast.line == line
+        assert error_ast.column == column
+        assert error_ast.children() == []
+        assert error_ast.error_type == ErrorType.SEMANTIC
