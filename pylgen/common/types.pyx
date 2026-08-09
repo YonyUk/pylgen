@@ -1,3 +1,6 @@
+from ..analysis.error cimport Error
+from ..analysis.error_type import ErrorType
+
 from hashlib import sha256
 from .enums import TokenType
 
@@ -100,12 +103,13 @@ cdef class ErrorAST(AST):
     '''
     Error Syntax Tree Class
     '''
-    def __init__(self,Symbol symbol,int line,int column):
+    def __init__(self,Symbol symbol,int line,int column,Error error):
         '''
         Args:
             symbol (Symbol): internal symbol of this ast
             line (int): line in the source code where this ast is located
             column (int): column in the source code where this ast is located
+            error (Error)
         '''
         self._symbol = symbol
         if line < 0 or column < 0:
@@ -113,6 +117,11 @@ cdef class ErrorAST(AST):
         self._line = line
         self._column = column
         self._is_error = True # type:ignore
+        self._error = error
+    
+    @property
+    def error_type(self) -> ErrorType:
+        return self._error._type # type:ignore
 
     cpdef list[AST] children(self):
         return []

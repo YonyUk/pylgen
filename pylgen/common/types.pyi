@@ -1,5 +1,8 @@
 from typing import List
 
+from ..analysis.error import Error
+from ..analysis.error_type import ErrorType
+
 from .enums import TokenType
 
 class Symbol:
@@ -46,7 +49,10 @@ class AST:
 
 class ErrorAST(AST):
 
-    def __init__(self, symbol:Symbol, line:int, column:int): ...
+    def __init__(self, symbol:Symbol, line:int, column:int,error:Error): ...
+
+    @property
+    def error_type(self) -> ErrorType: ...
 
     def children(self) -> List[AST]: ...
 

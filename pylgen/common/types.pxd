@@ -1,3 +1,5 @@
+from ..analysis.error cimport Error
+
 cdef class Symbol:
 
     cdef int _hash
@@ -14,7 +16,7 @@ cdef class AST:
     cpdef list[AST] children(self)
 
 cdef class ErrorAST(AST):
-    pass
+    cdef Error _error
 
 cdef class ASTListView:
     cdef list[AST] _data
