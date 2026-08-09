@@ -14,8 +14,13 @@ from ..lexer.base_lexer import BaseLexer
 from ..parser.parser import ParseTreeNode, Parser
 from ..common.types import AST
 from ..grammar.grammar import Grammar
+from ..parser.parser_type import ParserType
 
-from .table import build_propagation_edges_table
+from .table import (
+    build_propagation_edges_table,
+    build_action_goto_lalr_tables,
+    build_action_goto_lalr_html_tables
+)
 
 CACHE_FILE:str | None = None
 
@@ -300,10 +305,10 @@ def draw_automaton(automaton:Automaton,**kwargs) -> None:
         raise ValueError('filename must be an string value')
     show = kwargs.get('show',False)
     if not isinstance(show,bool):
-        raise ValueError('edges argument must be a boolean value')
+        raise ValueError('show argument must be a boolean value')
     cache = kwargs.get('cache',False)
     if not isinstance(cache,bool):
-        raise ValueError('edges argument must be a boolean value')
+        raise ValueError('cache argument must be a boolean value')
 
     if physics:
         filters.append('physics')
@@ -441,10 +446,10 @@ def draw_ast(ast:AST,**kwargs) -> None:
         raise ValueError('filename must be an string value')
     show = kwargs.get('show',False)
     if not isinstance(show,bool):
-        raise ValueError('edges argument must be a boolean value')
+        raise ValueError('show argument must be a boolean value')
     cache = kwargs.get('cache',False)
     if not isinstance(cache,bool):
-        raise ValueError('edges argument must be a boolean value')
+        raise ValueError('cache argument must be a boolean value')
 
     if physics:
         filters.append('physics')
@@ -571,10 +576,10 @@ def draw_parse_tree_from_parser(parser:Parser,**kwargs) -> None:
         raise ValueError('filename must be an string value')
     show = kwargs.get('show',False)
     if not isinstance(show,bool):
-        raise ValueError('edges argument must be a boolean value')
+        raise ValueError('show argument must be a boolean value')
     cache = kwargs.get('cache',False)
     if not isinstance(cache,bool):
-        raise ValueError('edges argument must be a boolean value')
+        raise ValueError('cache argument must be a boolean value')
 
     if physics:
         filters.append('physics')
@@ -654,7 +659,7 @@ def draw_parse_tree_from_parser(parser:Parser,**kwargs) -> None:
 def show_propagation_edges_table(g:Grammar,**kwargs) -> None:
     '''
     Args:
-        parser (Parser): parser to draw
+        g (Grammar)
         
         kwargs (dict): optional values
 
@@ -665,18 +670,18 @@ def show_propagation_edges_table(g:Grammar,**kwargs) -> None:
             cache:bool tells if the cache will be used
     
         Returns:
-            None: creates an interactive graphic showing the propagation edges for the given grammar.
+            None: creates an interactive graphic showing the lalr propagation edges for the given grammar.
     '''
 
-    filename = kwargs.get('filename','parse tree')
+    filename = kwargs.get('filename','propagation edges')
     if not isinstance(filename,str):
         raise ValueError('filename must be an string value')
     show = kwargs.get('show',False)
     if not isinstance(show,bool):
-        raise ValueError('edges argument must be a boolean value')
+        raise ValueError('show argument must be a boolean value')
     cache = kwargs.get('cache',False)
     if not isinstance(cache,bool):
-        raise ValueError('edges argument must be a boolean value')
+        raise ValueError('cache argument must be a boolean value')
 
     output_path = f'{filename}.html'
     html = build_propagation_edges_table(g)
@@ -708,6 +713,81 @@ def show_propagation_edges_table(g:Grammar,**kwargs) -> None:
 
     if show:
             webbrowser.open(output_path,2)
+
+def lr_inspect_grammar(g:Grammar,type_:str | ParserType=ParserType.LALR1,**kwargs) -> bool:
+    '''
+        Args:
+            g (Grammar)
+
+            type_ (str | ParserType)
+            
+            kwargs (dict): optional values
+    
+                filename:str filename of the output file with the ast drawed
+                
+                show:bool tells if the result will be opened after created
+                
+                cache:bool tells if the cache will be used
+
+                report:bool if true, an HTML file is generated with the results
+        
+            Returns:
+                bool: tells when the given grammar has lr conflicts
+        '''
+    filename = kwargs.get('filename','lr inspection results')
+    if not isinstance(filename,str):
+        raise ValueError('filename must be an string value')
+    show = kwargs.get('show',False)
+    if not isinstance(show,bool):
+        raise ValueError('show argument must be a boolean value')
+    cache = kwargs.get('cache',False)
+    if not isinstance(cache,bool):
+        raise ValueError('cache argument must be a boolean value')
+    report = kwargs.get('report',False)
+    if not isinstance(report,bool):
+        raise ValueError('report argument must be a boolean value')
+
+    output_path = f'{filename}.html'
+    html = ''
+    conflicts = False
+    if type_ == ParserType.LALR1:
+        action,goto = build_action_goto_lalr_tables(g)
+        html,conflicts = build_action_goto_lalr_html_tables(g,action,goto)
+    else:
+        raise NotImplementedError()
+
+    if cache:
+        cache = {}
+        if not CACHE_FILE:
+            raise ValueError('cache file not set')
+        if os.path.exists(CACHE_FILE):
+            with open(CACHE_FILE,'rb') as f:
+                cache = pickle.load(f)
+        
+        json_str_or = json.dumps(cache,sort_keys=True,ensure_ascii=True)
+        digest_or = hashlib.sha256(json_str_or.encode()).hexdigest()
+        
+        embedder = ResourceEmbedder(cache)
+        embedder.feed(html)
+
+        json_str = json.dumps(cache,sort_keys=True,ensure_ascii=True)
+        digest = hashlib.sha256(json_str.encode()).hexdigest()
+
+        if not os.path.exists(CACHE_FILE) or digest_or != digest:
+            with open(CACHE_FILE,'wb') as f:
+                pickle.dump(cache,f)
+        html = embedder.output
+
+    if report:
+        with open(output_path,'w',encoding='utf-8') as f:
+            f.write(html)    
+
+    if show:
+        if not report:
+            raise ValueError('To perform this action, report must be True')
+        webbrowser.open(output_path,2)
+
+    return conflicts
 
 def set_cache_file(filename:str) -> None:
     '''

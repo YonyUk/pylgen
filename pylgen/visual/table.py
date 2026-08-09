@@ -1,434 +1,20 @@
-from ..grammar.grammar import Grammar
+import lzma
+from typing import Dict,Tuple,Any
+
+from ..grammar.grammar import Grammar,Production
 from ..parser.parser_builder import ParserBuilder
-from ..parser.lalr_parser import LALRItem,LALRState
-from ..parser.lr0_parser import LR0Item
+from ..parser.lalr_parser import LALRState
+from ..parser.lr0_parser import LR0Item,LR0State
+from ..parser.bottom_up_parser_actions import BottomUpParserAction
+from ..common.types import Symbol
 
-template = """
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
-</head>
-<body>
-    <div class="container">
-        <h1>
-            🔍 Lookaheads Propagation (LALR(1))
-        </h1>
+propagation_edges_template = lzma.decompress(b'\xfd7zXZ\x00\x00\x04\xe6\xd6\xb4F\x02\x00!\x01\x16\x00\x00\x00t/\xe5\xa3\xe0.G\t\x90]\x00\x05\x0f\xfc\x84\x9eu\xa5\xa3\x88\x7f\xb6\x9aSj\x08\x1d\x96\xcb\x05\xd1\xbc"\xffR\xd8\xbf$\xdf\xf9\x06\x86\xcd*\xed\x0162\x99\xe18\xbfJH\xb6\x12f<\rD\x16\xa2\xaa~`\xa7c\xfc\x1c\xee\xcc\xbaC\xe4\x12\x0f\xe1\x19\xa3\x8e\xb1\xb7\xd2\xfa\x05\xd5\x05\x9e-\xb3\xe5G\xa9\xc4\x1dR\xfdd\x93$\xa1\x9d\xc8\xcd\xb5\x82\xed\xae#Ai\xeb\xb9\xdc\x8ft\x9f^\x1a\x8c\xe2\xd4\xa1Z\xe5\x7f\xe2\xc0\x9dd\xb1\xfb\x99h\x88\r\xb3\x879\x05\xb7p\xa7B\xc6\x8b\xa14\xed\x7f\xf6xFLF;\x16\x08\xb3,!=%K\x8a2\x98F\x04\x89\x0ca\xb2@\xbc\xcc\xc3\x05 r\x89\xb3?V\x04nKK\x11\x8e\x01M\xfc\xde\xba\xf9\xb3\xbf\x11\xba|\r\xc92p,Ym.\x8a4C/<\x02\xd41\xec\xd9\xab\xdc\x87\x8b\x87\xb2K/J\xc1\x91\x8b@\xa1\xd2\xad_\xfc#\xa6\x10\xe7\xbb\xda(\xc7\xe6\x1aj\xf4\x9c,\xbc/\x0e\x06\x99t\x85\x0b\xb6\x82\xe5\x03+\xb9\xbe4\xb8\xbf\xfa\x8b\xc4\xe5j\xc7\xd0\x9f\xaeU\x9e\xc4}]\xbe\xfeoD\x97\x00\xf8\xa7v\xf6v\x04\xc5\xdb\x83\xb5(\xd7\xef\x8e(\x8a\xa6\xd3\xc62O{\xa5s\x84\xf3q\xe1E;q\xdb\r9gM\xfa\xa7\xb3\x94[h\x08\x0b~\x1d\x14\xe3\x13\xb0\xe3\xbfB\xe1\xb4;w\x1auJ}\x9cG\x9ev\x1b\ncD\xc1{\t\x15\x84\xabR\xc8\xdc#e\x12#c\xdeL\xf5I\x81\xe2#\x14\xe0*\xa0\xa3\x03R\x16\xe3\x1f\x8b\xa8\x1e\x98\xdc\x82\xc7L\x9d\xaf\x91L\x9c\xc8\x01\xba\xcf\x11h\x1c\xd8\x10\x88\xab\xf0.\xe3\xad\x0e\xebv/\x9bn\xd0 =]\x11lu\xa7J\x94\xdd\xda\xa3tm#\x97\x19h_%\xca\x1at\\U\xcb/`\x1f|\xaea\xe5\x1d\xc5$}F\xadI(\x8e\x892;UU\x8a\xc9\xd7\xb9\x7f\xa6\xa2w\xdb\x0cN\x9dY\xb2\xa2+}\x8c\xa1\x9b\x0f\x88\xfa\x1e\x83O~b\x98zs\x89\xf8\x90#\xc5\xd1/|\xdf\xcc$\x91qx2\xddu\xec\xc8g\x12\x80\x8fW;\xb8\x82D\x98i\xbd\xc1\xd6\x8e\x12\x8cEux\x0e\xc9[\xd9\xd9$:Lc}\xb7\xa9\xe4\xe7f2\x0c\x0e/k\xcf\xf0\n\xc1\xf5\xfe\xd8g6S\xdd\x991\x1a\xc1\x10\xde\xadQ\xfe\xa3X^\xb2\x1c\x15q\xb2,\x92\r\x85[\x03\x1d\xdf\x86Pa\x17\x86c\xe0\'*\xc7\xa7\rMA\xfeT\x98{J7\x03\xbd\r\xe2\x9fG3\xab+\xcb}t\xa5*\xbem5\x8b<\x88\xd2\xa2\x14\xf2\x04v\xfch#\xa6\xbe\xfaI\xad\'I"\x8a\x8b\x19\xaa\x0c|\xec\x8e\xd8\xe2\xac\xc4R\x9c\xa6\xa0\x03\x87\xf3\xabG\xab\xb7\xd6\xe4^\xaa\x90p\x02\xb9B3\x0c\xa7\'\x11\x99G\xad\xf9:\xf4\xf2W1\x0f\xb0[k\xb8oI\xb8Xo\x03M\x8f\xbddm\xd6\x9b\xa6O\x1d\xdfP\xd9\x94\xe7M\x0c/\xc4\xee]\xd3\xe8m\x92~\x8a\xc9\xd2\x10\xf3\x93xK\xc0\xfc\x8d\x0fL\x07\xbd\'w\x8aA\x11\xaa|6\xc3$+\xbe\x0bq_sz\x84\x96\x84\x92h\xf45y\xe3\xfb\xc8[\x8aV\xdb\xf0\x15\xce\x95\xce\xff\'\xd8\xd4\xbdc\x82I\x1e\\Q\x02\x97\xf2\x9c\x95\xfcC\xa0q2\xf7\xb7Wy\x84>\xcb\xbfK\\\xef\xe8\xf6@=\x80\r\x89\xcc\x0fU\xa1\xdc\x02(Q.\xd2\xa8\xd1)K\x85\xf0\x9a\x0c}\xa7\xa4\xe4D\x1b%W\xae\x0c\x02\x9a\xf0\t\xdfA^8\xa1\xf3\r\x13\x15\xe15\xed\xe8\xb21\xd7\xacn\xea\xde\x14q\xd6y\xbf\xa6\x82\xedV\x1b\x01\xec\x1b\xc4\x14\xa5\xa4!|\x1d\xa4\xd0\xd7\xbf-\xd5\xa2%w$\x96\xe8\x06u\xbc\xdd\xd8\xebs\x9f+\t\x1f\x90\xc4\x98\xde\x85\xea\xa5\xcb\xadtq\x86\x03-\xa3\x87\x04\x10\xc3Yv\xa1\xd1\xce5V\xd3\xe5\xa3\x89 \xcb^\xd3[z\xd1\x08L\xc7\xd4\x90\xd6\xf3\xb1\'\xa5\x19\xc5\xea\xd2\xe4\xc9\x86\xe8\xf5\x1d\xf5\x8e&v\xa6\xa7;\x1c\x12\x11\xfcB\xfb\x8f\xd3@\xaf\x06U\x82\x81*\xa3V\x04\xc4C\xc2o\xee\x9e\xa7\x04\xdf\x9c"\x122\xf5\x87H ZM\x16d\x83R\x0e\x94\x80\xc4\x98\t\xfaJT\x05pX\x06\x98\xa9\xc4\x94u\xc2\x9aw$\x99|5\xfd\xaa\xfc\x08,DN3\xb78Oc\xd3\xfd\xfc\xbf.\xb6\xf6\x98R\xf6\xc5\x19\x90\xab\xe3:\xe5v)!\xc8Rb\xaaF\x0chW\x87[I\x02\x0c\x90\x7f$\x84/6F\x04\xf9PP\xc1F?@H\x7f\xe4\xf8b\x9a\xae\x7f\xe4\xf4\xc9\x02\xc2 b\xe5\x9f7\x99\x19k\xc5\xe3@\x15\x9f\xff\x86\x84#\t\xbc\x9a\xd7\x9aow13E\xc9r\xef\xe2\xaf\xd7;\x90\xcf\xe9\xf1\xc3\xae\x92\xc81.\x83\xf1m\xda\x01\x1c\xf4\x8bB@\x1b\xdf\xafNa\xactS\x96\xaf\xcc-\xdd\xc5\xbd\xfa\x08d\xc0\x15R}E56\xc0\x8a\xed\x9a\xa1>\xd3\xc6>\xb0\x94\x8f\xb6w\xf3\x06oQ\x8eR\x08,\xee\x87\xa3\xaer\x8a\xea\xce\xa0\xd3\x07\x832\xecti0\x96u\xf5r\x7fF\xa9,\xa6lR\xf3\x11\xc5o\x93\xc4\xb8\x1cB\xa5^k\xc2X7\xe7\x05t\xad\xd2^\xe2\xe6\r\x13I\xed\xbd\xa9\xbd.\x1f\xc4\x1a\xb3\x9e\xb4n\xa7\xc3\x16^.j\x15fn(\xca\xd3X\x86\x19\x7f\x98\xef|\xd6\xf9\xb1@\xde\xad\xbb\xf1\x02Z\x9d\xda\x7f\x1d\x8d\x80\xcf\xeaG\xe6\xd9\xa1\xad\xaa\x90\x06\xd1\xf8\xfc\x14\xb5\xbf\x0eQH\xa2\xa2\xe6\xf7\xfau\x81\x06\x08\x94\xda8\x99\xda6\xa1\x8b\xf3\xf0-C\x8a\xa6\xb4O\xebq\xa1j\x0b\xee\xe5/G\xd8\xb2\x8df\xc5_u}v\x16B\x0c\xc9?\x92\x84}\x16N\xa77\x9b\n\x1b\x8b\x8b|\r\xf73\xcd\xcd\xf19Yvw\xf1o`900\xff\xb2\xca\xb6x\xc6\xb2\x1b\xdf\xbd\xbf\xcfq\n\'n\xf3Ala\\"3\xc5-\xa7\xf5@P\x1d\x82\x92\x0b=\xa4\x1b%ofP\xc7\xc0\xf9)\x1ar\x03\x8a\xa2U\xa0\xbe\xcbM\x12\xc9\x17\x91C\x90\xad\xa6\xf3\xd3\xf8\xbf\xe2\xc7\xa5\x10c\xa8\xfb\xc4J\xb6+7fT\x80\xd3\xf5\xc5\xfe\x9f\x1f0\x80\x93x\x13\xef\xe08\x8bo\x02\xca\t\xfb4S\xa1\xbdL\xbf\x00\xe1\x16\xb7\xcap\x88\xcc\xd1\x06\xcax\x05|?m\xfc\x14\xd4\\`\'t,T~\x19\xd0\x9c\x17\xa4\x8d\xbcFV\x84\x12\x1a=m\x0bF\x1d\x83\x1f\xf6|Q\x7f\xf5\xc1]\x90q\xf0m\xba\xd7I\xe7\xec\xddm\xb8\xb1\x83\xe3%\xed\xd2\x85\x9a\xea\x00\x13\xd01\xc3H\xf2L\x14\xa5\x83\xe3W\x9b\xd5 \\=\xfc_\xd4\x8fg&\xdd\xf9X\'\xf4\x86\xdda`A^\xd0r \\X\xd7\xf0\x87\x1aY\x87\xf0\xeeb\xb9\xfc\xa1\xf8\xb15\x81\x82\x01OjA\xce\xb8,\xb9:q[2>\x8f\xac\xf3\x10\x88q&\x94\x1f\xd3\x1dv\xca\x9e=\xe7\xa1H\xe5<y\xfdb)u\x19\xde8\xc3\xe6~\x84#u\x8bK\x12\xb0\xcb%\x83\x00\xff\xf6\x92\xffw<\xe2\x15P\x1d\xb9\xc4\xfa0b\xa4\xc2*4\xb3\xe7\xf3\xe8}Cd\xfbZ\x1bEz\x10m\xfb\xaek+\xcd\x18\xfa\x0e\x12\xc8B5\xa8\xc5\x18\xa1e\xf5\xa8\r\xe7\x9c=.q\xb7{k\x9a\xb8\x1d\x1c\xfd\xad\xa8\x16\x0c\xd5\xd2\x1e\xdb\xc1\xaem\xc3pw\xa3R\xdf\xf9R\x13\xa4\xf1\xfc\xab\xd5\xf0%\x05f\x1cm$vh\t\xbd\x8c\x96G\x1a\nM\x14R\xa6\xac\x7f\x01H\x08\xd0>\x9a\x94\xaa\xc0T\xfd\x83\xcf\xd9`O\x8ef\xd74\x1f#\x15\xb2\x89\x81\xc0J\xce\xe3\xb8\xcd\xdc\t&V:\x06\x13\x05A\xf2k\xcc\xe9\xe2\x199+\x11\x87\x02\xa4\xc4\xf6\xe2\x0c\xe8\xac{B_\xd3i}F\x93]\x10c\xb3h\xad\x84\xd7\xd8\xea$\xecn!\xf6\x86\xe7Z4h\xfcD%i\xeft\xc1\x05\xec\x97\x95FR\xa7\xc0\xc4\xe1[\x07\xae\x90q\x9fK!\xfe\xd8\x8a?\xc7\xad\x94\x87\x93\xb3\xa57\x0e<)\x1f\xb7\xdb\x97\xa5\xc4<\x1b\xc7\x0c3\xf3\xb9\x00c\x8a\xb9\x08t]\x98\xb8\x98\x9a1\xaeC\xc3\x98\x0b\xeb\xa2\xfb\x97S6!\x96\xc7%\x8aK\xcc@\xc0\xa7G\x0b!.a\xab\xff\x7f\xd8\xdfi\xfd\x9bC{x\\\x9ed\xe2\xde\xdb"\x7fJk0\x84j\x07\x1e\x81AB4\xe7\x19\xd8)\xd7S\x0bq\xec\x93>\x87\xcc\x08\xf8\x0f(I"Y\xf1\xaf6\xec\x92>Zz&\xc1\x8cMW\x1f\x87\xc0\xb7\x9f{\x17\xe4p\xac \x9c\x8e\xa4\xd7\x1b\x16\x7f\xc5E\x85o\x8d\xfb\xe4\xae8\xcd\x11\xd4\x10q-\xe3qx`\xdf@\x17\xafju\x03\x8f\xc5\xb8a\xda\xe8\x89\xc7"M^\xba\x03Rh\xa0\x01\x8e+\x8f/o?M\xdd\xc3\x030\xa4\xd2\x19\x86"X\xe7\xf1\x1e\xdc\xb6\xd2\x07\xc0~\x8c1\xc5q\xcf?B\x05\xd7kq9\xbf\x0f$\xa6\xc9\x0b\x02\x021d\x99\x01\xe1d\xf3\xb9e\xe4\x9c\xd2GA\x954\x90/su\xe4z\xe1\xe8\x023o\x00\xebe\to\x9e\xad\xa9\xb0\x80\x11\xd2\xc7TA\x10\x94\xdf\xd6\x01\xee\x9743\xee)V|\xb3\x86X\xc8\xb4"\xc6\xbf\x81\xb8i\xec\xf4d\x1cc)\x13T@\xb0\xa7\n\xc3\rT\xa3}\x1b\xe0U\xa4\xa3G4\xe7\xd6\xae\\\xb1#5\x1b\x0f\xfe\xa0\xd9\xb5\x80A\xb3u\xda\xf6l\xc1~\xd6\xf1\xaf\xc0M\xcf\xcdi\xf50\x00\x84a\xd5\x1e8J\n`Z(\x04&\xcaCS\xdc\x9c\x95\xfe\x8d\xb6\x1d8R\xa1\x9bYS\x9e;\x93;\x8b\xb5\x01\xd1\xff\xcey\xc2M\xbe\xf1o\x84~\xdb\x15\xdb\xaf\x94\xde\x05\x8d\x0b\x93\x12;y*0\xf7\xb31Q\x0c\xf7v3HH\xb2;X\x8e:{T\xc7W\x1bY\xbf\xd9\\+\xab\xd6f:\x9e\x88\x8c"c\x7f\x99\xd0R\xb4}O\xdaP\xcc\x91R\xb7\x0b\xfd\xd8V\x17\x04\xa0I,\x0cH\x82\xb3pI\xba\xb7P\x82\xf3\x97\xfc\xe3\xea\xbc\xfa\x9c\xfc\x8b\xbdT<%\x81eg\x10\xed\xf5\xd4K\xf9\xa1<\xf8\x1d/\xde&E~\x00\xa8g\xf6H_\x9b\xe5I\x00\x01\xac\x13\xc8\\\x00\x00\'\xf9\x94\\\xb1\xc4g\xfb\x02\x00\x00\x00\x00\x04YZ').decode()
 
-        <div class="stats">
-            <span>📊 <strong>Edges:</strong> EDGES-COUNT-PLACEHOLDER </span>
-        </div>
+propagation_edges_row_template = lzma.decompress(b'\xfd7zXZ\x00\x00\x04\xe6\xd6\xb4F\x02\x00!\x01\x16\x00\x00\x00t/\xe5\xa3\xe0\x02\xa7\x00\xac]\x00\x05\x08\xfa\xb9\xae\xbd~\x8a%\x92U\n\x96\x07T\xd1l~\xcb\xeb\x98\x94\x94\xcb\xaa4\x02^jA\xcdX%\x0c\x18\x99\rf\x9e\xbc2\x0b\xb5\x9b\xf2\x8a\xc7\xb2\xf0a\xd5.\xa3`\x97\x99s\x8b\xc2v\xbe\x84\x10V\xf9)(\xbf=\xf1F\x94\x19\xf9j|\xdcq\x13\xd9\x8d\x8adh\xb8\xf9\xdd\x13\x05w4\x03\x88H%o\xcd\x01\x17\xc0\xa3\x17\xcb\xe7%\xfcc\x97\x9660\xaf\x08\xf2V\x08\x8e\x80\xe8WY~Y 5K\xcd\x86\xbb\x14\xbfu\xf0\x18Nv\xc9@\xf2\x8f\x04Y\xa2U\xccm5\xbf\xc9\n\xbf\xaf@\x0e5\xdc\x92\x05\xfc\x8e\xecfd\xdb\x8e\x90c\x9e\x17 \xc4\x00\x00\xf1R\x80d{\xac\xafX\x00\x01\xc8\x01\xa8\x05\x00\x00\xb5\x92\x9a\x8d\xb1\xc4g\xfb\x02\x00\x00\x00\x00\x04YZ').decode()
 
-        <div class="table-wrapper">
-            <table id="propagationTable" class="display" style="width:100%;">
-                <thead>
-                    <tr>
-                        <th style="min-width: 80px;">Origin</th>
-                        <th style="min-width: 200px;">Source Item</th>
-                        <th style="min-width: 70px;">Symbol</th>
-                        <th style="min-width: 80px;">Destination</th>
-                        <th style="min-width: 200px;">Destination Item</th>
-                        <th style="min-width: 200px;">Propagated Lookaheads</th>
-                        <th style="min-width: 200px;">Lookaheads</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- CONTENT-PLACEHOLDER -->
-                </tbody>
-            </table>
-        </div>
-        <div>
-            <details>
-                <summary class="state-summary">
-                    <h1><span>States details</span><h1>
-                </summary>
-                <!-- STATES-DETAILS-PLACEHOLDER -->
-            </details>
-        </div>
-    </div>
+state_details_template = lzma.decompress(b'\xfd7zXZ\x00\x00\x04\xe6\xd6\xb4F\x02\x00!\x01\x16\x00\x00\x00t/\xe5\xa3\xe0\x03c\x00\xd8]\x00\x05\x08\xfaY\x83+\xc0,0\'n\x89\x8d"\xf8\x81\xde\xdc \x90Vw\xa6y\x15\xc7\xa3\x98&\xc3\xbc\x14m\x86\x01\x98l\xfe\xdeWf\xb7\xe4\x94\x17P\x90\xfbg\xeddDhN\xac.\x14^\xfb;\x97\xde\xee-\x938\x1d\xc7\x193*\xe5\xfd\x8b8\t\xdd\xba\xb4\xc4\xc03\xce\xcdv\xa2\x9b\xa9\xe9\xe2,\x8b\x87\x08\x04\x1f\x9bym"!\x8c\xf9/0~=\x17\xb49\xb6\xd5\xaeo\x8b\xb0yP\xe3n\xa8\x10\x1fvOBpQ}\xeb\xec\x84\xa3\xf0i\xf8]2\x12R\'\x80\x8a7\xd6\x08\x81C\xadd\xad{g.\xca"~\xf0p\xe3\x88J\x1c\x04]\xe5\xfe$O\'L\xce\xccliT\xa5\x9fP\x0eR\x99\xd5\xe4\xde\xa8rs\x92\xac\xb0Y\xaf\xa4\xdd\xda\xfc\x93\xc7\xc0`\x13T\x1d\x1a\xff\xba \x87\xf3\xee\n\xd0\x80\x14\x00\x00z?(=\xaeR\x10\x8d\x00\x01\xf4\x01\xe4\x06\x00\x00\xbf\x0c\xa6-\xb1\xc4g\xfb\x02\x00\x00\x00\x00\x04YZ').decode()
 
-    <!-- DataTables JS -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
-            padding: 20px;
-            margin: 0;
-        }
-
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
-            background: #1e293b;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin: 0 0 8px 0;
-            color: #f8fafc;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .subtitle {
-            color: #94a3b8;
-            font-size: 0.9rem;
-            font-weight: 400;
-            margin-left: 12px;
-        }
-
-        .stats {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-            padding: 12px 16px;
-            background: #0f172a;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-        .stats span {
-            color: #94a3b8;
-        }
-        .stats strong {
-            color: #f8fafc;
-            font-weight: 600;
-        }
-
-        .dataTables_wrapper {
-            font-family: inherit;
-        }
-
-        table.dataTable {
-            border-collapse: collapse;
-            width: 100%;
-            background: #1e293b;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        table.dataTable thead th {
-            background: #0f172a !important;
-            color: #94a3b8 !important;
-            font-weight: 600;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 14px 12px !important;
-            border-bottom: 2px solid #334155 !important;
-            white-space: nowrap;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        table.dataTable tbody td {
-            padding: 10px 12px !important;
-            border-bottom: 1px solid #2d3748 !important;
-            color: #e2e8f0;
-            font-size: 0.85rem;
-            vertical-align: middle;
-        }
-
-        table.dataTable tbody tr:nth-child(even) {
-            background: #1a2538;
-        }
-        table.dataTable tbody tr:nth-child(odd) {
-            background: #1e293b;
-        }
-
-        /* Hover */
-        table.dataTable tbody tr:hover {
-            background: #2d3a52 !important;
-            cursor: default;
-        }
-
-        .badge-state {
-            display: inline-block;
-            background: #3b82f6;
-            color: white;
-            font-weight: 700;
-            font-size: 0.75rem;
-            padding: 2px 10px;
-            border-radius: 9999px;
-            font-family: 'JetBrains Mono', 'Cascadia Code', monospace;
-            letter-spacing: 0.3px;
-            min-width: 36px;
-            text-align: center;
-        }
-
-        .badge-state.conflict {
-            background: #ef4444;
-            animation: pulse-border 1.5s infinite;
-        }
-
-        .badge-symbol {
-            display: inline-block;
-            background: #334155;
-            color: #e2e8f0;
-            font-weight: 600;
-            font-size: 0.8rem;
-            padding: 2px 10px;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            border: 1px solid #475569;
-        }
-
-        .item-code {
-            font-family: 'JetBrains Mono', 'Cascadia Code', monospace;
-            font-size: 0.8rem;
-            background: #0f172a;
-            padding: 2px 8px;
-            border-radius: 4px;
-            color: #a5b4fc;
-            white-space: nowrap;
-            display: inline-block;
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .lookahead-set {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            color: #fbbf24;
-            background: #0f172a;
-            padding: 2px 8px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        tr.conflict-row {
-            border-left: 4px solid #ef4444 !important;
-            background: #2d1a1a !important;
-        }
-        tr.conflict-row td:first-child {
-            border-left: 4px solid #ef4444;
-            padding-left: 8px !important;
-        }
-        tr.conflict-row:hover {
-            background: #3d2222 !important;
-        }
-
-        .conflict-icon {
-            color: #ef4444;
-            font-weight: bold;
-            margin-left: 6px;
-            cursor: help;
-        }
-
-        @keyframes pulse-border {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
-        .dataTables_filter input {
-            background: #0f172a !important;
-            border: 1px solid #334155 !important;
-            border-radius: 6px !important;
-            color: #f8fafc !important;
-            padding: 6px 12px !important;
-            margin-left: 8px !important;
-            width: 220px !important;
-        }
-        .dataTables_filter input:focus {
-            border-color: #3b82f6 !important;
-            outline: none !important;
-        }
-        .dataTables_length select {
-            background: #0f172a !important;
-            border: 1px solid #334155 !important;
-            border-radius: 6px !important;
-            color: #f8fafc !important;
-            padding: 4px 8px !important;
-        }
-        .dataTables_info, .dataTables_paginate {
-            color: #94a3b8 !important;
-            margin-top: 12px !important;
-        }
-        .paginate_button {
-            background: #0f172a !important;
-            border: 1px solid #334155 !important;
-            color: #e2e8f0 !important;
-            border-radius: 4px !important;
-            padding: 4px 12px !important;
-            margin: 0 2px !important;
-        }
-        .paginate_button.current {
-            background: #3b82f6 !important;
-            border-color: #3b82f6 !important;
-            color: white !important;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            padding-bottom: 10px;
-        }
-
-        .states-section {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #334155;
-        }
-
-        .state-detail {
-            background: #1a2538;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            padding: 0;
-            transition: border-color 0.2s;
-        }
-
-        .state-detail[open] {
-            border-color: #3b82f6;
-        }
-
-        .state-summary {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 16px;
-            cursor: pointer;
-            font-weight: 500;
-            user-select: none;
-            background: #0f172a;
-            border-radius: 8px;
-        }
-        .state-summary:hover {
-            background: #1a2538;
-        }
-
-        .state-id {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            color: #60a5fa;
-            font-size: 1rem;
-            min-width: 48px;
-        }
-
-        .state-badge {
-            background: #334155;
-            color: #94a3b8;
-            font-size: 0.75rem;
-            padding: 2px 10px;
-            border-radius: 9999px;
-        }
-
-        .state-content {
-            padding: 12px 20px 16px 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-        }
-
-        .item-group, .transitions {
-            flex: 1 1 300px;
-            min-width: 250px;
-        }
-
-        .item-group h4, .transitions h4 {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #94a3b8;
-            margin: 0 0 8px 0;
-            border-bottom: 1px solid #2d3748;
-            padding-bottom: 4px;
-        }
-
-        .item-group ul, .transitions ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .item-group li {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            padding: 2px 0;
-            color: #e2e8f0;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            gap: 6px;
-        }
-
-        .lookahead {
-            color: #fbbf24;
-            font-size: 0.75rem;
-            background: #0f172a;
-            padding: 0 6px;
-            border-radius: 4px;
-        }
-    </style>
-    <script>
-    $(document).ready(function() {
-        $('#propagationTable').DataTable({
-            "pageLength": 25,
-            "order": [[0, "asc"]],
-            "columnDefs": [
-                { "orderable": false, "targets": [1, 4] }
-            ],
-            "language": {
-                "search": "🔎 Filter:",
-                "lengthMenu": "Show _MENU_ edges",
-                "info": "Showing _START_ to _END_ of _TOTAL_ edges",
-                "infoEmpty": "no edges",
-                "infoFiltered": "(filtered de _MAX_ total)"
-            }
-        });
-    });
-    </script>
-</body>
-</html>
-"""
-
-row_template = """
-                    <tr>
-                        <td><span class="badge-state">SOURCE-STATE-PLACEHOLDER</span></td>
-                        <td><code class="item-code">SOURCE-ITEM-PLACEHOLDER</code></td>
-                        <td><span class="badge-symbol">SYMBOL-PLACEHOLDER</span></td>
-                        <td><span class="badge-state">DEST-STATE-PLACEHOLDER</span></td>
-                        <td><code class="item-code">DEST-ITEM-PLACEHOLDER</code></td>
-                        <td><span class="lookahead-set">LOOKAHEADS-PLACEHOLDER</span></td>
-                        <td><span class="lookahead-set">TOTAL-LOOKAHEADS-PLACEHOLDER</span></td>
-                    </tr>
-"""
-
-state_details_template = """
-                <details class="state-detail">
-                    <summary class="state-summary">
-                        <span class="state-id">STATE-INDEX-PLACEHOLDER</span>
-                        <span class="state-badge">STATE-ITEMS-PLACEHOLDER</span>
-                    </summary>
-                    <div class="state-content">
-                        <div class="item-group">
-                            <h4>Kernel Items</h4>
-                            <ul>
-STATE-KERNEL-ITEMS-PLACEHOLDER
-                            </ul>
-                        </div>
-                        <div class="item-group">
-                            <h4>Non‑kernel Items (Closure)</h4>
-                            <ul>
-STATE-NON-KERNEL-ITEMS-PLACEHOLDER
-                            </ul>
-                        </div>
-                    </div>
-                </details>
-"""
+goto_action_tables_template = lzma.decompress(b'\xfd7zXZ\x00\x00\x04\xe6\xd6\xb4F\x02\x00!\x01\x16\x00\x00\x00t/\xe5\xa3\xe0%\x14\x08E]\x00\x05\x0f\xfc\x86\xae\x81\xeaHH\x85\x13\x9f\xe8\\;\xe4\'\xf8\x8b\xdc\x83\xe0\x08v\xce\xf2{\xce_\xdc\xc4\x8e\xdd\x81\x90)\x8f,\xf4\xf3\xf8\x84\x88E\x83\x854\xbe8\xe9A\xf0\xd2:\x1f\xda\xb5\x0ePs1\'\x8e\x05h\xd6C\xde5o\xc3%\x9e\x95\xd6H\xecX7h\xfc\n\xa4\xf1\x89\xd6s\x0e[7\'%7\x0406\x96\xfb\xe0\xaa\x0c\xdf\x83\xdf\x05Wg\xcf!\xee\x05\xa6p\xfb\x18/\x1d\x00\x05\xa5\xff\x1c\xb9W\xd3\xa7\xb3\x91\x81\x14\x90\x08\xbb\xfa\xce[\xba\xfb\x1e\xc8l\x06\xfb\xaa\x8ez\xe6>\xbf\xfc\xaaC>\x18\xf8\x97\x85\xb7+7\x802\x1e_\xb4\x99\xd2\x8b8.\x04\xe72\x1e\x91C\xeab\x9b\x92{\x8eAj\xfa!N\x9c\x91R5O\xf5&\xc6\xb0\xe0\x9fsg\xe4\xd6\xbb\xde\x86`\xe9Q\xf59{_\xdab\x0e\xbb\xb0\x96\xab@,2\xa2\xd4\x9c\xa8\x12\xf0\xd7\xbbGU>\xa3\x8d\x0e\x99:\x88\xbc\x9e\xfb\x9e\x10,\xbf\x93\x1b\xd3B\x05\xf5\xa6A\xc5\x02\xca\xf3\x12\xd2\xd9\xee\x0b\x94\x96s+%\xbb\xd6\xb2&E)}Xa4k\xf90?\xda\xb2X\xc8a\xb3\x1b\xdbw\xf5Z\x8a\xeb\x8d\x90W\x0b\x88,\xf8\x9b]Vr\xc8\x86\xd9T\x7f?\x90\xe6\x8b\xa4O\xaf\x14\x1b\x94\xd3A\xbd\xf1\xbfn\xb0^\xa59\x1e\xc3\xcf\xa6\xd6$\x93i\xbc\xdd\x1b\x05\x0ey\xd8\xcf\xf7@\x0f\xee9\xf3-\x85g&]q\x08t\xa5X\x8f\x80!\xcd\xdb w\\>\xce\xf4Y\x18\x8ek\xc2G\x99Y\x10S\xf8KEEG\xe5`\xf3\x16\xb4\xcak@8\xf6\x88~~\xe5\xfc.N\x82/\xf7\x0c\xbfu\x0f]42)\x02\x1fl\xe6\xb7\x9f\xa0\x18\xca=,F\xcc_(\x1a\x8bP3\x03[x\x90 \xc2x|\xeb\xaf\xb4\xf1B\xe0\xd8\x89\xda\xb3\xd8>W>7\x057\xfb\xc0\xad\x17\xac\xd5\x08\x08\x1b\xcbT\x12\xcd\x8d\xa3<8Z\xbau\x05L\xb2\x08\xef\xe4\'\xa9\x9d\xf9\x12RAM\x9c\xd8\xa9\xb1\xeei46I\xfe\xb0\xcb\xc8y\x96\xe7\xf1Uuf{1yL}\xff\x05\x96\xcf\x9a\x0f\xe2\x1c\xd1W\x91\xdc\x95\xa2\x10c3\x10Y\xe67\x91|\xa5\x91\x8b\x97\xa0\xfe8V\x9e\x9a\x8c\xa4\xca\xe4\x17\x8e\x14\xcd\x98Q\xb3!\xac\xac/\xe1\xbe\xbb\xd8\xf0K\xdb\xbe\xdf\xa2\x88J\xfc2.Kbz\x80\x9f\xdd\x9d\xff\xe2\xe6\xcd\x1a\x04P\x0bP\xaa\xd08\xb6\x01-\xe0\x06s=\xcaP\\\xd8\x9d\xa1\xd0\xe8\x9fXI\xa9\xadu8\x9b@\x92D\xe3E+SF\xf2#\xd9oH6\xe9:\xc7\xfe\xc5v\xd5\x87g\xe5\xe2\xfbr\x81\x86\x11\x911\xf2<N\xb5\xebM\x1c\xc9\x90L7[c\x15\x81\x04w\x0e\x006y\x1a\xdb\xa0\x0b\xb7\xd4\xad\xd1l|\xc5\xa5\xcb@\xecD\x94\xfc\x0c\xeeR_\xc2\x1d$\xba\x9dl\x8a\xdd\xdaN\xcb\xed\xd5|\xd0\xfe\xb4B\x02\xec\xfd\t\x8e\t\x8d\xb6\x9au\xf7u\x15j\x99c\t\xf7\xa3=W\xfc\xe0Y!\xb0|.\xb8{\xb5\xd9W\x1bZ\xa4\x1b\xfa\xf5\xe28\xeb\xe2!Y\xd2\t\x07\x08\x83Rn\xb2*/n\xe8m\xe8\xdd\xdf\x1e\xeec\xce\xa0Yv\xf2?\x03{b\xcaP\xf2\x80\xac\xd0\xf9Y\xa0\xc6\xb8\xd5#v\xf1\x06\xb7\xdd9\xd9\xb44\xf6\xf2\x9a+\xf4\xeb\xdc{\xd1\x98~\n\xe3\xc5\x89\xc8?l+5\xb7\xcd*I:Ds\xe2R\xce@;\xac\x85\xb5@\x8aT6\x8cVt\xa7}\xb7\x13)\x90\x15\x86"\x7f\xf8\xc4\x01\xa0\x01\x98h;"2\x813b\xa9\xd3L\x8f\xa0\xb6u\xb9\x1e\xeb\xc0r|\x8f\xe0\xeda\x0c\x0c\x08n\xf0~\x02\x0exU\xb8z\x88\x8e\x8a\xbf\xe2T\xa8\xe0;\x1a\xd2\xbc\xfe\xf8r6K\x03D$gw\xe8\xdf\x1a\'Zn\xedh86\xed\xdd\x9b\xe1\xa7\t\xbbN\x00\xc8\xb4#\x81:\x0f\xda\x1d\x82\xe7\x19\xe8\x02ws\xe8\xdb\xccI4wv\xd3@\r\x1dV\xf3\x12\xda\xa91\xc8$\xc2\x8c\xb9\xcff\xeb\x0cf(\x96\x04,b\xea\xc4?M6\xdd\xdd\xc0\x17&\xf1k\xf5s:3[P\x13\xab\x8fa\x05\xc4\x17\x91\xf5\xc0W\xefD\'\n\xd2\r-\x15\xd6\x99\xba\xa1\n\x133)\xeb\x8d\xd4\xb2\xa0\x93r\x10\x9f*\xf7\xa1\xdf\x82\xfa\xa7A\xd6\x08\x0fw\x805\xdd\xde\x0b~\x12\xfa\x8e\x80\xb2DiF\x07\xead\x80jt\\(\xb7\x9b\x80\xba\xa4\x16\x04l=\xeaLQ\xbb\xa7\xa1\x8d\x106\x03\xc1\xd9\xd1\xb7p\xac\x016\xce\x85\xa7k\xc5\xf3(\x97\xc7\xd2\'>F\x1a&\xeb.\x1e\xe7\xaf\x8e\x1e\x98$\x96e\xe5l\\9\xc5p\xa7\x8cN1i"\xc5\xe3\xe60b\x1by\x84O\x81\x12M](\x81\x9aD\x9f\x136\x13\xacPbI\x9e\x8b\xd1\xe1[e\x88\xb7\xec\xaf\x1b\x00\xa5\x81\x13=\xc6*\xffk\xa3\xe9\xa4zR0\x02\xac(\xd0\xa0\x93\x0c~\xd9\x93\x14\xdc\xc4y5[3\x1c\xdeWZ\xf3_\x80\xd7\x01N\x8b2\xdd\x1d\x94\xff\x90o\xb5\x10\xfb\x9d}\x05}\xdeW\xfcg{\xc5\x8c\x1f\x97\xd1\xc3\x07~\x88\x1a\xd2k\xfc\x1c\xaa)\xf5\xa1\xab3\xe9?\x06\x85\xae\xf3\xae\x85\xbdF!"q.}\x9e\x18\x91(\x88(\x17\x9dTK\xf3\x876U\xfc\xaai\xf3D\x04Q\xb4\x8b;\x93"\xfc8)\x11\\}Ew\x07\xd1\xc4NA\xd9\x919\x92\xab\xb2\x9e<\xa6\xc8}\x9f X\xf5W\x0c\xb2\x1c(\x17\xd2\x85\x0c16\xcbG\xb7\x9b\xebn\x06V\xa8\x0c\x84\x08\x8b\xd6b\x12\xcf\xe1\xc9\xf4\xd8\xd1\x16%ES\xdc\xab\x0c\xb0\r\x84\x14\xe1_\x17.\xafX:\x9as \xae)\xa4W\xc1\xbc\xeaj05jd\xb3a\xa2\xed!/`\x0e,\xf1\xa6o[#\xee\xf2j\x84\x86L\xbe\x03\xd6\xe0\x1a\x99~=r\xc0\xa6\xdaLs\xcf\x8f\xdb\x90\xe0\xe9Y\xea<\r\x18\x80\xae\xa0a]\xe2\x94\xac\xce\xb8cZ\x86\xad\x852"o\xf1l\x02\xeeF\xaa\x16.w;\x85Gz]\xb1\xec\x14=#\x93\x0b#\xfd\xd9\xb8\xb3\xea\xb2\xb8\xc4{I\xc2\x92x\xa2\xd4\x8e\xad\x1a\xd1\xdc\x16\x0c\xc1\x84\xcaa\xa6\xc3\xdc)\x9b\x0b\xe9\n*\x94\xff\xcf\x18\xe3\x97&ExA\xb2xw\xd4\x07I\xc8K\x8d\xc0\xe4\x89|"&S"\x86\xb6\x83\x05\x07\xdc\xac\xd5\xa5\x99\x8aD>\r\xe8\x14\xeeT\r\x13\xbf\xf5\xb9\xc2$b6\xb2=u%\x91\r>\xcf\xbe\xeb\x8f\xab\x88\xa0\xfd\xac})o0Ov}Q\xbc\x0f\x1fLc\xe4\xb8#k\x8e\x17u\x9e\xfb\x02\xc2\x15\xf5\xb8\x89"T\x95\xf0\xb3\x808\x9aW|\xe2\xaf\xf0x\x82\xe4\xdb\x92\x82\xb8e\xd3\xde\t\xc3\x12)\xff\xa3\x99wo\xd5k\xc1\xfd\x0fw\xae\xabw\xc0$5\xdd\xb5>_\x10\xd9\xf6i\xbfv]\x16/\x0bs\xbb\x1d\xa4=\xe1\xc9Z\xf6\xba\x7f\xd7\xcf?\xab4:\xfc$j\xf7\xdf\x07c\x95C\xa3\x8f\xe2\x88\xb3+\x90Q\x88\xc1\x8c\x1b\xf2\xf8\xd7\xd8\x0f\x11\x9f\xdfu\xced\xb0\xd20k\xf9\xf3\x96\xd5\x87\x97\xde`Q0\xf6y\x87Tx\xd3C\xee\xd2\xc3\xfa\xc4\xe2\xe6\x1e\x02i\xd7\x10\x99A*(\xa4\x9d\x97\xb1;\xbe\x8d\xcc\xbbx\xd8fq\xb6\x17\xe5\xdf.\xee\x02\xaa\xf2o,\x93a\xdf\xa5\xdb3(\'\x9c+\x02\xb3\x1c&\x80W\x8d\x91\x16\xc0\xef\xe9\xd4H\\\x9a\xe6\x9a\xb0\x00g\xd0\xd5\xe7\x18\xd8n?\xbd\xaeH5\xe5%\x1b\n\x99\xde\x1fGnjP$\xcc\xc09{\x8e\xe5\xb5\xc5EC\xd9n4\t\x8c {~\xa6\x8e\x85e:|\x9b1\xb3{j\xed.yk\x9a\x12M\x0c\xd9{\xb4\xd3\x84@\x9f\x8bp\xb8\xc7\x04\xa7\x91\xd9\x98\xb3\x0e\xab=\x80\x16\xecY\x1e\xa7\xbe0\xfc\x98\xd6o\xf6&\' \xdcd\xd4\xfcR\x10\xf0\xf1u\x11\r\x00n\x0c\x18\x91\xb12e\xe3\x85\xf0Yb\xa1\x0bkq\xfe\xcf\x06\x04\xd4vTc\xd0px(\x0f\x94\x1ap\xac\x13\x04\x1a3z\x80$\x90\xe8\x95\xe3\xe7\xde\x9da\xf3l\x1a$0&\xfekc]\x989\xc3C \xb1\x07\x80O\xeb\xbf\x99\xeb*\x85D\x80&I\x99\xde \x08R\xc2\xc4\xbcV\xd1/\xd9eyh\xabv\xed1a\x10T\xf5\xb8$\xca9iTr\x13\x99\x89\x10\x08\xab\xd3\xc5\xc9y\xa2\x0fa~D\xc5k\x80\xe6\x83,\x0c\xcdf\x81w\xb6\xb9kjbe\n?7\xf7\xb0\xb4K~\x0c-!q\x1f^\xfdeH\x0e\x05\x89\x8b\x1d\x1c]\xcb\xd9\xe1\xc0\xf25\x1c\xf0\xbf\xda\xd3U\x1a\xaf\xe0\xdcAgO\xc4\xe9;-\xab\x1c\x07\x08\x00\x00\x00\x00\x00J\x04\x10<\xeb\x8fO\x1d\x00\x01\xe1\x10\x95J\x00\x00\xf8\x92>\x89\xb1\xc4g\xfb\x02\x00\x00\x00\x00\x04YZ').decode()
 
 def build_propagation_edges_table(g:Grammar) -> str:
 
@@ -443,7 +29,7 @@ def build_propagation_edges_table(g:Grammar) -> str:
         for (source_item,symbol),(dest_state,dest_item) in edges[source_state].items():
             edges_count += 1
             d_state = states_dict[hash(dest_state)]
-            row = row_template.replace('SOURCE-STATE-PLACEHOLDER',f'I{source_state.index}')
+            row = propagation_edges_row_template.replace('SOURCE-STATE-PLACEHOLDER',f'I{source_state.index}')
             row = row.replace('SOURCE-ITEM-PLACEHOLDER',str(source_item))
             row = row.replace('SYMBOL-PLACEHOLDER',symbol.symbol)
             row = row.replace('DEST-STATE-PLACEHOLDER',f'I{d_state.index}')
@@ -454,7 +40,7 @@ def build_propagation_edges_table(g:Grammar) -> str:
             row = row.replace('LOOKAHEADS-PLACEHOLDER',str(source_lookaheads) if len(source_lookaheads) > 0 else '∅')
             rows.append(row)
 
-    html = template.replace('<!-- CONTENT-PLACEHOLDER -->','\n'.join(rows))
+    html = propagation_edges_template.replace('<!-- CONTENT-PLACEHOLDER -->','\n'.join(rows))
     html = html.replace('EDGES-COUNT-PLACEHOLDER',str(edges_count))
 
     states_details = []
@@ -476,3 +62,142 @@ def build_propagation_edges_table(g:Grammar) -> str:
     html = html.replace('<!-- STATES-DETAILS-PLACEHOLDER -->','\n'.join(states_details))
 
     return html
+
+def build_action_goto_lalr_tables(g:Grammar) -> Tuple[Dict[Tuple[LALRState,Symbol],Any],Dict[Tuple[LALRState,Symbol],LALRState]]:
+    states = ParserBuilder.get_canonical_lalr_states(g)
+    states_by_kernel:Dict[LR0State,LALRState] = {}
+    lookaheads_by_kernel_item = {}
+    productions_by_kernel_item = {}
+
+    goto:Dict[Tuple[LALRState,Symbol],LALRState] = {}
+    action:Dict[Tuple[LALRState,Symbol],Any] = {}
+
+    for lalr_state in states:
+        lr0_kernel = set()
+        for lalr_item in lalr_state.items:
+            lr0_item = LR0Item(lalr_item.head,lalr_item.left,lalr_item.right)
+            lr0_kernel.add(lr0_item)
+            lookahead_key = (lalr_state,lr0_item)
+            lookaheads_by_kernel_item[lookahead_key] = lalr_item.lookaheads
+            if len(lr0_item.right) == 0 and lr0_item.head in g.non_terminals:
+                for reduction in g[lalr_item.head].productions:
+                    if lalr_item.head == lr0_item.head and reduction == lr0_item.left:
+                        productions_by_kernel_item[lr0_item] = Production(lalr_item.head,reduction)
+                        break
+        states_by_kernel[LR0State(lr0_kernel,lalr_state.index)] = lalr_state
+
+    for lr0_state in states_by_kernel:
+        for lr0_item in lr0_state.items:
+            if len(lr0_item.right) > 0:
+                symbol = lr0_item.right[0]
+                next_state = LR0State(ParserBuilder.goto_lr0(lr0_state.items,symbol,g))
+                key = (states_by_kernel[lr0_state],symbol)
+                goto[key] = states_by_kernel[next_state]
+                action_value = f'{BottomUpParserAction.SHIFT}',states_by_kernel[next_state]
+                if not key in action:
+                    action[key] = []
+                if not action_value in action[key]:
+                    action[key].append(action_value)
+            else:
+                lookahead_key = (states_by_kernel[lr0_state],lr0_item)
+                for symbol in lookaheads_by_kernel_item[lookahead_key]:
+                    key = (lookahead_key[0],symbol)
+                    action_value = f'{BottomUpParserAction.ACCEPT}',None
+                    if not key in action:
+                        action[key] = []
+                    if symbol == g.end_symbol and lr0_item.head not in g.non_terminals:
+                        if not action_value in action[key]:
+                            action[key].append(action_value)
+                        continue
+                    reduction = productions_by_kernel_item[lr0_item]
+                    action_value = f'{BottomUpParserAction.REDUCE}',reduction
+                    if not action_value in action[key]:
+                        action[key].append(action_value)
+
+    return action,goto
+
+def build_action_goto_lalr_html_tables(g:Grammar,action_table:Dict[Tuple[LALRState,Symbol],Any],goto_table:Dict[Tuple[LALRState,Symbol],LALRState]) -> Tuple[str,bool]:
+
+    conflicts_flag = False
+    terminals = g.terminals
+    states = ParserBuilder.get_canonical_lalr_states(g)
+
+    terminals_html = ['\t'*4 + f'<th>{symbol}</th>' for symbol in terminals]
+    non_terminals_html = ['\t'*4 + f'<th>{symbol}</th>' for symbol in sorted(g.non_terminals,key=lambda symbol:symbol.symbol)]
+
+    html = goto_action_tables_template.replace('<! --- NON-TERMINALS-PLACEHOLDER --->','\n'.join(non_terminals_html))
+    html = html.replace('<! --- TERMINALS-PLACEHOLDER --->','\n'.join(terminals_html))
+
+    actions_rows = []
+    goto_rows = []
+    states_details = []
+
+    for state in sorted(states,key=lambda state:state.index):
+        state_detail_html = state_details_template.replace('STATE-INDEX-PLACEHOLDER',f'I{state.index}')
+        items_length = len(state.items)
+        state_detail_html = state_detail_html.replace('STATE-ITEMS-PLACEHOLDER',f'{str(items_length)} {'items' if items_length > 1 else 'item'}')
+
+        kernel_items = ParserBuilder.get_kernel_items_lalr(state,g)
+        kernel_items_html_details = ['\t'*8 + f'<li>{item}</li>' for item in kernel_items]
+        non_kernel_items_html_details = ['\t'*8 + f'<li>{item}</li>' for item in state.items if not item in kernel_items]
+        
+        state_detail_html = state_detail_html.replace('STATE-KERNEL-ITEMS-PLACEHOLDER','\n'.join(kernel_items_html_details))
+        state_detail_html = state_detail_html.replace('STATE-NON-KERNEL-ITEMS-PLACEHOLDER','\n'.join(non_kernel_items_html_details))
+
+        states_details.append(state_detail_html)
+
+        action_row = ['\t'*4 + f'<td>I{state.index}</td>']
+        goto_row = ['\t'*4 + f'<td>I{state.index}</td>']
+
+        for symbol in terminals:
+            key = state,symbol
+
+            if key in action_table:
+                actions = action_table[key]
+                if len(actions) == 1:
+                    action = actions[0]
+                    if action[0] == BottomUpParserAction.SHIFT:
+                        action_row.append('\t'*4 + f'<td class="cell-shift">Shift I{action[1].index}</td>')
+                    elif action[0] == BottomUpParserAction.REDUCE:
+                        action_row.append('\t'*4 + f'<td class="cell-reduce" title="{action[1]}">Reduce</td>')
+                    else:
+                        action_row.append('\t'*4 + f'<td class="cell-accept">Accept</td>')
+                else:
+                    conflicts_flag = True
+                    shift = False
+                    conflicts = []
+                    for action in actions:
+                        if action[0] == BottomUpParserAction.SHIFT:
+                            shift = True
+                            conflicts.append('\t'*6 + f'<span class="shift-part">Shift to I{action[1].index}</span>')
+                        else:
+                            conflicts.append('\t'*6 + f'<span class="reduce-part">{action[1]}</span>')
+                    conflicts_html = ('\n' + '\t'*6 + '<hr>\n').join(conflicts)
+                    span_content_html = '\n' + '\t'*5 + f'<span class="actions">\n{conflicts_html}' + '\n' + '\t'*5 + '</span>\n'
+                    action_row.append('\t'*4 + f'<td class="cell-conflict" title="{'Shift/Reduce' if shift else 'Reduce/Reduce'}">{span_content_html}' + '\t'*4 + '</td>')
+                    pass
+            else:
+                action_row.append('\t'*4 + f'<td class="cell-empty"></td>')
+
+        for symbol in g.non_terminals:
+            key = state,symbol
+
+            if key in goto_table:
+                next_state = goto_table[key]
+                goto_row.append('\t'*4 + f'<td>I{next_state.index}</td>')
+            else:
+                goto_row.append('\t'*4 + '<td></td>')
+
+        action_row_html = '\n'.join(action_row)
+        goto_row_html = '\n'.join(goto_row)
+
+        actions_rows.append('\t'*3 + f'<tr>\n{action_row_html}\n' + '\t'*3 + '</tr>')
+        goto_rows.append('\t'*3 + f'<tr>\n{goto_row_html}\n' + '\t'*3 + '</tr>')
+
+    html = html.replace('<! --- ACTION-ROWS-PLACEHOLDER --->','\n'.join(actions_rows))
+    html = html.replace('<! --- GOTO-ROWS-PLACEHOLDER --->','\n'.join(goto_rows))
+    html = html.replace('STATES-COUNT-PLACEHOLDER',str(len(states)))
+    html = html.replace('TERMINALS-COUNT-PLACEHOLDER',str(len(terminals)))
+    html = html.replace('<!-- STATES-DETAILS-PLACEHOLDER -->','\n'.join(states_details))
+    html = html.replace('<title>Document</title>','GOTO/ACTION Tables')
+    return html,conflicts_flag
