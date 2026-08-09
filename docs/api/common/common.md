@@ -99,7 +99,7 @@ The hash is calculated once in the constructor and stored in a private `_hash` f
 
 ## AST (The Root of Every Tree)
 
-`AST` is the abstract base class for all **Abstract Syntax Tree** nodes. Every node you build must inherit from it and, at a minimum, implement the `children()` method, which returns the list of its child nodes (sub‑ASTs).
+`AST` is the abstract base class for all **Abstract Syntax Tree** nodes. Every node you build must inherit from it and, at a minimum, implement the `children()` method, which returns the list of its child nodes (sub‑ASTs). The base implementation of `children()` raises `NotImplementedError`, so you are required to override it in concrete subclasses.
 
 > ### 1. Attributes and Methods
 
@@ -109,6 +109,9 @@ The hash is calculated once in the constructor and stored in a private `_hash` f
 | `line` (property)	| `int` | The line number in the source code where this node begins. |
 | `column` (property) | `int` | The column number (1‑indexed) where it begins. |
 | `children()` (method) | `List[AST]` | Returns a list of child AST nodes. Must be overridden. |
+
+!!! note "Validation"
+    The constructor of `AST` raises a `ValueError` if `line` or `column` are negative. Always pass non‑negative integers.
 
 === "Python"
     ```python
@@ -139,6 +142,47 @@ The hash is calculated once in the constructor and stored in a private `_hash` f
 !!! tip "Best Practice"
     Always declare attributes as cdef with concrete types whenever possible. This speeds up access and assignment in reducers and visitors.
 
+## `ErrorAST` (Handling Errors during Syntactic Analysis)
+
+`ErrorAST` is a specialized subclass of `AST` that represents a node inserted into the syntax tree **exclusively during syntactic analysis**. Although the node is produced during parsing, the error it carries can be of any nature:
+
+ - **Syntactic errors**: unexpected tokens, malformed productions, or violations of the grammar.
+
+ - **Semantic errors**: type mismatches, undeclared identifiers, or other contextual checks that your reducers perform while building the AST.
+
+By embedding `ErrorAST` nodes directly into the tree, the parser can continue processing and report multiple errors in a single pass, and later stages can easily detect and handle problematic regions of the AST.
+
+| **Attribute/Method** | **Type/Return** | **Description** |
+| :---: | :---: | :---: |
+| **`error_type` (property)** | `ErrorType` | The type of the encapsulated error (e.g., `ErrorType.SYNTAX`, `ErrorType.SEMANTIC`). Extracted from the internal `Error` object. |
+| **`children()`** | `List[AST]` | Always returns `[]`, an error node is a leaf in the tree (it has no children). |
+
+> ### Usage
+
+=== "Python"
+
+    ```python
+    from pylgen.common.types import ErrorAST, Symbol
+    from pylgen.analysis.error import SemanticError
+
+    # A semantic error detected inside a reducer
+    error = SemanticError("Undeclared variable 'x'", line=10, column=5)
+    err_node = ErrorAST(Symbol('error'), line=10, column=5, error=error)
+
+    print(err_node.error_type)  # ErrorType.SEMANTIC
+    ```
+
+=== "Cython"
+
+    ```cython
+    from pylgen.common.types cimport ErrorAST
+    from pylgen.analysis.error cimport SemanticError
+
+    # A syntactic error raised by the parser's recovery mechanism
+    cdef SemanticError error = SemanticError("Unexpected '}'", 10, 5)
+    cdef ErrorAST err_node = ErrorAST(Symbol('error'), 10, 5, error)
+    ```
+
 ## `Token` (The Node from the Lexer)
 
 `Token` inherits from `AST` and represents a concrete **lexical token**: a specific piece of text identified by the lexer. In addition to its location and symbol (mapped from the token type), it stores the original text and its type.
@@ -151,6 +195,8 @@ The hash is calculated once in the constructor and stored in a private `_hash` f
 | `type` | `TokenType` | The token type (a value from your enumeration that inherits from `TokenType`). |
 
 #### Creation
+
+The constructor requires the token text, its type (must be a subclass of `TokenType`), the corresponding `Symbol`, and the location. It raises a `ValueError` if `type_` is not a subclass of `TokenType`.
 
 === "Python"
     ```python
@@ -192,7 +238,7 @@ In reducers, you often need to inspect the text or type of a token to build the 
 
 ## `ASTListView` (A Lightweight View for Reducers)
 
-When the parser reduces a production, it passes an `ASTListView` object to the reducer function. This object contains the ASTs of the right-hand side symbols, in the exact order they appear in the production. This view is **inmutable and efficient**: it does not copy the underlying list, but rather provides indexed access and length via optimized internal methods.
+When the parser reduces a production, it passes an `ASTListView` object to the reducer function. This object contains the ASTs of the right-hand side symbols, in the exact order they appear in the production. This view is **inmutable and efficient**: it does not copy the underlying list, but rather provides indexed access and length via optimized internal methods. Indexing is 0‑based, and out‑of‑range access raises `IndexError`.
 
 > ### 1. API
 
@@ -234,7 +280,7 @@ When the parser reduces a production, it passes an `ASTListView` object to the r
 
 ## `Table` (Transition Tables for Automata and Parsers)
 
-`Table` is a specialized container that acts like a dictionary with two-element keys `(str,str)` and `str` values. It is used internally in the `automaton` module to store transitions for automata, and also in parsers for the **ACTION/GOTO** tables.
+`Table` is a specialized container that acts like a dictionary with two-element keys `(str,str)` and `str` values. It is used internally in the `automaton` module to store transitions for automata.
 
 > ### 1. API
 
