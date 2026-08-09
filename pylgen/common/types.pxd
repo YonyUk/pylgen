@@ -9,8 +9,12 @@ cdef class AST:
     cdef Symbol _symbol
     cdef int _line
     cdef int _column
+    cdef bint _is_error
 
     cpdef list[AST] children(self)
+
+cdef class ErrorAST(AST):
+    pass
 
 cdef class ASTListView:
     cdef list[AST] _data

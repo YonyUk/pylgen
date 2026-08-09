@@ -73,6 +73,7 @@ cdef class AST:
             raise ValueError('line and column must be non-negative values')
         self._line = line
         self._column = column
+        self._is_error = False # type:ignore
     
     @property
     def symbol(self) -> Symbol:
@@ -94,6 +95,27 @@ cdef class AST:
     
     def __repr__(self) -> str:
         return str(self)
+
+cdef class ErrorAST(AST):
+    '''
+    Error Syntax Tree Class
+    '''
+    def __init__(self,Symbol symbol,int line,int column):
+        '''
+        Args:
+            symbol (Symbol): internal symbol of this ast
+            line (int): line in the source code where this ast is located
+            column (int): column in the source code where this ast is located
+        '''
+        self._symbol = symbol
+        if line < 0 or column < 0:
+            raise ValueError('line and column must be non-negative values')
+        self._line = line
+        self._column = column
+        self._is_error = True # type:ignore
+
+    cpdef list[AST] children(self):
+        return []
 
 cdef class ASTListView:
 
