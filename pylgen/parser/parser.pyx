@@ -194,6 +194,7 @@ cdef class BottomUpParser(Parser):
         # local references for micro-optimizations
         cdef bint errors = len(self._errors) > 0 # type:ignore
         cdef unsigned int symbol_id
+        cdef Error error
 
         if self._parsed:
             raise ValueError('EOF token already readed')
@@ -222,7 +223,9 @@ cdef class BottomUpParser(Parser):
             self._view._start = self._stack_ast_top - production_len
             new_ast = self._reductor_by_production[p._hash](self._view) # type:ignore
             if new_ast._is_error:
-                self._errors.append((<ErrorAST>new_ast)._error)
+                error = (<ErrorAST>new_ast)._error
+                if not error in self._errors:
+                    self._errors.append(error)
             if not errors and self._draw_parse_tree:
                 # build the parse tree
                 childrens = self._parse_tree_nodes[-1*production_len:]
