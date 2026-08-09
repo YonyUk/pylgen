@@ -173,7 +173,7 @@ context_extension = Extension(
 
 setup(
     name='pylgen',
-    version='0.4.1',
+    version='0.5.0',
     description='test',
     author='YonyUk',
     packages=[
@@ -206,5 +206,5 @@ setup(
         context_extension
     ]),
     install_requires=requirements,
-    python_requires=">=3.13.7"
+    python_requires=">=3.11"
 )
