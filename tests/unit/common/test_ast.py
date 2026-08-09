@@ -1,5 +1,5 @@
 import pytest
-from pylgen.common.types import AST,Symbol
+from pylgen.common.types import AST,Symbol,ErrorAST
 
 class TestAST:
 
@@ -30,3 +30,11 @@ class TestAST:
         assert ast.symbol == symbol
         assert ast.line == line
         assert ast.column == column
+        with pytest.raises(NotImplementedError):
+            ast.children()
+
+        error_ast = ErrorAST(symbol,line,column)
+        assert error_ast.symbol == symbol
+        assert error_ast.line == line
+        assert error_ast.column == column
+        assert error_ast.children() == []
