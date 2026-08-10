@@ -123,7 +123,7 @@ def build_action_goto_lalr_html_tables(g:Grammar,action_table:Dict[Tuple[LALRSta
     states = ParserBuilder.get_canonical_lalr_states(g)
 
     terminals_html = ['\t'*4 + f'<th>{symbol}</th>' for symbol in terminals]
-    non_terminals_html = ['\t'*4 + f'<th>{symbol}</th>' for symbol in sorted(g.non_terminals,key=lambda symbol:symbol.symbol)]
+    non_terminals_html = ['\t'*4 + f'<th>{symbol}</th>' for symbol in g.non_terminals]
 
     html = goto_action_tables_template.replace('<! --- NON-TERMINALS-PLACEHOLDER --->','\n'.join(non_terminals_html))
     html = html.replace('<! --- TERMINALS-PLACEHOLDER --->','\n'.join(terminals_html))
