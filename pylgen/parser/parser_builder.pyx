@@ -214,13 +214,13 @@ cdef class ParserBuilder:
         raise NotImplementedError()
     
     @staticmethod
-    def get_propagated_lookaheads(g:Grammar) -> tuple[dict[tuple[LR0State,LR0Item],set[Symbol]],dict[tuple[LR0State,LR0Item,Symbol,LR0State,LR0Item],set[Symbol]]]:
+    def get_propagated_lookaheads(g:Grammar) -> tuple[dict[tuple[LR0State,LR0Item],set[Symbol]],dict[tuple[str,LR0Item,Symbol,str,LR0Item],set[Symbol]]]:
         '''
         Args:
             g (Grammar)
         
         Returns:
-            Tuple[Dict[Tuple[LR0State,LR0Item],Set[Symbol]],Dict[Tuple[LR0State,LR0Item,Symbol,LR0State,LR0Item],Set[Symbol]]]
+            Tuple[Dict[Tuple[LR0State,LR0Item],Set[Symbol]],Dict[Tuple[str,LR0Item,Symbol,str,LR0Item],Set[Symbol]]]
         '''
         cdef dict[tuple[LR0State,LR0Item],set[Symbol]] final_lookaheads
         cdef dict[tuple[LR0State,LR0Item,Symbol,LR0State,LR0Item],set[Symbol]] propagated_lookaheads
@@ -413,7 +413,7 @@ cdef tuple[dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]],se
 
     return result,states
 
-cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]],dict[tuple[LR0State,LR0Item,Symbol,LR0State,LR0Item],set[Symbol]]] _get_canonical_lalr_states(Grammar g,bint keep_edge_propagation_info=False): # type:ignore
+cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]],dict[tuple[str,LR0Item,Symbol,str,LR0Item],set[Symbol]]] _get_canonical_lalr_states(Grammar g,bint keep_edge_propagation_info=False): # type:ignore
     cdef set[LR0State] lr0_states
     cdef dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]] propagation_edges
     cdef bint change = True # type:ignore
@@ -497,19 +497,19 @@ cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]],dict[tuple[L
                 # edge that propagate lookaheads
                 lr0_state = LR0State(_closure_lr0(lr0_state._items,g),lr0_state._index) # type:ignore
                 key = (lr0_state,lr0_item)
-                edge_key = (lr0_state,lr0_item,key_symbol,lr0_state_to,lr0_item_to)
-                if keep_edge_propagation_info:
-                    if not edge_key in edge_propagation_info:
-                        edge_propagation_info[edge_key] = set()
                 if len(lookaheads[key]) == 0: continue
                 lr0_state_to = LR0State(_closure_lr0(lr0_state_to._items,g),lr0_state_to._index) # type:ignore
+                # save the propagated lookaheads
                 key_to = (lr0_state_to,lr0_item_to)
                 for lookahead_symbol in lookaheads[key]:
+                    if keep_edge_propagation_info:
+                        edge_key = (lr0_state._id,lr0_item,key_symbol,lr0_state_to._id,lr0_item_to)
+                        if not edge_key in edge_propagation_info:
+                            edge_propagation_info[edge_key] = set()
+                        edge_propagation_info[edge_key].update(lookaheads[key])
                     if not lookahead_symbol in lookaheads[key_to]:
                         change = True # type:ignore
                         lookaheads[key_to].add(lookahead_symbol)
-                        if keep_edge_propagation_info:
-                            edge_propagation_info[edge_key].add(lookahead_symbol)
 
     # build lalr states
     for lr0_state in lr0_states:

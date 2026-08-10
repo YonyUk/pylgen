@@ -35,7 +35,7 @@ def build_propagation_edges_table(g:Grammar) -> str:
             row = row.replace('DEST-ITEM-PLACEHOLDER',str(dest_item))
             _lookaheads = lookaheads[(dest_state,dest_item)]
             row = row.replace('TOTAL-LOOKAHEADS-PLACEHOLDER',str(_lookaheads))
-            source_lookaheads = propagated_lookaheads.get((source_state,source_item,symbol,d_state,dest_item),set())
+            source_lookaheads = propagated_lookaheads.get((source_state.id,source_item,symbol,d_state.id,dest_item),set())
             row = row.replace('LOOKAHEADS-PLACEHOLDER',str(source_lookaheads) if len(source_lookaheads) > 0 else '∅')
             rows.append(row)
 
