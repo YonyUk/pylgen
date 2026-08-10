@@ -1,0 +1,1033 @@
+
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"></meta>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+
+    GOTO/ACTION Tables
+  </head>
+
+  <body>
+    <div class="container">
+      <h2>🔧 ACTION Table <small>actions by state and terminal</small>
+</h2>
+
+      <div class="table-wrapper">
+        <table class="lr-table" id="action-table">
+          <thead>
+            <tr>
+              <th>State</th>
+
+				<th>id</th>
+
+				<th>=</th>
+
+				<th>$</th>
+
+				<th>*</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+			<tr>
+				<td>I0</td>
+
+				<td class="cell-shift">Shift I3</td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-shift">Shift I2</td>
+
+			</tr>
+
+			<tr>
+				<td>I1</td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-reduce" title="S -> R">Reduce</td>
+
+				<td class="cell-empty"></td>
+
+			</tr>
+
+			<tr>
+				<td>I2</td>
+
+				<td class="cell-shift">Shift I3</td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-shift">Shift I2</td>
+
+			</tr>
+
+			<tr>
+				<td>I3</td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-reduce" title="L -> id">Reduce</td>
+
+				<td class="cell-reduce" title="L -> id">Reduce</td>
+
+				<td class="cell-empty"></td>
+
+			</tr>
+
+			<tr>
+				<td>I4</td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-accept">Accept</td>
+
+				<td class="cell-empty"></td>
+
+			</tr>
+
+			<tr>
+				<td>I5</td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-shift">Shift I6</td>
+
+				<td class="cell-reduce" title="R -> L">Reduce</td>
+
+				<td class="cell-empty"></td>
+
+			</tr>
+
+			<tr>
+				<td>I6</td>
+
+				<td class="cell-shift">Shift I3</td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-shift">Shift I2</td>
+
+			</tr>
+
+			<tr>
+				<td>I7</td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-reduce" title="S -> L = R">Reduce</td>
+
+				<td class="cell-empty"></td>
+
+			</tr>
+
+			<tr>
+				<td>I8</td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-reduce" title="R -> L">Reduce</td>
+
+				<td class="cell-reduce" title="R -> L">Reduce</td>
+
+				<td class="cell-empty"></td>
+
+			</tr>
+
+			<tr>
+				<td>I9</td>
+
+				<td class="cell-empty"></td>
+
+				<td class="cell-reduce" title="L -> * R">Reduce</td>
+
+				<td class="cell-reduce" title="L -> * R">Reduce</td>
+
+				<td class="cell-empty"></td>
+
+			</tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <div class="legend">
+        <span class="legend-item"><span class="legend-color shift"></span>
+ SHIFT</span>
+
+        <span class="legend-item"><span class="legend-color reduce"></span>
+ REDUCE</span>
+
+        <span class="legend-item"><span class="legend-color accept"></span>
+ ACCEPT</span>
+
+        <span class="legend-item"><span class="legend-color conflict"></span>
+ Conflict</span>
+
+      </div>
+
+      <div class="table-footer">
+        <span>⚡ States: 10</span>
+
+        <span>🔹 Terminals: 4</span>
+
+      </div>
+
+    </div>
+
+
+    <div class="container" style="margin-top: 24px">
+      <h2>🔀 GOTO Table <small>transitions by non-terminal</small>
+</h2>
+
+      <div class="table-wrapper">
+        <table class="lr-table" id="goto-table">
+          <thead>
+            <tr>
+              <th>State</th>
+
+				<th>L</th>
+
+				<th>R</th>
+
+				<th>S</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+			<tr>
+				<td>I0</td>
+
+				<td>I4</td>
+
+				<td>I5</td>
+
+				<td>I1</td>
+
+			</tr>
+
+			<tr>
+				<td>I1</td>
+
+				<td></td>
+
+				<td></td>
+
+				<td></td>
+
+			</tr>
+
+			<tr>
+				<td>I2</td>
+
+				<td></td>
+
+				<td>I8</td>
+
+				<td>I9</td>
+
+			</tr>
+
+			<tr>
+				<td>I3</td>
+
+				<td></td>
+
+				<td></td>
+
+				<td></td>
+
+			</tr>
+
+			<tr>
+				<td>I4</td>
+
+				<td></td>
+
+				<td></td>
+
+				<td></td>
+
+			</tr>
+
+			<tr>
+				<td>I5</td>
+
+				<td></td>
+
+				<td></td>
+
+				<td></td>
+
+			</tr>
+
+			<tr>
+				<td>I6</td>
+
+				<td></td>
+
+				<td>I8</td>
+
+				<td>I7</td>
+
+			</tr>
+
+			<tr>
+				<td>I7</td>
+
+				<td></td>
+
+				<td></td>
+
+				<td></td>
+
+			</tr>
+
+			<tr>
+				<td>I8</td>
+
+				<td></td>
+
+				<td></td>
+
+				<td></td>
+
+			</tr>
+
+			<tr>
+				<td>I9</td>
+
+				<td></td>
+
+				<td></td>
+
+				<td></td>
+
+			</tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+        <div style="margin-top: 24px">
+            <details>
+                <summary class="state-summary">
+                    <h1><span>States details</span>
+<h1>
+                </summary>
+
+                
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I0</span>
+
+                        <span class="state-badge">6 items</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>S' ->  ◦ S {$}</li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+								<li>L ->  ◦ * R {=, $}</li>
+
+								<li>R ->  ◦ L {$}</li>
+
+								<li>L ->  ◦ id {=, $}</li>
+
+								<li>S ->  ◦ L = R {$}</li>
+
+								<li>S ->  ◦ R {$}</li>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I1</span>
+
+                        <span class="state-badge">1 item</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>S -> R ◦  {$}</li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I2</span>
+
+                        <span class="state-badge">4 items</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>L -> * ◦ R {=, $}</li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+								<li>R ->  ◦ L {=, $}</li>
+
+								<li>L ->  ◦ * R {=, $}</li>
+
+								<li>L ->  ◦ id {=, $}</li>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I3</span>
+
+                        <span class="state-badge">1 item</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>L -> id ◦  {=, $}</li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I4</span>
+
+                        <span class="state-badge">1 item</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>S' -> S ◦  {$}</li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I5</span>
+
+                        <span class="state-badge">2 items</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>R -> L ◦  {$}</li>
+
+								<li>S -> L ◦ = R {$}</li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I6</span>
+
+                        <span class="state-badge">4 items</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>S -> L = ◦ R {$}</li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+								<li>L ->  ◦ * R {$}</li>
+
+								<li>L ->  ◦ id {$}</li>
+
+								<li>R ->  ◦ L {$}</li>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I7</span>
+
+                        <span class="state-badge">1 item</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>S -> L = R ◦  {$}</li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I8</span>
+
+                        <span class="state-badge">1 item</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>R -> L ◦  {=, $}</li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I9</span>
+
+                        <span class="state-badge">1 item</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>L -> * R ◦  {=, $}</li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+            </details>
+
+        </div>
+
+    </div>
+
+    <style>
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #1e293b;
+        border-radius: 6px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #475569;
+        border-radius: 6px;
+        border: 2px solid #1e293b;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+      }
+
+      ::-webkit-scrollbar-corner {
+        background: #1e293b;
+      }
+
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: #475569 #1e293b;
+      }
+
+      body {
+        background: #0f172a;
+        color: #e2e8f0;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        padding: 20px;
+        margin: 0;
+      }
+
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background: #1e293b;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0 0 16px 0;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      h2 small {
+        font-size: 0.8rem;
+        font-weight: 400;
+        color: #94a3b8;
+      }
+
+      .table-wrapper {
+        overflow: auto;
+        position: relative;
+        border-radius: 8px;
+        max-height: 500px;
+      }
+
+      table.lr-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        font-size: 0.85rem;
+        background: #1e293b;
+      }
+
+      table.lr-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: #0f172a;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 10px 12px;
+        border-bottom: 2px solid #334155;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      table.lr-table thead th:first-child,
+      table.lr-table tbody td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 10;
+        background: #0f172a;
+        min-width: 60px;
+        text-align: left;
+        font-weight: 600;
+        color: #60a5fa;
+        border-right: 2px solid #334155;
+      }
+
+      table.lr-table thead th:first-child {
+        z-index: 30;
+        border-bottom: 2px solid #334155;
+      }
+
+      table.lr-table tbody td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #2d3748;
+        text-align: center;
+        font-family: "JetBrains Mono", "Cascadia Code", monospace;
+        font-size: 0.8rem;
+        background: #1e293b;
+      }
+
+      table.lr-table tbody tr:hover td {
+        background: #2d3a52;
+      }
+      table.lr-table tbody tr:hover td:first-child {
+        background: #1a2538;
+      }
+
+      table.lr-table tbody td:first-child::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: -6px;
+        width: 6px;
+        height: 100%;
+        background: linear-gradient(to right, rgba(0, 0, 0, 0.3), transparent);
+        pointer-events: none;
+      }
+
+      table.lr-table thead th,
+      table.lr-table tbody td {
+        border: 1px solid #2d3748;
+        border-top: none;
+        border-left: none;
+      }
+      table.lr-table thead th:first-child,
+      table.lr-table tbody td:first-child {
+        border-left: 1px solid #2d3748;
+      }
+
+      .cell-shift {
+        color: #34d399;
+      }
+      .cell-reduce {
+        color: #fbbf24;
+      }
+      .cell-accept {
+        color: #60a5fa;
+        font-weight: 700;
+      }
+      .cell-empty {
+        color: #475569;
+        font-size: 0.7rem;
+      }
+
+      .cell-conflict {
+        background: #4a1a1a !important;
+        border: 2px solid #ef4444 !important;
+        font-weight: 700;
+        position: relative;
+        cursor: help;
+      }
+      .cell-conflict .shift-part {
+        color: #34d399;
+      }
+      .cell-conflict .reduce-part {
+        color: #fbbf24;
+      }
+      .cell-conflict .separator {
+        color: #ef4444;
+      }
+
+      .cell-conflict[title]:hover::after {
+        content: attr(title);
+        position: absolute;
+        bottom: 110%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #0f172a;
+        color: #f8fafc;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-family: "Segoe UI", sans-serif;
+        font-size: 0.75rem;
+        font-weight: 400;
+        white-space: nowrap;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        border: 1px solid #334155;
+        z-index: 100;
+        pointer-events: none;
+      }
+
+      .table-footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 4px 0 4px;
+        font-size: 0.8rem;
+        color: #94a3b8;
+      }
+
+      .legend {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        padding: 12px 0 8px 0;
+        font-size: 0.8rem;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .legend-color {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        border: 1px solid #334155;
+      }
+      .legend-color.shift {
+        background: #34d399;
+      }
+      .legend-color.reduce {
+        background: #fbbf24;
+      }
+      .legend-color.accept {
+        background: #60a5fa;
+      }
+      .legend-color.conflict {
+        background: #ef4444;
+        border-color: #ef4444;
+      }
+    .states-section {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 2px solid #334155;
+    }
+    .state-detail {
+        background: #1a2538;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        padding: 0;
+        transition: border-color 0.2s;
+    }
+    .state-detail[open] {
+        border-color: #3b82f6;
+    }
+    .state-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        cursor: pointer;
+        font-weight: 500;
+        user-select: none;
+        background: #0f172a;
+        border-radius: 8px;
+    }
+    .state-summary:hover {
+        background: #1a2538;
+    }
+    .state-id {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        color: #60a5fa;
+        font-size: 1rem;
+        min-width: 48px;
+    }
+    .state-badge {
+        background: #334155;
+        color: #94a3b8;
+        font-size: 0.75rem;
+        padding: 2px 10px;
+        border-radius: 9999px;
+    }
+    .state-content {
+        padding: 12px 20px 16px 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+    }
+    .item-group, .transitions {
+        flex: 1 1 300px;
+        min-width: 250px;
+    }
+    .item-group h4, .transitions h4 {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #94a3b8;
+        margin: 0 0 8px 0;
+        border-bottom: 1px solid #2d3748;
+        padding-bottom: 4px;
+    }
+    .item-group ul, .transitions ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .item-group li {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8rem;
+        padding: 2px 0;
+        color: #e2e8f0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px;
+    }
+    </style>
+
+  </body>
+
+</html>
+
