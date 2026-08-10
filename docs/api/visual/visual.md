@@ -128,9 +128,7 @@ if has_conflicts:
     print("Grammar has conflicts. Check the report for details.")
 ```
 
-> ### Examples
-
-#### Classic LALR1 grammar analysis
+> ### Example 1: Classic LALR1 Grammar Analysis
 
 ```python
 from pylgen.common.types import Symbol
@@ -168,6 +166,53 @@ lr_inspect_grammar(G,'LALR1',show=True,report=True,cache=True,filename='inspect'
 #### `ACTION` and `GOTO` Tables
 
 <iframe src="../../../images/api/visual/inspect.html" width="100%" height="1200px" style="border:none;"></iframe>
+
+> ### Example 2: LALR(1) Problematic Grammar Analysis
+
+```python
+from pylgen.common.types import Symbol
+from pylgen.grammar import Grammar
+from pylgen.visual import show_propagation_edges_table,lr_inspect_grammar,set_cache_file
+
+set_cache_file('cache.pkl')
+
+S = Symbol('S')
+
+E = Symbol('E')
+A = Symbol('A')
+B = Symbol('B')
+C = Symbol('C')
+
+mul = Symbol('*',True)
+id_ = Symbol('id',True)
+plus = Symbol('+',True)
+
+G = Grammar(S,'$')
+
+G[S] += E,
+G[S] += A,
+
+G[E] += E,plus,E
+G[E] += E,mul,E
+G[E] += id_,
+
+G[A] += B,
+G[A] += C,
+
+G[B] += id_,
+G[C] += id_,
+
+show_propagation_edges_table(G,show=True,cache=True,filename='edges_table_conflict')
+lr_inspect_grammar(G,'LALR1',show=True,report=True,cache=True,filename='inspect_conflict')
+```
+
+#### Propagation Edges
+
+<iframe src="../../../images/api/visual/edges_table_conflict.html" width="100%" height="1430px" style="border:none;"></iframe>
+
+#### `ACTION` and `GOTO` Tables
+
+<iframe src="../../../images/api/visual/inspect_conflict.html" width="100%" height="1400px" style="border:none;"></iframe>
 
 ## Cache Management
 

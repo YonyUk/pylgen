@@ -16296,7 +16296,7 @@ table.dataTable td {
 
         <div class="stats">
             <span>📊 <strong>Edges:</strong>
- 15 </span>
+ 24 </span>
 
         </div>
 
@@ -16326,19 +16326,45 @@ table.dataTable td {
                 <tbody>
                     
                     <tr>
+                        <td><span class="badge-state">I0</span>
+</td>
+
+                        <td><code class="item-code">E ->  ◦ E * E</code>
+</td>
+
+                        <td><span class="badge-symbol">E</span>
+</td>
+
                         <td><span class="badge-state">I5</span>
 </td>
 
-                        <td><code class="item-code">S -> L ◦ = R</code>
+                        <td><code class="item-code">E -> E ◦ * E</code>
 </td>
 
-                        <td><span class="badge-symbol">=</span>
+                        <td><span class="lookahead-set">{$, +, *}</span>
 </td>
 
-                        <td><span class="badge-state">I6</span>
+                        <td><span class="lookahead-set">{*, $, +}</span>
 </td>
 
-                        <td><code class="item-code">S -> L = ◦ R</code>
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I0</span>
+</td>
+
+                        <td><code class="item-code">S ->  ◦ E</code>
+</td>
+
+                        <td><span class="badge-symbol">E</span>
+</td>
+
+                        <td><span class="badge-state">I5</span>
+</td>
+
+                        <td><code class="item-code">S -> E ◦ </code>
 </td>
 
                         <td><span class="lookahead-set">{$}</span>
@@ -16355,42 +16381,16 @@ table.dataTable td {
                         <td><span class="badge-state">I0</span>
 </td>
 
-                        <td><code class="item-code">L ->  ◦ * R</code>
+                        <td><code class="item-code">C ->  ◦ id</code>
 </td>
 
-                        <td><span class="badge-symbol">*</span>
+                        <td><span class="badge-symbol">id</span>
 </td>
 
-                        <td><span class="badge-state">I2</span>
+                        <td><span class="badge-state">I1</span>
 </td>
 
-                        <td><code class="item-code">L -> * ◦ R</code>
-</td>
-
-                        <td><span class="lookahead-set">{=, $}</span>
-</td>
-
-                        <td><span class="lookahead-set">{=, $}</span>
-</td>
-
-                    </tr>
-
-
-
-                    <tr>
-                        <td><span class="badge-state">I0</span>
-</td>
-
-                        <td><code class="item-code">S ->  ◦ L = R</code>
-</td>
-
-                        <td><span class="badge-symbol">L</span>
-</td>
-
-                        <td><span class="badge-state">I5</span>
-</td>
-
-                        <td><code class="item-code">S -> L ◦ = R</code>
+                        <td><code class="item-code">C -> id ◦ </code>
 </td>
 
                         <td><span class="lookahead-set">{$}</span>
@@ -16413,7 +16413,7 @@ table.dataTable td {
                         <td><span class="badge-symbol">S</span>
 </td>
 
-                        <td><span class="badge-state">I4</span>
+                        <td><span class="badge-state">I3</span>
 </td>
 
                         <td><code class="item-code">S' -> S ◦ </code>
@@ -16433,42 +16433,42 @@ table.dataTable td {
                         <td><span class="badge-state">I0</span>
 </td>
 
-                        <td><code class="item-code">S ->  ◦ R</code>
+                        <td><code class="item-code">E ->  ◦ E + E</code>
 </td>
 
-                        <td><span class="badge-symbol">R</span>
-</td>
-
-                        <td><span class="badge-state">I1</span>
-</td>
-
-                        <td><code class="item-code">S -> R ◦ </code>
-</td>
-
-                        <td><span class="lookahead-set">{$}</span>
-</td>
-
-                        <td><span class="lookahead-set">{$}</span>
-</td>
-
-                    </tr>
-
-
-
-                    <tr>
-                        <td><span class="badge-state">I0</span>
-</td>
-
-                        <td><code class="item-code">R ->  ◦ L</code>
-</td>
-
-                        <td><span class="badge-symbol">L</span>
+                        <td><span class="badge-symbol">E</span>
 </td>
 
                         <td><span class="badge-state">I5</span>
 </td>
 
-                        <td><code class="item-code">R -> L ◦ </code>
+                        <td><code class="item-code">E -> E ◦ + E</code>
+</td>
+
+                        <td><span class="lookahead-set">{$, +, *}</span>
+</td>
+
+                        <td><span class="lookahead-set">{*, $, +}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I0</span>
+</td>
+
+                        <td><code class="item-code">A ->  ◦ B</code>
+</td>
+
+                        <td><span class="badge-symbol">B</span>
+</td>
+
+                        <td><span class="badge-state">I6</span>
+</td>
+
+                        <td><code class="item-code">A -> B ◦ </code>
 </td>
 
                         <td><span class="lookahead-set">{$}</span>
@@ -16485,48 +16485,22 @@ table.dataTable td {
                         <td><span class="badge-state">I0</span>
 </td>
 
-                        <td><code class="item-code">L ->  ◦ id</code>
+                        <td><code class="item-code">B ->  ◦ id</code>
 </td>
 
                         <td><span class="badge-symbol">id</span>
 </td>
 
-                        <td><span class="badge-state">I3</span>
+                        <td><span class="badge-state">I1</span>
 </td>
 
-                        <td><code class="item-code">L -> id ◦ </code>
-</td>
-
-                        <td><span class="lookahead-set">{=, $}</span>
-</td>
-
-                        <td><span class="lookahead-set">{=, $}</span>
-</td>
-
-                    </tr>
-
-
-
-                    <tr>
-                        <td><span class="badge-state">I6</span>
-</td>
-
-                        <td><code class="item-code">L ->  ◦ * R</code>
-</td>
-
-                        <td><span class="badge-symbol">*</span>
-</td>
-
-                        <td><span class="badge-state">I2</span>
-</td>
-
-                        <td><code class="item-code">L -> * ◦ R</code>
+                        <td><code class="item-code">B -> id ◦ </code>
 </td>
 
                         <td><span class="lookahead-set">{$}</span>
 </td>
 
-                        <td><span class="lookahead-set">{=, $}</span>
+                        <td><span class="lookahead-set">{$}</span>
 </td>
 
                     </tr>
@@ -16534,51 +16508,103 @@ table.dataTable td {
 
 
                     <tr>
-                        <td><span class="badge-state">I6</span>
+                        <td><span class="badge-state">I0</span>
 </td>
 
-                        <td><code class="item-code">R ->  ◦ L</code>
+                        <td><code class="item-code">E ->  ◦ id</code>
 </td>
 
-                        <td><span class="badge-symbol">L</span>
+                        <td><span class="badge-symbol">id</span>
 </td>
 
+                        <td><span class="badge-state">I1</span>
+</td>
+
+                        <td><code class="item-code">E -> id ◦ </code>
+</td>
+
+                        <td><span class="lookahead-set">{$, +, *}</span>
+</td>
+
+                        <td><span class="lookahead-set">{*, $, +}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I0</span>
+</td>
+
+                        <td><code class="item-code">S ->  ◦ A</code>
+</td>
+
+                        <td><span class="badge-symbol">A</span>
+</td>
+
+                        <td><span class="badge-state">I2</span>
+</td>
+
+                        <td><code class="item-code">S -> A ◦ </code>
+</td>
+
+                        <td><span class="lookahead-set">{$}</span>
+</td>
+
+                        <td><span class="lookahead-set">{$}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I0</span>
+</td>
+
+                        <td><code class="item-code">A ->  ◦ C</code>
+</td>
+
+                        <td><span class="badge-symbol">C</span>
+</td>
+
+                        <td><span class="badge-state">I4</span>
+</td>
+
+                        <td><code class="item-code">A -> C ◦ </code>
+</td>
+
+                        <td><span class="lookahead-set">{$}</span>
+</td>
+
+                        <td><span class="lookahead-set">{$}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
                         <td><span class="badge-state">I8</span>
 </td>
 
-                        <td><code class="item-code">R -> L ◦ </code>
+                        <td><code class="item-code">E ->  ◦ E * E</code>
 </td>
 
-                        <td><span class="lookahead-set">{$}</span>
+                        <td><span class="badge-symbol">E</span>
 </td>
 
-                        <td><span class="lookahead-set">{=, $}</span>
+                        <td><span class="badge-state">I10</span>
 </td>
 
-                    </tr>
-
-
-
-                    <tr>
-                        <td><span class="badge-state">I6</span>
+                        <td><code class="item-code">E -> E ◦ * E</code>
 </td>
 
-                        <td><code class="item-code">S -> L = ◦ R</code>
+                        <td><span class="lookahead-set">{$, +, *}</span>
 </td>
 
-                        <td><span class="badge-symbol">R</span>
-</td>
-
-                        <td><span class="badge-state">I7</span>
-</td>
-
-                        <td><code class="item-code">S -> L = R ◦ </code>
-</td>
-
-                        <td><span class="lookahead-set">{$}</span>
-</td>
-
-                        <td><span class="lookahead-set">{$}</span>
+                        <td><span class="lookahead-set">{*, $, +}</span>
 </td>
 
                     </tr>
@@ -16586,129 +16612,337 @@ table.dataTable td {
 
 
                     <tr>
-                        <td><span class="badge-state">I6</span>
-</td>
-
-                        <td><code class="item-code">L ->  ◦ id</code>
-</td>
-
-                        <td><span class="badge-symbol">id</span>
-</td>
-
-                        <td><span class="badge-state">I3</span>
-</td>
-
-                        <td><code class="item-code">L -> id ◦ </code>
-</td>
-
-                        <td><span class="lookahead-set">{$}</span>
-</td>
-
-                        <td><span class="lookahead-set">{=, $}</span>
-</td>
-
-                    </tr>
-
-
-
-                    <tr>
-                        <td><span class="badge-state">I2</span>
-</td>
-
-                        <td><code class="item-code">L ->  ◦ * R</code>
-</td>
-
-                        <td><span class="badge-symbol">*</span>
-</td>
-
-                        <td><span class="badge-state">I2</span>
-</td>
-
-                        <td><code class="item-code">L -> * ◦ R</code>
-</td>
-
-                        <td><span class="lookahead-set">{=, $}</span>
-</td>
-
-                        <td><span class="lookahead-set">{=, $}</span>
-</td>
-
-                    </tr>
-
-
-
-                    <tr>
-                        <td><span class="badge-state">I2</span>
-</td>
-
-                        <td><code class="item-code">R ->  ◦ L</code>
-</td>
-
-                        <td><span class="badge-symbol">L</span>
-</td>
-
                         <td><span class="badge-state">I8</span>
 </td>
 
-                        <td><code class="item-code">R -> L ◦ </code>
-</td>
-
-                        <td><span class="lookahead-set">{=, $}</span>
-</td>
-
-                        <td><span class="lookahead-set">{=, $}</span>
-</td>
-
-                    </tr>
-
-
-
-                    <tr>
-                        <td><span class="badge-state">I2</span>
-</td>
-
-                        <td><code class="item-code">L ->  ◦ id</code>
+                        <td><code class="item-code">E ->  ◦ id</code>
 </td>
 
                         <td><span class="badge-symbol">id</span>
-</td>
-
-                        <td><span class="badge-state">I3</span>
-</td>
-
-                        <td><code class="item-code">L -> id ◦ </code>
-</td>
-
-                        <td><span class="lookahead-set">{=, $}</span>
-</td>
-
-                        <td><span class="lookahead-set">{=, $}</span>
-</td>
-
-                    </tr>
-
-
-
-                    <tr>
-                        <td><span class="badge-state">I2</span>
-</td>
-
-                        <td><code class="item-code">L -> * ◦ R</code>
-</td>
-
-                        <td><span class="badge-symbol">R</span>
 </td>
 
                         <td><span class="badge-state">I9</span>
 </td>
 
-                        <td><code class="item-code">L -> * R ◦ </code>
+                        <td><code class="item-code">E -> id ◦ </code>
 </td>
 
-                        <td><span class="lookahead-set">{=, $}</span>
+                        <td><span class="lookahead-set">{$, +, *}</span>
 </td>
 
-                        <td><span class="lookahead-set">{=, $}</span>
+                        <td><span class="lookahead-set">{*, $, +}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I8</span>
+</td>
+
+                        <td><code class="item-code">E ->  ◦ E + E</code>
+</td>
+
+                        <td><span class="badge-symbol">E</span>
+</td>
+
+                        <td><span class="badge-state">I10</span>
+</td>
+
+                        <td><code class="item-code">E -> E ◦ + E</code>
+</td>
+
+                        <td><span class="lookahead-set">{$, +, *}</span>
+</td>
+
+                        <td><span class="lookahead-set">{*, $, +}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I8</span>
+</td>
+
+                        <td><code class="item-code">E -> E + ◦ E</code>
+</td>
+
+                        <td><span class="badge-symbol">E</span>
+</td>
+
+                        <td><span class="badge-state">I10</span>
+</td>
+
+                        <td><code class="item-code">E -> E + E ◦ </code>
+</td>
+
+                        <td><span class="lookahead-set">{*, +, $}</span>
+</td>
+
+                        <td><span class="lookahead-set">{$, *, +}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I11</span>
+</td>
+
+                        <td><code class="item-code">E -> E ◦ * E</code>
+</td>
+
+                        <td><span class="badge-symbol">*</span>
+</td>
+
+                        <td><span class="badge-state">I7</span>
+</td>
+
+                        <td><code class="item-code">E -> E * ◦ E</code>
+</td>
+
+                        <td><span class="lookahead-set">{*, $, +}</span>
+</td>
+
+                        <td><span class="lookahead-set">{+, *, $}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I11</span>
+</td>
+
+                        <td><code class="item-code">E -> E ◦ + E</code>
+</td>
+
+                        <td><span class="badge-symbol">+</span>
+</td>
+
+                        <td><span class="badge-state">I8</span>
+</td>
+
+                        <td><code class="item-code">E -> E + ◦ E</code>
+</td>
+
+                        <td><span class="lookahead-set">{*, $, +}</span>
+</td>
+
+                        <td><span class="lookahead-set">{+, *, $}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I5</span>
+</td>
+
+                        <td><code class="item-code">E -> E ◦ * E</code>
+</td>
+
+                        <td><span class="badge-symbol">*</span>
+</td>
+
+                        <td><span class="badge-state">I7</span>
+</td>
+
+                        <td><code class="item-code">E -> E * ◦ E</code>
+</td>
+
+                        <td><span class="lookahead-set">{*, $, +}</span>
+</td>
+
+                        <td><span class="lookahead-set">{+, *, $}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I5</span>
+</td>
+
+                        <td><code class="item-code">E -> E ◦ + E</code>
+</td>
+
+                        <td><span class="badge-symbol">+</span>
+</td>
+
+                        <td><span class="badge-state">I8</span>
+</td>
+
+                        <td><code class="item-code">E -> E + ◦ E</code>
+</td>
+
+                        <td><span class="lookahead-set">{*, $, +}</span>
+</td>
+
+                        <td><span class="lookahead-set">{+, *, $}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I10</span>
+</td>
+
+                        <td><code class="item-code">E -> E ◦ * E</code>
+</td>
+
+                        <td><span class="badge-symbol">*</span>
+</td>
+
+                        <td><span class="badge-state">I7</span>
+</td>
+
+                        <td><code class="item-code">E -> E * ◦ E</code>
+</td>
+
+                        <td><span class="lookahead-set">{*, $, +}</span>
+</td>
+
+                        <td><span class="lookahead-set">{+, *, $}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I10</span>
+</td>
+
+                        <td><code class="item-code">E -> E ◦ + E</code>
+</td>
+
+                        <td><span class="badge-symbol">+</span>
+</td>
+
+                        <td><span class="badge-state">I8</span>
+</td>
+
+                        <td><code class="item-code">E -> E + ◦ E</code>
+</td>
+
+                        <td><span class="lookahead-set">{*, $, +}</span>
+</td>
+
+                        <td><span class="lookahead-set">{+, *, $}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I7</span>
+</td>
+
+                        <td><code class="item-code">E -> E * ◦ E</code>
+</td>
+
+                        <td><span class="badge-symbol">E</span>
+</td>
+
+                        <td><span class="badge-state">I11</span>
+</td>
+
+                        <td><code class="item-code">E -> E * E ◦ </code>
+</td>
+
+                        <td><span class="lookahead-set">{*, +, $}</span>
+</td>
+
+                        <td><span class="lookahead-set">{$, *, +}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I7</span>
+</td>
+
+                        <td><code class="item-code">E ->  ◦ E * E</code>
+</td>
+
+                        <td><span class="badge-symbol">E</span>
+</td>
+
+                        <td><span class="badge-state">I11</span>
+</td>
+
+                        <td><code class="item-code">E -> E ◦ * E</code>
+</td>
+
+                        <td><span class="lookahead-set">{$, +, *}</span>
+</td>
+
+                        <td><span class="lookahead-set">{*, $, +}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I7</span>
+</td>
+
+                        <td><code class="item-code">E ->  ◦ id</code>
+</td>
+
+                        <td><span class="badge-symbol">id</span>
+</td>
+
+                        <td><span class="badge-state">I9</span>
+</td>
+
+                        <td><code class="item-code">E -> id ◦ </code>
+</td>
+
+                        <td><span class="lookahead-set">{$, +, *}</span>
+</td>
+
+                        <td><span class="lookahead-set">{*, $, +}</span>
+</td>
+
+                    </tr>
+
+
+
+                    <tr>
+                        <td><span class="badge-state">I7</span>
+</td>
+
+                        <td><code class="item-code">E ->  ◦ E + E</code>
+</td>
+
+                        <td><span class="badge-symbol">E</span>
+</td>
+
+                        <td><span class="badge-state">I11</span>
+</td>
+
+                        <td><code class="item-code">E -> E ◦ + E</code>
+</td>
+
+                        <td><span class="lookahead-set">{$, +, *}</span>
+</td>
+
+                        <td><span class="lookahead-set">{*, $, +}</span>
 </td>
 
                     </tr>
@@ -16732,7 +16966,7 @@ table.dataTable td {
                     <summary class="state-summary">
                         <span class="state-id">I0</span>
 
-                        <span class="state-badge">6 items</span>
+                        <span class="state-badge">10 items</span>
 
                     </summary>
 
@@ -16751,15 +16985,23 @@ table.dataTable td {
                             <h4>Non‑kernel Items (Closure)</h4>
 
                             <ul>
-								<li>L ->  ◦ * R</li>
+								<li>E ->  ◦ E * E</li>
 
-								<li>R ->  ◦ L</li>
+								<li>S ->  ◦ E</li>
 
-								<li>S ->  ◦ L = R</li>
+								<li>C ->  ◦ id</li>
 
-								<li>S ->  ◦ R</li>
+								<li>E ->  ◦ E + E</li>
 
-								<li>L ->  ◦ id</li>
+								<li>A ->  ◦ B</li>
+
+								<li>B ->  ◦ id</li>
+
+								<li>E ->  ◦ id</li>
+
+								<li>S ->  ◦ A</li>
+
+								<li>A ->  ◦ C</li>
 
                             </ul>
 
@@ -16775,7 +17017,7 @@ table.dataTable td {
                     <summary class="state-summary">
                         <span class="state-id">I1</span>
 
-                        <span class="state-badge">1 item</span>
+                        <span class="state-badge">3 items</span>
 
                     </summary>
 
@@ -16784,7 +17026,11 @@ table.dataTable td {
                             <h4>Kernel Items</h4>
 
                             <ul>
-								<li>S -> R ◦ </li>
+								<li>E -> id ◦ </li>
+
+								<li>C -> id ◦ </li>
+
+								<li>B -> id ◦ </li>
 
                             </ul>
 
@@ -16809,7 +17055,7 @@ table.dataTable td {
                     <summary class="state-summary">
                         <span class="state-id">I2</span>
 
-                        <span class="state-badge">4 items</span>
+                        <span class="state-badge">1 item</span>
 
                     </summary>
 
@@ -16818,7 +17064,7 @@ table.dataTable td {
                             <h4>Kernel Items</h4>
 
                             <ul>
-								<li>L -> * ◦ R</li>
+								<li>S -> A ◦ </li>
 
                             </ul>
 
@@ -16828,11 +17074,6 @@ table.dataTable td {
                             <h4>Non‑kernel Items (Closure)</h4>
 
                             <ul>
-								<li>L ->  ◦ * R</li>
-
-								<li>R ->  ◦ L</li>
-
-								<li>L ->  ◦ id</li>
 
                             </ul>
 
@@ -16847,40 +17088,6 @@ table.dataTable td {
                 <details class="state-detail">
                     <summary class="state-summary">
                         <span class="state-id">I3</span>
-
-                        <span class="state-badge">1 item</span>
-
-                    </summary>
-
-                    <div class="state-content">
-                        <div class="item-group">
-                            <h4>Kernel Items</h4>
-
-                            <ul>
-								<li>L -> id ◦ </li>
-
-                            </ul>
-
-                        </div>
-
-                        <div class="item-group">
-                            <h4>Non‑kernel Items (Closure)</h4>
-
-                            <ul>
-
-                            </ul>
-
-                        </div>
-
-                    </div>
-
-                </details>
-
-
-
-                <details class="state-detail">
-                    <summary class="state-summary">
-                        <span class="state-id">I4</span>
 
                         <span class="state-badge">1 item</span>
 
@@ -16914,9 +17121,9 @@ table.dataTable td {
 
                 <details class="state-detail">
                     <summary class="state-summary">
-                        <span class="state-id">I5</span>
+                        <span class="state-id">I4</span>
 
-                        <span class="state-badge">2 items</span>
+                        <span class="state-badge">1 item</span>
 
                     </summary>
 
@@ -16925,9 +17132,45 @@ table.dataTable td {
                             <h4>Kernel Items</h4>
 
                             <ul>
-								<li>R -> L ◦ </li>
+								<li>A -> C ◦ </li>
 
-								<li>S -> L ◦ = R</li>
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I5</span>
+
+                        <span class="state-badge">3 items</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>E -> E ◦ * E</li>
+
+								<li>E -> E ◦ + E</li>
+
+								<li>S -> E ◦ </li>
 
                             </ul>
 
@@ -16952,7 +17195,7 @@ table.dataTable td {
                     <summary class="state-summary">
                         <span class="state-id">I6</span>
 
-                        <span class="state-badge">4 items</span>
+                        <span class="state-badge">1 item</span>
 
                     </summary>
 
@@ -16961,7 +17204,7 @@ table.dataTable td {
                             <h4>Kernel Items</h4>
 
                             <ul>
-								<li>S -> L = ◦ R</li>
+								<li>A -> B ◦ </li>
 
                             </ul>
 
@@ -16971,11 +17214,6 @@ table.dataTable td {
                             <h4>Non‑kernel Items (Closure)</h4>
 
                             <ul>
-								<li>L ->  ◦ * R</li>
-
-								<li>R ->  ◦ L</li>
-
-								<li>L ->  ◦ id</li>
 
                             </ul>
 
@@ -16991,7 +17229,7 @@ table.dataTable td {
                     <summary class="state-summary">
                         <span class="state-id">I7</span>
 
-                        <span class="state-badge">1 item</span>
+                        <span class="state-badge">4 items</span>
 
                     </summary>
 
@@ -17000,7 +17238,7 @@ table.dataTable td {
                             <h4>Kernel Items</h4>
 
                             <ul>
-								<li>S -> L = R ◦ </li>
+								<li>E -> E * ◦ E</li>
 
                             </ul>
 
@@ -17010,6 +17248,11 @@ table.dataTable td {
                             <h4>Non‑kernel Items (Closure)</h4>
 
                             <ul>
+								<li>E ->  ◦ E * E</li>
+
+								<li>E ->  ◦ id</li>
+
+								<li>E ->  ◦ E + E</li>
 
                             </ul>
 
@@ -17025,7 +17268,7 @@ table.dataTable td {
                     <summary class="state-summary">
                         <span class="state-id">I8</span>
 
-                        <span class="state-badge">1 item</span>
+                        <span class="state-badge">4 items</span>
 
                     </summary>
 
@@ -17034,7 +17277,7 @@ table.dataTable td {
                             <h4>Kernel Items</h4>
 
                             <ul>
-								<li>R -> L ◦ </li>
+								<li>E -> E + ◦ E</li>
 
                             </ul>
 
@@ -17044,6 +17287,11 @@ table.dataTable td {
                             <h4>Non‑kernel Items (Closure)</h4>
 
                             <ul>
+								<li>E ->  ◦ E * E</li>
+
+								<li>E ->  ◦ id</li>
+
+								<li>E ->  ◦ E + E</li>
 
                             </ul>
 
@@ -17068,7 +17316,83 @@ table.dataTable td {
                             <h4>Kernel Items</h4>
 
                             <ul>
-								<li>L -> * R ◦ </li>
+								<li>E -> id ◦ </li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I10</span>
+
+                        <span class="state-badge">3 items</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>E -> E ◦ * E</li>
+
+								<li>E -> E + E ◦ </li>
+
+								<li>E -> E ◦ + E</li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="item-group">
+                            <h4>Non‑kernel Items (Closure)</h4>
+
+                            <ul>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <details class="state-detail">
+                    <summary class="state-summary">
+                        <span class="state-id">I11</span>
+
+                        <span class="state-badge">3 items</span>
+
+                    </summary>
+
+                    <div class="state-content">
+                        <div class="item-group">
+                            <h4>Kernel Items</h4>
+
+                            <ul>
+								<li>E -> E * E ◦ </li>
+
+								<li>E -> E ◦ * E</li>
+
+								<li>E -> E ◦ + E</li>
 
                             </ul>
 
