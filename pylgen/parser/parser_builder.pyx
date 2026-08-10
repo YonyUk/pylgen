@@ -214,15 +214,19 @@ cdef class ParserBuilder:
         raise NotImplementedError()
     
     @staticmethod
-    def get_propagated_lookaheads(g:Grammar) -> dict[tuple[LR0State,LR0Item],set[Symbol]]:
+    def get_propagated_lookaheads(g:Grammar) -> tuple[dict[tuple[LR0State,LR0Item],set[Symbol]],dict[tuple[LR0State,LR0Item,Symbol,LR0State,LR0Item],set[Symbol]]]:
         '''
         Args:
             g (Grammar)
         
         Returns:
-            Dict[Tuple[LR0State,LR0Item],Set[Symbol]]
+            Tuple[Dict[Tuple[LR0State,LR0Item],Set[Symbol]],Dict[Tuple[LR0State,LR0Item,Symbol,LR0State,LR0Item],Set[Symbol]]]
         '''
-        return _get_canonical_lalr_states(g)[1] # type:ignore
+        cdef dict[tuple[LR0State,LR0Item],set[Symbol]] final_lookaheads
+        cdef dict[tuple[LR0State,LR0Item,Symbol,LR0State,LR0Item],set[Symbol]] propagated_lookaheads
+
+        _,final_lookaheads,propagated_lookaheads = _get_canonical_lalr_states(g,True) # type:ignore
+        return final_lookaheads,propagated_lookaheads
 
 cdef set[LR0Item] _closure_lr0(set[LR0Item] items,Grammar g):
     cdef LR0Item item,new_item
@@ -409,11 +413,12 @@ cdef tuple[dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]],se
 
     return result,states
 
-cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]]] _get_canonical_lalr_states(Grammar g):
+cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]],dict[tuple[LR0State,LR0Item,Symbol,LR0State,LR0Item],set[Symbol]]] _get_canonical_lalr_states(Grammar g,bint keep_edge_propagation_info=False): # type:ignore
     cdef set[LR0State] lr0_states
     cdef dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]] propagation_edges
     cdef bint change = True # type:ignore
     cdef dict[tuple[LR0State,LR0Item],set[Symbol]] lookaheads = {}
+    cdef dict[tuple[LR0State,LR0Item,Symbol,LR0State,LR0Item],set[Symbol]] edge_propagation_info = {}
     cdef LR0State lr0_state,lr0_state_to
     cdef LR0Item lr0_item,lr0_item_to
     cdef set[LR0Item] lr0_kernel_items
@@ -422,8 +427,9 @@ cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]]] _get_canoni
     cdef set[LALRItem] lalr_items
     cdef set[Symbol] lookahead_set
     cdef tuple[LR0State,LR0Item] key,key_to
-    cdef Symbol lookahead_symbol
+    cdef Symbol lookahead_symbol,key_symbol
     cdef set[LALRState] result = set()
+    cdef tuple[LR0State,LR0Item,Symbol,LR0State,LR0Item] edge_key
 
     # make the propagation edges
     propagation_edges,lr0_states = _build_lookaheads_propagation_edges(g)
@@ -487,10 +493,14 @@ cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]]] _get_canoni
         
         # propagate lookaheads
         for lr0_state in propagation_edges:
-            for (lr0_item,_),(lr0_state_to,lr0_item_to) in propagation_edges[lr0_state].items(): # type:ignore
+            for (lr0_item,key_symbol),(lr0_state_to,lr0_item_to) in propagation_edges[lr0_state].items(): # type:ignore
                 # edge that propagate lookaheads
                 lr0_state = LR0State(_closure_lr0(lr0_state._items,g),lr0_state._index) # type:ignore
                 key = (lr0_state,lr0_item)
+                edge_key = (lr0_state,lr0_item,key_symbol,lr0_state_to,lr0_item_to)
+                if keep_edge_propagation_info:
+                    if not edge_key in edge_propagation_info:
+                        edge_propagation_info[edge_key] = set()
                 if len(lookaheads[key]) == 0: continue
                 lr0_state_to = LR0State(_closure_lr0(lr0_state_to._items,g),lr0_state_to._index) # type:ignore
                 key_to = (lr0_state_to,lr0_item_to)
@@ -498,6 +508,8 @@ cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]]] _get_canoni
                     if not lookahead_symbol in lookaheads[key_to]:
                         change = True # type:ignore
                         lookaheads[key_to].add(lookahead_symbol)
+                        if keep_edge_propagation_info:
+                            edge_propagation_info[edge_key].add(lookahead_symbol)
 
     # build lalr states
     for lr0_state in lr0_states:
@@ -510,7 +522,7 @@ cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]]] _get_canoni
         lalr_state = LALRState(lalr_items,lr0_state._index) # type:ignore
         result.add(lalr_state)
     
-    return result,lookaheads
+    return result,lookaheads,edge_propagation_info
 
 cdef tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],tuple]] _get_goto_action_tables_lalr(Grammar g):
     cdef dict[tuple[LALRState,Symbol],LALRState] goto = {}
@@ -645,8 +657,4 @@ cdef BottomUpParser _build_lalr_parser_from_attributed(AttributedGrammar g):
         for production in productions:
             result._set_reductor(production,g.get_reductor(production))
     
-    return result
-
-cdef dict[tuple[LR0State,LR0Item],set[Symbol]] _get_propagated_lookaheads(Grammar g):
-    cdef dict[tuple[LR0State,LR0Item],set[Symbol]] result = _get_canonical_lalr_states(g)[1]
     return result
