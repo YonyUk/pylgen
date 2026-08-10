@@ -8,7 +8,7 @@ All visualizations produce self‑contained HTML files that can be opened in any
 
 > ### `draw_automaton(automaton: Automaton, **kwargs) -> None`
 
-Generates an interactive HTML visualization of a finite automaton (`DFA` or `NFA`). The graph displays states (with accept states in green, start state in white and border green if is accept, and other states in blue) and transitions labeled with symbols. Epsilon transitions are shown as dashed edges.
+Generates an interactive HTML visualization of a finite automaton (`DFA` or `NFA`). The graph displays states (with accept states in green, start state in white with a green border if it is also an accept state, and other states in blue) and transitions labeled with symbols. Epsilon transitions are shown as dashed edges.
 
  - **Parameters**:
 
@@ -128,7 +128,9 @@ if has_conflicts:
     print("Grammar has conflicts. Check the report for details.")
 ```
 
-> ### Example 1: Classic LALR1 Grammar Analysis
+> ### Example 1: Classic LALR1 Grammar Analysis (No Conflicts)
+
+The following example demonstrates how to visualize the propagation edges and the `ACTION/GOTO` tables for a classic LALR(1) grammar (the well‑known `S -> L = R | R, L -> * R | id, R -> L` grammar). This grammar is LALR(1) and has no conflicts.
 
 ```python
 from pylgen.common.types import Symbol
@@ -168,6 +170,8 @@ lr_inspect_grammar(G,'LALR1',show=True,report=True,cache=True,filename='inspect'
 <iframe src="../../../images/api/visual/inspect.html" width="100%" height="1200px" style="border:none;"></iframe>
 
 > ### Example 2: LALR(1) Problematic Grammar Analysis
+
+This example shows a grammar that contains ambiguities, resulting in shift/reduce and reduce/reduce conflicts. The generated tables highlight the conflicting cells in red, and the propagation edges table also marks conflicting states.
 
 ```python
 from pylgen.common.types import Symbol
@@ -240,7 +244,7 @@ set_cache_file('my_cache.pkl')
 
 ## Common Parameters
 
-| **Method** | <span style="white-space: nowrap">**`filename:str`**</span> | <span style="white-space: nowrap">**`show:bool`**</span> | <span style="white-space: nowrap">**`cache:bool`**</span> | <span style="white-space: nowrap">**`physics:bool`**</span> | <span style="white-space: nowrap">**`select_menu:bool`**</span> | <span style="white-space: nowrap">**`filter_menu:bool`**</span> | <span style="white-space: nowrap">**`nodes:bool`**</span> | <span style="white-space: nowrap">**`edges:bool`**</span> | <span style="white-space: nowrap">**`as_tree:bool`**</span> | <span style="white-space: nowrap">**`report:bool`**</span> |
+| **Method** | <span style="white-space: nowrap">**`filename`**</span> | <span style="white-space: nowrap">**`show`**</span> | <span style="white-space: nowrap">**`cache`**</span> | <span style="white-space: nowrap">**`physics`**</span> | <span style="white-space: nowrap">**`select_menu`**</span> | <span style="white-space: nowrap">**`filter_menu`**</span> | <span style="white-space: nowrap">**`nodes`**</span> | <span style="white-space: nowrap">**`edges`**</span> | <span style="white-space: nowrap">**`as_tree`**</span> | <span style="white-space: nowrap">**`report`**</span> |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | <span style="white-space: nowrap">**`draw_automaton`**</span> | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
 | <span style="white-space: nowrap">**`draw_lexer`**</span> | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
@@ -249,9 +253,27 @@ set_cache_file('my_cache.pkl')
 | <span style="white-space: nowrap">**`show_propagation_edges_table`**</span> | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | <span style="white-space: nowrap">**`lr_inspect_grammar`**</span> | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
+| **Parameter** | **Type** | **Default** | **Description** |
+| :---: | :---: | :---: | :---: |
+| **`filename`** | `str` | Depends on the function | Name of the output HTML file (without extension). |
+| **`show`** | `bool` | `False` | If `True`, opens the generated HTML file in your default browser immediately. |
+| **`cache`** | `bool` | `False` | If `True`, uses a global cache file (set via `set_cache_file()`) to store downloaded CSS/JS resources for offline reuse. |
+| **`physics`** | `bool` | `False` | If `True`, enables physics controls in the interactive graph. |
+| <span style="white-space: nowrap">**`select_menu`**</span> | `bool` | `False` | If `True`, shows a selection menu in the visualization. |
+| <span style="white-space: nowrap">**`filter_menu`**</span> | `bool` | `False` | If `True`, shows a filter menu. |
+| **`nodes`** | `bool` | `False` | If `True`, displays node controls. |
+| **`edges`** | `bool` | `False` | If `True`, displays edge controls. |
+| **`as_tree`** | `bool` | `False` | If `True`, lays out the graph as a hierarchical tree. |
+| **`report`** | `bool` | `False` | If `True`, the HTML report is generated; if `False`, no file is written (but the conflict check is still performed). |
+
+
+!!! note
+    When `cache=True`, you must have previously called `set_cache_file()` to specify the cache file path. Otherwise, a `ValueError` is raised.
+
 ## Resource Embedding
 
-The `ResourceEmbedder` class (subclass of `HTMLParser`) intercepts `<link>` and `<script>` tags that reference external HTTP resources. It downloads the content, caches it, and replaces the external reference with an inline `<style>` or `<script>` block. This makes the final HTML completely self‑contained.
+
+The `ResourceEmbedder` class (subclass of `HTMLParser`) intercepts `<link>` and `<script>` tags that reference external HTTP resources. It downloads the content, caches it, and replaces the external reference with an inline `<style>` or `<script>` block. This makes the final HTML completely self‑contained. The embedding is automatically performed when `cache=True`; you do not need to interact with `ResourceEmbedder` directly.
 
 ## Best Practices
 
