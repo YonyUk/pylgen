@@ -16,7 +16,8 @@ cdef class Parser:
     cdef bint _draw_parse_tree
     cdef ParseTreeNode _parse_tree
     cdef list[ParseTreeNode] _parse_tree_nodes
-    cdef list[Error] _errors
+    cdef set[Error] _errors
+    cdef bint _syntax_error
 
     cdef void _try_parse(self,Token token)
     cpdef void reset(self)

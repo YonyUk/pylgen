@@ -72,14 +72,14 @@ cdef class Parser:
             ParseTree: the current parse tree if parsing was successfully
         '''
         if self._parsed:
-            if len(self._errors) > 0:
+            if self._syntax_error:
                 raise ParsingException('The parsing ended with errors')
             return self._parse_tree
         raise ParsingException('Nothing parsed')
     
     @property
     def errors(self) -> List[Error]:
-        return self._errors
+        return list(self._errors)
 
     cpdef void reset(self):
         raise NotImplementedError()
@@ -125,7 +125,7 @@ cdef class BottomUpParser(Parser):
         self._start_state = start_state
         self._parsed = False # type:ignore
         self._parse_tree_nodes = []
-        self._errors = []
+        self._errors = set()
         self._panic_mode = False # type:ignore
         self._current_syncronization_set = set()
         self._draw_parse_tree = False # type:ignore
@@ -136,6 +136,7 @@ cdef class BottomUpParser(Parser):
         self._stack_ast_top = 0
         self._stack_states_len = 1
         self._stack_states_top = 1
+        self._syntax_error = False # type:ignore
 
     cdef void _set_reductor(self,Production production,object reductor): # type:ignore
         self._reductor_by_production[(<Production>production)._hash] = reductor
@@ -148,6 +149,8 @@ cdef class BottomUpParser(Parser):
         cdef int state
         cdef int idx
 
+        self._syntax_error = True # type:ignore
+
         for key in self._action_table:
             if int(key[0][1:]) == self._stack_states[self._stack_states_top - 1]:
                 follow_symbol = key[1] # type:ignore
@@ -155,7 +158,7 @@ cdef class BottomUpParser(Parser):
                     expected_symbols.add(follow_symbol)
 
         error = SyntaxError(f'Unexpected symbol "{symbol}"; expected {expected_symbols}',line,column) # type:ignore
-        self._errors.append(error)
+        self._errors.add(error)
         self._panic_mode = True # type:ignore
         self._current_syncronization_set = set()
         
@@ -192,7 +195,6 @@ cdef class BottomUpParser(Parser):
         cdef list[ParseTreeNode] childrens
         cdef int production_len
         # local references for micro-optimizations
-        cdef bint errors = len(self._errors) > 0 # type:ignore
         cdef unsigned int symbol_id
         cdef Error error
 
@@ -224,9 +226,8 @@ cdef class BottomUpParser(Parser):
             new_ast = self._reductor_by_production[p._hash](self._view) # type:ignore
             if new_ast._is_error:
                 error = (<ErrorAST>new_ast)._error
-                if not error in self._errors:
-                    self._errors.append(error)
-            if not errors and self._draw_parse_tree:
+                self._errors.add(error)
+            if not self._syntax_error and self._draw_parse_tree:
                 # build the parse tree
                 childrens = self._parse_tree_nodes[-1*production_len:]
                 new_node = ParseTreeNode(p._head,new_ast._line,new_ast._column,childrens)
@@ -285,7 +286,7 @@ cdef class BottomUpParser(Parser):
         
         if not self._panic_mode and current_action[0] == BottomUpParserAction.SHIFT:
             state = self._goto_table_optimized[key]
-            if not errors and self._draw_parse_tree:
+            if not self._syntax_error and self._draw_parse_tree:
                 # adds a new parse tree node to the parse tree
                 new_node = ParseTreeNode(token._symbol,token._line,token._column)
                 self._parse_tree_nodes.append(new_node)
@@ -313,7 +314,7 @@ cdef class BottomUpParser(Parser):
         
         if not self._panic_mode and current_action[0] == BottomUpParserAction.ACCEPT:
             self._parsed = True # type:ignore
-            if not errors:
+            if not self._syntax_error:
                 self._ast = self._stack_ast[self._stack_ast_top - 1]
                 if self._draw_parse_tree:
                     self._parse_tree = self._parse_tree_nodes[len(self._parse_tree_nodes) - 1]
