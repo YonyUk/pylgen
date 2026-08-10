@@ -20,7 +20,7 @@ def build_propagation_edges_table(g:Grammar) -> str:
 
     edges,lr0_states = ParserBuilder.build_lookaheads_propagation_edges(g)
     states_dict = { hash(state):state for state in lr0_states }
-    lookaheads = ParserBuilder.get_propagated_lookaheads(g)
+    lookaheads,propagated_lookaheads = ParserBuilder.get_propagated_lookaheads(g)
 
     rows = []
     edges_count = 0
@@ -36,7 +36,7 @@ def build_propagation_edges_table(g:Grammar) -> str:
             row = row.replace('DEST-ITEM-PLACEHOLDER',str(dest_item))
             _lookaheads = lookaheads[(dest_state,dest_item)]
             row = row.replace('TOTAL-LOOKAHEADS-PLACEHOLDER',str(_lookaheads))
-            source_lookaheads = lookaheads.get((source_state,source_item),set())
+            source_lookaheads = propagated_lookaheads.get((source_state,source_item,symbol,dest_state,dest_item),set())
             row = row.replace('LOOKAHEADS-PLACEHOLDER',str(source_lookaheads) if len(source_lookaheads) > 0 else '∅')
             rows.append(row)
 
