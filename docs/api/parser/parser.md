@@ -99,7 +99,7 @@ The abstract base class for all parsers. It defines the public interface that al
 
 | **Method** | **Description** |
 | :---: | :---: |
-| **`parse(tokens: Iterable[Token]) -> AST`** | Parses the token stream and returns the AST root. Raises no exception on error; instead, errors are stored in `errors` and parsing continues (error recovery). |
+| <span style="white-space: nowrap">**`parse(tokens: Iterable[Token]) -> AST`**</span> | Parses the token stream and returns the AST root. Raises no exception on error; instead, errors are stored in `errors` and parsing continues (error recovery). |
 | **`reset()`** | Resets the parser to its initial state, clearing the stack and errors.
 | **`set_draw_parse_tree_flag(flag: bool)`** | If `True`, the parser builds a parse tree during parsing (available via the `parse_tree` property). |
 
@@ -111,7 +111,7 @@ The abstract base class for all parsers. It defines the public interface that al
 | **Property** | **Type** | **Description** |
 | :---: | :---: | :---: |
 | **`parse_tree`** | `ParseTreeNode` | The root of the parse tree (if `draw_parse_tree` is `True` and parsing succeeded). |
-| **`errors`** | `List[SyntaxError]` | The list of syntax errors encountered during parsing. |
+| **`errors`** | `List[Error]` | The list of errors encountered during parsing. |
 
 > ### `BottomUpParser` (The LR Parser)
 
@@ -154,6 +154,17 @@ BottomUpParser(start_state: str, goto_table: Dict[Tuple[str, Symbol], str], acti
 | **`build_parser(g: Grammar, type_: ParserType) -> Parser`** | Builds a parser from a grammar (without reductors). Currently supports `ParserType.LALR1`; others raise `NotImplementedError`. |
 | **`build_parser_from_attributed(g: AttributedGrammar, type_: ParserType) -> Parser`** | Builds a parser from an attributed grammar, attaching reductors to productions. |
 | **`clear_cache()`** | Clears the internal cache of closures and states. Useful when modifying grammars dynamically. |
+| **`closure_lr0(items: Set[LR0Item], g: Grammar) -> Set[LR0Item]`** | Computes the LR(0) closure of a set of items. |
+| **`closure_lalr(items: Set[LALRItem], g: Grammar) -> Set[LALRItem]`** | Computes the LALR(1) closure of a set of items (including lookahead propagation). |
+| **`goto_lr0(items: Set[LR0Item], x: Symbol, g: Grammar) -> Set[LR0Item]`** | Computes the LR(0) `GOTO` of a set of items on symbol `x`. |
+| **`goto_lalr(items: Set[LALRItem], x: Symbol, g: Grammar) -> Set[LALRItem]`** | Computes the LALR(1) `GOTO` of a set of items on symbol `x`. |
+| **`get_canonical_lr0_states(g: Grammar) -> Set[LR0State]`** | Returns the canonical collection of LR(0) states for the grammar. |
+| **`get_kernel_items_lr0(state: LR0State, g: Grammar) -> Set[LR0Item]`** | Extracts the kernel items (items with dot not at the beginning) from an LR(0) state. |
+| **`get_kernel_items_lalr(state: LALRState, g: Grammar) -> Set[LALRItem]`** | Extracts the kernel items from an LALR(1) state. |
+| **`build_lookaheads_propagation_edges(g: Grammar) -> Tuple[Dict[LR0State, Dict[Tuple[LR0Item, Symbol], Tuple[LR0State, LR0Item]]], Set[LR0State]]`** | Builds the lookahead propagation edges used in LALR(1) construction. |
+| **`get_canonical_lalr_states(g: Grammar) -> Set[LALRState]`** | Returns the canonical collection of LALR(1) states. |
+| **`get_goto_action_tables_lalr(g: Grammar) -> Tuple[Dict[Tuple[LALRState, Symbol], LALRState], Dict[Tuple[LALRState, Symbol], Tuple[str, LALRState | Production]]]`** | Returns the `GOTO` and `ACTION` tables as dictionaries keyed by `(LALRState, Symbol)`. |
+| **`get_propagated_lookaheads(g: Grammar) -> Tuple[Dict[Tuple[LR0State, LR0Item], Set[Symbol]], Dict[Tuple[str, LR0Item, Symbol, str, LR0Item], Set[Symbol]]]`** | Returns detailed lookahead propagation information for debugging. |
 
 !!! note
     `build_parser` and `build_parser_from_attributed` automatically augments the grammar. 
@@ -180,6 +191,38 @@ The `ASTListView` is a lightweight, immutable view over the AST stack. It provid
  - Length (number of children).
 
  - It is implemented as a view over the internal stack, so it does not copy any data, making it extremely efficient.
+
+ > ### Semantic Error Collection via `ErrorAST`
+
+A critical feature of the parsing runtime is its unified handling of **semantic errors** during reductions. Reductors are not limited to constructing valid ASTs; they can also detect semantic violations (such as type mismatches, undeclared identifiers, or scoping errors) by returning an `ErrorAST` object (an AST subclass with the `_is_error` flag set to `True` and an `_error` attribute containing the concrete `Error` instance).
+
+This design provides several advantages:
+
+ - **Non‑interruptive error handling**: The parser does not raise an exception upon semantic errors. It records the error and continues parsing, enabling the detection of multiple semantic issues in a single pass.
+
+ - **Unified error reporting**: Both syntactic errors (detected by the LR automaton during panic‑mode recovery) and semantic errors (reported by reductors) are stored in the same errors collection. This simplifies the implementation of diagnostics for IDEs, linters, and compilers.
+
+ - **Robust recovery**: Since the parser ignores the error AST for the purpose of stack management (it still pushes it as a valid child for the reduction), the parser state remains consistent and can attempt to shift subsequent tokens, finding more errors.
+
+To leverage this feature, your reductor signature must remain `Callable[[ASTListView], AST]`, but it is free to return an ErrorAST (which is a subtype of `AST`) instead of a regular AST node. For example:
+
+```python
+def complex_number_reductor(asts:ASTListView) -> AST:
+    token:Token = asts[1]
+    img:NumberAST = asts[0]
+    _value = complex(0,img._type(img._value))
+
+    if token._text != 'j':
+        error = SyntaxError(f'Unexpected symbol {token._text}',token._line,token._column)
+        return ErrorAST(syntax_error_symbol,img._line,img._column,error)
+    
+    return NumberAST(str(_value),np.complex128,img._line,img._column)
+```
+
+!!! note
+    In this example, we create a `SyntaxError` because this feature is more about syntax that semantic, but you can return a `SemanticError` too.
+
+This tight integration between syntactic analysis (shift/reduce) and semantic checks (reductors) makes PyLGEN parsers exceptionally suitable for production-grade compilers and interpreters, where collecting all errors in a single run is a hard requirement.
 
 ## Code Examples
 
