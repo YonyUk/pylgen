@@ -220,7 +220,7 @@ def complex_number_reductor(asts:ASTListView) -> AST:
 ```
 
 !!! note
-    In this example, we create a `SyntaxError` because this feature is more about syntax that semantic, but you can return a `SemanticError` too.
+    We raise a SyntaxError here because we're checking for an unexpected symbol, which is a syntactic issue. While a SemanticError would also be acceptable in principle, we chose SyntaxError to reflect the nature of the check more accurately.
 
 This tight integration between syntactic analysis (shift/reduce) and semantic checks (reductors) makes PyLGEN parsers exceptionally suitable for production-grade compilers and interpreters, where collecting all errors in a single run is a hard requirement.
 
