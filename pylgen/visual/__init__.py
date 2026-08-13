@@ -158,7 +158,7 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
             ast_root,
             list(
                 filter(
-                    lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast_root.__getattribute__(_attr)),
+                    lambda _attr:not _attr == 'is_error' and not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast_root.__getattribute__(_attr)),
                     dir(ast_root)
                     )
                 ),
@@ -189,19 +189,19 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
             if not from_node in ast_attrs:
                 ast_attrs[from_node] = list(
                     filter(
-                        lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast.__getattribute__(_attr)),
+                        lambda _attr:not _attr == 'is_error' and not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast.__getattribute__(_attr)),
                         dir(ast)
                     )
                 )
             if not to_node in ast_attrs:
                 ast_attrs[to_node] = list(
                     filter(
-                        lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(child.__getattribute__(_attr)),
+                        lambda _attr:not _attr == 'is_error' and not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(child.__getattribute__(_attr)),
                         dir(child)
                     )
                 )
             stack[-1] = ast,attrs,i + 1,level
-            top = child,list(filter(lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(child.__getattribute__(_attr)),dir(child))),0,level + 1
+            top = child,list(filter(lambda _attr:not _attr == 'is_error' and not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(child.__getattribute__(_attr)),dir(child))),0,level + 1
             stack.append(top)
             entered = True
             break
@@ -214,7 +214,7 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
         asts[node] = ast_root
         ast_attrs[node] = list(
             filter(
-                lambda _attr:not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast_root.__getattribute__(_attr)),
+                lambda _attr:not _attr == 'is_error' and not _attr.startswith('_') and _attr != 'symbol' and _is_json_serializable(ast_root.__getattribute__(_attr)),
                 dir(ast_root)
             )
         )
