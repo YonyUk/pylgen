@@ -122,9 +122,6 @@ cdef class ErrorAST(AST):
         self._is_error = True # type:ignore
         self._errors = errors
 
-    cpdef list[AST] children(self):
-        return []
-
 cdef class ASTListView:
 
     cdef inline AST _get(self,int idx):
