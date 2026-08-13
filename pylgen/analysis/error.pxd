@@ -3,6 +3,7 @@ cdef class Error:
     cdef int _line
     cdef int _column
     cdef str _msg
+    cdef int _hash
 
 cdef class LexicalError(Error):
     pass

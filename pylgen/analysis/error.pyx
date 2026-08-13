@@ -1,8 +1,15 @@
 from .error_type import ErrorType
 
+from hashlib import sha256
+
 cdef class Error:
 
     def __init__(self,object type_,int line,int column,str msg) -> None:
+    
+        cdef bytes digest = sha256(f'{type_}-{line}-{column}-{msg}'.encode()).digest()
+        cdef long long h = 0 # type:ignore
+        cdef int i
+
         if not (isinstance(type_,ErrorType) or isinstance(type_,str)):
             raise TypeError('type_ must be a member of ErrorType')
         if isinstance(type_,str) and not type_ in ErrorType: # type:ignore
@@ -11,6 +18,11 @@ cdef class Error:
             self._type = ErrorType[type_] # type:ignore
         else:
             self._type = type_
+        
+        for i in range(8):
+            h = (h << 8) | digest[i]
+        
+        self._hash = h
         self._line = line
         self._column = column
         self._msg = msg
@@ -36,6 +48,19 @@ cdef class Error:
     
     def __repr__(self) -> str:
         return self.message
+    
+    def __hash__(self) -> int:
+        return self._hash
+    
+    def __eq__(self, __o: object) -> bool:
+        cdef Error other
+
+        if not isinstance(__o,Error):
+            return False
+        
+        other = __o
+
+        return other._type == self._type and other._line == self._line and other._column == self._column and other._msg == self._msg
 
 cdef class LexicalError(Error):
 
