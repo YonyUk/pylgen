@@ -1,7 +1,6 @@
 from typing import List
 
-from ..analysis.error import Error
-from ..analysis.error_type import ErrorType
+from ..analysis.error import SemanticError
 
 from .enums import TokenType
 
@@ -41,6 +40,9 @@ class AST:
     @property
     def column(self) -> int: ...
 
+    @property
+    def is_error(self) -> bool: ...
+
     def children(self) -> List[AST]: ...
 
     def __str__(self) -> str: ...
@@ -49,12 +51,7 @@ class AST:
 
 class ErrorAST(AST):
 
-    def __init__(self, symbol:Symbol, line:int, column:int,error:Error): ...
-
-    @property
-    def error_type(self) -> ErrorType: ...
-
-    def children(self) -> List[AST]: ...
+    def __init__(self, symbol:Symbol, line:int, column:int,error:SemanticError): ...
 
 class ASTListView:
 

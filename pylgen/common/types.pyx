@@ -1,5 +1,4 @@
-from ..analysis.error cimport Error
-from ..analysis.error_type import ErrorType
+from ..analysis.error cimport SemanticError
 
 from hashlib import sha256
 from .enums import TokenType
@@ -90,6 +89,10 @@ cdef class AST:
     def column(self) -> int:
         return self._column
     
+    @property
+    def is_error(self) -> bool:
+        return self._is_error # type:ignore
+    
     cpdef list[AST] children(self):
         raise NotImplementedError()
     
@@ -103,7 +106,7 @@ cdef class ErrorAST(AST):
     '''
     Error Syntax Tree Class
     '''
-    def __init__(self,Symbol symbol,int line,int column,Error error):
+    def __init__(self,Symbol symbol,int line,int column,SemanticError error):
         '''
         Args:
             symbol (Symbol): internal symbol of this ast
@@ -118,10 +121,6 @@ cdef class ErrorAST(AST):
         self._column = column
         self._is_error = True # type:ignore
         self._error = error
-    
-    @property
-    def error_type(self) -> ErrorType:
-        return self._error._type # type:ignore
 
     cpdef list[AST] children(self):
         return []

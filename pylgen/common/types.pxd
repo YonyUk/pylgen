@@ -1,4 +1,4 @@
-from ..analysis.error cimport Error
+from ..analysis.error cimport SemanticError
 
 cdef class Symbol:
 
@@ -16,7 +16,7 @@ cdef class AST:
     cpdef list[AST] children(self)
 
 cdef class ErrorAST(AST):
-    cdef Error _error
+    cdef SemanticError _error
 
 cdef class ASTListView:
     cdef list[AST] _data
