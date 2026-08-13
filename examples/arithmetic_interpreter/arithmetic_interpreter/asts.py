@@ -15,6 +15,9 @@ from .grammar_symbols import (
     exit
 )
 
+div_error = Symbol('Division SemanticError')
+mod_error = Symbol('Module SemanticError')
+
 class BinaryAST(AST):
 
     def __init__(self, left:AST,right:AST,symbol: Symbol, line: int, column: int):
@@ -51,7 +54,7 @@ class ModAST(BinaryAST):
 class ModuleByZeroErrorAST(ErrorAST):
 
     def __init__(self, line: int, column: int,left:AST,right:AST):
-        super().__init__(mod, line, column, SemanticError('module by zero not allowed',line,column))
+        super().__init__(mod_error, line, column, SemanticError('module by zero not allowed',line,column))
         self._left = left
         self._right = right
 
@@ -61,7 +64,7 @@ class ModuleByZeroErrorAST(ErrorAST):
 class ModuleByNotIntegerErrorAST(ErrorAST):
 
     def __init__(self, line: int, column: int,left:AST,right:AST):
-        super().__init__(mod, line, column, SemanticError('module by a non-integer not allowed',line,column))
+        super().__init__(mod_error, line, column, SemanticError('module by a non-integer not allowed',line,column))
         self._left = left
         self._right = right
 
@@ -82,7 +85,7 @@ class DivAST(BinaryAST):
 class DivisionByZeroErrorAST(ErrorAST):
 
     def __init__(self,line: int, column: int,left:AST,right:AST):
-        super().__init__(div, line, column, SemanticError('division by zero not allowed',line,column))
+        super().__init__(div_error, line, column, SemanticError('division by zero not allowed',line,column))
         self._left = left
         self._right = right
 

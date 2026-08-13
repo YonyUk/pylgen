@@ -35,7 +35,7 @@ def binary_reductor(asts:ASTListView) -> AST:
     elif asts[1].symbol == div:
         right = asts[2]
         if isinstance(right,Token) and float(right.text) == 0:
-            return DivisionByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[1])
+            return DivisionByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
         ast_type = DivAST
     elif asts[1].symbol == exp:
         ast_type = ExpAST
