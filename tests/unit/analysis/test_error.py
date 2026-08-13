@@ -1,4 +1,4 @@
-from pylgen.analysis.error import Error,LexicalError,SyntaxError,SemanticError
+from pylgen.analysis.error import Error,LexicalError,SyntaxError,SemanticError,RuntimeError
 from pylgen.analysis.error_type import ErrorType
 
 import pytest
@@ -44,3 +44,30 @@ class TestError:
         assert error.column == 1
         assert error.type == ErrorType.SEMANTIC
         assert 'nada' in error.message
+
+    def test_errors_comparision(self):
+        err1 = LexicalError('nada',1,1)
+        err2 = LexicalError('nada',1,1)
+
+        assert err1 == err2
+        assert hash(err1) == hash(err2)
+
+        err2 = LexicalError('nada1',1,1)
+
+        assert err1 != err2
+        assert hash(err1) != hash(err2)
+
+        err2 = SyntaxError('nada',1,1)
+
+        assert err1 != err2
+        assert hash(err1) != hash(err2)
+
+        err2 = SemanticError('nada',1,1)
+
+        assert err1 != err2
+        assert hash(err1) != hash(err2)
+
+        err2 = RuntimeError([],1,1,'nada')
+
+        assert err1 != err2
+        assert hash(err1) != hash(err2)
