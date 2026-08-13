@@ -1,7 +1,6 @@
 import pytest
 from pylgen.common.types import AST,Symbol,ErrorAST
 from pylgen.analysis.error import SemanticError
-from pylgen.analysis.error_type import ErrorType
 
 class TestAST:
 
@@ -37,7 +36,7 @@ class TestAST:
             ast.children()
 
         error = SemanticError('error 1',line,column)
-        error_ast = ErrorAST(symbol,line,column,error)
+        error_ast = ErrorAST(symbol,line,column,{error})
 
         assert error_ast.symbol == symbol
         assert error_ast.line == line
