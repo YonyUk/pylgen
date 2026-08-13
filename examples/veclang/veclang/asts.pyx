@@ -55,10 +55,6 @@ cdef Symbol type_int = Symbol('int_keyword',True) # type:ignore
 cdef Symbol type_float = Symbol('float_keyword',True) # type:ignore
 cdef Symbol type_complex = Symbol('complex_keyword',True) # type:ignore
 cdef Symbol type_vector = Symbol('vector_keyword',True) # type:ignore
-cdef Symbol syntax_error_symbol = Symbol('syntax_error',True) # type:ignore
-
-cdef Symbol div_error = Symbol('division error')
-cdef Symbol mod_error = Symbol('module error')
 
 cdef Symbol div_error = Symbol('Division Error')
 cdef Symbol mod_error = Symbol('Module Error')
