@@ -106,7 +106,7 @@ cdef class ErrorAST(AST):
     '''
     Error Syntax Tree Class
     '''
-    def __init__(self,Symbol symbol,int line,int column,SemanticError error):
+    def __init__(self,Symbol symbol,int line,int column,set[SemanticError] errors):
         '''
         Args:
             symbol (Symbol): internal symbol of this ast
@@ -120,7 +120,7 @@ cdef class ErrorAST(AST):
         self._line = line
         self._column = column
         self._is_error = True # type:ignore
-        self._error = error
+        self._errors = errors
 
     cpdef list[AST] children(self):
         return []

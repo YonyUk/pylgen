@@ -16,7 +16,7 @@ cdef class AST:
     cpdef list[AST] children(self)
 
 cdef class ErrorAST(AST):
-    cdef SemanticError _error
+    cdef set[SemanticError] _errors
 
 cdef class ASTListView:
     cdef list[AST] _data

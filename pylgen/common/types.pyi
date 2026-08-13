@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 
 from ..analysis.error import SemanticError
 
@@ -51,7 +51,7 @@ class AST:
 
 class ErrorAST(AST):
 
-    def __init__(self, symbol:Symbol, line:int, column:int,error:SemanticError): ...
+    def __init__(self, symbol:Symbol, line:int, column:int,errors:Set[SemanticError]): ...
 
 class ASTListView:
 
