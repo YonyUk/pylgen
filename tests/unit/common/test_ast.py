@@ -42,4 +42,5 @@ class TestAST:
         assert error_ast.line == line
         assert error_ast.column == column
         assert error_ast.is_error
-        assert error_ast.children() == []
+        with pytest.raises(NotImplementedError):
+            ast.children()
