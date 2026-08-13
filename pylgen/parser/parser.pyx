@@ -5,7 +5,7 @@ import inspect
 from typing import Iterable,Callable,List
 from ..common.types cimport Token,AST,Symbol,ASTListView,ErrorAST
 from ..grammar.grammar cimport Production
-from ..analysis.error cimport SyntaxError,Error
+from ..analysis.error cimport SyntaxError,SemanticError
 from .bottom_up_parser_actions import BottomUpParserAction
 
 _offset:int = 32
@@ -196,7 +196,7 @@ cdef class BottomUpParser(Parser):
         cdef int production_len
         # local references for micro-optimizations
         cdef unsigned int symbol_id
-        cdef Error error
+        cdef set[SemanticError] errors
 
         if self._parsed:
             raise ValueError('EOF token already readed')
@@ -225,8 +225,8 @@ cdef class BottomUpParser(Parser):
             self._view._start = self._stack_ast_top - production_len
             new_ast = self._reductor_by_production[p._hash](self._view) # type:ignore
             if new_ast._is_error:
-                error = (<ErrorAST>new_ast)._error
-                self._errors.add(error)
+                errors = (<ErrorAST>new_ast)._errors
+                self._errors.update(errors)
             if not self._syntax_error and self._draw_parse_tree:
                 # build the parse tree
                 childrens = self._parse_tree_nodes[-1*production_len:]
