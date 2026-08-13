@@ -132,17 +132,19 @@ cdef class DivisionByZeroErrorAST(ErrorAST):
     cdef AST _left
     cdef AST _right
 
-cdef class ModuleByZeroErrorAST(ErrorAST):
+cdef class ModuleErrorAST(ErrorAST):
     cdef AST _left
     cdef AST _right
 
-cdef class ModuleByNotIntegerErrorAST(ErrorAST):
-    cdef AST _left
-    cdef AST _right
+cdef class ValueTooLargeForIntegerErrorAST(ErrorAST):
+    cdef str _text
 
-cdef class ModuleByComplexErrorAST(ErrorAST):
-    cdef AST _left
-    cdef AST _right
+cdef class RangeErrorAST(ErrorAST):
+    pass
+
+cdef class ComplexNumberErrorAST(ErrorAST):
+    cdef NumberAST _coef
+    cdef Token _variable
 
 cdef class ModAST(BinaryAST):
     pass

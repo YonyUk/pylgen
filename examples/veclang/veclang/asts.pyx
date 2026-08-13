@@ -60,6 +60,12 @@ cdef Symbol syntax_error_symbol = Symbol('syntax_error',True) # type:ignore
 cdef Symbol div_error = Symbol('division error')
 cdef Symbol mod_error = Symbol('module error')
 
+cdef Symbol div_error = Symbol('Division Error')
+cdef Symbol mod_error = Symbol('Module Error')
+cdef Symbol int_too_large_error = Symbol('Integer Too Large Error')
+cdef Symbol range_error = Symbol('Range Error')
+cdef Symbol complex_error = Symbol('Complex Error')
+
 cdef class TypeAST(AST):
 
     def __init__(self, str type_name, int line, int column):
@@ -323,42 +329,53 @@ cdef class DivAST(BinaryAST):
 cdef class DivisionByZeroErrorAST(ErrorAST):
     
     def __init__(self,int line,int column, AST left,AST right):
-        super().__init__(div_error,line,column,SemanticError('division by zero not allowed',line,column))
+        super().__init__(div_error,line,column,{SemanticError('division by zero not allowed',line,column)})
         self._left = left
         self._right = right
     
     cpdef list[AST] children(self):
         return [self._left,self._right]
 
-cdef class ModuleByZeroErrorAST(ErrorAST):
-    
-    def __init__(self,int line,int column, AST left,AST right):
-        super().__init__(mod_error,line,column,SemanticError('module by zero not allowed',line,column))
+cdef class ModuleErrorAST(ErrorAST):
+
+    def __init__(self, int line, int column,AST left, AST right,set[SemanticError] errors) -> None:
+        super().__init__(mod_error,line,column,errors)
         self._left = left
         self._right = right
     
     cpdef list[AST] children(self):
         return [self._left,self._right]
 
-cdef class ModuleByNotIntegerErrorAST(ErrorAST):
-    
-    def __init__(self,int line,int column, AST left,AST right):
-        super().__init__(mod_error,line,column,SemanticError('module by a non-integer not allowed',line,column))
-        self._left = left
-        self._right = right
-    
-    cpdef list[AST] children(self):
-        return [self._left,self._right]
+cdef class ValueTooLargeForIntegerErrorAST(ErrorAST):
 
-cdef class ModuleByComplexErrorAST(ErrorAST):
+    def __init__(self, int line, int column,str text) -> None:
+        super().__init__(int_too_large_error,line,column,{SemanticError('Integer too large for 64 bits',line,column)})
+        self._text = text
     
-    def __init__(self,int line,int column, AST left,AST right):
-        super().__init__(div_error,line,column,SemanticError('module with complex numbers not allowed',line,column))
-        self._left = left
-        self._right = right
+    @property
+    def text(self) -> str:
+        return self._text
+
+    cpdef list[AST] children(self):
+        return []
+
+cdef class RangeErrorAST(ErrorAST):
+
+    def __init__(self, int line, int column, set[SemanticError] errors) -> None:
+        super().__init__(range_error,line,column,errors)
     
     cpdef list[AST] children(self):
-        return [self._left,self._right]
+        return []
+
+cdef class ComplexNumberErrorAST(ErrorAST):
+
+    def __init__(self, int line, int column,NumberAST coef, Token token) -> None:
+        super().__init__(complex_error,line,column,{SemanticError(f'Unexpected expression "{coef._value}{token._text}", maybe you meant "{coef._value}j"?',line,column)})
+        self._coef = coef
+        self._variable = token
+    
+    cpdef list[AST] children(self):
+        return [self._coef,self._variable]
 
 cdef class ExpAST(BinaryAST):
 
@@ -397,18 +414,22 @@ cdef AST div_reductor(ASTListView asts):
 cdef AST mod_reductor(ASTListView asts):
     cdef AST ast = asts._get(1)
     cdef NumberAST right,left
+    cdef set[SemanticError] errors = set()
+
     if asts._get(2)._symbol == NumberExpression:
         right = asts._get(2)
         if right._type(right._value) == 0:
-            return ModuleByZeroErrorAST(ast._line,ast._column,asts._get(0),right)
+            errors.add(SemanticError("module by zero not allowed",right._line,right._column))
         if right._type == np.complex128:
-            return ModuleByComplexErrorAST(ast._line,ast._column,asts._get(0),right)
+            errors.add(SemanticError("module with complex numbers not allowed",right._line,right._column))
         if right._type != np.int64:
-            return ModuleByNotIntegerErrorAST(ast._line,ast._column,asts._get(0),right)
+            errors.add(SemanticError("module by a non-integer not allowed",right._line,right._column))
     if asts._get(0)._symbol == NumberExpression:
         left = asts._get(0)
         if left._type == np.complex128:
-            return ModuleByComplexErrorAST(ast._line,ast._column,asts._get(0),right)
+            errors.add(SemanticError("module with complex numbers not allowed",left._line,left._column))
+    if errors:
+        return ModuleErrorAST(ast._line,ast._column,asts._get(0),asts._get(2),errors)
     return ModAST(asts._get(0),asts._get(2),ast._line,ast._column)
 
 cdef AST exp_reductor(ASTListView asts):
@@ -447,6 +468,8 @@ cdef AST number_reductor(ASTListView asts):
     if asts._size() == 1:
         number = asts._get(0) # type:ignore
         if number._type == TokenTypeEnum.INTEGER:
+            if int(number._text).bit_length() >= 64:
+                return ValueTooLargeForIntegerErrorAST(number._line,number._column,number._text)
             ast = NumberAST(number._text,np.int64,number._line,number._column)
         elif number._type == TokenTypeEnum.FLOAT:
             ast = NumberAST(number._text,np.float64,number._line,number._column)
@@ -482,8 +505,7 @@ cdef AST complex_number_reductor_1(ASTListView asts):
     cdef complex _value = np.complex128(0,img._type(img._value))
 
     if token._text != 'j':
-        error = SyntaxError(f'Unexpected symbol {token._text}',token._line,token._column)
-        return ErrorAST(syntax_error_symbol,img._line,img._column,error)
+        return ComplexNumberErrorAST(img._line,img._column,img,token)
     
     return NumberAST(str(_value),np.complex128,img._line,img._column)
 
@@ -506,11 +528,22 @@ cdef AST vector_components_reductor(ASTListView asts):
     return components
 
 cdef AST range_reductor(ASTListView asts):
-    cdef Token min_,max_
-    
+    cdef Token min_,max_,double_dots
+    cdef set[SemanticError] errors = set()
+
     min_ = asts._get(0) # type:ignore
     max_ = asts._get(2) # type:ignore
-    return RangeAST(int(min_._text),int(max_._text),min_._line,min_._column)
+    double_dots = asts._get(1)
+
+    if int(min_._text).bit_length() >= 32:
+        errors.add(SemanticError('Integer too large for 32 bits',min_._line,min_._column))
+    
+    if int(max_._text).bit_length() >= 32:
+        errors.add(SemanticError('Integer too large for 32 bits',max_._line,max_._column))
+
+    if errors:
+        return RangeErrorAST(double_dots._line,double_dots._column,errors)
+    return RangeAST(int(min_._text),int(max_._text),double_dots._line,double_dots._column)
 
 cdef AST range_reductor_1(ASTListView asts):
     cdef Token min_,max_,_minus
