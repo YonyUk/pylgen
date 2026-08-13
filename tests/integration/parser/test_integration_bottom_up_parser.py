@@ -388,7 +388,7 @@ class TestIntegrationBottomUpParser:
             if isinstance(token,Token):
                 if int(token.text) < 0:
                     error = SemanticError('numbers cannot be less than 0',token.line,token.column)
-                    return ErrorAST(F,error.line,error.column,error)
+                    return ErrorAST(F,error.line,error.column,{error})
             return AST(F,asts[0].line,asts[0].column)
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
@@ -466,7 +466,7 @@ class TestIntegrationBottomUpParser:
             if isinstance(token,Token):
                 if int(token.text) < 0:
                     error = SemanticError('numbers cannot be less than 0',token.line,token.column)
-                    return ErrorAST(F,error.line,error.column,error)
+                    return ErrorAST(F,error.line,error.column,{error})
             return AST(F,asts[0].line,asts[0].column)
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
