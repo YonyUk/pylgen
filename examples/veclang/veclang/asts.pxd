@@ -1,4 +1,4 @@
-from pylgen.common.types cimport AST,Symbol,ASTListView,Token
+from pylgen.common.types cimport AST,Symbol,ASTListView,Token,ErrorAST
 
 # NON-TERMINALS
 cdef Symbol VecLangProgram
@@ -128,6 +128,22 @@ cdef class MulAST(BinaryAST):
 cdef class DivAST(BinaryAST):
     pass
 
+cdef class DivisionByZeroErrorAST(ErrorAST):
+    cdef AST _left
+    cdef AST _right
+
+cdef class ModuleByZeroErrorAST(ErrorAST):
+    cdef AST _left
+    cdef AST _right
+
+cdef class ModuleByNotIntegerErrorAST(ErrorAST):
+    cdef AST _left
+    cdef AST _right
+
+cdef class ModuleByComplexErrorAST(ErrorAST):
+    cdef AST _left
+    cdef AST _right
+
 cdef class ModAST(BinaryAST):
     pass
 
@@ -164,6 +180,8 @@ cdef AST void_reductor(ASTListView asts)
 cdef AST variable_reductor(ASTListView asts)
 
 cdef AST complex_number_reductor(ASTListView asts)
+
+cdef AST complex_number_reductor_1(ASTListView asts)
 
 cdef AST vector_reductor(ASTListView asts)
 

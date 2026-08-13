@@ -65,6 +65,7 @@ from .asts cimport (
     number_reductor,
     variable_reductor,
     complex_number_reductor,
+    complex_number_reductor_1,
     vector_reductor,
     vector_components_reductor,
     range_reductor,
@@ -125,6 +126,7 @@ cpdef BottomUpParser build_parser():
     VecLangGrammar._add_attributed_production(Number,[minus,float_number],number_reductor)
 
     VecLangGrammar._add_attributed_production(ComplexNumber,[type_complex,lp,Number,com,Number,rp],complex_number_reductor)
+    VecLangGrammar._add_attributed_production(ComplexNumber,[Number,variable],complex_number_reductor_1)
 
     VecLangGrammar._add_attributed_production(VariableExpression,[variable],variable_reductor)
 

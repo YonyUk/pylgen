@@ -79,12 +79,6 @@ cdef class IndexingASTErrorCollectorVisitor(ASTVisitor):
 cdef class BinaryASTErrorCollectorVisitor(ASTVisitor):
     pass
 
-cdef class DivASTErrorCollectorVisitor(BinaryASTErrorCollectorVisitor):
-    pass
-
-cdef class ModASTErrorCollectorVisitor(BinaryASTErrorCollectorVisitor):
-    pass
-
 ##########################################################################
 #                                 VARIABLE INDEXING VISITOR
 ##########################################################################

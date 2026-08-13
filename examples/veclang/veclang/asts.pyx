@@ -1,4 +1,6 @@
-from pylgen.common.types cimport AST,Symbol,Token,ASTListView
+from pylgen.common.types cimport AST,Symbol,Token,ASTListView,ErrorAST
+from pylgen.analysis.error cimport Error,SemanticError
+
 from .tokens_enum import TokenTypeEnum
 
 import numpy as np # type:ignore
@@ -53,6 +55,10 @@ cdef Symbol type_int = Symbol('int_keyword',True) # type:ignore
 cdef Symbol type_float = Symbol('float_keyword',True) # type:ignore
 cdef Symbol type_complex = Symbol('complex_keyword',True) # type:ignore
 cdef Symbol type_vector = Symbol('vector_keyword',True) # type:ignore
+cdef Symbol syntax_error_symbol = Symbol('syntax_error',True) # type:ignore
+
+cdef Symbol div_error = Symbol('division error')
+cdef Symbol mod_error = Symbol('module error')
 
 cdef class TypeAST(AST):
 
@@ -314,6 +320,46 @@ cdef class DivAST(BinaryAST):
     def __init__(self, AST left, AST right, int line, int column):
         super().__init__(div, left, right, line, column)
 
+cdef class DivisionByZeroErrorAST(ErrorAST):
+    
+    def __init__(self,int line,int column, AST left,AST right):
+        super().__init__(div_error,line,column,SemanticError('division by zero not allowed',line,column))
+        self._left = left
+        self._right = right
+    
+    cpdef list[AST] children(self):
+        return [self._left,self._right]
+
+cdef class ModuleByZeroErrorAST(ErrorAST):
+    
+    def __init__(self,int line,int column, AST left,AST right):
+        super().__init__(mod_error,line,column,SemanticError('module by zero not allowed',line,column))
+        self._left = left
+        self._right = right
+    
+    cpdef list[AST] children(self):
+        return [self._left,self._right]
+
+cdef class ModuleByNotIntegerErrorAST(ErrorAST):
+    
+    def __init__(self,int line,int column, AST left,AST right):
+        super().__init__(mod_error,line,column,SemanticError('module by a non-integer not allowed',line,column))
+        self._left = left
+        self._right = right
+    
+    cpdef list[AST] children(self):
+        return [self._left,self._right]
+
+cdef class ModuleByComplexErrorAST(ErrorAST):
+    
+    def __init__(self,int line,int column, AST left,AST right):
+        super().__init__(div_error,line,column,SemanticError('module with complex numbers not allowed',line,column))
+        self._left = left
+        self._right = right
+    
+    cpdef list[AST] children(self):
+        return [self._left,self._right]
+
 cdef class ExpAST(BinaryAST):
 
     def __init__(self, AST left, AST right, int line, int column):
@@ -341,10 +387,28 @@ cdef AST mul_reductor(ASTListView asts):
 
 cdef AST div_reductor(ASTListView asts):
     cdef AST ast = asts._get(1)
+    cdef NumberAST right
+    if asts._get(2)._symbol == NumberExpression:
+        right = asts._get(2)
+        if right._type(right._value) == 0:
+            return DivisionByZeroErrorAST(ast._line,ast._column,asts._get(0),right)
     return DivAST(asts._get(0),asts._get(2),ast._line,ast._column)
 
 cdef AST mod_reductor(ASTListView asts):
     cdef AST ast = asts._get(1)
+    cdef NumberAST right,left
+    if asts._get(2)._symbol == NumberExpression:
+        right = asts._get(2)
+        if right._type(right._value) == 0:
+            return ModuleByZeroErrorAST(ast._line,ast._column,asts._get(0),right)
+        if right._type == np.complex128:
+            return ModuleByComplexErrorAST(ast._line,ast._column,asts._get(0),right)
+        if right._type != np.int64:
+            return ModuleByNotIntegerErrorAST(ast._line,ast._column,asts._get(0),right)
+    if asts._get(0)._symbol == NumberExpression:
+        left = asts._get(0)
+        if left._type == np.complex128:
+            return ModuleByComplexErrorAST(ast._line,ast._column,asts._get(0),right)
     return ModAST(asts._get(0),asts._get(2),ast._line,ast._column)
 
 cdef AST exp_reductor(ASTListView asts):
@@ -410,7 +474,19 @@ cdef AST complex_number_reductor(ASTListView asts):
     _value = np.complex128(real._type(real._value),img._type(img._value))
 
     return NumberAST(str(_value),np.complex128,token._line,token._column)
+
+cdef AST complex_number_reductor_1(ASTListView asts):
+    cdef Token token = asts._get(1)
+    cdef NumberAST img = asts._get(0)
+    cdef Error error
+    cdef complex _value = np.complex128(0,img._type(img._value))
+
+    if token._text != 'j':
+        error = SyntaxError(f'Unexpected symbol {token._text}',token._line,token._column)
+        return ErrorAST(syntax_error_symbol,img._line,img._column,error)
     
+    return NumberAST(str(_value),np.complex128,img._line,img._column)
+
 cdef AST vector_reductor(ASTListView asts):
     cdef Token star = asts._get(0) # type:ignore
     cdef VectorComponentsAST components = asts._get(1) # type:ignore
