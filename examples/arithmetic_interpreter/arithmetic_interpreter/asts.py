@@ -1,6 +1,7 @@
 from typing import List
 
-from pylgen.common.types import AST,Symbol
+from pylgen.analysis.error import SemanticError
+from pylgen.common.types import AST,Symbol,ErrorAST
 from .grammar_symbols import (
     clear,
     plus,
@@ -47,6 +48,27 @@ class ModAST(BinaryAST):
     def __init__(self, left:AST,right:AST, line: int, column: int):
         super().__init__(left,right,mod, line, column)
 
+class ModuleByZeroErrorAST(ErrorAST):
+
+    def __init__(self, line: int, column: int,left:AST,right:AST):
+        super().__init__(mod, line, column, SemanticError('module by zero not allowed',line,column))
+        self._left = left
+        self._right = right
+
+    def children(self) -> List[AST]:
+        return [self._left,self._right]
+
+class ModuleByNotIntegerErrorAST(ErrorAST):
+
+    def __init__(self, line: int, column: int,left:AST,right:AST):
+        super().__init__(mod, line, column, SemanticError('module by a non-integer not allowed',line,column))
+        self._left = left
+        self._right = right
+
+    def children(self) -> List[AST]:
+        return [self._left,self._right]
+
+
 class MulAST(BinaryAST):
 
     def __init__(self, left:AST,right:AST, line: int, column: int):
@@ -56,6 +78,16 @@ class DivAST(BinaryAST):
 
     def __init__(self, left:AST,right:AST, line: int, column: int):
         super().__init__(left,right,div, line, column)
+
+class DivisionByZeroErrorAST(ErrorAST):
+
+    def __init__(self,line: int, column: int,left:AST,right:AST):
+        super().__init__(div, line, column, SemanticError('division by zero not allowed',line,column))
+        self._left = left
+        self._right = right
+
+    def children(self) -> List[AST]:
+        return [self._left,self._right]
 
 class ExpAST(BinaryAST):
 

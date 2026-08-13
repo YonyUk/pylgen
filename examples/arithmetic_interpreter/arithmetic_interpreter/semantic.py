@@ -6,8 +6,6 @@ from .visitors import (
     ClearASTEvaluatorVisitor,
     PostOrderStrategy,
     ArithmeticExpressionASTChildrenSelector,
-    DivASTSemanticErrorCollectorVisitor,
-    ModASTSemanticErrorCollectorVisitor,
     VariableASTSemanticErrorCollectorVisitor,
     AssignmentASTSemanticErrorCollectorVisitor,
     PlusASTEvaluatorVisitor,
@@ -40,8 +38,6 @@ traversal_strategy.set_default_selector(ArithmeticExpressionASTChildrenSelector(
 
 error_collector_ast_walker = ASTWalker(context,traversal_strategy)
 
-error_collector_ast_walker.add_visitor(DivAST,DivASTSemanticErrorCollectorVisitor())
-error_collector_ast_walker.add_visitor(ModAST,ModASTSemanticErrorCollectorVisitor())
 error_collector_ast_walker.add_visitor(VarAST,VariableASTSemanticErrorCollectorVisitor())
 error_collector_ast_walker.add_visitor(AssignmentAST,AssignmentASTSemanticErrorCollectorVisitor())
 

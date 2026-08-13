@@ -1,11 +1,10 @@
 from typing import Any,List
 import sys
 
-from pylgen.common.types import AST,Token
+from pylgen.common.types import AST
 from pylgen.analysis.visitor import ASTChildrenSelector,ASTVisitor,TraversalStrategy
 from pylgen.analysis.error import RuntimeError,SemanticError
 from .context import ArithmeticExpressionContext
-from .asts import BinaryAST,VarAST
 from .errors import (
     DivisionByZeroError,
     ModuleByZeroError,
@@ -142,31 +141,6 @@ class ClearASTEvaluatorVisitor(ASTVisitor):
         self._check_context_type(context)
         print('\033c',end="")
 
-class DivASTSemanticErrorCollectorVisitor(ASTVisitor):
-
-    def __init__(self) -> None:
-        super().__init__(ArithmeticExpressionContext)
-
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
-        self._check_context_type(context)
-        if isinstance(ast.right,Token) and float(ast.right.text) == 0:
-            error = SemanticError('division by zero not allowed',ast.line,ast.column)
-            context.add_semantic_error(error)
-
-class ModASTSemanticErrorCollectorVisitor(ASTVisitor):
-
-    def __init__(self) -> None:
-        super().__init__(ArithmeticExpressionContext)
-
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
-        self._check_context_type(context)
-        if isinstance(ast.right,Token):
-            if float(ast.right.text) == 0:
-                error = SemanticError('module by zero not allowed',ast.line,ast.column)
-                context.add_semantic_error(error)
-            if int(float(ast.right.text)) != float(ast.right.text):
-                error = SemanticError('module by not-integer not allowed',ast.line,ast.column)
-                context.add_semantic_error(error)
 
 class VariableASTSemanticErrorCollectorVisitor(ASTVisitor):
 

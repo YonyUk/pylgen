@@ -1,4 +1,4 @@
-from pylgen.common.types import AST,ASTListView
+from pylgen.common.types import AST,ASTListView,Token
 from .grammar_symbols import (
     minus,
     plus,
@@ -18,10 +18,12 @@ from .asts import (
     ModAST,
     VarAST,
     AssignmentAST,
-    ExitAST
+    ExitAST,
+    DivisionByZeroErrorAST,
+    ModuleByNotIntegerErrorAST,
+    ModuleByZeroErrorAST
 )
 
-# ...
 def binary_reductor(asts:ASTListView) -> AST:
     ast_type:type = None  # type: ignore
     if asts[1].symbol == plus:
@@ -31,10 +33,19 @@ def binary_reductor(asts:ASTListView) -> AST:
     elif asts[1].symbol == mul:
         ast_type = MulAST
     elif asts[1].symbol == div:
+        right = asts[2]
+        if isinstance(right,Token) and float(right.text) == 0:
+            return DivisionByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[1])
         ast_type = DivAST
     elif asts[1].symbol == exp:
         ast_type = ExpAST
     elif asts[1].symbol == mod:
+        right = asts[2]
+        if isinstance(right,Token):
+            if float(right.text) == 0:
+                return ModuleByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
+            if '.' in right.text:
+                return ModuleByNotIntegerErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
         ast_type = ModAST
     elif asts[1].symbol == eq:
         ast_type = AssignmentAST
