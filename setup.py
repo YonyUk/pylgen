@@ -173,7 +173,7 @@ context_extension = Extension(
 
 setup(
     name='pylgen',
-    version='0.5.3',
+    version='0.5.4',
     description='test',
     author='YonyUk',
     packages=[
