@@ -104,7 +104,7 @@ The abstract base class for all parsers. It defines the public interface that al
 | **`set_draw_parse_tree_flag(flag: bool)`** | If `True`, the parser builds a parse tree during parsing (available via the `parse_tree` property). |
 
 !!! important
-    The token's stream must always end with an `EOF` token, so the parser can accept it. This token comes from the lexer.
+    The `parse` method assumes that the provided iterable of tokens contains exactly one `EOF` token at the end and that no further tokens are supplied after it. If parse is called with an iterable that continues after the `EOF`, a `ValueError` is raised internally (the implementation checks for this condition). In practice, this situation does not occur if your lexer emits a single `EOF` at the end of the input.
 
 #### Properties
 
@@ -122,6 +122,9 @@ The abstract base class for all parsers. It defines the public interface that al
 ```python
 BottomUpParser(start_state: str, goto_table: Dict[Tuple[str, Symbol], str], action_table: Dict[Tuple[str, Symbol], tuple[str, str | Production]])
 ```
+
+!!! important
+    In the `action_table`, the first element of the tuple is a string that can be `'SHIFT'`, `'REDUCE'`, or `'ACCEPT'`. For `'SHIFT'`, the second element is a string with the destination state identifier (e.g., `'I5'`); for `'REDUCE'`, it is an instance of `Production`; for `'ACCEPT'`, the second element may be `None` (although the type hint does not reflect it, the internal implementation handles this case).
 
  - **`start_state`**: The identifier of the initial state (typically `'I0'`).
 
@@ -194,7 +197,7 @@ The `ASTListView` is a lightweight, immutable view over the AST stack. It provid
 
  > ### Semantic Error Collection via `ErrorAST`
 
-A critical feature of the parsing runtime is its unified handling of **semantic errors** during reductions. Reductors are not limited to constructing valid ASTs; they can also detect semantic violations (such as type mismatches, undeclared identifiers, or scoping errors) by returning an `ErrorAST` object (an AST subclass with the `_is_error` flag set to `True` and an `_error` attribute containing the concrete `Error` instance).
+A critical feature of the parsing runtime is its unified handling of **semantic errors** during reductions. Reductors are not limited to constructing valid ASTs; they can also detect semantic violations (such as type mismatches) by returning an `ErrorAST` object (an AST subclass with the `_is_error` flag set to `True` and an `_errors` attribute containing a **set of `SemanticError` instances**). This allows collecting multiple semantic errors from a single reduction and aggregating them without interrupting the parsing process.
 
 This design provides several advantages:
 
@@ -213,14 +216,14 @@ def complex_number_reductor(asts:ASTListView) -> AST:
     _value = complex(0,img._type(img._value))
 
     if token._text != 'j':
-        error = SyntaxError(f'Unexpected symbol {token._text}',token._line,token._column)
-        return ErrorAST(syntax_error_symbol,img._line,img._column,error)
+        error = SemanticError(f'Unexpected symbol {token._text}',token._line,token._column)
+        return ErrorAST(semantic_error_symbol,img._line,img._column,{error})
     
     return NumberAST(str(_value),np.complex128,img._line,img._column)
 ```
 
-!!! note
-    We raise a SyntaxError here because we're checking for an unexpected symbol, which is a syntactic issue. While a SemanticError would also be acceptable in principle, we chose SyntaxError to reflect the nature of the check more accurately.
+!!! note "Clarification on ErrorAST Usage"
+    Although `ErrorAST` is a concrete class and can be instantiated directly (as shown above), it is also **intended to be subclassed** by users who wish to add additional error‑specific attributes or methods. The example provided here is merely illustrative of the direct usage pattern.
 
 This tight integration between syntactic analysis (shift/reduce) and semantic checks (reductors) makes PyLGEN parsers exceptionally suitable for production-grade compilers and interpreters, where collecting all errors in a single run is a hard requirement.
 
