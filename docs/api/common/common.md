@@ -105,13 +105,17 @@ The hash is calculated once in the constructor and stored in a private `_hash` f
 
 | **Attribute/Method** | **Type/Return** | **Description** |
 | :---: | :---: | :---: |
-| `symbol` (property) |	`Symbol` | The grammar symbol associated with this node. |
-| `line` (property)	| `int` | The line number in the source code where this node begins. |
-| `column` (property) | `int` | The column number (1‑indexed) where it begins. |
+| **`symbol` (property)** |	`Symbol` | The grammar symbol associated with this node. |
+| **`line` (property)**	| `int` | The line number in the source code where this node begins. |
+| **`column` (property)** | `int` | The column number (1‑indexed) where it begins. |
+| **`is_error` (property)** | `bool` | Indicates whether this node represents a semantic error. Always `False` for `AST`; overridden in `ErrorAST` | 
 | `children()` (method) | `List[AST]` | Returns a list of child AST nodes. Must be overridden. |
 
-!!! note "Validation"
+!!! warning "Validation"
     The constructor of `AST` raises a `ValueError` if `line` or `column` are negative. Always pass non‑negative integers.
+
+!!! note "String Representation"
+    Both `__str__` and `__repr__` return the string representation of the internal `Symbol` (i.e., the symbol’s name). This makes debugging and logging more convenient.
 
 === "Python"
     ```python
@@ -147,6 +151,9 @@ The hash is calculated once in the constructor and stored in a private `_hash` f
 `ErrorAST` is a specialized subclass of `AST` that represents a node inserted into the syntax tree **exclusively during syntactic analysis** to report **semantic errors** (e.g., type mismatches or other contextual checks performed by reducers). It is **not** intended for syntactic errors (unexpected tokens, malformed productions, etc.); those are handled by the parser's error recovery mechanism without producing `ErrorAST` nodes.
 
 By embedding `ErrorAST` nodes directly into the tree, the parser can continue processing and report multiple semantic errors in a single pass, and later stages can easily detect and handle problematic regions of the AST.
+
+!!! note
+    `ErrorAST` inherits all attributes of `AST`. Its `is_error` property is always `True`, and the `_errors` internal set stores the reported semantic errors. This allows downstream visitors to easily identify error nodes and skip or handle them appropriately.
 
 > ### Usage
 
@@ -185,7 +192,7 @@ By embedding `ErrorAST` nodes directly into the tree, the parser can continue pr
 
 #### Creation
 
-The constructor requires the token text, its type (must be a subclass of `TokenType`), the corresponding `Symbol`, and the location. It raises a `ValueError` if `type_` is not a subclass of `TokenType`.
+The constructor requires the token text, its **type (must be an instance of a subclass of `TokenType`)**, the corresponding `Symbol`, and the location. It raises a `ValueError` if `type_` is not an instance of a `TokenType` subclass.
 
 === "Python"
     ```python
@@ -203,6 +210,11 @@ The constructor requires the token text, its type (must be a subclass of `TokenT
 
     cdef Token token = Token("123", TokenTypeEnum.INTEGER, int_symbol, 1, 5)
     ```
+
+!!! note
+     - Since a `Token` is a leaf node, its `children()` method returns an empty list. This is consistent with the fact that tokens do not have sub‑ASTs.
+
+     - Like all `AST` nodes, `Token` has an `is_error` property; for tokens it is always `False` because they represent valid lexical input.
 
 > ### 2. Usage in Reducers
 
