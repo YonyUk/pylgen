@@ -67,16 +67,19 @@ These values are used internally to tag each error and to format user‑friendly
 | **`type`** | `ErrorType` | The category of the error. |
 | **`message`** | `str` | A human‑readable error message, formatted as `"{type} ERROR at line {line}, column {column}: {msg}"`. |
 
-The constructor accepts the error type, line, column, and a custom message. The `message` property builds a standardised string that is also returned by `__str__` and `__repr__`.
+The constructor accepts the error type (either a member of `ErrorType` or a string that matches one of its values), the line number, the column number, and a custom message. If a string is given, it is internally converted to the corresponding `ErrorType` member; otherwise, a `TypeError` or `ValueError` is raised.
+
+!!! note "Hash Consistency"
+    Like `Symbol`, `Error` objects compute a deterministic 64‑bit hash based on a SHA‑256 digest of the string `f"{type}-{line}-{column}-{msg}"`. This hash is stable across runs and is used for set/dictionary lookups (e.g., when collecting unique errors).
 
 > ### Concrete Error Classes
 
 | **Class** | **Description** |
 | :---: | :---: |
-| **`LexicalError`** | Raised during lexing when a token does not match any pattern or fails a lexical rule (e.g., malformed number, invalid character). |
-| **`SyntaxError`** | Raised during parsing when the token stream does not conform to the grammar (e.g., unexpected token, missing semicolon). |
-| **`SemanticError`** | Raised during semantic analysis for violations that cannot be detected by the grammar (e.g., undeclared variable, type mismatch, duplicate definition). |
-| **`RuntimeError`** | Raised during evaluation or execution of the AST (e.g., division by zero, invalid operation, out‑of‑bounds access). Unlike the other errors, it includes a stack trace to help debug the execution context. |
+| <span style="white-space: nowrap">**`LexicalError`**</span> | Raised during lexing when a token does not match any pattern or fails a lexical rule (e.g., malformed number, invalid character). |
+| <span style="white-space: nowrap">**`SyntaxError`**</span> | Raised during parsing when the token stream does not conform to the grammar (e.g., unexpected token, missing semicolon). |
+| <span style="white-space: nowrap">**`SemanticError`**</span> | Raised during semantic analysis for violations that cannot be detected by the grammar (e.g., undeclared variable, type mismatch, duplicate definition). |
+| <span style="white-space: nowrap">**`RuntimeError`**</span> | Raised during evaluation or execution of the AST (e.g., division by zero, invalid operation, out‑of‑bounds access). Unlike the other errors, it includes a stack trace to help debug the execution context. |
 
 All of these classes inherit directly from `Error` and simply forward their arguments to the base class constructor, providing a consistent interface.
 
@@ -96,15 +99,15 @@ The `Context` class is the central repository for all state during semantic anal
 | :---: | :---: |
 | **`push_trace(trace: str)`** | Adds a trace entry to the stack (used for debugging). |
 | **`pop_trace()`** | Removes the top trace entry. |
-| **`push_new_scope()`** | Pushes a new lexical scope. Must be overridden. |
-| **`pop_scope()`** | Pops the current lexical scope. Must be overridden. |
+| **`push_new_scope()`** | Pushes a new lexical scope. **Must be overridden in subclasses**. |
+| **`pop_scope()`** | Pops the current lexical scope. **Must be overridden in subclasses**. |
 | **`add_semantic_error(error: SemanticError)`** | Adds a semantic error to the context. |
-| **`add_runtime_error(ast: AST, error: RuntimeError)`** | Associates a runtime error with an AST node. Must be overridden. |
+| **`add_runtime_error(ast: AST, error: RuntimeError)`** | Associates a runtime error with an AST node. **Must be overridden in subclasses**. |
 | **`clear_semantic_errors()`** | Clears all semantic errors. |
-| **`clear_runtime_errors()`** | Clears all runtime errors. Must be overridden. |
-| **`clear_errors()`** | Clears both semantic and runtime errors. |
-| **`reset()`** | Resets the context (clears stack trace and all errors). |
-| **`get_runtime_errors()`** | Returns the list of runtime errors. Must be overridden. |
+| **`clear_runtime_errors()`** | Clears all runtime errors. **Must be overridden in subclasses**. |
+| **`clear_errors()`** | Clears all semantic and runtime errors, and also clears the stack trace. |
+| **`reset()`** | Resets the context by clearing the stack trace, all semantic errors, and all runtime errors (functionally equivalent to `clear_errors()` in the base implementation). |
+| **`get_runtime_errors()`** | Returns the list of runtime errors. **Must be overridden in subclasses**. |
 
 #### Properties
 
@@ -136,7 +139,7 @@ The `LexicalRule` class provides a framework for validating tokens beyond what r
 | **Method** | **Description** |
 | :---: | :---: |
 | **`_check(text: str) -> bool`** | Abstract method that subclasses must implement. Returns `True` if the token is valid. |
-| **`check(token: Token) -> LexicalError | None`** | Called by the lexer. If `_check` returns `False`, a `LexicalError` is returned. |
+| **`check(token: Token) -> LexicalError | None`** | Called by the lexer. If `_check` returns `False`, a `LexicalError` is returned; otherwise, it returns `None` (indicating that the token is valid). The method signature is `check(self, token: Token) -> LexicalError | None`. |
 
 #### Example
 
