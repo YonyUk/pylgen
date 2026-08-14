@@ -142,20 +142,11 @@ The hash is calculated once in the constructor and stored in a private `_hash` f
 !!! tip "Best Practice"
     Always declare attributes as cdef with concrete types whenever possible. This speeds up access and assignment in reducers and visitors.
 
-## `ErrorAST` (Handling Errors during Syntactic Analysis)
+## `ErrorAST` (Handling Semantic Errors during Syntactic Analysis)
 
-`ErrorAST` is a specialized subclass of `AST` that represents a node inserted into the syntax tree **exclusively during syntactic analysis**. Although the node is produced during parsing, the error it carries can be of any nature:
+`ErrorAST` is a specialized subclass of `AST` that represents a node inserted into the syntax tree **exclusively during syntactic analysis** to report **semantic errors** (e.g., type mismatches or other contextual checks performed by reducers). It is **not** intended for syntactic errors (unexpected tokens, malformed productions, etc.); those are handled by the parser's error recovery mechanism without producing `ErrorAST` nodes.
 
- - **Syntactic errors**: unexpected tokens, malformed productions, or violations of the grammar.
-
- - **Semantic errors**: type mismatches, undeclared identifiers, or other contextual checks that your reducers perform while building the AST.
-
-By embedding `ErrorAST` nodes directly into the tree, the parser can continue processing and report multiple errors in a single pass, and later stages can easily detect and handle problematic regions of the AST.
-
-| **Attribute/Method** | **Type/Return** | **Description** |
-| :---: | :---: | :---: |
-| **`error_type` (property)** | `ErrorType` | The type of the encapsulated error (e.g., `ErrorType.SYNTAX`, `ErrorType.SEMANTIC`). Extracted from the internal `Error` object. |
-| **`children()`** | `List[AST]` | Always returns `[]`, an error node is a leaf in the tree (it has no children). |
+By embedding `ErrorAST` nodes directly into the tree, the parser can continue processing and report multiple semantic errors in a single pass, and later stages can easily detect and handle problematic regions of the AST.
 
 > ### Usage
 
@@ -166,10 +157,8 @@ By embedding `ErrorAST` nodes directly into the tree, the parser can continue pr
     from pylgen.analysis.error import SemanticError
 
     # A semantic error detected inside a reducer
-    error = SemanticError("Undeclared variable 'x'", line=10, column=5)
-    err_node = ErrorAST(Symbol('error'), line=10, column=5, error=error)
-
-    print(err_node.error_type)  # ErrorType.SEMANTIC
+    error = SemanticError("semantic error detected", line=10, column=5)
+    err_node = ErrorAST(Symbol('error'), line=10, column=5, errors={error})
     ```
 
 === "Cython"
@@ -179,8 +168,8 @@ By embedding `ErrorAST` nodes directly into the tree, the parser can continue pr
     from pylgen.analysis.error cimport SemanticError
 
     # A syntactic error raised by the parser's recovery mechanism
-    cdef SemanticError error = SemanticError("Unexpected '}'", 10, 5)
-    cdef ErrorAST err_node = ErrorAST(Symbol('error'), 10, 5, error)
+    cdef SemanticError error = SemanticError("semantic error detected", 10, 5)
+    cdef ErrorAST err_node = ErrorAST(Symbol('error'), 10, 5, {error})
     ```
 
 ## `Token` (The Node from the Lexer)
