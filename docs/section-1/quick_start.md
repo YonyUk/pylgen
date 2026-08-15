@@ -1,4 +1,4 @@
-# 🚀 Quick start
+# Quick start
 
 There is no better way to master a language-building tool than by actually building a language with it. So, let's build our own.
 

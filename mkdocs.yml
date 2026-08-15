@@ -3,7 +3,7 @@ site_name: PyLGEN
 nav:
   - Overview: index.md
   - Meeting PyLGEN:
-    - 🚀 Quick Start: section-1/quick_start.md
+    - Quick Start: section-1/quick_start.md
     - Example 1: 
       - Introduction: section-1/example-1-first-approach.md
       - Step 1 (Lexical Analysis): section-1/example-1-step-1.md
