@@ -537,33 +537,79 @@ cdef inline AST range_reductor(ASTListView asts):
     if int(max_._text).bit_length() >= 32:
         errors.add(SemanticError('Integer too large for 32 bits',max_._line,max_._column))
 
+    if int(min_._text) > int(max_._text):
+        errors.add(SemanticError('minimum value must be less or equal to maximum value',min_._line,min_._column))
+
     if errors:
         return RangeErrorAST(double_dots._line,double_dots._column,errors)
     return RangeAST(int(min_._text),int(max_._text),double_dots._line,double_dots._column)
 
 cdef inline AST range_reductor_1(ASTListView asts):
-    cdef Token min_,max_,_minus
+    cdef Token min_,max_,_minus,double_dots
+    cdef set[SemanticError] errors = set()
 
     _minus = asts._get(0) # type:ignore
     min_ = asts._get(1) # type:ignore
     max_ = asts._get(3) # type:ignore
+    double_dots = asts._get(2)
+
+    if int(f'{_minus._text}{min_._text}').bit_length() >= 32:
+        errors.add(SemanticError('Integer too large for 32 bits',min_._line,min_._column))
+    
+    if int(max_._text).bit_length() >= 32:
+        errors.add(SemanticError('Integer too large for 32 bits',max_._line,max_._column))
+
+    if int(f'{_minus._text}{min_._text}') > int(max_._text):
+        errors.add(SemanticError('minimum value must be less or equal to maximum value',_minus._line,_minus._column))
+
+    if errors:
+        return RangeErrorAST(double_dots._line,double_dots._column,errors)
     return RangeAST(int(f'{_minus._text}{min_._text}'),int(max_._text),min_._line,min_._column)
 
 cdef inline AST range_reductor_2(ASTListView asts):
-    cdef Token min_,max_,_minus
+    cdef Token min_,max_,_minus,double_dots
+    cdef set[SemanticError] errors = set()
 
     min_ = asts._get(0) # type:ignore
+    double_dots = asts._get(1)
     _minus = asts._get(2) # type:ignore
     max_ = asts._get(3) # type:ignore
+
+    if int(min_._text).bit_length() >= 32:
+        errors.add(SemanticError('Integer too large for 32 bits',min_._line,min_._column))
+    
+    if int(f'{_minus._text}{max_._text}').bit_length() >= 32:
+        errors.add(SemanticError('Integer too large for 32 bits',max_._line,max_._column))
+
+    if int(min_._text) > int(f'{_minus._text}{max_._text}'):
+        errors.add(SemanticError('minimum value must be less or equal to maximum value',min_._line,min_._column))
+
+    if errors:
+        return RangeErrorAST(double_dots._line,double_dots._column,errors)
     return RangeAST(int(min_._text),int(f'{_minus._text}{max_._text}'),min_._line,min_._column)
 
 cdef inline AST range_reductor_3(ASTListView asts):
-    cdef Token min_,max_,_minus1,_minus2
+    cdef Token min_,max_,_minus1,_minus2,double_dots
+    cdef set[SemanticError] errors = set()
 
     _minus1 = asts._get(0) # type:ignore
     min_ = asts._get(1) # type:ignore
+    double_dots = asts._get(2)
     _minus2 = asts._get(3) # type:ignore
     max_ = asts._get(4) # type:ignore
+
+    if int(f'{_minus1._text}{min_._text}').bit_length() >= 32:
+        errors.add(SemanticError('Integer too large for 32 bits',min_._line,min_._column))
+    
+    if int(f'{_minus2._text}{max_._text}').bit_length() >= 32:
+        errors.add(SemanticError('Integer too large for 32 bits',max_._line,max_._column))
+
+    if int(f'{_minus1._text}{min_._text}') > int(f'{_minus2._text}{max_._text}'):
+        errors.add(SemanticError('minimum value must be less or equal to maximum value',_minus1._line,_minus1._column))
+
+    if errors:
+        return RangeErrorAST(double_dots._line,double_dots._column,errors)
+
     return RangeAST(int(f'{_minus1._text}{min_._text}'),int(f'{_minus2._text}{max_._text}'),min_._line,min_._column)
 
 

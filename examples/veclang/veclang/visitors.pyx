@@ -494,19 +494,6 @@ cdef class VectorComponentsASTErrorCollector(ASTVisitor):
                     error = SemanticError(f'Undeclared variable "{var._name}"',var._line,var._column) # type:ignore
                     context.add_semantic_error(error)
 
-cdef class RangeASTErrorCollectorVisitor(ASTVisitor):
-
-    def __init__(self) -> None:
-        super().__init__(VecLangContext)
-    
-    cpdef void visit(self,AST ast,Context context):
-        cdef RangeAST _range = ast # type:ignore
-
-        self._check_context_type(context)
-
-        if _range._max < _range._min:
-            context.add_runtime_error(ast,BadRangeError(context._stack,_range._line,_range._column)) # type:ignore    
-
 cdef class SlicingASTErrorCollectorVisitor(ASTVisitor):
     
     def __init__(self) -> None:
@@ -1183,7 +1170,6 @@ cpdef tuple[VecLangContext,ASTWalker,ASTWalker,ASTWalker] build_walkers():
     error_collector_walker.add_visitor_without_signature_checking(ModAST,BinaryASTErrorCollectorVisitor())
     error_collector_walker.add_visitor_without_signature_checking(AssignmentAST,BinaryASTErrorCollectorVisitor())
     error_collector_walker.add_visitor_without_signature_checking(AssignmentAST,VariableIndexerVisitor())
-    error_collector_walker.add_visitor_without_signature_checking(RangeAST,RangeASTErrorCollectorVisitor())
     error_collector_walker.add_visitor_without_signature_checking(VectorComponentsAST,VectorComponentsASTErrorCollector())
 
     evaluator_walker.add_visitor_without_signature_checking(NumberAST,NumberASTEvaluatorVisitor())

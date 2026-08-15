@@ -67,9 +67,6 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
 cdef class VectorComponentsASTErrorCollector(ASTVisitor):
     pass
 
-cdef class RangeASTErrorCollectorVisitor(ASTVisitor):
-    pass
-
 cdef class SlicingASTErrorCollectorVisitor(ASTVisitor):
     pass
 
