@@ -89,7 +89,7 @@ flowchart LR
 pip install pylgen
 ```
 
-Then build your interpreter step by step, following the complete tutorial in the [documentation](https://www.google.com).
+Then build your interpreter step by step, following the complete tutorial in the [documentation](https://pylgen.readthedocs.io/en/latest/section-1/example-1-first-approach/).
 
 ## 📖 Learn More
 
@@ -99,6 +99,6 @@ Then build your interpreter step by step, following the complete tutorial in the
 
  - **Deep‑dive API tour**: Understand every module inside out.
 
-[Read the full documentation →](https://www.google.com)
+[Read the full documentation →](https://pylgen.readthedocs.io)
 
 **PyLGEN**: Where compiler theory meets Python pragmatism.
