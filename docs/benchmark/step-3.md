@@ -28,9 +28,6 @@ cdef class UnSupportedOperationForTypesError(UnSupportedOperationError):
 cdef class InvalidOperationError(RuntimeError):
     pass
 
-cdef class BadRangeError(InvalidOperationError):
-    pass
-
 cdef class IndexOutOfRangeError(RuntimeError):
     pass
 ```
@@ -67,11 +64,6 @@ cdef class InvalidOperationError(RuntimeError):
 
     def __init__(self, list[str] stack_trace, int line, int column, str msg) -> None:
         super().__init__(stack_trace, line, column, msg)
-
-cdef class BadRangeError(InvalidOperationError):
-
-    def __init__(self, list[str] stack_trace, int line, int column) -> None:
-        super().__init__(stack_trace, line, column, f'The args[1] < args[0] is not allowed')
 
 cdef class IndexOutOfRangeError(RuntimeError):
     
@@ -141,11 +133,9 @@ After user-defined functions collection and before evaluation, we run a **semant
 
  - `FunctionCall ASTErrorCollectorVisitor`: verifies that called functions exist, that the argument count matches the signature, that arguments are declared variables (if they are variable references), and detects infinite recursion (calls that loop back to the same function).
  - `VectorComponentASTErrorCollector`: ensures that any variable used inside a vector literal has been declared.
- - `RangeASTErrorCollectorVisitor`: checks that the range's `min` <= `max`.
  - `SlicingASTErrorCollectorVisitor`: validates that slicing indices are within bounds of the target (if the target is a literal vector or range).
  - `IndexingASTErrorCollectorVisitor`: similar for indexing.
  - `BinaryASTErrorCollectorVisitor`: checks that variables used in binary operations are declared.
- - `DivASTErrorCollectorVisitor` and `ModASTErrorCollectorVisitor`: specialise for division and modulo, if the right operand is a literal zero, they raise a semantic error (division by zero).
  - `VariableIndexerVisitor`: when an assignment is encountered, it assigns an index to the variable in the context, preparing for fast lookup during evaluation.
 
 All these visitors are registered in the `error_collector_walker`.
@@ -284,9 +274,6 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
 cdef class VectorComponentsASTErrorCollector(ASTVisitor):
     pass
 
-cdef class RangeASTErrorCollectorVisitor(ASTVisitor):
-    pass
-
 cdef class SlicingASTErrorCollectorVisitor(ASTVisitor):
     pass
 
@@ -294,12 +281,6 @@ cdef class IndexingASTErrorCollectorVisitor(ASTVisitor):
     pass
 
 cdef class BinaryASTErrorCollectorVisitor(ASTVisitor):
-    pass
-
-cdef class DivASTErrorCollectorVisitor(BinaryASTErrorCollectorVisitor):
-    pass
-
-cdef class ModASTErrorCollectorVisitor(BinaryASTErrorCollectorVisitor):
     pass
 
 ##########################################################################
@@ -425,7 +406,6 @@ from .errors cimport(
     DivisionByZeroError,
     UnSupportedOperationForTypesError,
     ModuleByZeroError,
-    BadRangeError,
     InvalidOperationError,
     IndexOutOfRangeError
 )
@@ -877,19 +857,6 @@ cdef class VectorComponentsASTErrorCollector(ASTVisitor):
                     error = SemanticError(f'Undeclared variable "{var._name}"',var._line,var._column) # type:ignore
                     context.add_semantic_error(error)
 
-cdef class RangeASTErrorCollectorVisitor(ASTVisitor):
-
-    def __init__(self) -> None:
-        super().__init__(VecLangContext)
-    
-    cpdef void visit(self,AST ast,Context context):
-        cdef RangeAST _range = ast # type:ignore
-
-        self._check_context_type(context)
-
-        if _range._max < _range._min:
-            context.add_runtime_error(ast,BadRangeError(context._stack,_range._line,_range._column)) # type:ignore    
-
 cdef class SlicingASTErrorCollectorVisitor(ASTVisitor):
     
     def __init__(self) -> None:
@@ -974,58 +941,6 @@ cdef class BinaryASTErrorCollectorVisitor(ASTVisitor):
             if not _context.look_for_var(var._name)[0]:
                 error2 = SemanticError(f'variable "{var._name}" doesn\'t exists',var._line,var._column) # type:ignore
                 context.add_semantic_error(error2)
-
-cdef class DivASTErrorCollectorVisitor(BinaryASTErrorCollectorVisitor):
-
-    cpdef void visit(self,AST ast, Context context):
-        cdef SemanticError error
-        cdef DivAST div = ast # type:ignore
-        cdef NumberAST number
-        cdef object value
-
-        super(DivASTErrorCollectorVisitor,self).visit(ast,context)
-        if div._right._symbol == Number:
-            number = div._right # type:ignore
-            if number._type == np.complex128: # type:ignore
-                value = np.complex128(number._value)
-            elif number._type == np.float64: # type:ignore
-                value = np.float64(number._value)
-            else:
-                value = np.int64(number._value)
-            if value == 0: # type:ignore
-                error = SemanticError('division by zero not allowed',div._line,div._column) # type:ignore
-                context.add_semantic_error(error)
-
-cdef class ModASTErrorCollectorVisitor(BinaryASTErrorCollectorVisitor):
-
-    cpdef void visit(self,AST ast, Context context):
-        cdef SemanticError error1,error2
-        cdef ModAST mod = ast # type:ignore
-        cdef NumberAST left,right
-        cdef object value
-
-        super(ModASTErrorCollectorVisitor,self).visit(ast,context)
-        if mod._left._symbol == Number:
-            left = mod._left # type:ignore
-            if left._type == np.complex128: # type:ignore
-                error1 = SemanticError('operation not supported for complex numbers',mod._line,mod._column) # type:ignore
-                context.add_semantic_error(error1)
-        if mod._right._symbol == Number:
-            right = mod._right # type:ignore
-            if right._type == np.complex128: # type:ignore
-                error2 = SemanticError('operation not supported for complex numbers',mod._line,mod._column) # type:ignore
-                context.add_semantic_error(error2)
-        
-            if right._type == np.complex128: # type:ignore
-                value = np.complex128(right._value)
-            elif right._type == np.float64: # type:ignore
-                value = np.float64(right._value)
-            else:
-                value = np.int64(right._value)
-        
-            if value == 0: # type:ignore
-                error1 = SemanticError('module by zero not allowed',mod._line,mod._column) # type:ignore
-                context.add_semantic_error(error1)
 
 cdef class VariableIndexerVisitor(ASTVisitor):
 
@@ -1614,11 +1529,10 @@ cpdef tuple[VecLangContext,ASTWalker,ASTWalker,ASTWalker] build_walkers():
     error_collector_walker.add_visitor_without_signature_checking(MinusAST,BinaryASTErrorCollectorVisitor())
     error_collector_walker.add_visitor_without_signature_checking(MulAST,BinaryASTErrorCollectorVisitor())
     error_collector_walker.add_visitor_without_signature_checking(ExpAST,BinaryASTErrorCollectorVisitor())
-    error_collector_walker.add_visitor_without_signature_checking(DivAST,DivASTErrorCollectorVisitor())
-    error_collector_walker.add_visitor_without_signature_checking(ModAST,ModASTErrorCollectorVisitor())
+    error_collector_walker.add_visitor_without_signature_checking(DivAST,BinaryASTErrorCollectorVisitor())
+    error_collector_walker.add_visitor_without_signature_checking(ModAST,BinaryASTErrorCollectorVisitor())
     error_collector_walker.add_visitor_without_signature_checking(AssignmentAST,BinaryASTErrorCollectorVisitor())
     error_collector_walker.add_visitor_without_signature_checking(AssignmentAST,VariableIndexerVisitor())
-    error_collector_walker.add_visitor_without_signature_checking(RangeAST,RangeASTErrorCollectorVisitor())
     error_collector_walker.add_visitor_without_signature_checking(VectorComponentsAST,VectorComponentsASTErrorCollector())
 
     evaluator_walker.add_visitor_without_signature_checking(NumberAST,NumberASTEvaluatorVisitor())
