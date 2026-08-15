@@ -2,53 +2,6 @@ from setuptools import setup, find_packages
 from Cython.Build import cythonize
 from setuptools.extension import Extension
 
-requirements = [
-    "asttokens==3.0.1",
-    "build==1.5.0",
-    "colorama==0.4.6",
-    "contourpy==1.3.3",
-    "cycler==0.12.1",
-    "Cython==3.2.4",
-    "decorator==5.2.1",
-    "executing==2.2.1",
-    "fonttools==4.62.1",
-    "iniconfig==2.3.0",
-    "ipython==9.13.0",
-    "ipython_pygments_lexers==1.1.1",
-    "jedi==0.20.0",
-    "Jinja2==3.1.6",
-    "jsonpickle==4.1.1",
-    "kiwisolver==1.5.0",
-    "MarkupSafe==3.0.3",
-    "matplotlib==3.10.9",
-    "matplotlib-inline==0.2.2",
-    "narwhals==2.21.2",
-    "networkx==3.6.1",
-    "numpy==2.4.4",
-    "packaging==26.2",
-    "parso==0.8.7",
-    "pillow==12.2.0",
-    "pluggy==1.6.0",
-    "prompt_toolkit==3.0.52",
-    "psutil==7.2.2",
-    "pure_eval==0.2.3",
-    "Pygments==2.20.0",
-    "pyparsing==3.3.2",
-    "pyproject_hooks==1.2.0",
-    "pytest==9.0.3",
-    "python-dateutil==2.9.0.post0",
-    "pyvis==0.3.2",
-    "PyYAML==6.0.3",
-    "setuptools==82.0.1",
-    "six==1.17.0",
-    "stack-data==0.6.3",
-    "tornado==6.5.5",
-    "traitlets==5.15.0",
-    "wcwidth==0.7.0",
-    "wheel==0.47.0",
-    "xyzservices==2026.3.0"
-]
-
 ###################################################################################
 #                                  COMON 
 ###################################################################################
@@ -172,10 +125,6 @@ context_extension = Extension(
 )
 
 setup(
-    name='pylgen',
-    version='0.5.4',
-    description='test',
-    author='YonyUk',
     packages=[
         'pylgen',
         'pylgen.analysis',
@@ -204,7 +153,5 @@ setup(
         lexical_rule_extension,
         visitor_extension,
         context_extension
-    ]),
-    install_requires=requirements,
-    python_requires=">=3.11"
+    ])
 )
