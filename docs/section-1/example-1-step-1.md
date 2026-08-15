@@ -77,7 +77,7 @@ Next, we associate regular expression patterns with their corresponding token ty
 ```python
 # ...
 
-lexer[0,TokenTypeEnum.NUMBER] = '\\d+|\\d+\\.\\d+'
+lexer[0,TokenTypeEnum.NUMBER] = '\\d+(\\.\\d+)?'
 lexer[1,TokenTypeEnum.SYMBOL] = '\\(|\\)'
 lexer[2,TokenTypeEnum.OPERATOR] = '\\+|\\*\\*?|\\-|/|%|='
 lexer[3,TokenTypeEnum.KEYWORD] = 'exit|clear'
@@ -172,7 +172,7 @@ def get_symbol_function(t:TokenTypeEnum,tx:str) -> Symbol:
 
 lexer = Lexer(get_symbol_function,'\n|\t| ')
 lexer.set_eof_token(END_SYMBOL,TokenTypeEnum.SYMBOL)
-lexer[0,TokenTypeEnum.NUMBER] = '\\d+|\\d+\\.\\d+'
+lexer[0,TokenTypeEnum.NUMBER] = '\\d+(\\.\\d+)?'
 lexer[1,TokenTypeEnum.SYMBOL] = '\\(|\\)'
 lexer[2,TokenTypeEnum.OPERATOR] = '\\+|\\*\\*?|\\-|/|%|='
 lexer[3,TokenTypeEnum.KEYWORD] = 'exit|clear'
