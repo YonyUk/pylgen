@@ -73,6 +73,9 @@ For the sample expression `(1 + 3)*9 - 5%3`, the functions generate the followin
 
 Notice how the AST is leaner and more direct than the parse tree, it omits details like parentheses and single‑step reductions, focusing purely on the semantic essence of the expression. The parse tree, on the other hand, is a faithful record of the syntactic derivation, invaluable for debugging grammar ambiguities or precedence issues.
 
+!!! tip "Visual Debugging"
+    When hovering over any node in the AST visualization, a tooltip appears displaying the **node’s public**, **JSON‑serializable** properties such as its symbol, line/column, and any additional data like the variable name or operator. This allows you to inspect the node’s internal state instantly without referring back to the source code or reading the AST class definitions.
+
 ## What this Confirms?
 
 By visually inspecting both trees, you can immediately verify:

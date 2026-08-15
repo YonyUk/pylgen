@@ -17,7 +17,7 @@ Let's start by declaring our basic building blocks.
 
 ## Grammar symbols
 
-With the overall structure in mind, let's start by declaring the actual symbols of our grammar. These symbols,both terminals (like `+` or `number`) and non-terminals (like `E` for expression), will serve as the alphabet for our syntactic rules.
+With the overall structure in mind, let's start by declaring the actual symbols of our grammar. These symbols, both terminals (like `+` or `number`) and non-terminals (like `E` for expression), will serve as the alphabet for our syntactic rules.
 
 Before we dive into the code, it's helpful to distinguish between the two types of symbol we'll encounter:
 
@@ -64,7 +64,8 @@ File `asts.py`
 ```python
 from typing import List
 
-from pylgen.common.types import AST,Symbol
+from pylgen.common.types import AST,Symbol,ErrorAST
+from pylgen.analysis.error import SemanticError
 from .grammar_symbols import (
     clear,
     plus,
@@ -77,6 +78,10 @@ from .grammar_symbols import (
     variable,
     exit
 )
+
+# used later
+div_error = Symbol('Division SemanticError')
+mod_error = Symbol('Module SemanticError')
 
 class BinaryAST(AST):
 
@@ -115,6 +120,36 @@ class ModAST(BinaryAST):
     def __init__(self, left:AST,right:AST, line: int, column: int):
         super().__init__(left,right,mod, line, column)
 
+class ModuleByZeroErrorAST(ErrorAST):
+    def __init__(self, line: int, column: int, left: AST, right: AST):
+        errors = {SemanticError('module by zero not allowed', line, column)}
+        super().__init__(mod_error, line, column, errors)
+        self._left = left
+        self._right = right
+
+    def children(self) -> List[AST]:
+        return [self._left, self._right]
+
+class ModuleByNotIntegerErrorAST(ErrorAST):
+    def __init__(self, line: int, column: int, left: AST, right: AST):
+        errors = {SemanticError('module by a non-integer not allowed', line, column)}
+        super().__init__(mod_error, line, column, errors)
+        self._left = left
+        self._right = right
+
+    def children(self) -> List[AST]:
+        return [self._left, self._right]
+
+class DivisionByZeroErrorAST(ErrorAST):
+    def __init__(self, line: int, column: int, left: AST, right: AST):
+        errors = {SemanticError('division by zero not allowed', line, column)}
+        super().__init__(div_error, line, column, errors)
+        self._left = left
+        self._right = right
+
+    def children(self) -> List[AST]:
+        return [self._left, self._right]
+
 class MulAST(BinaryAST):
 
     def __init__(self, left:AST,right:AST, line: int, column: int):
@@ -130,6 +165,22 @@ class ExpAST(BinaryAST):
     def __init__(self, left:AST,right:AST, line: int, column: int):
         super().__init__(left,right,exp, line, column)
 ```
+
+!!! note "Why `ErrorAST`?"
+    `ErrorAST` is a special AST node provided by PyLGEN that carries a set of `SemanticError` objects. It allows us to embed static error information directly into the syntax tree during parsing; for instance, when a literal zero is used as the divisor or modulo operand. By returning an `ErrorAST` from a reductor, we detect these errors as early as possible, without needing a separate semantic pass to re‑check the same conditions. This keeps the semantic analysis phase lean and focused on dynamic errors like undeclared variables.
+
+!!! tip "Why subclasses of `ErrorAST` instead of using `ErrorAST` directly?"
+    We need to **preserve contextual information** from the source code (operands, error type, location). A generic `ErrorAST` node only holds a set of errors, but does not distinguish *what* failed or *with which* values. Creating specific subclasses (`DivisionByZeroErrorAST`, etc.) allows us to:
+
+     - Identify the error precisely in later phases (recovery, reporting).
+
+     - Store the involved operands for complete diagnostics.
+
+     - Keep the AST rich in metadata, as compiler theory recommends: error nodes should be **specialized** to convey semantic information and enable recovery strategies without losing context.
+
+    This design avoids having the error system reconstruct lost information and aligns with best practices in syntactic and semantic analysis.
+
+
 
 For assignments, we follow the same binary structure. However, note that we override the children method to return only the right‑hand side, this is a design choice to simplify later tree traversals by treating the variable name as metadata rather than a child node.
 
@@ -182,7 +233,8 @@ File `asts.py`
 ```python
 from typing import List
 
-from pylgen.common.types import AST,Symbol
+from pylgen.analysis.error import SemanticError
+from pylgen.common.types import AST,Symbol,ErrorAST
 from .grammar_symbols import (
     clear,
     plus,
@@ -196,6 +248,9 @@ from .grammar_symbols import (
     exit
 )
 
+div_error = Symbol('Division SemanticError')
+mod_error = Symbol('Module SemanticError')
+
 class BinaryAST(AST):
 
     def __init__(self, left:AST,right:AST,symbol: Symbol, line: int, column: int):
@@ -206,11 +261,11 @@ class BinaryAST(AST):
     @property
     def left(self) -> AST:
         return self._left # type:ignore
-    
+
     @property
     def right(self) -> AST:
         return self._right # type: ignore
-    
+
     def children(self) -> List[AST]:
         return [self._left,self._right]
 
@@ -220,7 +275,7 @@ class PlusAST(BinaryAST):
         super().__init__(left,right,plus, line, column)
 
 class MinusAST(BinaryAST):
-    
+
     def __init__(self, left:AST,right:AST, line: int, column: int):
         super().__init__(left,right,minus, line, column)
 
@@ -228,6 +283,29 @@ class ModAST(BinaryAST):
 
     def __init__(self, left:AST,right:AST, line: int, column: int):
         super().__init__(left,right,mod, line, column)
+
+class ModuleByZeroErrorAST(ErrorAST):
+
+    def __init__(self, line: int, column: int,left:AST,right:AST):
+        errors = {SemanticError('module by zero not allowed',line,column)}
+        super().__init__(mod_error, line, column, errors)
+        self._left = left
+        self._right = right
+
+    def children(self) -> List[AST]:
+        return [self._left,self._right]
+
+class ModuleByNotIntegerErrorAST(ErrorAST):
+
+    def __init__(self, line: int, column: int,left:AST,right:AST):
+        errors = {SemanticError('module by a non-integer not allowed',line,column)}
+        super().__init__(mod_error, line, column, errors)
+        self._left = left
+        self._right = right
+
+    def children(self) -> List[AST]:
+        return [self._left,self._right]
+
 
 class MulAST(BinaryAST):
 
@@ -238,6 +316,17 @@ class DivAST(BinaryAST):
 
     def __init__(self, left:AST,right:AST, line: int, column: int):
         super().__init__(left,right,div, line, column)
+
+class DivisionByZeroErrorAST(ErrorAST):
+
+    def __init__(self,line: int, column: int,left:AST,right:AST):
+        errors = {SemanticError('division by zero not allowed',line,column)}
+        super().__init__(div_error, line, column, errors)
+        self._left = left
+        self._right = right
+
+    def children(self) -> List[AST]:
+        return [self._left,self._right]
 
 class ExpAST(BinaryAST):
 
@@ -257,11 +346,11 @@ class VarAST(AST):
     def __init__(self,name:str,line:int,column:int):
         super().__init__(variable,line,column)
         self._name = name
-    
+
     @property
     def name(self) -> str:
         return self._name
-    
+
     def children(self) -> List[AST]:
         return []
 
@@ -269,7 +358,7 @@ class ExitAST(AST):
 
     def __init__(self,line: int, column: int):
         super().__init__(exit, line, column)
-    
+
     def children(self) -> List[AST]:
         return []
 
@@ -277,7 +366,7 @@ class ClearAST(AST):
 
     def __init__(self, line: int, column: int):
         super().__init__(clear, line, column)
-    
+
     def children(self) -> List[AST]:
         return []
 ```
@@ -501,7 +590,10 @@ from .asts import (
     ModAST,
     VarAST,
     AssignmentAST,
-    ExitAST
+    ExitAST,
+    DivisionByZeroErrorAST,
+    ModuleByNotIntegerErrorAST,
+    ModuleByZeroErrorAST
 )
 ```
 
@@ -520,10 +612,19 @@ def binary_reductor(asts:ASTListView) -> AST:
     elif asts[1].symbol == mul:
         ast_type = MulAST
     elif asts[1].symbol == div:
+        right = asts[2]
+        if isinstance(right,Token) and float(right.text) == 0:
+            return DivisionByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
         ast_type = DivAST
     elif asts[1].symbol == exp:
         ast_type = ExpAST
     elif asts[1].symbol == mod:
+        right = asts[2]
+        if isinstance(right,Token):
+            if float(right.text) == 0:
+                return ModuleByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
+            if '.' in right.text:
+                return ModuleByNotIntegerErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
         ast_type = ModAST
     elif asts[1].symbol == eq:
         ast_type = AssignmentAST
@@ -597,7 +698,10 @@ from .asts import (
     ModAST,
     VarAST,
     AssignmentAST,
-    ExitAST
+    ExitAST,
+    DivisionByZeroErrorAST,
+    ModuleByNotIntegerErrorAST,
+    ModuleByZeroErrorAST
 )
 
 def binary_reductor(asts:ASTListView) -> AST:
@@ -609,10 +713,19 @@ def binary_reductor(asts:ASTListView) -> AST:
     elif asts[1].symbol == mul:
         ast_type = MulAST
     elif asts[1].symbol == div:
+        right = asts[2]
+        if isinstance(right,Token) and float(right.text) == 0:
+            return DivisionByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
         ast_type = DivAST
     elif asts[1].symbol == exp:
         ast_type = ExpAST
     elif asts[1].symbol == mod:
+        right = asts[2]
+        if isinstance(right,Token):
+            if float(right.text) == 0:
+                return ModuleByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
+            if '.' in right.text:
+                return ModuleByNotIntegerErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
         ast_type = ModAST
     elif asts[1].symbol == eq:
         ast_type = AssignmentAST

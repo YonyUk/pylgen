@@ -126,8 +126,6 @@ PyLGEN provides the `ASTVisitor` base class, and we extend it for our specific n
 
 Before evaluating anything, we run a **semantic error collection** pass. These visitors traverse the AST and llok for issues that can be detected statically, without executing the code:
 
- - `DivASTSemanticErrorCollectorVisitor`: checks if the right operand of a division is a literal zero and raises a semantic error if so.
- - `ModASTSemanticErrorCollectorVisitor`: similarly, checks for zero or non-integer operands in modulo operations.
  - `VariableASTSemanticErrorCollectorVisitor`: checks that the right-hand side of an assignment doesn't reference an undeclared variable.
  - `AssignmentASTSemanticErrorCollector`:  checks that the right-hand side of an assignment doesn't reference an undeclared variable.
 
@@ -141,32 +139,6 @@ from pylgen.analysis.error import SemanticError
 from .context import ArithmeticExpressionContext
 
 from .grammar_symbols import VAR
-
-class DivASTSemanticErrorCollectorVisitor(ASTVisitor):
-
-    def __init__(self) -> None:
-        super().__init__(ArithmeticExpressionContext)
-    
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
-        self._check_context_type(context)
-        if isinstance(ast.right,Token) and float(ast.right.text) == 0:
-            error = SemanticError('division by zero not allowed',ast.line,ast.column)
-            context.add_semantic_error(error)
-
-class ModASTSemanticErrorCollectorVisitor(ASTVisitor):
-
-    def __init__(self) -> None:
-        super().__init__(ArithmeticExpressionContext)
-    
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
-        self._check_context_type(context)
-        if isinstance(ast.right,Token):
-            if float(ast.right.text) == 0:
-                error = SemanticError('module by zero not allowed',ast.line,ast.column)
-                context.add_semantic_error(error)
-            if int(float(ast.right.text)) != float(ast.right.text):
-                error = SemanticError('module by not-integer not allowed',ast.line,ast.column)
-                context.add_semantic_error(error)
 
 class VariableASTSemanticErrorCollectorVisitor(ASTVisitor):
 
@@ -572,32 +544,6 @@ class ClearASTEvaluatorVisitor(ASTVisitor):
         self._check_context_type(context)
         print('\033c',end="")
 
-class DivASTSemanticErrorCollectorVisitor(ASTVisitor):
-
-    def __init__(self) -> None:
-        super().__init__(ArithmeticExpressionContext)
-    
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
-        self._check_context_type(context)
-        if isinstance(ast.right,Token) and float(ast.right.text) == 0:
-            error = SemanticError('division by zero not allowed',ast.line,ast.column)
-            context.add_semantic_error(error)
-
-class ModASTSemanticErrorCollectorVisitor(ASTVisitor):
-
-    def __init__(self) -> None:
-        super().__init__(ArithmeticExpressionContext)
-    
-    def visit(self, ast: AST, context: ArithmeticExpressionContext) -> None:
-        self._check_context_type(context)
-        if isinstance(ast.right,Token):
-            if float(ast.right.text) == 0:
-                error = SemanticError('module by zero not allowed',ast.line,ast.column)
-                context.add_semantic_error(error)
-            if int(float(ast.right.text)) != float(ast.right.text):
-                error = SemanticError('module by not-integer not allowed',ast.line,ast.column)
-                context.add_semantic_error(error)
-
 class VariableASTSemanticErrorCollectorVisitor(ASTVisitor):
 
     def __init__(self) -> None:
@@ -683,8 +629,6 @@ from .visitors import (
     ClearASTEvaluatorVisitor,
     PostOrderStrategy,
     ArithmeticExpressionASTChildrenSelector,
-    DivASTSemanticErrorCollectorVisitor,
-    ModASTSemanticErrorCollectorVisitor,
     VariableASTSemanticErrorCollectorVisitor,
     AssignmentASTSemanticErrorCollectorVisitor,
     PlusASTEvaluatorVisitor,
@@ -717,8 +661,6 @@ traversal_strategy.set_default_selector(ArithmeticExpressionASTChildrenSelector(
 
 error_collector_ast_walker = ASTWalker(context,traversal_strategy)
 
-error_collector_ast_walker.add_visitor(DivAST,DivASTSemanticErrorCollectorVisitor())
-error_collector_ast_walker.add_visitor(ModAST,ModASTSemanticErrorCollectorVisitor())
 error_collector_ast_walker.add_visitor(VarAST,VariableASTSemanticErrorCollectorVisitor())
 error_collector_ast_walker.add_visitor(AssignmentAST,AssignmentASTSemanticErrorCollectorVisitor())
 
