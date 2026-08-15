@@ -19,7 +19,7 @@ First, let's create our development environment. Open a terminal in your chosen 
     Scripts\activate
 
     # install PyLGEN
-    pip install pylgen
+    pip install pylgen[all]
     ```
 
 === "Linux/macOS"
@@ -35,7 +35,14 @@ First, let's create our development environment. Open a terminal in your chosen 
     source bin/activate
 
     # install PyLGEN
-    pip install pylgen
+    pip install pylgen[all]
     ```
+
+!!! info "Installation extras"
+    - `pip install pylgen` → Core only (lightweight).
+    - `[visual]` → Graph plotting (`matplotlib`, `networkx`, `pyvis`).
+    - `[test]` → Run tests (`pytest`).
+    - `[all]` → Installs `visual` + `test` + `cython` (all user-facing features).
+    - `[cython]` → Build tools (`Cython`, `setuptools`, `wheel`, `build`) for developers/contributors.
 
 With these steps complete, you are ready to start building!
