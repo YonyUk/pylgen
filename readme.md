@@ -1,8 +1,7 @@
 # PyLGEN
-![PyPI - 0.3.5](https://img.shields.io/pypi/v/pylgen)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yonyuk/pylgen/ci.yml)
-![PyPI - 3.8](https://img.shields.io/pypi/pyversions/pylgen)
-![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen)
+![PyPI - 0.5.4](https://img.shields.io/pypi/v/pylgen-core)
+![PyPI - 3.11](https://img.shields.io/pypi/pyversions/pylgen-core)
+![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen-core)
 
 ![Codecov](https://img.shields.io/codecov/c/github/yonyuk/pylgen)
 
@@ -34,7 +33,7 @@ PyLGEN gives you **complete control** over every stage of language processing. B
 
 > PyLGEN is **not just a parser**, it's a complete, production‑ready interpreter framework that outperforms industry‑standard tools.
 
-## :rocket: Minimal Example
+## 🚀 Minimal Example
 
 ```python
 from pylgen.lexer import Lexer
@@ -86,7 +85,7 @@ flowchart LR
 # ⚡ Quick Start
 
 ```bash
-pip install pylgen
+pip install pylgen-core
 ```
 
 Then build your interpreter step by step, following the complete tutorial in the [documentation](https://pylgen.readthedocs.io/en/latest/section-1/example-1-first-approach/).
