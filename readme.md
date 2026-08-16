@@ -3,6 +3,7 @@
 ![PyPI - 3.11](https://img.shields.io/pypi/pyversions/pylgen-core)
 ![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen-core)
 
+[![CI](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml/badge.svg)](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml)
 ![Codecov](https://img.shields.io/codecov/c/github/yonyuk/pylgen)
 
 *From prototype to production: a **Python-native compiler framework** that brings the "**Dragon Book**" to life in Python, with clarity throughout.*
