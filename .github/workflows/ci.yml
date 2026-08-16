@@ -29,6 +29,8 @@ jobs:
           pip install pytest-cov  # (opcional, si no está en test)
 
       - name: Run tests with coverage
+        env: 
+            CYTHON_TRACE: 1
         run: |
           pytest --cov=pylgen --cov-report=xml
 
