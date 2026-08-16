@@ -570,7 +570,7 @@ A **reductor** is a function that receives an inmutable view over a list of AST 
 Let's implement each one step by step. First, let's make a few imports:
 
 ```python
-from pylgen.common.types import AST,ASTListView
+from pylgen.common.types import AST,ASTListView,Token
 from .grammar_symbols import (
     minus,
     plus,
@@ -678,7 +678,7 @@ File: `reductors.py`
 ```python
 from typing import List
 
-from pylgen.common.types import AST,ASTListView
+from pylgen.common.types import AST,ASTListView,Token
 from .grammar_symbols import (
     minus,
     plus,
