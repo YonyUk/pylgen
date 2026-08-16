@@ -153,10 +153,5 @@ setup(
         lexical_rule_extension,
         visitor_extension,
         context_extension
-    ],
-    compiler_directives={
-            'linetrace':True,
-            'profile':True
-        }
-    )
+    ])
 )
