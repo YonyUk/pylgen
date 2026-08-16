@@ -40,7 +40,7 @@ draw_parse_tree_from_parser(parser,show=True)
  - `parser.parse(lexer.tokens)`: consumes the token stream, applies the grammar rules and reductors, and returns the root node of the AST.
  - `draw_ast` and `draw_parse_tree_from_parser`: these are the star of the show from the `pylgen.visual` submodule.
 
-> ### Spotlight on `pylgen.visual` - Native Visualization Made Simple
+> ### Spotlight on [`pylgen.visual`](../api/visual/visual.md) - Native Visualization Made Simple
 
 One of PyLGEN's most convenient built-in utilities is its **visualization submodule**. Instead of requiring you to install external graphing libraries or manually export data, `pylgen.visual` provides ready-to-use functions that generate **standalone, interactive HTML documents** directly from your parser and AST.
 

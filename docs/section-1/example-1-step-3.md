@@ -1,6 +1,6 @@
 # Step 3: Bringing Meaning to the Tree (Semantic Analysis)
 
-With our AST ready and our parser validated, we've reached the stage where we move beyond structure and into **meaning**. Lexical and syntactic analysis tell us ***how*** the code is written; semantic analysis tells us ***what*** it means and ***whether*** it makes sense.
+With our AST ready and our parser validated, we've reached the stage where we move beyond structure and into **meaning**. Lexical and syntactic analysis tell us ***how*** the code is written; [semantic analysis](../api/analysis/analysis.md) tells us ***what*** it means and ***whether*** it makes sense.
 
 In a typical compiler pipeline, semantic analysis handles tasks like:
 

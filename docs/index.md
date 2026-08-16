@@ -49,3 +49,10 @@ Building a language should be **fun, educational and productive**. That's why Py
 > ## Intention
 
 PyLGEN has the intention to be the **meeting point** between classic compiler theory and modern software engineering practice. It's not trying to be the only framework or the fastest in every case, but to be the one that lets you **understand, modify, and optimize** every piece with confidence.
+
+> ## Where to Go Next?
+
+*   **[Quick Start Guide](section-1/quick_start.md):** Get started building your first interpreter in minutes.
+*   **[Benchmark: PyLGEN vs Lark](benchmark/benchmark-conclusion.md):** See how PyLGEN outperforms other tools in real-world tests.
+*   **[Architecture Deep Dive](api/intro.md):** Understand the modular design and each component of the framework.
+*   **API Reference:** Explore the details of the [`automaton`](api/automaton/intro.md), [`grammar`](api/grammar/intro.md), [`parser`](api/parser/parser.md), and other modules.

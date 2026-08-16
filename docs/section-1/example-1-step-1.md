@@ -24,7 +24,7 @@ class TokenTypeEnum(TokenType):
 To connect the lexer's output with the grammar rules, we need a mapping function that translates each token (type + lexeme) into a grammar symbol. This function bridges the gap between the lexer's raw token patterns and the grammar's terminal symbols, allowing the lexer to remain generic while precisely mapping each recognized token to the specific symbol the parser expects.
 
 !!! note
-    A detailed explanation of context‑free grammars, terminals, non‑terminals, and the parsing process will be provided in a dedicated section later. For now, we’ll focus on the implementation.
+    A detailed explanation of context‑free grammars, terminals, non‑terminals, and the parsing process will be provided in the [grammar](../api/grammar/intro.md) and [parser](../api/parser/parser.md) sections later. For now, we’ll focus on the implementation.
 
 ```python
 from pylgen.common.types import Symbol

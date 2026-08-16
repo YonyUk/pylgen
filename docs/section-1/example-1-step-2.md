@@ -2,7 +2,7 @@
 
 With our lexer up and running, we now have a clean stream of tokens. But having the pieces is only half the battle, we also need to know how they fit together. For instance, `x = 10` makes perfect sense, while `= x 10` clearly doesn't. To define these structural rules, we move on to syntactic analysis.
 
-In this step, we'll establish the grammar of our language: a set of rules that determines which sequences of tokens are valid. We'll begin by naming the basic building blocks (like numbers and variables) and then write the rules that specify how to combine them into assignments, expressions, and built-in commands.
+In this step, we'll establish the [grammar](../api/grammar/intro.md) of our language: a set of rules that determines which sequences of tokens are valid. We'll begin by naming the basic building blocks (like numbers and variables) and then write the rules that specify how to combine them into assignments, expressions, and built-in commands.
 
 As the parser processes the token stream and checks it against these rules, it doesn't just validate the input, it also builds a structured representation of your code called an **Abstract Syntax Tree (AST)**. Think of the AST as a simplified, hierarchical map of your program: it strips away superficial details like parentheses or whitespace and captures only the meaningful structure. For example, the parser will transform `x = 10` into a distinct node representing an assignment, with `x` on one side and `10` on the other. We'll define these node structures upfront, so the parser knows exactly what shape to produce.
 
@@ -377,7 +377,7 @@ With our symbols and AST nodes ready, we're all set to write the actual grammar 
 
 With our symbols and AST nodes ready, it's time to define the actual grammar rules. This is where we specify how the tokens can be combined to form valid expressions, assignments, and commands, and, crucially, which AST nodes should be built for each valid combination.
 
-We'll use PyLGEN's `AttributedGrammar` class, which allows us to attach a **reductor** (a function) to each production. This reductor will be called during parsing whenever that production is recognized; its job is to take the children (the ASTs of the symbols on the right‑hand side) and produce a new AST node for the left‑hand side.
+We'll use PyLGEN's [`AttributedGrammar`](../api/grammar/grammar.md#attributedgrammar-grammar-with-reductors) class, which allows us to attach a **reductor** (a function) to each production. This reductor will be called during parsing whenever that production is recognized; its job is to take the children (the ASTs of the symbols on the right‑hand side) and produce a new AST node for the left‑hand side.
 
 Let's start by importing everything we need and creating the grammar object.
 
