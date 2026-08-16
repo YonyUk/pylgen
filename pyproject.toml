@@ -22,7 +22,7 @@ dependencies = [
     "PyYAML==6.0.3",
 ]
 
-keywords = ["parser", "lalr", "lexer", "compiler", "grammar", "attributed-grammar", "automaton", "regex", "language-tool", "pylgen", "visualization", "high-performs"]
+keywords = ["parser", "lalr", "lexer", "compiler", "grammar", "attributed-grammar", "automaton", "regex", "language-tool", "pylgen", "visualization", "high-performance"]
 
 classifiers = [
     "Development Status :: 4 - Beta",
