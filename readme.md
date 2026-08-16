@@ -1,5 +1,5 @@
 # PyLGEN
-![PyPI - 0.5.7](https://img.shields.io/pypi/v/pylgen-core?cache=1)
+![PyPI - 0.5.8](https://img.shields.io/pypi/v/pylgen-core?cache=1)
 ![PyPI - 3.12](https://img.shields.io/pypi/pyversions/pylgen-core?cache=1)
 ![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen-core?cache=1)
 [![CI](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml/badge.svg)](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml?cache=1)
@@ -25,9 +25,9 @@ PyLGEN gives you **complete control** over every stage of language processing. B
 
 | | **Lark + `lark_cython`** | **PyLGEN** |
 | :---: | :---: | :---: |
-| **Parsing (2M lines, 40 MB)** | 116.75 s | 61.1 s |
+| **Parsing (2M lines, 40 MB)** | 116.73 s | 60.80 s |
 | **AST Construction** | Separate pass | Integrated |
-| **Full Interpreter** | — | ~65 s (incl. semantic checks + eval) |
+| **Full Interpreter** | — | ~66.03 s (incl. semantic checks + eval) |
 | **Peak Memory** | ~4 GB | ~927 MB |
 
 > PyLGEN is **not just a parser**, it's a complete, production‑ready interpreter framework that outperforms industry‑standard tools.
