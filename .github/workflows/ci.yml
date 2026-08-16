@@ -28,7 +28,6 @@ jobs:
           pip install -e .[test,cython]
 
       - name: Run tests with coverage
-        env:
         run: |
           pytest tests
 
