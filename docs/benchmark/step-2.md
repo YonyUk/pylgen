@@ -1225,10 +1225,10 @@ Because performance matters, we define each reductor as a `cdef` function (or `c
 
 These are trivial:
 ```cython
-cdef AST single_reductor(ASTListView asts):
+cdef inline AST single_reductor(ASTListView asts):
     return asts._get(0)
 
-cdef AST extractor_reductor(ASTListView asts):
+cdef inline AST extractor_reductor(ASTListView asts):
     return asts._get(1)
 ```
 
@@ -1237,7 +1237,7 @@ cdef AST extractor_reductor(ASTListView asts):
 We have separate reductors for each operator. For example:
 
 ```cython
-cdef AST plus_reductor(ASTListView asts):
+cdef inline AST plus_reductor(ASTListView asts):
     cdef AST ast = asts._get(1)
     return PlusAST(asts._get(0),asts._get(2),ast._line,ast._column)
 ```
@@ -1247,7 +1247,7 @@ Similarly for `minus_reductor`, `mul_reductor`, etc. This avoids a conditional c
 > ### Assignment Reductor
 
 ```cython
-cdef AST assignment_reductor(ASTListView asts):
+cdef inline AST assignment_reductor(ASTListView asts):
     cdef AST ast = asts._get(1)
     return AssignmentAST(asts._get(0),asts._get(2),ast._line,ast._column)
 ```
@@ -1257,7 +1257,7 @@ cdef AST assignment_reductor(ASTListView asts):
 number_reductor creates a `NumberAST` with the appropriate type.
 
 ```cython
-cdef AST number_reductor(ASTListView asts):
+cdef inline AST number_reductor(ASTListView asts):
     cdef Token operator,number
     cdef NumberAST ast
     
@@ -1280,7 +1280,7 @@ cdef AST number_reductor(ASTListView asts):
 `complex_number_reductor` extracts the real and imaginary parts from two `NumberAST`s and creates a complex number.
 
 ```cython
-cdef AST complex_number_reductor(ASTListView asts):
+cdef inline AST complex_number_reductor(ASTListView asts):
     cdef Token token = asts._get(0) # type:ignore
     cdef NumberAST real,img
     cdef complex _value
@@ -1319,7 +1319,7 @@ There are four variants to handle signs. Each creates a `RangeAST`.
 
 `type_reductor` creates a `TypeAST` from the keyword token.
 
-## Putting It All Together: The Parser Builder
+## Putting It All Together: The [Parser Builder](../api/parser/parser.md#parserbuilder-the-parser-generator)
 
 Finally, after adding all productions, we build the LALR(1) parser using PyLGEN's `_build_lalr_parser_from_attributed`:
 
@@ -1562,11 +1562,11 @@ def binary_reductor(asts:ASTListView) -> AST:
 
 Cython version
 ```cython
-cdef AST plus_reductor(ASTListView asts):
+cdef inline AST plus_reductor(ASTListView asts):
     cdef AST ast = asts._get(1)
     return PlusAST(asts._get(0),asts._get(2),ast._line,ast._column)
 
-cdef AST minus_reductor(ASTListView asts):
+cdef inline AST minus_reductor(ASTListView asts):
     cdef AST ast = asts._get(1)
     return MinusAST(asts._get(0),asts._get(2),ast._line,ast._column)
 
