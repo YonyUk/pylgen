@@ -28,16 +28,24 @@ jobs:
           pip install -e .[test,cython]
           pip install pytest-cov  # (opcional, si no está en test)
 
+      - name: Check coverage plugins
+        run: python -c "import coverage; print(coverage.__version__); print(coverage.plugin_support.get_plugins())"
+
       - name: Run tests with coverage
         env: 
             CYTHON_TRACE: 1
+            COVERAGE_PROCESS_START: .coveragerc
         run: |
-          pytest --cov=pylgen --cov-report=xml
+          pytest --cov=pylgen --cov-report=xml --cov-report=term-missing
+      
+      - name: Inspect coverage.xml
+        run: grep -c "pyx" coverage.xml   # Cuenta cuántas veces aparece .pyx
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
+          verbose: true
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
