@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pylgen-core"
-version = "0.5.7"
+version = "0.5.8"
 description = "From prototype to production: a Python-native compiler framework that brings the Dragon Book to life in Python, with clarity throughout."
 readme = "readme.md"
 authors = [
