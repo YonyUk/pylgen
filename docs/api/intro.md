@@ -1,4 +1,4 @@
-# A Practical Tour for PyLGEN Framework
+# PyLGEN Architecture: A Deep Dive into its Modular Compiler Framework
 
 Welcome to the core of PyLGEN. Up to this point, we have explored the high-level vision, the benchmark results, and the step-by-step construction of a production‑grade interpreter for VecLang. Now, we shift our focus from using PyLGEN to understanding it, from the inside out.
 

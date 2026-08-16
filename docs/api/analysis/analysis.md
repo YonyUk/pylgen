@@ -1,4 +1,4 @@
-# `pylgen.analysis` Module (The Semantic Framework)
+# The `pylgen.analysis` Module: Semantic Analysis and AST Visitors for Python Compilers
 
 Welcome to the `analysis` module, the gateway between syntax and meaning. If the lexer and parser are concerned with *structure*, this module is concerned with *semantics*. It provides the infrastructure for walking the Abstract Syntax Tree (AST), performing semantic checks, and executing computations. This is where your language truly comes to life.
 

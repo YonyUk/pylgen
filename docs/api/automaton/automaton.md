@@ -1,4 +1,4 @@
-# `pylgen.automaton` (The Theory in Action)
+# The `pylgen.automaton` Module: Implementing Finite Automata for Lexical Analysis
 
 Having established the mathematical foundations of finite automata, from the classic DFA to the hybrid ε‑DFA, we now turn to the concrete implementation provided by PyLGEN. The `automaton` module materializes all that theory into a clear, efficient, and extensible API, designed both for manual automaton construction and for automatic generation from regular expressions or words.
 
