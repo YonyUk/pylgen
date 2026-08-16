@@ -1,8 +1,8 @@
 # PyLGEN
-![PyPI - 0.5.6](https://img.shields.io/pypi/v/pylgen-core)
-![PyPI - 3.12](https://img.shields.io/pypi/pyversions/pylgen-core)
-![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen-core)
-[![CI](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml/badge.svg)](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml)
+![PyPI - 0.5.7](https://img.shields.io/pypi/v/pylgen-core?cache=1)
+![PyPI - 3.12](https://img.shields.io/pypi/pyversions/pylgen-core?cache=1)
+![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen-core?cache=1)
+[![CI](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml/badge.svg)](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml?cache=1)
 
 *From prototype to production: a **Python-native compiler framework** that brings the "**Dragon Book**" to life in Python, with clarity throughout.*
 
