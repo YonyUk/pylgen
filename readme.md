@@ -25,10 +25,10 @@ PyLGEN gives you **complete control** over every stage of language processing. B
 
 | | **Lark + `lark_cython`** | **PyLGEN** |
 | :---: | :---: | :---: |
-| **Parsing (2M lines, 40 MB)** | 151.9 s | 61.1 s |
+| **Parsing (2M lines, 40 MB)** | 116.75 s | 61.1 s |
 | **AST Construction** | Separate pass | Integrated |
 | **Full Interpreter** | — | ~65 s (incl. semantic checks + eval) |
-| **Peak Memory** | ~4 GB | ~887 MB |
+| **Peak Memory** | ~4 GB | ~927 MB |
 
 > PyLGEN is **not just a parser**, it's a complete, production‑ready interpreter framework that outperforms industry‑standard tools.
 
