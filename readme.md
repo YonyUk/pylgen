@@ -17,7 +17,7 @@ PyLGEN gives you **complete control** over every stage of language processing. B
 
  - **Dual‑nature design**: Pure Python for development and debugging; Cython for near‑C performance.
 
- - **Built for scale**: Handles 2‑million‑line inputs with ~2.5x faster parsing than Lark + `lark_cython`.
+ - **Built for scale**: Handles 2‑million‑line inputs with ~1.92x faster parsing than Lark + `lark_cython`.
 
  - **Python ecosystem integration**: Leverage NumPy, SciPy, or any library from within your language.
 
