@@ -1,6 +1,6 @@
-# PyLGEN
+# PyLGEN: The Python-Native Compiler Framework for Building Interpreters and DSLs
 
-*From prototype to production: a **Python-native compiler framework** that brings the "**Dragon Book**" to life in Python, with clarity throughout.*
+*From prototype to production: A **Python-native compiler framework** that brings the "**Dragon Book**" to life in Python with clarity throughout. A high-performance tool to build interpreters and Domain-Specific Languages (DSLs). Master every step of the compilation pipeline, from lexing to semantic analysis, with full control and clarity.*
 
  - Build **interpreters** and **compilers** from scratch, without leaving the **Python's ecosystem**
  - Keep total control of what's going on at every step
@@ -10,6 +10,10 @@
 > ## What is PyLGEN?
 
 PyLGEN is a toolbox for building **interpreters and compilers** from scratch, without leaving the Python ecosystem. It's not a magical code generator, it's a cohesive set of modules that guide you through every stage: from lexical analysis to semantic evaluation, including **LALR(1)** parsing and **Abstract Syntax Tree (AST)** construction.
+
+> **TL;DR:** PyLGEN is a powerful Python-native toolkit for creating fast interpreters, compilers, and DSLs. It gives you complete control over the compilation process, from lexical analysis to AST evaluation, and is optimized with Cython for near-C performance. Ideal for students, software engineers, and anyone exploring compiler theory.
+
+<hr>
 
 > ## Why PyLGEN?
 
