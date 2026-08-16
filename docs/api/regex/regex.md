@@ -12,13 +12,13 @@ This module is unique in the PyLGEN ecosystem: it is the only one that ingests a
 
  - Extract a regex string from a given automaton (regex synthesis).
 
-In this section, we will explore the architecture, API, and internal workings of this module, showing how it integrates the concepts from the `automaton` and `grammar` modules to provide a seamless **regex‑to‑automaton pipeline**.
+In this section, we will explore the architecture, API, and internal workings of this module, showing how it integrates the concepts from the [`automaton`](../automaton/intro.md) and [`grammar`](../grammar/intro.md) modules to provide a seamless **regex‑to‑automaton pipeline**.
 
 ## Purpose in the Framework
 
 The `regex` module serves three primary roles:
 
- - **`1` Lexer Foundation**: The lexer uses this module internally to convert token patterns (provided as regex strings) into DFAs that can efficiently scan input text.
+ - **`1` [Lexer](../lexer/lexer.md#code-examples) Foundation**: The lexer uses this module internally to convert token patterns (provided as regex strings) into DFAs that can efficiently scan input text.
 
  - **`2` Standalone Regex Engine**: You can use it independently to parse and evaluate regular expressions, obtain their equivalent automata, or even generate a regex from an automaton (useful for debugging or minimization).
 

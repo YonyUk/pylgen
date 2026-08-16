@@ -2,7 +2,7 @@
 
 Welcome to the parser module, the intellectual heart of PyLGEN's syntactic analysis. If the lexer transforms a stream of characters into tokens, the parser transforms that token stream into an **Abstract Syntax Tree (AST)** , validating the grammatical structure of the input according to a context‑free grammar. This is where the theoretical elegance of LR parsing meets the practical demands of real‑world language processing.
 
-The parser module implements **LALR(1) parser generation** from context‑free grammars, following the classic algorithms described in the "Dragon Book" (Aho, Sethi, and Ullman). It builds upon the `grammar` module, using `FIRST` and `FOLLOW` sets to construct the `ACTION` and `GOTO` tables that drive the parsing process. The module is designed to be both **correct** and **fast**, with Cython‑optimized parsing routines that can handle thousands of tokens per second.
+The parser module implements **LALR(1) parser generation** from context‑free grammars, following the classic algorithms described in the "Dragon Book" (Aho, Sethi, and Ullman). It builds upon the [`grammar`](../grammar/intro.md) module, using `FIRST` and `FOLLOW` sets to construct the `ACTION` and `GOTO` tables that drive the parsing process. The module is designed to be both **correct** and **fast**, with Cython‑optimized parsing routines that can handle thousands of tokens per second.
 
 This module is also where **attributed grammars** come to life: the parser invokes user‑defined reductors during reductions, building the AST incrementally as the input is consumed. The separation between parser generation (done once, offline) and parsing (done at runtime) allows for efficient, reusable parsers.
 
@@ -185,7 +185,7 @@ These exceptions allow you to inspect the conflict and, if necessary, resolve it
 
 > ### Integration with Attributed Grammars
 
-The parser's ability to build ASTs comes from its integration with attributed grammars. The `ParserBuilder.build_parser_from_attributed` method attaches a reductor to each production in the `AttributedGrammar`. When the parser performs a reduce action, it looks up the reductor for that production and invokes it with an `ASTListView` containing the children AST nodes.
+The parser's ability to build ASTs comes from its integration with attributed grammars. The `ParserBuilder.build_parser_from_attributed` method attaches a reductor to each production in the [`AttributedGrammar`](../grammar/grammar.md#attributedgrammar-grammar-with-reductors). When the parser performs a reduce action, it looks up the reductor for that production and invokes it with an [`ASTListView`](../common/common.md#astlistview-a-lightweight-view-for-reducers) containing the children AST nodes.
 
 The `ASTListView` is a lightweight, immutable view over the AST stack. It provides:
 
@@ -197,7 +197,7 @@ The `ASTListView` is a lightweight, immutable view over the AST stack. It provid
 
  > ### Semantic Error Collection via `ErrorAST`
 
-A critical feature of the parsing runtime is its unified handling of **semantic errors** during reductions. Reductors are not limited to constructing valid ASTs; they can also detect semantic violations (such as type mismatches) by returning an `ErrorAST` object (an AST subclass with the `_is_error` flag set to `True` and an `_errors` attribute containing a **set of `SemanticError` instances**). This allows collecting multiple semantic errors from a single reduction and aggregating them without interrupting the parsing process.
+A critical feature of the parsing runtime is its unified handling of **semantic errors** during reductions. Reductors are not limited to constructing valid ASTs; they can also detect semantic violations (such as type mismatches) by returning an [`ErrorAST`](../common/common.md#errorast-handling-semantic-errors-during-syntactic-analysis) object (an AST subclass with the `_is_error` flag set to `True` and an `_errors` attribute containing a **set of [`SemanticError`](../analysis/analysis.md#concrete-error-classes) instances**). This allows collecting multiple semantic errors from a single reduction and aggregating them without interrupting the parsing process.
 
 This design provides several advantages:
 

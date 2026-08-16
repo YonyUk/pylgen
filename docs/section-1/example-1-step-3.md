@@ -324,7 +324,7 @@ class ClearASTEvaluatorVisitor(ASTVisitor):
 
 > ### The Traversal Strategy (Controlling the Walk)
 
-How do these visitors walk the tree? We use a `PostOrderStrategy` defined in `visitors.py`. As the name suggests, it processes the tree bottom-up: children are visited before their parent. This is essential for evaluators, because a parent operation (like addition) needs the values of its children already computed.
+How do these visitors walk the tree? We use a [`PostOrderStrategy`](../api/analysis/analysis.md#traversalstrategy-base-class) defined in `visitors.py`. As the name suggests, it processes the tree bottom-up: children are visited before their parent. This is essential for evaluators, because a parent operation (like addition) needs the values of its children already computed.
 
 The strategy works with a **selector** (`ArithmeticExpressionASTChildrenSelector`) that determines, for each AST node, which chldren to visit. By default, it simply returns `ast.children()`, but you can override this for fine-grained control, for instance, to skip certain branch during error collection.
 

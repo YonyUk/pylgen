@@ -10,7 +10,7 @@ The `automaton` module serves a dual role:
 
  - `1`. **Foundation for Lexical Analysis**: The lexer converts regex patterns (strings) into DFAs that can efficiently scan input text. This module provides the automata that make that possible.
 
- - `2`. **Standalone Tool for Language Manipulation**: Even if you never use the lexer or parser, you can use this module to:
+ - `2`. **Standalone Tool for Language Manipulation**: Even if you never use the [lexer](../lexer/lexer.md#lexer-the-userfacing-lexer) or [parser](../parser/parser.md#parser-abstract-base-class), you can use this module to:
     - Build automata from scratch.
 
     - Perform operations on regular languages (union, intersection, etc.).

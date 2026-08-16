@@ -101,7 +101,7 @@ print(ps.productions)  # [[E, plus, T], [T]]
 
 #### Public API
 
- - **`__iadd__`**: expects a tuple of `(production_tuple, reductor)`, where `production_tuple` is a tuple of `Symbol` and `reductor` is a callable with signature `(ASTListView) -> AST`. The reductor's signature is validated at addition time (must be annotated with `ASTListView` and return `AST`).
+ - **`__iadd__`**: expects a tuple of `(production_tuple, reductor)`, where `production_tuple` is a tuple of `Symbol` and `reductor` is a callable with signature `(ASTListView) -> AST`. The reductor's signature is validated at addition time (must be annotated with [`ASTListView`](../common/common.md#astlistview-a-lightweight-view-for-reducers) and return [`AST`](../common/common.md#ast-the-root-of-every-tree)).
 
 #### Example
 

@@ -1,6 +1,6 @@
 # `pylgen.common` Module (The Foundation of PyLGEN)
 
-The `common` submodule is the bedrock upon which the entire PyLGEN ecosystem is built. It provides the fundamental data types, the core abstractions for the **Abstract Syntax Tree (AST)**, **grammar symbols**, **lexical tokens**, and **transition tables** that connect all the moving parts. Understanding this module is essential, because every other submodule (`lexer`, `parser`, `analysis`, `automaton`, `regex`, and `visual`) depends on it.
+The `common` submodule is the bedrock upon which the entire PyLGEN ecosystem is built. It provides the fundamental data types, the core abstractions for the **Abstract Syntax Tree (AST)**, **grammar symbols**, **lexical tokens**, and **transition tables** that connect all the moving parts. Understanding this module is essential, because every other submodule ([`lexer`](../lexer/lexer.md), [`parser`](../parser/parser.md), [`analysis`](../analysis/analysis.md), [`automaton`](../automaton/intro.md), [`regex`](../regex/regex.md), and [`visual`](../visual/visual.md)) depends on it.
 
 In this section, we will explore each class, its purpose, its API (both in pure Python and Cython), and recommended usage patterns. You'll find practical examples that will help you internalize how and when to use each component.
 
@@ -336,10 +336,10 @@ Later, when configuring your lexer, you will use this enumeration to associate e
 
 The `common` module is never used in isolation. Here is a quick map of how it relates to other modules:
 
- - **Lexer**: Tokens are created as instances of `Token`, and the mapping function (which you provide), takes the token type (`TokenType`) and text to return a `Symbol`.
- - **Grammar**: Symbols (`Symbol`) are used in productions, and reducers receive `ASTListView`.
- - **Parser**: The parser returns an `AST` (the root of the tree), and the parsing tables are built with `Table` objects.
- - **Analysis**: `ASTWalker` and `ASTVisitor` operate on `AST` nodes.
+ - [**Lexer**](../lexer/lexer.md): Tokens are created as instances of `Token`, and the mapping function (which you provide), takes the token type (`TokenType`) and text to return a `Symbol`.
+ - [**Grammar**](../grammar/grammar.md#usage-example): Symbols (`Symbol`) are used in productions, and reducers receive `ASTListView`.
+ - [**Parser**](../parser/parser.md#parser-abstract-base-class): The parser returns an `AST` (the root of the tree), and the parsing tables are built with `Table` objects.
+ - [**Analysis**](../analysis/analysis.md#the-visitor-framework): `ASTWalker` and `ASTVisitor` operate on `AST` nodes.
 
 ## Best Practices for Maximum Performance
 

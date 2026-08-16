@@ -12,7 +12,7 @@ Generates an interactive HTML visualization of a finite automaton (`DFA` or `NFA
 
  - **Parameters**:
 
-    - **`automaton`**: An instance of `pylgen.automaton.Automaton`.
+    - **`automaton`**: An instance of [`pylgen.automaton.Automaton`](../automaton/automaton.md#the-base-class-automaton).
 
     - **`**kwargs`**: Common parameters (see above). The default filename is `automaton-{automaton.id}`.
 
@@ -44,7 +44,7 @@ Visualizes an AST. The graph is laid out as a hierarchical tree (top‑down). Ea
 
  - **Parameters**:
 
-    - **`ast`**: The root AST node (an instance of a subclass of `pylgen.common.types.AST`).
+    - **`ast`**: The root AST node (an instance of a subclass of [`pylgen.common.types.AST`](../common/common.md#ast-the-root-of-every-tree)).
 
     - **`**kwargs`**: Common parameters. Default filename is `ast`.
 
@@ -65,7 +65,7 @@ Visualizes the **parse tree** (also known as the **concrete syntax tree**) that 
 
  - **Parameters**:
 
-    - **`parser`**: A `pylgen.parser.parser.Parser` instance that has already parsed some input (i.e., its `parse_tree` attribute is set).
+    - **`parser`**: A [`pylgen.parser.parser.Parser`](../parser/parser.md#parser-abstract-base-class) instance that has already parsed some input (i.e., its `parse_tree` attribute is set).
 
     - **`**kwargs`**: Common parameters. Default filename is `parse tree`.
 
@@ -92,7 +92,7 @@ Generates an HTML table that shows all **propagation edges** used in LALR lookah
 
  - **Parameters**:
 
-    - **`g`**: A `pylgen.grammar.grammar.Grammar` instance.
+    - **`g`**: A [`pylgen.grammar.grammar.Grammar`](../grammar/grammar.md#grammar-the-base-grammar-class) instance.
 
     - **`**kwargs`**: Supports `filename`, `show`, and `cache` (no physics or other graph controls).
 

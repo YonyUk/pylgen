@@ -6,7 +6,7 @@ PyLGEN is not a black box; it is a modular, layered framework designed to give y
 
 ## Why a Modular Tour?
 
-If you have followed the VecLang tutorial, you have already seen PyLGEN in action. But that was a top‑down view: you learned what to write to build an interpreter. Now we are going bottom‑up: we will dissect the building blocks that make that possible. This tour is essential for:
+If you have followed the [VecLang tutorial](../benchmark/benchmark-intro.md), you have already seen PyLGEN in action. But that was a top‑down view: you learned what to write to build an interpreter. Now we are going bottom‑up: we will dissect the building blocks that make that possible. This tour is essential for:
 
  - **Advanced customization**: When you need to extend PyLGEN beyond the standard patterns.
 
@@ -22,14 +22,14 @@ PyLGEN is organized into seven cohesive submodules, each with a well‑defined r
 
 | **Submodule** | **Responsability** |
 | :---: | :---: |
-| **`common`** | Core data types: `Symbol`, `AST`, `Token`, `ASTListView`, `Table`. The foundation. |
-| **`automaton`** | Finite automata construction, determinization (NFA → DFA), minimization (Hopcroft). |
-| **`grammar`** | Grammar definition (productions, first/follow sets), attributed grammars with reducers. |
-| **`regex`** | Regular expression engine: parse patterns, build automata, convert between regex and automata. |
-| **`lexer`** | Lexical analysis: regex‑based tokenization, prioritization, validation, and error handling. |
-| **`parser`** | LALR(1) parser generator and runtime: conflict detection, error recovery, AST construction. |
-| **`analysis`** | Semantic analysis framework: visitors, traversal strategies, contexts, and error hierarchies. |
-| **`visual`** | Interactive graph visualization for automata, ASTs, and parse trees (via HTML/pyvis). |
+| [**`common`**](common/common.md) | Core data types: `Symbol`, `AST`, `Token`, `ASTListView`, `Table`. The foundation. |
+| [**`automaton`**](automaton/intro.md) | Finite automata construction, determinization (NFA → DFA), minimization (Hopcroft). |
+| [**`grammar`**](grammar/intro.md) | Grammar definition (productions, first/follow sets), attributed grammars with reducers. |
+| [**`regex`**](regex/regex.md) | Regular expression engine: parse patterns, build automata, convert between regex and automata. |
+| [**`lexer`**](lexer/lexer.md) | Lexical analysis: regex‑based tokenization, prioritization, validation, and error handling. |
+| [**`parser`**](parser/parser.md) | LALR(1) parser generator and runtime: conflict detection, error recovery, AST construction. |
+| [**`analysis`**](analysis/analysis.md) | Semantic analysis framework: visitors, traversal strategies, contexts, and error hierarchies. |
+| [**`visual`**](visual/visual.md) | Interactive graph visualization for automata, ASTs, and parse trees (via HTML/pyvis). |
 
 Each module builds upon the ones above it. The `common` module stands alone; every other module depends on it. This layered design ensures that you can use, say, the `automaton` module independently of the `parser`, if all you need is a DFA minimizer.
 

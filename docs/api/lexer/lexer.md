@@ -1,6 +1,6 @@
 # `pylgen.lexer` Module (The Scanning Engine)
 
-Welcome to the `lexer` module, the entry point of any language pipeline. If the `regex` module is about **describing** patterns, the lexer module is about **applying** them to raw source code, transforming a character stream into a meaningful token stream. This module is where regular expressions meet practicality, where theory becomes execution.
+Welcome to the `lexer` module, the entry point of any language pipeline. If the [`regex`](../regex/regex.md) module is about **describing** patterns, the lexer module is about **applying** them to raw source code, transforming a character stream into a meaningful token stream. This module is where regular expressions meet practicality, where theory becomes execution.
 
 Lexical analysis(or scanning) is the first phase of compilation. Its job is to read the source code character by character, group them into *lexemes*, and classify each lexeme as a *token* (e.g., `NUMBER`, `IDENTIFIER`, `PLUS`). This process is fundamentally driven by **regular languages**: the set of valid lexemes for each token type is a regular language, which can be described by a regular expression and recognized by a finite automaton.
 
@@ -64,7 +64,7 @@ The `Lexer` subclass builds on top of this by allowing the user to specify regul
 BaseLexer(get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: DFA, check_annotation: bool = True)
 ```
 
- - `get_symbol_function`: A function that maps a token type (the enumeration value) and its lexeme (string) to a `Symbol` (terminal) for the parser. This bridges the lexer and the grammar.
+ - `get_symbol_function`: A function that maps a token type (the enumeration value) and its lexeme (string) to a [`Symbol`](../common/common.md#symbol-the-atom-of-the-grammar) (terminal) for the parser. This bridges the lexer and the grammar.
 
 !!! important
     The lexer validates that `get_symbol_function` has the correct annotations:
@@ -124,9 +124,9 @@ Lexer(get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: str, ch
 
 ## Lexical Rules and Error Handling
 
-`Lexer` integrates with the `analysis.lexical` module, which defines the `LexicalRule` abstract class. A lexical rule is a validation check that operates on a token's text. For example, you might have a rule that ensures a number does not have leading zeros, or that an identifier does not start with a digit.
+`Lexer` integrates with the [`analysis.lexical`](../analysis/analysis.md) module, which defines the [`LexicalRule`](../analysis/analysis.md#lexical-rules) abstract class. A lexical rule is a validation check that operates on a token's text. For example, you might have a rule that ensures a number does not have leading zeros, or that an identifier does not start with a digit.
 
-When a rule fails, it returns a `LexicalError` object that is added to the lexer's errors set. The tokenization process does not stop on errors; it continues to collect all errors, allowing you to report them all at once.
+When a rule fails, it returns a [`LexicalError`](../analysis/analysis.md#concrete-error-classes) object that is added to the lexer's errors set. The tokenization process does not stop on errors; it continues to collect all errors, allowing you to report them all at once.
 
 ## Building the Combined DFA
 

@@ -8,7 +8,7 @@ In this section, we will dissect the `grammar` module's API, explore its core cl
 
 The `grammar` module serves as the **syntactic specification layer** of PyLGEN. Its responsibilities are:
 
- - **Define grammar symbols** (terminals and non‑terminals) using the `Symbol` class from `common`.
+ - **Define grammar symbols** (terminals and non‑terminals) using the `Symbol` class from [`common`](../common/common.md#symbol-the-atom-of-the-grammar).
 
  - **Model productions** (rules) with left‑hand side (head) and right‑hand side (sequence of symbols).
 

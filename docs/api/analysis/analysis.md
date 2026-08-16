@@ -1,6 +1,6 @@
 # The `pylgen.analysis` Module: Semantic Analysis and AST Visitors for Python Compilers
 
-Welcome to the `analysis` module, the gateway between syntax and meaning. If the lexer and parser are concerned with *structure*, this module is concerned with *semantics*. It provides the infrastructure for walking the Abstract Syntax Tree (AST), performing semantic checks, and executing computations. This is where your language truly comes to life.
+Welcome to the `analysis` module, the gateway between syntax and meaning. If the [lexer](../lexer/lexer.md) and [parser](../parser/parser.md) are concerned with *structure*, this module is concerned with *semantics*. It provides the infrastructure for walking the Abstract Syntax Tree (AST), performing semantic checks, and executing computations. This is where your language truly comes to life.
 
 The analysis module is designed around two powerful design patterns that together enable flexible, extensible AST processing:
 
@@ -8,7 +8,7 @@ The analysis module is designed around two powerful design patterns that togethe
 
  - **The Strategy Pattern**: Encapsulates different traversal algorithms (pre‑order, post‑order, in‑order, or custom walks) that can be swapped at runtime without changing the visitors.
 
-Together, these patterns provide a clean, maintainable foundation for all semantic analysis tasks. In the REPL tutorial, you saw them in action: the same `PostOrderStrategy` was used first for semantic error collection (a static analysis pass) and then for evaluation (a dynamic computation pass), simply by swapping the set of visitors.
+Together, these patterns provide a clean, maintainable foundation for all semantic analysis tasks. In the [REPL tutorial](../../section-1/example-1-step-3.md#the-traversal-strategy-controlling-the-walk), you saw them in action: the same `PostOrderStrategy` was used first for semantic error collection (a static analysis pass) and then for evaluation (a dynamic computation pass), simply by swapping the set of visitors.
 
 ## Purpose in the Framework
 
@@ -118,7 +118,7 @@ The `Context` class is the central repository for all state during semantic anal
 
 #### Usage in Practice
 
-In the REPL tutorial, the `ArithmeticExpressionContext` subclass extends `Context` with:
+In the [REPL tutorial](../../section-1/example-1-step-3.md#the-context-managing-state), the `ArithmeticExpressionContext` subclass extends `Context` with:
 
  - A variable table (`_variables`).
 
