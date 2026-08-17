@@ -39,6 +39,7 @@ nav:
 
 theme:
   name: material
+  custom_dir: docs/overrides
   features:
     - navigation.sections
     - toc.integrate
