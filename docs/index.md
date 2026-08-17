@@ -9,7 +9,7 @@
 
 > ## What is PyLGEN?
 
-PyLGEN is a toolbox for building **interpreters and compilers** from scratch, without leaving the [Python](https://www.python.org/) ecosystem. It's not a magical code generator, it's a cohesive set of modules that guide you through every stage: from lexical analysis to semantic evaluation, including [**LALR(1)**](https://en.wikipedia.org/wiki/LALR_parser) parsing and **Abstract Syntax Tree (AST)** construction.
+[PyLGEN](https://pypi.org/project/pylgen-core/#description) is a toolbox for building **interpreters and compilers** from scratch, without leaving the [Python](https://www.python.org/) ecosystem. It's not a magical code generator, it's a cohesive set of modules that guide you through every stage: from lexical analysis to semantic evaluation, including [**LALR(1)**](https://en.wikipedia.org/wiki/LALR_parser) parsing and **Abstract Syntax Tree (AST)** construction.
 
 > **TL;DR:** PyLGEN is a powerful Python-native toolkit for creating fast interpreters, compilers, and DSLs. It gives you complete control over the compilation process, from lexical analysis to AST evaluation, and is optimized with Cython for near-C performance. Ideal for students, software engineers, and anyone exploring compiler theory.
 
