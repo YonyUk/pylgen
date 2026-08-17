@@ -1,6 +1,6 @@
 # PyLGEN Architecture: A Deep Dive into its Modular Compiler Framework
 
-Welcome to the core of PyLGEN. Up to this point, we have explored the high-level vision, the benchmark results, and the step-by-step construction of a production‑grade interpreter for VecLang. Now, we shift our focus from using PyLGEN to understanding it, from the inside out.
+Welcome to the core of PyLGEN. Up to this point, we have explored the high-level vision, the [benchmark results](../benchmark/benchmark-conclusion.md), and the step-by-step construction of a production‑grade interpreter for [VecLang](../benchmark/getting-to-know-veclang.md). Now, we shift our focus from using PyLGEN to understanding it, from the inside out.
 
 PyLGEN is not a black box; it is a modular, layered framework designed to give you full control over every stage of language processing: from tokenization to parsing, from semantic analysis to execution. Its architecture draws from classic compiler theory (the "Dragon Book" approach) while embracing the Python ecosystem and the performance boost of Cython.
 

@@ -1,6 +1,6 @@
 # `pylgen.visual` Module (Visualizing Grammars, Automata, and ASTs)
 
-The `visual` submodule provides a set of functions to generate interactive HTML visualizations of the core PyLGEN components. Using `networkx` and `pyvis`, you can explore **automata**, **lexers**, **abstract syntax trees**, **parse trees**, and even inspect **LALR parser tables** and **propagation edges** directly in your browser. This module is invaluable for debugging grammars, understanding parser behavior, and teaching language concepts.
+The `visual` submodule provides a set of functions to generate interactive HTML visualizations of the core PyLGEN components. Using [`networkx`](https://networkx.org/) and [`pyvis`](https://pyvis.readthedocs.io/), you can explore **automata**, **lexers**, **abstract syntax trees**, **parse trees**, and even inspect **LALR parser tables** and **propagation edges** directly in your browser. This module is invaluable for debugging grammars, understanding parser behavior, and teaching language concepts.
 
 All visualizations produce self‑contained HTML files that can be opened in any modern browser. They support optional caching of external resources (like CSS/JS from CDN) to enable offline viewing and faster loading.
 

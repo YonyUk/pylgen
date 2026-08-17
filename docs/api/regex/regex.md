@@ -1,6 +1,6 @@
 # `pylgen.regex` Module (The Regular Expression Engine)
 
-Regular expressions are the *lingua franca* of pattern matching. They provide a concise, declarative way to describe sets of strings, and they are the foundation upon which lexical analyzers are built. The `regex` module in PyLGEN is a complete, standalone regular expression engine that bridges the gap between regex patterns, finite automata, and context‑free grammars.
+[Regular expressions](https://en.wikipedia.org/wiki/Regular_expression) are the *lingua franca* of pattern matching. They provide a concise, declarative way to describe sets of strings, and they are the foundation upon which lexical analyzers are built. The `regex` module in PyLGEN is a complete, standalone regular expression engine that bridges the gap between regex patterns, finite automata, and context‑free grammars.
 
 This module is unique in the PyLGEN ecosystem: it is the only one that ingests a string (the regex pattern) and produces an executable artifact (a DFA) without requiring manual grammar definition. It does this by embedding a full parser for regular expressions, complete with its own lexer, grammar, AST, and semantic evaluator. The result is a powerful, self‑contained engine that can:
 
@@ -24,11 +24,11 @@ The `regex` module serves three primary roles:
 
  - **`3` Grammar $\leftrightarrow$ Automaton Bridge**: The module provides methods to convert a regular grammar into an equivalent automaton and vice versa, completing the circle of equivalence established by Kleene's theorem.
 
-This modularity means you can use the regex engine even if you don't need a full lexer or parser, it's a self‑contained tool for any application that requires pattern matching or automata manipulation.
+This modularity means you can use the regex engine even if you don't need a full [lexer](../lexer/lexer.md) or [parser](../parser/parser.md), it's a self‑contained tool for any application that requires pattern matching or automata manipulation.
 
 ## Formal Foundations: Regular Expressions and Automata
 
-At its core, the regex module implements the **Kleene algebra** of regular expressions. A regular expression over an alphabet $\Sigma$ is defined inductively:
+At its core, the regex module implements the [**Kleene algebra**](https://en.wikipedia.org/wiki/Kleene_algebra) of regular expressions. A regular expression over an alphabet $\Sigma$ is defined inductively:
 
  - **Empty Language**: $\varnothing$ (matches nothing).
  - **Empty String**: $\epsilon$ (matches the empty string).
@@ -41,7 +41,7 @@ By **Kleene's theorem**, every regular expression has an equivalent finite autom
 
  - **Regex → Automaton**: builds an NFA using a construction method equivalent to the **standard Thompson construction** (with $\epsilon$‑transitions), then determinizes and minimizes it.
 
- - **Automaton → Regex**: The module implements the **state elimination algorithm** (also known as the **Brzozowski‑McCluskey method** or **Arden's lemma**) to derive a regular expression from a DFA.
+ - **Automaton → Regex**: The module implements the **state elimination algorithm** (also known as the [**Brzozowski‑McCluskey method** or **Arden's lemma**](https://en.wikipedia.org/wiki/Arden%27s_rule)) to derive a regular expression from a DFA.
 
 The module also supports **regular grammars**: a grammar is regular if all productions have the form $A \rightarrow a$ or $A \rightarrow aB$ (right-linear), or $A \rightarrow a$ or $A \rightarrow Ba$ (left-linear). By converting such grammars to automata and vice versa, the module provides a complete translation between the three formalisms: regex, automata, and regular grammars.
 

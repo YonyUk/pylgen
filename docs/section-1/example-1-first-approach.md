@@ -1,6 +1,6 @@
 # First approach
 
-For our first example, let's create a simple **REPL** for arithmetic expressions that supports variable declarations and a few built-in functions. By the end, you'll have a working interpreter and a clear understanding of how PyLGEN's components fit together.
+For our first example, let's create a simple [**REPL**](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop) for arithmetic expressions that supports variable declarations and a few built-in functions. By the end, you'll have a working interpreter and a clear understanding of how PyLGEN's components fit together.
 
 > ## What we're building
 A **REPL** that evaluates expressions like:

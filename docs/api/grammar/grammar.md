@@ -283,7 +283,7 @@ Exception raised when a method (e.g., `first()`, `follow()`) is called with a sy
 
 ## Complete Example: Defining an Arithmetic Expression Grammar
 
-Here is a minimal complete example that defines a simple arithmetic grammar with attributed productions (similar to the tutorial).
+Here is a minimal complete example that defines a simple arithmetic grammar with attributed productions (similar to the [tutorial](../../section-1/example-1-step-2.md#designing-our-language)).
 
 === "Python"
     ```python
@@ -374,4 +374,4 @@ The `grammar` module is the linchpin that connects the lexical and syntactic pha
 
 With this module, you can specify any context‑free language and automatically generate an efficient parser, complete with semantic actions. The rest of the pipeline, lexical analysis, parsing, and semantic processing, then integrates seamlessly to produce a full language implementation.
 
-In the next module, we will explore the `regex` engine, which underpins the lexer's pattern matching. But first, take a moment to experiment with the grammar API, it is the heart of your language definition.
+In the next module, we will explore the [`regex`](../regex/regex.md) engine, which underpins the lexer's pattern matching. But first, take a moment to experiment with the grammar API, it is the heart of your language definition.

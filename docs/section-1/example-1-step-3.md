@@ -165,7 +165,7 @@ class AssignmentASTSemanticErrorCollectorVisitor(ASTVisitor):
 ```
 
 !!! important
-    If you're using a static type checker (like `mypy` or Pyright), the linter might complain about incompatible types or missing attributes, especially when we access `ast.right` or `ast.left` without explict type narrowing. **Don't worry, this doesn't affect the correctness of the interpreter**. The type checker cannot always infer the exact subtype at compile time, but at runtime, the actual objects are what we expect them to be.
+    If you're using a static type checker (like [`mypy`](https://mypy.readthedocs.io/) or [Pyright](https://microsoft.github.io/pyright/)), the linter might complain about incompatible types or missing attributes, especially when we access `ast.right` or `ast.left` without explict type narrowing. **Don't worry, this doesn't affect the correctness of the interpreter**. The type checker cannot always infer the exact subtype at compile time, but at runtime, the actual objects are what we expect them to be.
 
     We could spend a lot of effort adding intricate type annotations and casts to satisfy the linter, but that would obscure the logic. Instead, we use `# type: ignore` to silence these false positives, keeping the code clean and readable.
 
@@ -616,6 +616,7 @@ class PostOrderStrategy(TraversalStrategy):
 `semantic.py` is the orchestrator. It instantiates a single context and a single traversal strategy, then builds two `ASTWalker` instances:
 
 `1` - `error_collector_ast_walker`: uses the error collector visitors to perform static checks.
+
 `2` - `evaluator_ast_walker`: uses the evaluation visitors to compute results.
 
 File: `semantic.py`

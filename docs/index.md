@@ -1,6 +1,6 @@
 # PyLGEN: The Python-Native Compiler Framework for Building Interpreters and DSLs
 
-*From prototype to production: A **Python-native compiler framework** that brings the "**Dragon Book**" to life in Python with clarity throughout. A high-performance tool to build interpreters and Domain-Specific Languages (DSLs). Master every step of the compilation pipeline, from lexing to semantic analysis, with full control and clarity.*
+*From prototype to production: A **Python-native [compiler](https://en.wikipedia.org/wiki/Compiler-compiler) framework** that brings the ["**Dragon Book**"](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools) to life in Python with clarity throughout. A high-performance tool to build interpreters and [Domain-Specific Languages (DSLs)](https://en.wikipedia.org/wiki/Domain-specific_language). Master every step of the compilation pipeline, from lexing to semantic analysis, with full control and clarity.*
 
  - Build **interpreters** and **compilers** from scratch, without leaving the **Python's ecosystem**
  - Keep total control of what's going on at every step
@@ -9,7 +9,7 @@
 
 > ## What is PyLGEN?
 
-PyLGEN is a toolbox for building **interpreters and compilers** from scratch, without leaving the Python ecosystem. It's not a magical code generator, it's a cohesive set of modules that guide you through every stage: from lexical analysis to semantic evaluation, including **LALR(1)** parsing and **Abstract Syntax Tree (AST)** construction.
+PyLGEN is a toolbox for building **interpreters and compilers** from scratch, without leaving the [Python](https://www.python.org/) ecosystem. It's not a magical code generator, it's a cohesive set of modules that guide you through every stage: from lexical analysis to semantic evaluation, including [**LALR(1)**](https://en.wikipedia.org/wiki/LALR_parser) parsing and **Abstract Syntax Tree (AST)** construction.
 
 > **TL;DR:** PyLGEN is a powerful Python-native toolkit for creating fast interpreters, compilers, and DSLs. It gives you complete control over the compilation process, from lexical analysis to AST evaluation, and is optimized with Cython for near-C performance. Ideal for students, software engineers, and anyone exploring compiler theory.
 
@@ -19,7 +19,7 @@ PyLGEN is a toolbox for building **interpreters and compilers** from scratch, wi
 
 *What makes PyLGEN different from other parser generators or compiler frameworks?*
 
- - **Prototype fast, optimize smart**: Write your entire language logic in pure python first. Only when performance becomes critical, compile your critical path with Cython.
+ - **Prototype fast, optimize smart**: Write your entire language logic in pure python first. Only when performance becomes critical, compile your critical path with [Cython](https://cython.org/#:~:text=Cython%20is%20an%20optimising%20static,and%20C%20to%20let%20you).
  - **Full visibility, zero magic**: See exactly what happens at each stage. You build your own **ASTs**, define your own visitors, and control traversal order. There are no hidden transformations, you own the pipeline.
  - **Enterprise-ready parsing**: A robust LALR(1) engine with built-in conflict detection and ***panic-mode error recovery*** means  your **DSL** handles real-world, messy input without falling over.
  - **Instant visual feedback**: Turn your **automata, ASTs** and **parse trees** into interactive HTML graphs with a single command. Debug visually, not just via logs, a game changer for understanding and teaching.

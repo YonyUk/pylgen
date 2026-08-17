@@ -2,7 +2,7 @@
 
 ## Definition
 
-Formally, a **deterministic finite automata (DFA)** is a **5-tuple $(Q,\Sigma,\delta,q_0,F)$** where:
+Formally, a [**deterministic finite automata (DFA)**](https://en.wikipedia.org/wiki/Deterministic_finite_automaton) is a **5-tuple $(Q,\Sigma,\delta,q_0,F)$** where:
 
  - **$Q$** is a **finite set of states**.
  - **$\Sigma$** is a **finite set of symbols** called **alphabet**.
@@ -256,7 +256,7 @@ The tracing of an input string involves:
 
 ## Regular Languages
 
-A language $L \subseteq \Sigma^*$ is called a **regular language** if and only if there exists a finite automaton (DFA, standard NFA, $\epsilon$‑NFA, or our hybrid $\epsilon$‑DFA) that recognises it. **By Kleene's Theorem**, regular languages are exactly those expressible by regular expressions (built from $\varnothing$, $\lbrace \epsilon \rbrace$, $\lbrace a \rbrace$ for $a \in \Sigma$, and closed under union, concatenation, and Kleene star). This theorem establishes the foundational equivalence between automata, expressions, and regular grammars.
+A language $L \subseteq \Sigma^*$ is called a [**regular language**](https://en.wikipedia.org/wiki/Regular_language) if and only if there exists a finite automaton (DFA, standard NFA, $\epsilon$‑NFA, or our hybrid $\epsilon$‑DFA) that recognises it. By **Kleene's Theorem**, regular languages are exactly those expressible by regular expressions (built from $\varnothing$, $\lbrace \epsilon \rbrace$, $\lbrace a \rbrace$ for $a \in \Sigma$, and closed under union, concatenation, and Kleene star). This theorem establishes the foundational equivalence between automata, expressions, and regular grammars.
 
 > ### Formal Relationship Between DFA and the Hybrid $\epsilon$‑DFA
 

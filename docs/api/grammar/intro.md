@@ -1,6 +1,6 @@
 # pylgen.grammar Module (The Syntactic Blueprint)
 
-Having covered the foundational data types and the automata theory, we now reach the heart of syntactic analysis: the `grammar` module. This module provides the tools to define **context‑free grammars** and **attributed grammars**, the essential building blocks for constructing parsers. It handles everything from production rules and symbol management to the computation of `FIRST` and `FOLLOW` sets, which are crucial for parser generation and error recovery.
+Having covered the foundational data types and the automata theory, we now reach the heart of syntactic analysis: the `grammar` module. This module provides the tools to define [**context‑free grammars**](https://en.wikipedia.org/wiki/Context-free_grammar) and [**attributed grammars**](https://en.wikipedia.org/wiki/Attribute_grammar), the essential building blocks for constructing parsers. It handles everything from production rules and symbol management to the computation of `FIRST` and `FOLLOW` sets, which are crucial for parser generation and error recovery.
 
 In this section, we will dissect the `grammar` module's API, explore its core classes, and illustrate how it integrates with the parser generator to turn a language specification into a working parser. We'll also show how attributed grammars allow you to attach semantic actions (reductors) directly to productions, bridging syntax and semantics seamlessly.
 

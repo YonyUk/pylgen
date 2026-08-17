@@ -36,11 +36,11 @@ The formal model is as follows:
 
  - If no $L_t$ matches, a lexical error is reported.
 
-This is exactly the behavior of a **maximal munch** lexer. To implement this efficiently, we combine all patterns into a single DFA where each accepting state is annotated with the token type(s) it matches. The DFA is then run over the input, and we keep track of the last accepting state encountered; when the DFA gets stuck, we backtrack to that last accepting state to emit the token.
+This is exactly the behavior of a [**maximal munch**](https://en.wikipedia.org/wiki/Maximal_munch) lexer. To implement this efficiently, we combine all patterns into a single DFA where each accepting state is annotated with the token type(s) it matches. The DFA is then run over the input, and we keep track of the last accepting state encountered; when the DFA gets stuck, we backtrack to that last accepting state to emit the token.
 
 ## The Role of `BaseLexer`
 
-The `BaseLexer` class is the pure scanning engine. It expects to receive a set of **pre‑built automata** (DFAs or NFAs) for each token type, along with a priority order. It then:
+The `BaseLexer` class is the pure scanning engine. It expects to receive a set of **pre‑built automata** ([DFAs or NFAs](../automaton/automaton.md#the-base-class-automaton)) for each token type, along with a priority order. It then:
 
  - Combines all automata into a single NFA using union, then determinizes and minimizes the result.
 
@@ -254,4 +254,4 @@ for token in lexer.tokens:
 
 ## Summary
 
-The `lexer` module is the workhorse of tokenization in PyLGEN. It combines the power of the `regex` engine and the `automaton` module to provide a robust, flexible, and efficient scanner. The separation between `BaseLexer` (scanning engine) and `Lexer` (user interface) allows for both low‑level control and high‑level convenience. With this module, you can define the lexical structure of any language in just a few lines of code, and the generated scanner will be both correct and fast. The next step is to combine it with the parser to build a complete language processor.
+The `lexer` module is the workhorse of tokenization in PyLGEN. It combines the power of the [`regex`](../regex/regex.md) engine and the [`automaton`](../automaton/intro.md) module to provide a robust, flexible, and efficient scanner. The separation between `BaseLexer` (scanning engine) and `Lexer` (user interface) allows for both low‑level control and high‑level convenience. With this module, you can define the lexical structure of any language in just a few lines of code, and the generated scanner will be both correct and fast. The next step is to combine it with the parser to build a complete language processor.

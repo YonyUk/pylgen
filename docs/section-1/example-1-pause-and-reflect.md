@@ -50,7 +50,7 @@ One of PyLGEN's most convenient built-in utilities is its **visualization submod
 The best part? These HTML files are self-contained, You can save them, share them, or embed them directly into documentation, just like we've done, below. No external servers, no complicated setup. Just clean, visual representation of your language's internal structure.
 
 !!! important
-    The generated HTML files are **single, portable documents** that you can **save, share, or embed**. However, by default, `draw_ast` and `draw_parse_tree_from_parser` reference external resources, the **vis.js library** and its associated CSS styles, loaded from online CDNs via `<script>` and `<link>` tags.
+    The generated HTML files are **single, portable documents** that you can **save, share, or embed**. However, by default, `draw_ast` and `draw_parse_tree_from_parser` reference external resources, the [**vis.js library**](https://visjs.org/) and its associated CSS styles, loaded from online CDNs via `<script>` and `<link>` tags.
 
     This means that unless you use the embedding option, an internet connection is required when opening the generated HTML to download these resources. The visualization will not render properly in offline environments without that initial fetch (or an existing browser cache).
 

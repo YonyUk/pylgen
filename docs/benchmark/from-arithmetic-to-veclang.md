@@ -27,11 +27,11 @@ Not quite. If a new feature requires changes to the traversal strategy (e.g., a 
 
 ## Leveraging the Python Ecosystem
 
-One of the strongest arguments for building a language on top of Python (and Cython) is the access to the vast Python ecosystem. VecLang uses **NumPy** extensively for vector operations. Without NumPy, we would have to implement array operations in pure Python loops, which would be painfully slow. With NumPy, operations like element-wise addition, dot product, and slicing are delegated to highly optimised C/Fortran libraries.
+One of the strongest arguments for building a language on top of Python (and Cython) is the access to the vast Python ecosystem. VecLang uses [**NumPy**](https://numpy.org/) extensively for vector operations. Without NumPy, we would have to implement array operations in pure Python loops, which would be painfully slow. With NumPy, operations like element-wise addition, dot product, and slicing are delegated to highly optimised C/Fortran libraries.
 
 This is not just a convenience; it's a strategic advantage. It allows VecLang to be a high-performance DSL for numerical computing, similar to what NumPy does for Python itself, but with a custom syntax tailored to the problem domain. The ability to call any Python library from within VecLang (if we exposed it) would be trivial, thanks to the seamless integration.
 
-The pure-Python arithmetic interpreter didn't need NumPy because it only handled scalars. But as soon as we introduced vectors, NumPy became essential. This illustrates how the ecosystem can be leveraged incrementally as the language grows. Moreover, we could easily add support for `matplotlib` to plot vectors, or `scipy` for advanced statistics, simply by calling those libraries from within our evaluator visitors.
+The pure-Python arithmetic interpreter didn't need NumPy because it only handled scalars. But as soon as we introduced vectors, NumPy became essential. This illustrates how the ecosystem can be leveraged incrementally as the language grows. Moreover, we could easily add support for [`matplotlib`](https://matplotlib.org/) to plot vectors, or [`scipy`](https://scipy.org/) for advanced statistics, simply by calling those libraries from within our evaluator visitors.
 
 > ### Trade-offs:
 

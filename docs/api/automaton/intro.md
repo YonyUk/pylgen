@@ -1,8 +1,8 @@
 # `pylgen.automaton` Module (The Engine Pattern Matching)
 
-Welcome to the `automaton` module, the mathematical powerhouse of PyLGEN. If the `common` module provides the ***vocabulary*** of language processing, the `automaton` module provides the ***grammar***: it implements the finite automata theory that underpins lexical analysis, regular expression matching, and pattern recognition.
+Welcome to the `automaton` module, the mathematical powerhouse of PyLGEN. If the [`common`](../common/common.md) module provides the ***vocabulary*** of language processing, the `automaton` module provides the ***grammar***: it implements the finite automata theory that underpins lexical analysis, regular expression matching, and pattern recognition.
 
-This module is where theory meets practice. Here, we implement **deterministic finite automata (DFAs) and nondeterministic finite automata (NFAs)**, complete with subset construction, Hopcroft's minimization algorithm, and a rich set of set-theoretic operations: union, intersection, complement, concatenation, and Kleene star. These are the building blocks that allow the `lexer` module to turn regex patterns into efficient tokenization engines.
+This module is where theory meets practice. Here, we implement **deterministic finite automata (DFAs) and nondeterministic finite automata (NFAs)**, complete with subset construction, [Hopcroft's minimization algorithm](https://en.wikipedia.org/wiki/DFA_minimization), and a rich set of set-theoretic operations: union, intersection, complement, concatenation, and Kleene star. These are the building blocks that allow the `lexer` module to turn regex patterns into efficient tokenization engines.
 
 ## Purpose in the Framework
 

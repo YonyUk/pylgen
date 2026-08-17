@@ -4,9 +4,9 @@ Welcome to the `analysis` module, the gateway between syntax and meaning. If the
 
 The analysis module is designed around two powerful design patterns that together enable flexible, extensible AST processing:
 
- - **The Visitor Pattern**: Separates algorithms from the data structures they operate on. Adding a new operation (e.g., type checking, code generation, evaluation) does not require modifying existing AST node classes.
+ - [**The Visitor Pattern**](https://en.wikipedia.org/wiki/Visitor_pattern): Separates algorithms from the data structures they operate on. Adding a new operation (e.g., type checking, code generation, evaluation) does not require modifying existing AST node classes.
 
- - **The Strategy Pattern**: Encapsulates different traversal algorithms (pre‑order, post‑order, in‑order, or custom walks) that can be swapped at runtime without changing the visitors.
+ - [**The Strategy Pattern**](https://en.wikipedia.org/wiki/Strategy_pattern): Encapsulates different traversal algorithms (pre‑order, post‑order, in‑order, or custom walks) that can be swapped at runtime without changing the visitors.
 
 Together, these patterns provide a clean, maintainable foundation for all semantic analysis tasks. In the [REPL tutorial](../../section-1/example-1-step-3.md#the-traversal-strategy-controlling-the-walk), you saw them in action: the same `PostOrderStrategy` was used first for semantic error collection (a static analysis pass) and then for evaluation (a dynamic computation pass), simply by swapping the set of visitors.
 
