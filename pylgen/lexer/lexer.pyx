@@ -34,8 +34,6 @@ cdef class Lexer(BaseLexer):
 
     @property
     def tokens(self) -> Iterable[Token]:
-        cdef LexicalError error
-        cdef LexicalRule rule
         cdef int line,column
         self.initialize()
         while self._move_next():
@@ -99,3 +97,65 @@ cdef class Lexer(BaseLexer):
     
     cpdef void add_rule(self,object type_,LexicalRule rule):
         self._rules[type_].add(rule)
+
+cdef class IdentedLexer(Lexer):
+
+    def __init__(self, get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: str, check_annotation: bool = True) -> None:
+        super().__init__(get_symbol_function, ignore_pattern, check_annotation)
+        self._ident_counter = 0
+        self._last_ident_value = 0
+    
+    cpdef void set_ident(self,object ident_type):
+        if not isinstance(ident_type,self._enum_type): # type:ignore
+            raise ValueError(f'type_ must be a member of {self._enum_type}')
+        self._ident_type = ident_type
+    
+    cpdef void set_indent_symbol(self,Symbol symbol):
+        self._indent_symbol = symbol
+
+    cpdef void set_dedent_symbol(self,Symbol symbol):
+        self._dedent_symbol = symbol
+
+    @property
+    def tokens(self) -> Iterable[Token]:
+        cdef int line,column
+        cdef Token current_token,last_token
+        last_token = None # type:ignore
+        self.initialize()
+        while self._move_next():
+            self._ident_counter = 0
+            current_token = self._current()
+            line = self._current_token._line
+            column = self._current_token._column
+            
+            if current_token._type == self._ident_type:
+                
+                while current_token._type == self._ident_type and self._move_next():
+                    self._ident_counter += 1
+                    last_token = current_token
+                    current_token = self._current()
+                    line = self._current_token._line
+                    column = self._current_token._column
+
+                while self._last_ident_value < self._ident_counter:
+                    yield Token('IDENT',self._ident_type,self._indent_symbol,last_token._line,last_token._column) # type:ignore
+                    self._last_ident_value += 1
+                
+                while self._last_ident_value > self._ident_counter:
+                    yield Token('DEDENT',self._ident_type,self._dedent_symbol,last_token._line,last_token._column) # type:ignore
+                    self._last_ident_value -= 1
+                
+                yield current_token
+            else:
+                if last_token and line > last_token._line:
+                    while self._ident_counter < self._last_ident_value:
+                        yield Token('DEDENT',self._ident_type,self._dedent_symbol,current_token._line,current_token._column) # type:ignore
+                        self._last_ident_value -= 1
+
+                yield current_token
+                last_token = current_token         
+
+        if self._eof:
+            self._eof._line = line
+            self._eof._column = column + 1
+            yield self._eof

@@ -198,6 +198,10 @@ cdef class BaseLexer:
             if len(self._text_readed) == 0:
                 self._text_readed = self._text[self._text_position_pointer]
                 self._ignore.walk(self._text[self._text_position_pointer])
+                if self._text_readed == '\n':
+                    self._line += 1
+                    self._column = 0
+                self._text_position_pointer += 1
             self._dfa._current_state = last_state
             self._current_token = self._get_token(self._text_readed,self._line,self._column)
             if not self._current_token or self._current_token._type == 'INVALID_TOKEN':
@@ -206,7 +210,6 @@ cdef class BaseLexer:
                     self._column = 1
                 else:
                     self._column += 1
-                self._text_position_pointer += 1
                 # reset the text readed
                 self._text_readed = ''
                 # restart the dfa
