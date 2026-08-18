@@ -1,5 +1,12 @@
 # PyLGEN: The Python-Native Compiler Framework for Building Interpreters and DSLs
 
+
+[![GitHub Repo](https://img.shields.io/badge/View%20on-GitHub-black?logo=github)](https://github.com/yonyuk/pylgen)
+[![PyPI 0.5.8](https://img.shields.io/pypi/v/pylgen-core.svg)](https://pypi.org/project/pylgen-core/)
+![PyPI - 3.12](https://img.shields.io/pypi/pyversions/pylgen-core?cache=1)
+![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen-core?cache=1)
+[![CI](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml/badge.svg)](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml?cache=1)
+
 *From prototype to production: A **Python-native [compiler](https://en.wikipedia.org/wiki/Compiler-compiler) framework** that brings the ["**Dragon Book**"](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools) to life in Python with clarity throughout. A high-performance tool to build interpreters and [Domain-Specific Languages (DSLs)](https://en.wikipedia.org/wiki/Domain-specific_language). Master every step of the compilation pipeline, from lexing to semantic analysis, with full control and clarity.*
 
  - Build **interpreters** and **compilers** from scratch, without leaving the **Python's ecosystem**
@@ -11,7 +18,7 @@
 
 [PyLGEN](https://pypi.org/project/pylgen-core/#description) is a toolbox for building **interpreters and compilers** from scratch, without leaving the [Python](https://www.python.org/) ecosystem. It's not a magical code generator, it's a cohesive set of modules that guide you through every stage: from lexical analysis to semantic evaluation, including [**LALR(1)**](https://en.wikipedia.org/wiki/LALR_parser) parsing and **Abstract Syntax Tree (AST)** construction.
 
-> **TL;DR:** PyLGEN is a powerful Python-native toolkit for creating fast interpreters, compilers, and DSLs. It gives you complete control over the compilation process, from lexical analysis to AST evaluation, and is optimized with Cython for near-C performance. Ideal for students, software engineers, and anyone exploring compiler theory.
+> **TL;DR:** PyLGEN is a powerful Python-native toolkit for creating fast interpreters, compilers, and DSLs. It gives you complete control over the compilation process, from lexical analysis to AST evaluation, and is optimized with Cython for near-C performance. Ideal for students, software engineers, and anyone exploring compiler theory. Explore the complete source code, open issues, and contribute on [GitHub](https://github.com/yonyuk/pylgen).
 
 <hr>
 
@@ -51,6 +58,8 @@ Building a language should be **fun, educational and productive**. That's why Py
 PyLGEN has the intention to be the **meeting point** between classic compiler theory and modern software engineering practice. It's not trying to be the only framework or the fastest in every case, but to be the one that lets you **understand, modify, and optimize** every piece with confidence.
 
 > ## Where to Go Next?
+
+* **[GitHub Repository](https://github.com/yonyuk/pylgen):** Star the project, report issues, and explore the source code.
 
 *   **[Quick Start Guide](section-1/quick_start.md):** Get started building your first interpreter in minutes.
 *   **[Benchmark: PyLGEN vs Lark](benchmark/benchmark-conclusion.md):** See how PyLGEN outperforms other tools in real-world tests.
