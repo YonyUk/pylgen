@@ -165,6 +165,10 @@ cdef class IdentedLexer(Lexer):
                 yield current_token
                 last_token = current_token         
 
+        while self._last_ident_value > 0:
+            yield Token('DEDENT',self._ident_type,self._dedent_symbol,line,column) # type:ignore
+            self._last_ident_value -= 1
+
         if self._eof:
             self._eof._line = line
             self._eof._column = column + 1
