@@ -822,9 +822,11 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             (9,2,TokenTypeTestEnum.VARIABLE),
             (15,2,TokenTypeTestEnum.VARIABLE),
             (22,2,TokenTypeTestEnum.VARIABLE),
-            (29,2,TokenTypeTestEnum.VARIABLE)
+            (29,2,TokenTypeTestEnum.VARIABLE),
+            (29,2,TokenTypeTestEnum.IDENTATION),
+            (29,2,TokenTypeTestEnum.IDENTATION)
         ]
-        assert len(tokens) == 9
+        assert len(tokens) == 11
         for i in range(len(tokens)):
             assert tokens[i].column == pos[i][0]
             assert tokens[i].line == pos[i][1]
@@ -888,11 +890,13 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             TokenTypeTestEnum.NUMBER,
             TokenTypeTestEnum.VARIABLE,
             TokenTypeTestEnum.KEYWORD,
-            TokenTypeTestEnum.VARIABLE
+            TokenTypeTestEnum.VARIABLE,
+            TokenTypeTestEnum.IDENTATION
         ]
-        assert len(tokens) == 8
+        assert len(tokens) == 9
         for index,token in enumerate(tokens):
             assert token.type == types[index]
+            if token.text == 'DEDENT': continue
             match_:re.Match = re.search(token.text.replace('IDENT','    '),text) # type: ignore
             pos = match_.start()
             column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
@@ -1029,6 +1033,6 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         text = '        0.1     199.289'
         lexer.load_text(text)
         tokens = list(lexer.tokens)
-        assert len(tokens) == 4
+        assert len(tokens) == 6
         assert tokens[0].type == TokenTypeTestEnum.IDENTATION
         assert tokens[1].type == TokenTypeTestEnum.IDENTATION
