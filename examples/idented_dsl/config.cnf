@@ -1,0 +1,20 @@
+[database]
+    name: "mydatabase"
+    host: "localhost"
+    port: 5432
+
+    -options:
+        security_level:1
+        onfail:"report"
+        
+    -extra:
+        important: true
+
+[users]
+
+    max: 10
+    min: 5
+
+    - options:
+        onfull:"denegate"
+        overflow:"expulse"

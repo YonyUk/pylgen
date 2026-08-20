@@ -1,0 +1,20 @@
+from pylgen.common.types import Symbol
+
+Config = Symbol('Config')
+ConfigSequence = Symbol('ConfigSequence')
+Section = Symbol('Section')
+SubSection = Symbol('SubSection')
+SectionConfigSequence = Symbol('SectionConfigSequence')
+ConfigAtom = Symbol('ConfigAtom')
+
+lbracket = Symbol('[',True)
+rbracket = Symbol(']',True)
+variable = Symbol('variable',True)
+indent = Symbol('INDENT',True)
+dedent = Symbol('DEDENT',True)
+minus = Symbol('-',True)
+colon = Symbol(':',True)
+string = Symbol('string',True)
+boolean = Symbol('boolean',True)
+number = Symbol('number',True)
+newline = Symbol('newline',True)

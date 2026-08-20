@@ -1,0 +1,22 @@
+{
+    "database": {
+        "name": "mydatabase",
+        "host": "localhost",
+        "port": 5432.0,
+        "options": {
+            "security_level": 1.0,
+            "onfail": "report"
+        },
+        "extra": {
+            "important": true
+        }
+    },
+    "users": {
+        "max": 10.0,
+        "min": 5.0,
+        "options": {
+            "onfull": "denegate",
+            "overflow": "expulse"
+        }
+    }
+}
