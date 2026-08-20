@@ -231,7 +231,33 @@ class TestIntegrationIdentedLexerParser:
 '''
         lexer.load_text(text)
         tokens = list(lexer.tokens)
+        tokens_positions = [
+            (2, 1),
+            (2, 2),
+            (2, 8),
+            (2, 9),
+            (3, 1),
+            (3, 5),
+            (3, 9),
+            (3, 11),
+            (3, 22),
+            (4, 5),
+            (4, 9),
+            (4, 11),
+            (4, 15),
+            (5, 5),
+            (5, 10),
+            (5, 12),
+            (5, 16),
+            (5, 16),
+            (5, 17)
+        ]
         ast = parser.parse(tokens)
+        assert len(tokens) == 19
+        for idx,token in enumerate(tokens):
+            pos = token.line,token.column
+            assert tokens_positions[idx] == pos
+            
         assert len(lexer.errors) == 0
         assert len(parser.errors) == 0
         assert ast is not None
@@ -250,7 +276,52 @@ class TestIntegrationIdentedLexerParser:
 '''
         lexer.load_text(text)
         tokens = list(lexer.tokens)
+        tokens_positions = [
+            (2, 1),
+            (2, 2),
+            (2, 10),
+            (2, 11),
+            (3, 1),
+            (3, 5),
+            (3, 9),
+            (3, 11),
+            (3, 17),
+            (4, 5),
+            (4, 7),
+            (4, 13),
+            (4, 14),
+            (5, 5),
+            (5, 9),
+            (5, 13),
+            (5, 15),
+            (5, 25),
+            (6, 9),
+            (6, 13),
+            (6, 15),
+            (6, 22),
+            (7, 5),
+            (7, 5),
+            (7, 7),
+            (7, 14),
+            (7, 15),
+            (8, 5),
+            (8, 9),
+            (8, 13),
+            (8, 15),
+            (8, 25),
+            (9, 9),
+            (9, 13),
+            (9, 15),
+            (9, 23),
+            (9, 23),
+            (9, 23),
+            (9, 24)
+        ]
         ast = parser.parse(tokens)
+        assert len(tokens) == 39
+        for idx,token in enumerate(tokens):
+            pos = token.line,token.column
+            assert tokens_positions[idx] == pos
         assert len(lexer.errors) == 0
         assert len(parser.errors) == 0
         assert ast is not None
@@ -265,6 +336,30 @@ class TestIntegrationIdentedLexerParser:
         lexer.load_text(text)
         tokens = list(lexer.tokens)
         ast = parser.parse(tokens)
+        tokens_positions = [
+            (2, 1),
+            (2, 2),
+            (2, 10),
+            (2, 11),
+            (3, 1),
+            (3, 5),
+            (3, 17),
+            (3, 19),
+            (3, 23),
+            (4, 5),
+            (4, 16),
+            (4, 18),
+            (4, 19),
+            (5, 5),
+            (5, 12),
+            (5, 14),
+            (5, 14),
+            (5, 15)
+        ]
+        assert len(tokens) == 18
+        for idx,token in enumerate(tokens):
+            pos = token.line,token.column
+            assert tokens_positions[idx] == pos
         assert len(lexer.errors) == 0
         assert len(parser.errors) == 0
         assert ast is not None
@@ -290,6 +385,79 @@ class TestIntegrationIdentedLexerParser:
         lexer.load_text(text)
         tokens = list(lexer.tokens)
         ast = parser.parse(tokens)
+        tokens_positions = [
+            (2, 1),
+            (2, 2),
+            (2, 10),
+            (2, 11),
+            (3, 1),
+            (3, 5),
+            (3, 9),
+            (3, 11),
+            (3, 17),
+            (4, 5),
+            (4, 7),
+            (4, 13),
+            (4, 14),
+            (5, 5),
+            (5, 9),
+            (5, 13),
+            (5, 15),
+            (5, 25),
+            (6, 9),
+            (6, 13),
+            (6, 15),
+            (6, 22),
+            (7, 9),
+            (7, 11),
+            (7, 18),
+            (7, 19),
+            (8, 9),
+            (8, 13),
+            (8, 26),
+            (8, 28),
+            (8, 32),
+            (9, 13),
+            (9, 24),
+            (9, 26),
+            (9, 31),
+            (10, 5),
+            (10, 5),
+            (10, 5),
+            (10, 7),
+            (10, 14),
+            (10, 15),
+            (11, 5),
+            (11, 9),
+            (11, 13),
+            (11, 15),
+            (11, 25),
+            (12, 9),
+            (12, 13),
+            (12, 15),
+            (12, 23),
+            (13, 9),
+            (13, 11),
+            (13, 18),
+            (13, 19),
+            (14, 9),
+            (14, 13),
+            (14, 26),
+            (14, 28),
+            (14, 32),
+            (15, 13),
+            (15, 24),
+            (15, 26),
+            (15, 30),
+            (15, 30),
+            (15, 30),
+            (15, 30),
+            (15, 31)
+        ]
+        assert len(tokens) == 67
+        for idx,token in enumerate(tokens):
+            pos = token.line,token.column
+            assert tokens_positions[idx] == pos
         assert len(lexer.errors) == 0
         assert len(parser.errors) == 0
         assert ast is not None
@@ -317,6 +485,89 @@ class TestIntegrationIdentedLexerParser:
         lexer.load_text(text)
         tokens = list(lexer.tokens)
         ast = parser.parse(tokens)
+        tokens_positions = [
+            (2, 1),
+            (2, 2),
+            (2, 10),
+            (2, 11),
+            (3, 1),
+            (3, 5),
+            (3, 9),
+            (3, 11),
+            (3, 17),
+            (4, 5),
+            (4, 7),
+            (4, 13),
+            (4, 14),
+            (5, 5),
+            (5, 9),
+            (5, 13),
+            (5, 15),
+            (5, 25),
+            (6, 9),
+            (6, 13),
+            (6, 15),
+            (6, 22),
+            (7, 9),
+            (7, 11),
+            (7, 18),
+            (7, 19),
+            (8, 9),
+            (8, 13),
+            (8, 26),
+            (8, 28),
+            (8, 32),
+            (9, 13),
+            (9, 24),
+            (9, 26),
+            (9, 31),
+            (10, 9),
+            (10, 9),
+            (10, 11),
+            (10, 16),
+            (10, 17),
+            (11, 9),
+            (11, 13),
+            (11, 29),
+            (11, 31),
+            (11, 35),
+            (12, 5),
+            (12, 5),
+            (12, 5),
+            (12, 7),
+            (12, 14),
+            (12, 15),
+            (13, 5),
+            (13, 9),
+            (13, 13),
+            (13, 15),
+            (13, 25),
+            (14, 9),
+            (14, 13),
+            (14, 15),
+            (14, 23),
+            (15, 9),
+            (15, 11),
+            (15, 18),
+            (15, 19),
+            (16, 9),
+            (16, 13),
+            (16, 26),
+            (16, 28),
+            (16, 32),
+            (17, 13),
+            (17, 24),
+            (17, 26),
+            (17, 30),
+            (17, 30),
+            (17, 30),
+            (17, 30),
+            (17, 31)
+        ]
+        assert len(tokens) == 77
+        for idx,token in enumerate(tokens):
+            pos = token.line,token.column
+            assert tokens_positions[idx] == pos
         assert len(lexer.errors) == 0
         assert len(parser.errors) == 0
         assert ast is not None
@@ -329,8 +580,19 @@ class TestIntegrationIdentedLexerParser:
         lexer.load_text(text)
         tokens = list(lexer.tokens)
         ast = parser.parse(tokens)
-        assert len(lexer.errors) == 0
         errors = list(parser.errors)
+        tokens_positions = [
+            (2,1),
+            (2,2),
+            (2,7),
+            (2,8),
+            (2,9)      
+        ]
+        assert len(tokens) == 5
+        for idx,token in enumerate(tokens):
+            pos = token.line,token.column
+            assert tokens_positions[idx] == pos
+        assert len(lexer.errors) == 0
         assert len(errors) == 1
         assert errors[0].type == ErrorType.SYNTAX
         assert ast is None
@@ -345,8 +607,31 @@ class TestIntegrationIdentedLexerParser:
         lexer.load_text(text)
         tokens = list(lexer.tokens)
         ast = parser.parse(tokens)
+        tokens_positions = [
+            (2, 1),
+            (2, 2),
+            (2, 6),
+            (2, 7),
+            (3, 1),
+            (3, 5),
+            (3, 6),
+            (3, 8),
+            (3, 9),
+            (4, 5),
+            (4, 6),
+            (4, 7),
+            (4, 9),
+            (4, 10),
+            (4, 10),
+            (4, 11)
+        ]
+        assert len(tokens) == 16
+        for idx,token in enumerate(tokens):
+            pos = token.line,token.column
+            assert tokens_positions[idx] == pos
         assert len(lexer.errors) == 1
         assert len(parser.errors) == 1
+        assert ast is None
 
     def test_invalid_bad_ident_2(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
@@ -358,5 +643,28 @@ class TestIntegrationIdentedLexerParser:
         lexer.load_text(text)
         tokens = list(lexer.tokens)
         ast = parser.parse(tokens)
+        tokens_positions = [
+            (2, 1),
+            (2, 2),
+            (2, 6),
+            (2, 7),
+            (3, 1),
+            (3, 5),
+            (3, 6),
+            (3, 8),
+            (3, 9),
+            (4, 5),
+            (4, 6),
+            (4, 7),
+            (4, 9),
+            (4, 10),
+            (4, 10),
+            (4, 11)
+        ]
+        assert len(tokens) == 16
+        for idx,token in enumerate(tokens):
+            pos = token.line,token.column
+            assert tokens_positions[idx] == pos
         assert len(lexer.errors) == 1
         assert len(parser.errors) == 1
+        assert ast is None
