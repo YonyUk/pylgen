@@ -132,6 +132,9 @@ cdef class IdentedLexer(Lexer):
         cdef list[Token] idents = []
         cdef int idx
 
+        line = 1
+        column = 1
+
         self.initialize()
         last_token = None # type:ignore
         while self._move_next():
