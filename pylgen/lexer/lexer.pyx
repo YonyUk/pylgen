@@ -145,7 +145,7 @@ cdef class IdentedLexer(Lexer):
             current_token = self._current()
             line = self._current_token._line
             column = self._current_token._column
-            
+
             if current_token._type == self._ident_type:
                 
                 if current_token._column > 1:
@@ -154,7 +154,7 @@ cdef class IdentedLexer(Lexer):
                 while current_token._type == self._ident_type and self._move_next():
                     idents.append(current_token)
                     self._ident_counter += 1
-                    current_token = self._current()
+                    current_token = self._current()            
                     line = self._current_token._line
                     column = self._current_token._column
 
@@ -164,8 +164,7 @@ cdef class IdentedLexer(Lexer):
                     self._last_ident_value += 1
                 
                 while self._last_ident_value > self._ident_counter:
-                    idx = len(idents) + self._ident_counter - self._last_ident_value
-                    yield Token('DEDENT',self._ident_type,self._dedent_symbol,(<Token>idents[idx])._line,(<Token>idents[idx])._column) # type:ignore
+                    yield Token('DEDENT',self._ident_type,self._dedent_symbol,current_token._line,current_token._column) # type:ignore
                     self._last_ident_value -= 1
                 
                 yield current_token
