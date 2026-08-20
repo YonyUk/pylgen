@@ -104,6 +104,7 @@ cdef class IdentedLexer(Lexer):
         super().__init__(get_symbol_function, ignore_pattern, check_annotation)
         self._ident_counter = 0
         self._last_ident_value = 0
+        self._sanitaze_function = None
     
     cpdef void set_ident(self,object ident_type):
         if not isinstance(ident_type,self._enum_type): # type:ignore
@@ -115,6 +116,14 @@ cdef class IdentedLexer(Lexer):
 
     cpdef void set_dedent_symbol(self,Symbol symbol):
         self._dedent_symbol = symbol
+    
+    cpdef void set_text_sanitize_function(self,object sanitaze_function):
+        self._sanitaze_function = sanitaze_function
+    
+    cpdef void load_text(self,str text):
+        BaseLexer.load_text(self,text)
+        if self._sanitaze_function:
+            self._text = self._sanitaze_function(text) # type:ignore
 
     @property
     def tokens(self) -> Iterable[Token]:

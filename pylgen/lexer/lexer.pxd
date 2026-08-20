@@ -18,7 +18,9 @@ cdef class IdentedLexer(Lexer):
     cdef object _ident_type
     cdef Symbol _indent_symbol
     cdef Symbol _dedent_symbol
+    cdef object _sanitaze_function
 
     cpdef void set_ident(self,object ident_type)
     cpdef void set_indent_symbol(self,Symbol symbol)
     cpdef void set_dedent_symbol(self,Symbol symbol)
+    cpdef void set_text_sanitize_function(self,object sanitaze_function)
