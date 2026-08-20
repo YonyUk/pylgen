@@ -209,7 +209,10 @@ cdef class BaseLexer:
                     self._line += 1
                     self._column = 1
                 else:
-                    self._column += 1
+                    if self._current_token and self._current_token._type == 'INVALID_TOKEN':
+                        self._column += len(self._current_token._text)
+                    else:
+                        self._column += 1
                 # reset the text readed
                 self._text_readed = ''
                 # restart the dfa
