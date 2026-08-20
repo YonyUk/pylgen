@@ -18,6 +18,7 @@ class TokenTypeEnum(TokenType):
     EOF = 'EOF'
     VARIABLE = 'VARIABLE'
     IDENTATION = 'IDENTATION'
+    WHITESPACEMARKER = 'WHITESPACEMARKER'
 
 Config = Symbol('Config')
 ConfigSequence = Symbol('ConfigSequence')
@@ -165,7 +166,7 @@ def configatom_variable_colon_number_reductor(asts:ASTListView) -> AST:
 
 def sanitaze_text(text:str) -> str:
     lines = text.split('\n')
-    lines = list(filter(lambda line:not line.strip() == '', lines))
+    lines = list(map(lambda line:line if not line.strip() == '' else '#ignore#', lines))
     return '\n'.join(lines)
 
 G = AttributedGrammar(Config,'$')
@@ -195,7 +196,7 @@ class TestIntegrationIdentedLexerParser:
 
     @pytest.fixture(scope='class')
     def lexer(self) -> IdentedLexer:
-        lexer = IdentedLexer(get_symbol_function,' ')
+        lexer = IdentedLexer(get_symbol_function,' |#ignore#\n?')
         lexer.set_text_sanitize_function(sanitaze_text)
         lexer[0,TokenTypeEnum.NUMBER] = r'\d+(\.\d+)?'
         lexer[1,TokenTypeEnum.BOOLEAN] = 'true|false'
@@ -204,6 +205,7 @@ class TestIntegrationIdentedLexerParser:
         lexer[4,TokenTypeEnum.NEWLINE] = '\n'
         lexer[5,TokenTypeEnum.SYMBOL] = r'\-|:|\[|\]'
         lexer[6,TokenTypeEnum.STRING] = '".*"'
+        lexer[7,TokenTypeEnum.WHITESPACEMARKER] = '#ignore#\n'
 
         lexer.set_ident(TokenTypeEnum.IDENTATION)
         lexer.set_indent_symbol(indent)
@@ -219,66 +221,72 @@ class TestIntegrationIdentedLexerParser:
     def test_1(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
         text = '''
-[personal_data]
-    name:"jhon"
-
+[server]
+    host: "localhost"
+    port: 8080
+    debug: true
 '''
         lexer.load_text(text)
-        ast = parser.parse(lexer.tokens)
+        tokens = list(lexer.tokens)
+        ast = parser.parse(tokens)
         assert len(lexer.errors) == 0
         assert len(parser.errors) == 0
+        assert ast is not None
 
     def test_2(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
         text = '''
-[personal_data]
-    name:"jhon"
-    age:27
-    working:false
-    - home:
-        address:"wall street"
-        apt:12
+[database]
+    name: "mydb"
+    - master:
+        host: "10.0.0.1"
+        user: "admin"
+    - replica:
+        host: "10.0.0.2"
+        user: "reader"
 '''
         lexer.load_text(text)
-        ast = parser.parse(lexer.tokens)
+        tokens = list(lexer.tokens)
+        ast = parser.parse(tokens)
         assert len(lexer.errors) == 0
         assert len(parser.errors) == 0
+        assert ast is not None
 
     def test_3(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
         text = '''
-[economic_data]
-    bank:"NY"
-    debit:12000000
-
-    - hipotec:
-        remains:100000
-        until:"march"
-
-    solded:false
-'''
+[features]
+    enable_cache: true
+    max_retries: 3
+    timeout: 30'''
         lexer.load_text(text)
-        ast = parser.parse(lexer.tokens)
+        tokens = list(lexer.tokens)
+        ast = parser.parse(tokens)
         assert len(lexer.errors) == 0
         assert len(parser.errors) == 0
+        assert ast is not None
 
     def test_4(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
         text = '''
-[extra_data]
-    level1:"proving"
-
-    - level2:
-        final:true
-
-        -level3:
-            name:"extra"
-            value:100
-
-            - level4:
-                final:true
+[database]
+    name: mydb
+    - master:
+        host: "10.0.0.1"
+        user: "admin"
+        - options:
+            alert_on_fail: true
+            is_critical: false
+    - replica:
+        host: "10.0.0.2"
+        user: "reader"
+        - options:
+            alert_on_fail: true
+            is_critical: true
 '''
         lexer.load_text(text)
-        ast = parser.parse(lexer.tokens)
+        tokens = list(lexer.tokens)
+        ast = parser.parse(tokens)
         assert len(lexer.errors) == 0
         assert len(parser.errors) == 0
+        assert ast is not None
