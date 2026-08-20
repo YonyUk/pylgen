@@ -223,6 +223,7 @@ class TestIntegrationIdentedLexerParser:
 
     def test_1(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
+        lexer.clear_errors()
         text = '''
 [server]
     host: "localhost"
@@ -264,6 +265,7 @@ class TestIntegrationIdentedLexerParser:
 
     def test_2(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
+        lexer.clear_errors()
         text = '''
 [database]
     name: "mydb"
@@ -328,6 +330,7 @@ class TestIntegrationIdentedLexerParser:
 
     def test_3(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
+        lexer.clear_errors()
         text = '''
 [features]
     enable_cache: true
@@ -366,6 +369,7 @@ class TestIntegrationIdentedLexerParser:
 
     def test_4(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
+        lexer.clear_errors()
         text = '''
 [database]
     name: "mydb"
@@ -464,6 +468,7 @@ class TestIntegrationIdentedLexerParser:
 
     def test_5(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
+        lexer.clear_errors()
         text = '''
 [database]
     name: "mydb"
@@ -574,6 +579,7 @@ class TestIntegrationIdentedLexerParser:
 
     def test_invalid_empty_section(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
+        lexer.clear_errors()
         text = '''
 [empty]
 '''
@@ -599,6 +605,7 @@ class TestIntegrationIdentedLexerParser:
 
     def test_invalid_bad_ident_1(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
+        lexer.clear_errors()
         text = '''
 [main]
     x: 1
@@ -635,6 +642,7 @@ class TestIntegrationIdentedLexerParser:
 
     def test_invalid_bad_ident_2(self,lexer:IdentedLexer,parser:Parser):
         parser.reset()
+        lexer.clear_errors()
         text = '''
 [main]
     x: 1
@@ -665,6 +673,111 @@ class TestIntegrationIdentedLexerParser:
         for idx,token in enumerate(tokens):
             pos = token.line,token.column
             assert tokens_positions[idx] == pos
-        assert len(lexer.errors) == 1
+        assert len(lexer.errors) == 0
         assert len(parser.errors) == 1
         assert ast is None
+
+    def test_void_lines_parsing_1(self,lexer:IdentedLexer,parser:Parser):
+        parser.reset()
+        lexer.clear_errors()
+        text = '''
+[database]
+
+    name: "mydb"
+
+    - master:
+        host: "10.0.0.1"
+        user: "admin"
+    
+    - replica:
+    
+        host: "10.0.0.2"
+    
+        user: "reader"
+'''
+        lexer.load_text(text)
+        ast = parser.parse(lexer.tokens)
+        assert len(lexer.errors) == 0
+        assert len(parser.errors) == 0
+        assert ast is not None
+
+    def test_void_lines_parsing_2(self,lexer:IdentedLexer,parser:Parser):
+        parser.reset()
+        lexer.clear_errors()
+        text = '''
+[database]
+
+    name: "mydb"
+
+    - master:
+    
+        host: "10.0.0.1"
+    
+        user: "admin"
+    
+        - options:
+    
+            alert_on_fail: true
+    
+            is_critical: false
+    
+    - replica:
+    
+        host: "10.0.0.2"
+    
+        user: "reader"
+    
+        - options:
+    
+            alert_on_fail: true
+    
+            is_critical: true
+'''
+        lexer.load_text(text)
+        ast = parser.parse(lexer.tokens)
+        assert len(lexer.errors) == 0
+        assert len(parser.errors) == 0
+        assert ast is not None
+
+    def test_void_lines_parsing_3(self,lexer:IdentedLexer,parser:Parser):
+        parser.reset()
+        lexer.clear_errors()
+        text = '''
+[database]
+
+    name: "mydb"
+
+    - master:
+
+        host: "10.0.0.1"
+
+        user: "admin"
+
+        - options:
+
+            alert_on_fail: true
+
+            is_critical: false
+
+        - extra:
+
+            alert_on_success: true
+
+    - replica:
+
+        host: "10.0.0.2"
+
+        user: "reader"
+
+        - options:
+
+            alert_on_fail: true
+
+            is_critical: true
+
+'''
+        lexer.load_text(text)
+        ast = parser.parse(lexer.tokens)
+        assert len(lexer.errors) == 0
+        assert len(parser.errors) == 0
+        assert ast is not None
