@@ -35,6 +35,8 @@ cdef class Lexer(BaseLexer):
     @property
     def tokens(self) -> Iterable[Token]:
         cdef int line,column
+        line = 1
+        column = 1
         self.initialize()
         while self._move_next():
             yield self._current()
@@ -58,7 +60,7 @@ cdef class Lexer(BaseLexer):
     cdef Token _current(self):
         cdef LexicalRule rule
         cdef LexicalError error
-        cdef int line,column
+        # cdef int line,column
 
         if self._current_token._type in self._rules:
             for rule in self._rules[self._current_token._type]:
