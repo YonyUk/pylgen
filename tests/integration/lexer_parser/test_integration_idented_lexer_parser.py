@@ -6,6 +6,7 @@ from pylgen.grammar.grammar import AttributedGrammar
 from pylgen.lexer.lexer import IdentedLexer
 from pylgen.parser import ParserBuilder,Parser
 from pylgen.parser.parser_type import ParserType
+from pylgen.analysis.error_type import ErrorType
 
 import pytest
 
@@ -270,7 +271,7 @@ class TestIntegrationIdentedLexerParser:
         parser.reset()
         text = '''
 [database]
-    name: mydb
+    name: "mydb"
     - master:
         host: "10.0.0.1"
         user: "admin"
@@ -290,3 +291,70 @@ class TestIntegrationIdentedLexerParser:
         assert len(lexer.errors) == 0
         assert len(parser.errors) == 0
         assert ast is not None
+
+    def test_5(self,lexer:IdentedLexer,parser:Parser):
+        parser.reset()
+        text = '''
+[database]
+    name: "mydb"
+    - master:
+        host: "10.0.0.1"
+        user: "admin"
+        - options:
+            alert_on_fail: true
+            is_critical: false
+        - extra:
+            alert_on_success: true
+    - replica:
+        host: "10.0.0.2"
+        user: "reader"
+        - options:
+            alert_on_fail: true
+            is_critical: true
+'''
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        ast = parser.parse(tokens)
+        assert len(lexer.errors) == 0
+        assert len(parser.errors) == 0
+        assert ast is not None
+
+    def test_invalid_empty_section(self,lexer:IdentedLexer,parser:Parser):
+        parser.reset()
+        text = '''
+[empty]
+'''
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        ast = parser.parse(tokens)
+        assert len(lexer.errors) == 0
+        errors = list(parser.errors)
+        assert len(errors) == 1
+        assert errors[0].type == ErrorType.SYNTAX
+        assert ast is None
+
+    def test_invalid_bad_ident_1(self,lexer:IdentedLexer,parser:Parser):
+        parser.reset()
+        text = '''
+[main]
+    x: 1
+      y: 2
+'''
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        ast = parser.parse(tokens)
+        assert len(lexer.errors) == 1
+        assert len(parser.errors) == 1
+
+    def test_invalid_bad_ident_2(self,lexer:IdentedLexer,parser:Parser):
+        parser.reset()
+        text = '''
+[main]
+    x: 1
+     y: 2
+'''
+        lexer.load_text(text)
+        tokens = list(lexer.tokens)
+        ast = parser.parse(tokens)
+        assert len(lexer.errors) == 1
+        assert len(parser.errors) == 1
