@@ -20,6 +20,7 @@ class TokenTypeEnum(TokenType):
     VARIABLE = 'VARIABLE'
     IDENTATION = 'IDENTATION'
     WHITESPACEMARKER = 'WHITESPACEMARKER'
+    SINGLEWHITESPACE = 'SINGLEWHITESPACE'
 
 Config = Symbol('Config')
 ConfigSequence = Symbol('ConfigSequence')
@@ -197,7 +198,7 @@ class TestIntegrationIdentedLexerParser:
 
     @pytest.fixture(scope='class')
     def lexer(self) -> IdentedLexer:
-        lexer = IdentedLexer(get_symbol_function,' |#ignore#\n?')
+        lexer = IdentedLexer(get_symbol_function,'#ignore#\n?')
         lexer.set_text_sanitize_function(sanitaze_text)
         lexer[0,TokenTypeEnum.NUMBER] = r'\d+(\.\d+)?'
         lexer[1,TokenTypeEnum.BOOLEAN] = 'true|false'
@@ -207,6 +208,7 @@ class TestIntegrationIdentedLexerParser:
         lexer[5,TokenTypeEnum.SYMBOL] = r'\-|:|\[|\]'
         lexer[6,TokenTypeEnum.STRING] = '".*"'
         lexer[7,TokenTypeEnum.WHITESPACEMARKER] = '#ignore#\n'
+        lexer[8,TokenTypeEnum.SINGLEWHITESPACE] = ' '
 
         lexer.set_ident(TokenTypeEnum.IDENTATION)
         lexer.set_indent_symbol(indent)
