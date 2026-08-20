@@ -618,12 +618,12 @@ class TestIntegrationIdentedLexerParser:
             (3, 8),
             (3, 9),
             (4, 5),
-            (4, 6),
             (4, 7),
-            (4, 9),
+            (4, 8),
             (4, 10),
-            (4, 10),
-            (4, 11)
+            (4, 11),
+            (4, 11),
+            (4, 12)
         ]
         assert len(tokens) == 16
         for idx,token in enumerate(tokens):
