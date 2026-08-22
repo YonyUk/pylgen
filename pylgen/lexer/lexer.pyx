@@ -146,7 +146,7 @@ cdef class IdentedLexer(Lexer):
             line = self._current_token._line
             column = self._current_token._column
 
-            if current_token._text == ' ' and current_token._column > 1:
+            if current_token._text != '\n' and current_token._text.strip() == '' and current_token._column > 1:
                 continue
 
             if current_token._type == self._ident_type:
