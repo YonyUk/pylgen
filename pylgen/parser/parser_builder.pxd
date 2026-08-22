@@ -34,7 +34,7 @@ cdef class ParserBuilder:
     pass
 
 cdef set[LR0Item] _closure_lr0(set[LR0Item] items,Grammar g)
-cdef set[LALRState] _closure_lalr(set[LALRItem] items,Grammar g)
+cdef set[LALRItem] _closure_lalr(set[LALRItem] items,Grammar g)
 cdef set[LR0Item] _goto_lr0(set[LR0Item] items,Symbol x,Grammar g)
 cdef set[LALRItem] _goto_lalr(set[LALRItem] items,Symbol x,Grammar g)
 cdef set[LR0State] _get_canonical_lr0_states(Grammar g)
