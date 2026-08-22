@@ -133,6 +133,7 @@ cdef class IdentedLexer(Lexer):
         cdef Token current_token,last_token
         cdef list[Token] idents = []
         cdef int idx
+        cdef LexicalError error
 
         line = 1
         column = 1
@@ -147,6 +148,9 @@ cdef class IdentedLexer(Lexer):
             column = self._current_token._column
 
             if current_token._text != '\n' and current_token._text.strip() == '' and current_token._column > 1:
+                if current_token._type == 'INVALID_TOKEN':
+                    error = LexicalError("Invalid token",current_token._line,current_token._column) # type:ignore
+                    self._errors.remove(error)
                 continue
 
             if current_token._type == self._ident_type:

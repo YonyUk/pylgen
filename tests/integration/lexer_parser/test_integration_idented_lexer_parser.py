@@ -781,3 +781,46 @@ class TestIntegrationIdentedLexerParser:
         assert len(lexer.errors) == 0
         assert len(parser.errors) == 0
         assert ast is not None
+
+    def test_void_lines_parsing_and_whitespaces(self,lexer:IdentedLexer,parser:Parser):
+        parser.reset()
+        lexer.clear_errors()
+        text = '''
+[database]
+
+    name:  "mydb"
+
+    - master:
+
+        host:   "10.0.0.1"
+
+        user:"admin"
+
+        - options:
+
+            alert_on_fail:   true
+
+            is_critical:    false
+
+        - extra:
+
+            alert_on_success:  true
+
+    - replica:
+
+        host: "10.0.0.2"
+
+        user: "reader"
+
+        - options:
+
+            alert_on_fail: true
+
+            is_critical: true
+
+'''
+        lexer.load_text(text)
+        ast = parser.parse(lexer.tokens)
+        assert len(lexer.errors) == 0
+        assert len(parser.errors) == 0
+        assert ast is not None
