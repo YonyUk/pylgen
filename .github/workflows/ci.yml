@@ -34,7 +34,7 @@ jobs:
       
       - name: Build extensions
         run: |
-          python setup.py build_ext --inplace --force
+          pip install -e .
 
 
       - name: Run tests with coverage
