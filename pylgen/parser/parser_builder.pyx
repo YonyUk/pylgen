@@ -15,6 +15,20 @@ _closures_lalr:dict[tuple[str,frozenset],set[LALRItem]] = {}
 cdef class ParserBuildingConflictException(Exception):
     pass
 
+cdef class SLRParserBuildingConflictException(ParserBuildingConflictException):
+
+    def __init__(self, state:LR0State,symbol:Symbol):
+        self._state = state
+        self._symbol = symbol
+    
+    @property
+    def state(self) -> LR0State:
+        return self._state
+    
+    @property
+    def symbol(self) -> Symbol:
+        return self._symbol
+
 cdef class LALRParserBuildingConflictException(ParserBuildingConflictException):
 
     def __init__(self,state:LALRState,symbol:Symbol):
@@ -28,6 +42,21 @@ cdef class LALRParserBuildingConflictException(ParserBuildingConflictException):
     @property
     def symbol(self) -> Symbol:
         return self._symbol
+
+cdef class SLRShiftReduceConflictException(SLRParserBuildingConflictException):
+
+    def __init__(self, state: LR0State, symbol: Symbol,next_state:LR0State,production:Production):
+        super().__init__(state, symbol)
+        self._next = next_state
+        self._production = production
+    
+    @property
+    def next_state(self) -> LR0State:
+        return self._next
+    
+    @property
+    def production(self) -> Production:
+        return self._production
 
 cdef class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
     
@@ -43,6 +72,21 @@ cdef class LALRShiftReduceConflictException(LALRParserBuildingConflictException)
     @property
     def production(self) -> Production:
         return self._production
+
+cdef class SLRReduceReduceConflictException(SLRParserBuildingConflictException):
+
+    def __init__(self, state: LR0State, symbol: Symbol,old:Production,new_:Production):
+        super().__init__(state, symbol)
+        self._new = new_
+        self._old = old
+    
+    @property
+    def old(self) -> Production:
+        return  self._old
+    
+    @property
+    def new_(self) -> Production:
+        return self._new
 
 cdef class LALRReduceReduceConflictException(LALRParserBuildingConflictException):
 
@@ -174,13 +218,25 @@ cdef class ParserBuilder:
         return _get_canonical_lalr_states(g)[0]
     
     @staticmethod
-    def get_goto_action_tables_lalr(g:Grammar) -> Tuple[Dict[Tuple[LALRState,Symbol],LALRState],dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]]]:
+    def get_goto_action_tables_slr(g:Grammar) -> tuple[dict[tuple[LR0State,Symbol],LR0State],dict[tuple[LR0State,Symbol],tuple[str,LR0State | Production]]]:
         '''
         Args:
             g (Grammar)
         
         Returns:
-            Tuple[Dict[Tuple[LALRState,Symbol],LALRState],dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]]]:
+            Tuple[Dict[Tuple[LR0State,Symbol],LR0State],Dict[Tuple[LR0State,Symbol],Tuple[str,LR0State | Production]]]:
+                The ACTION and GOTO tables for a SLR parser from the given grammar in a tuple (GOTO,ACTION)
+        '''
+        return _get_goto_action_tables_slr(g)
+
+    @staticmethod
+    def get_goto_action_tables_lalr(g:Grammar) -> tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],tuple[str,LALRState | Production]]]:
+        '''
+        Args:
+            g (Grammar)
+        
+        Returns:
+            Tuple[Dict[Tuple[LALRState,Symbol],LALRState],Dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]]]:
                 The ACTION and GOTO tables for a LALR(1) parser from the given grammar in a tuple (GOTO,ACTION)
         '''
         return _get_goto_action_tables_lalr(g)
@@ -592,6 +648,60 @@ cdef tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],
                     else:
                         action_value = (f'{BottomUpParserAction.REDUCE}',reduction)
                         action[key] = action_value
+    
+    return goto,action
+
+cdef tuple[dict[tuple[LR0State,Symbol],LR0State],dict[tuple[LR0State,Symbol],tuple]] _get_goto_action_tables_slr(Grammar g):
+    cdef dict[tuple[LR0State,Symbol],LR0State] goto = {}
+    cdef dict[tuple[LR0State,Symbol],tuple] action = {}
+    cdef set[LR0State] states = _get_canonical_lr0_states(g)
+    cdef LR0State state,next_state
+    cdef LR0Item item
+    cdef Symbol symbol
+    cdef dict[int,LR0State] states_by_hash = { state._hash: state for state in states }
+    cdef tuple[LR0State,Symbol] key
+    cdef tuple action_value
+    cdef str action_type
+    cdef Production production
+
+    for state in states:
+        for item in state._items:
+            if len(item._right) > 0:
+                symbol = item._right[0]
+                key = state,symbol
+                if symbol._is_terminal:
+                    next_state = LR0State(_goto_lr0(state._items,symbol,g)) # type:ignore
+                    next_state = states_by_hash[next_state._hash]
+                    goto[key] = next_state
+                    if key in action:
+                        action_value = action[key]
+                        action_type = action_value[0]
+                        if action_type != f'{BottomUpParserAction.SHIFT}':
+                            raise SLRShiftReduceConflictException(state,symbol,next_state,action_value[1])
+                    else:
+                        action_value = (f'{BottomUpParserAction.SHIFT}',next_state)
+                        action[key] = action_value
+                else:
+                    next_state = LR0State(_goto_lr0(state._items,symbol,g)) # type:ignore
+                    next_state = states_by_hash[next_state._hash]
+                    goto[key] = next_state
+            elif item._head in g._non_terminals:
+                for symbol in g.follow(item._head):
+                    key = state,symbol
+                    production = Production(item._head,item._left) # type:ignore
+                    if key in action:
+                        action_value = action[key]
+                        action_type = action_value[0]
+                        if action_type != f'{BottomUpParserAction.REDUCE}':
+                            raise SLRShiftReduceConflictException(state,symbol,action_value[1],production)
+                        elif action_value[1] != production:
+                            raise SLRReduceReduceConflictException(state,symbol,action_value[1],production)
+                    else:
+                        action_value = (f'{BottomUpParserAction.REDUCE}',production)
+                        action[key] = action_value
+            else:
+                key = state,g._end_symbol
+                action[key] = (f'{BottomUpParserAction.ACCEPT}',None)
     
     return goto,action
 

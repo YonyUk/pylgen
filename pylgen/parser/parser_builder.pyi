@@ -10,6 +10,16 @@ from .parser_type import ParserType
 class ParserBuildingConflictException(Exception):
     pass
 
+class SLRParserBuildingConflictException(ParserBuildingConflictException):
+
+    def __init__(self, state:LR0State,symbol:Symbol): ...
+    
+    @property
+    def state(self) -> LR0State: ...
+    
+    @property
+    def symbol(self) -> Symbol: ...
+
 class LALRParserBuildingConflictException(ParserBuildingConflictException):
 
     def __init__(self,state:LALRState,symbol:Symbol): ...
@@ -20,6 +30,16 @@ class LALRParserBuildingConflictException(ParserBuildingConflictException):
     @property
     def symbol(self) -> Symbol: ...
 
+class SLRShiftReduceConflictException(SLRParserBuildingConflictException):
+
+    def __init__(self, state: LR0State, symbol: Symbol,next_state:LR0State,production:Production): ...
+    
+    @property
+    def next_state(self) -> LR0State: ...
+    
+    @property
+    def production(self) -> Production: ...
+
 class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
     
     def __init__(self, state: LALRState, symbol: Symbol,next_state:LALRState,production:Production): ...
@@ -29,6 +49,16 @@ class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
     
     @property
     def production(self) -> Production: ...
+
+class SLRReduceReduceConflictException(SLRParserBuildingConflictException):
+
+    def __init__(self, state: LR0State, symbol: Symbol,old:Production,new_:Production): ...
+    
+    @property
+    def old(self) -> Production: ...
+    
+    @property
+    def new_(self) -> Production: ...
 
 class LALRReduceReduceConflictException(LALRParserBuildingConflictException):
 
@@ -71,6 +101,9 @@ class ParserBuilder:
 
     @staticmethod
     def get_canonical_lalr_states(g:Grammar) -> Set[LALRState]: ...
+
+    @staticmethod
+    def get_goto_action_tables_slr(g:Grammar) -> tuple[dict[tuple[LR0State,Symbol],LR0State],dict[tuple[LR0State,Symbol],tuple[str,LR0State | Production]]]: ...
 
     @staticmethod
     def get_goto_action_tables_lalr(g:Grammar) -> Tuple[Dict[Tuple[LALRState,Symbol],LALRState],dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]]]: ...
