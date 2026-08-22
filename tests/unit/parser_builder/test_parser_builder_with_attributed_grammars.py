@@ -6,7 +6,13 @@ import pytest
 import time
 from pylgen.common.types import AST, Symbol,ASTListView
 from pylgen.grammar.grammar import Grammar,AttributedGrammar,Production
-from pylgen.parser.parser_builder import LALRReduceReduceConflictException, LALRShiftReduceConflictException, ParserBuilder
+from pylgen.parser.parser_builder import (
+    LALRReduceReduceConflictException,
+    LALRShiftReduceConflictException,
+    SLRShiftReduceConflictException,
+    SLRReduceReduceConflictException,
+    ParserBuilder
+)
 from pylgen.parser.bottom_up_parser_actions import BottomUpParserAction
 from pylgen.parser.lr0_parser import LR0Item,LR0State
 from pylgen.parser.lalr_parser import LALRItem,LALRState
@@ -117,7 +123,12 @@ class TestParserBuilderWithAttributedGrammars:
                     break
         return tokens
 
-    def simulate_parsing(self,tokens:List[Symbol],goto:Dict[Tuple[LALRState,Symbol],LALRState],action:Dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]]) -> bool:
+    def simulate_parsing(
+            self,
+            tokens:List[Symbol],
+            goto:Dict[Tuple[LALRState,Symbol],LALRState] | Dict[Tuple[LR0State,Symbol],LR0State],
+            action:Dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]] | Dict[Tuple[LR0State,Symbol],Tuple[str,LR0State | Production]]
+        ) -> bool:
         '''
         simulate the parsing and return True if the sequence of tokens was successfully parsed, False otherwise
         '''
@@ -128,32 +139,25 @@ class TestParserBuilderWithAttributedGrammars:
             state = initial_state
             stack_states = [state]
             for symbol in stack:
-                if not (state,symbol) in action:
+                if not (state,symbol) in goto:
                     break
-                act = action[(state,symbol)]
-                if act[0] == BottomUpParserAction.SHIFT:
-                    state = goto[(state,symbol)]
-                    stack_states.append(state)
-                elif act[0] == BottomUpParserAction.REDUCE and len(tokens) > 0:
-                    break
+                state = goto[(state,symbol)] # type: ignore
+                stack_states.append(state)
             if len(tokens) == 0 or not (state,tokens[0]) in action:
                 break
-            act = action[(state,tokens[0])]
+            act = action[(state,tokens[0])] # type: ignore
             while act[0] == BottomUpParserAction.REDUCE:
                 p:Production = act[1] # type: ignore
                 stack = stack[:-1*len(p.production)] + [p.head]
                 stack_states = stack_states[:-1*len(p.production)]
                 state = stack_states[-1]
-                if not (state,stack[-1]) in action:
+                if not (state,stack[-1]) in goto:
                     break
-                act = action[(state,stack[-1])]
-                if act[0] != BottomUpParserAction.SHIFT:
-                    break
-                state = goto[(state,stack[-1])]
+                state = goto[(state,stack[-1])] # type: ignore
                 stack_states.append(state)
                 if not (state,tokens[0]) in action:
                     break
-                act = action[(state,tokens[0])]
+                act = action[(state,tokens[0])] # type: ignore
             if act[0] == BottomUpParserAction.SHIFT:
                 stack.append(tokens[0])
                 stack_states.append(state)
@@ -804,7 +808,7 @@ class TestParserBuilderWithAttributedGrammars:
         edges,_ = ParserBuilder.build_lookaheads_propagation_edges(G)
         assert len(edges) == 1
     
-    def test_goto_action_tables_1(self,classic_lalr_1_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+    def test_lalr_goto_action_tables_1(self,classic_lalr_1_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
         G,(S,L,R,mul,id_,eq,end_symbol) = classic_lalr_1_grammar
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
@@ -851,8 +855,53 @@ class TestParserBuilderWithAttributedGrammars:
                     for sym in {G.end_symbol,eq}:
                         assert action[(state,sym)][0] == BottomUpParserAction.REDUCE
                         assert action[(state,sym)][1] == Production(R,[L])
-    
-    def test_goto_action_tables_2(self):
+
+    def test_slr_goto_action_tables_1(self, arithmetic_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G, (E, T, F, P, plus, minus, mul, div, exp, mod, lp, rp, id_, end_symbol) = arithmetic_grammar
+
+        goto, action = ParserBuilder.get_goto_action_tables_slr(G)
+        states = ParserBuilder.get_canonical_lr0_states(G)
+
+        accept_state = None
+        for state in states:
+            if any(
+                item.head not in G.non_terminals and len(item.right) == 0 and item.left == [G.start_symbol]
+                for item in state.items
+            ):
+                accept_state = state
+                break
+        assert accept_state is not None
+        assert (accept_state, G.end_symbol) in action
+        assert action[(accept_state, G.end_symbol)][0] == BottomUpParserAction.ACCEPT
+
+        for state in states:
+            for item in state.items:
+                if len(item.right) == 0:
+                    head = item.head
+                    if head not in G.non_terminals:
+                        continue
+                    prod = Production(head, item.left)
+                    follow_set = G.follow(head)
+
+                    for sym in follow_set:
+                        assert (state, sym) in action
+                        assert action[(state, sym)][0] == BottomUpParserAction.REDUCE
+                        assert action[(state, sym)][1] == prod
+
+                    for sym in G.terminals:
+                        if sym not in follow_set:
+                            if (state, sym) in action:
+                                assert action[(state, sym)][0] != BottomUpParserAction.REDUCE
+
+        for state in states:
+            for item in state.items:
+                if item.head == P and item.left == [id_] and len(item.right) == 0:
+                    for sym in G.follow(P):
+                        assert (state, sym) in action
+                        assert action[(state, sym)][0] == BottomUpParserAction.REDUCE
+                        assert action[(state, sym)][1] == Production(P, [id_])
+
+    def test_lalr_goto_action_tables_2(self):
         E = Symbol('E')
         plus = Symbol('+',True)
         id_ = Symbol('id',True)
@@ -864,12 +913,42 @@ class TestParserBuilderWithAttributedGrammars:
 
         with pytest.raises(LALRShiftReduceConflictException):
             _,_ = ParserBuilder.get_goto_action_tables_lalr(G)
+
+    def test_slr_goto_action_tables_2(self):
+        E = Symbol('E')
+        plus = Symbol('+',True)
+        id_ = Symbol('id',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,E
+        G[E] += id_,
+
+        with pytest.raises(SLRShiftReduceConflictException):
+            _,_ = ParserBuilder.get_goto_action_tables_slr(G)
     
-    def test_goto_action_tables_3(self,conflict_reduce_reduce_lalr_1_grammar_1:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+    def test_lalr_goto_action_tables_3(self,conflict_reduce_reduce_lalr_1_grammar_1:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
         G,_ = conflict_reduce_reduce_lalr_1_grammar_1
 
         with pytest.raises(LALRReduceReduceConflictException):
             _,_ = ParserBuilder.get_goto_action_tables_lalr(G)
+
+    def test_slr_goto_action_tables_3(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        plus = Symbol('+',True)
+        id_ = Symbol('id',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+        G[E] += id_,
+
+        G[T] += id_,
+
+        with pytest.raises(SLRReduceReduceConflictException):
+            _,_ = ParserBuilder.get_goto_action_tables_slr(G)
     
     def test_cache_closure_lr0(self):
         S = Symbol('S')
@@ -1062,7 +1141,7 @@ class TestParserBuilderWithAttributedGrammars:
         assert len(action) > 0
         assert elapsed < 2.0
     
-    def test_goto_action_tables_correctness_1(self,arithmetic_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+    def test_lalr_goto_action_tables_correctness_1(self,arithmetic_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
         G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
@@ -1091,8 +1170,49 @@ class TestParserBuilderWithAttributedGrammars:
         # ( id )
         tokens = [lp,id_,rp,end_symbol]
         assert self.simulate_parsing(tokens,goto,action)
-    
-    def test_goto_action_tables_correctness_2(self,arithmetic_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+
+    def test_slr_goto_action_tables_correctness_1(self,arithmetic_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
+
+        goto,action = ParserBuilder.get_goto_action_tables_slr(G)
+
+        # id
+        tokens = [id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id + id
+        tokens = [id_,plus,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id - id
+        tokens = [id_,minus,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id % id
+        tokens = [id_,mod,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id * id
+        tokens = [id_,mul,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id / id
+        tokens = [id_,div,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id ** id
+        tokens = [id_,exp,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # ( id )
+        tokens = [lp,id_,rp,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+
+    def test_lalr_goto_action_tables_correctness_2(self,arithmetic_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+        G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
+
+        goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
+        for _ in range(100):
+            tokens = self.generate_valid_tokens_string(G) + [end_symbol]
+            assert self.simulate_parsing(tokens,goto,action)
+            index = randint(0,len(tokens) - 1)
+            tokens.insert(index,tokens[index])
+            assert not self.simulate_parsing(tokens,goto,action)
+
+    def test_slr_goto_action_tables_correctness_2(self,arithmetic_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
         G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
@@ -1103,7 +1223,7 @@ class TestParserBuilderWithAttributedGrammars:
             tokens.insert(index,tokens[index])
             assert not self.simulate_parsing(tokens,goto,action)
     
-    def test_goto_action_tables_correctness_3(self,classic_lalr_1_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
+    def test_lalr_goto_action_tables_correctness_3(self,classic_lalr_1_grammar:Tuple[AttributedGrammar,Tuple[Symbol,...]]):
         G,_ = classic_lalr_1_grammar
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
@@ -1113,3 +1233,9 @@ class TestParserBuilderWithAttributedGrammars:
             index = randint(0,len(tokens) - 1)
             tokens.insert(index,tokens[index])
             assert not self.simulate_parsing(tokens,goto,action)
+
+    def test_slr_goto_action_tables_correctness_3(self,classic_lalr_1_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,_ = classic_lalr_1_grammar
+
+        with pytest.raises(SLRShiftReduceConflictException):
+            _,_ = ParserBuilder.get_goto_action_tables_slr(G)
