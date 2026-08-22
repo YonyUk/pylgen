@@ -253,6 +253,8 @@ cdef class ParserBuilder:
         '''
         if type_ == ParserType.LALR1:
             return _build_lalr_parser(g)
+        elif type_ == ParserType.SLR:
+            return _build_slr_parser(g)
         raise NotImplementedError()
     
     @staticmethod
@@ -267,6 +269,8 @@ cdef class ParserBuilder:
         '''
         if type_ == ParserType.LALR1:
             return _build_lalr_parser_from_attributed(g)
+        elif type_ == ParserType.SLR:
+            return _build_slr_parser_from_attributed(g)
         raise NotImplementedError()
     
     @staticmethod
@@ -720,6 +724,21 @@ cdef dict[tuple[str,Symbol],str] _plain_goto_table_lalr(dict[tuple[LALRState,Sym
 
     return result
 
+cdef dict[tuple[str,Symbol],str] _plain_goto_table_slr(dict[tuple[LR0State,Symbol],LR0State] table):
+    cdef dict[tuple[str,Symbol],str] result = {}
+    cdef LR0State from_state,to_state
+    cdef Symbol symbol
+    cdef tuple[LR0State,Symbol] key
+    cdef tuple[str,Symbol] new_key
+
+    for key,to_state in table.items():
+        from_state = <LR0State>key[0]
+        symbol = <Symbol>key[1]
+        new_key = (f'I{from_state._index}',symbol)
+        result[new_key] = f'I{to_state._index}'
+
+    return result
+
 cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_lalr(dict[tuple[LALRState,Symbol],tuple] table):
     cdef dict[tuple[str,Symbol],tuple[str,object]] result = {}
     cdef LALRState from_state,to_state
@@ -735,6 +754,28 @@ cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_lalr(dict[tup
         new_key = (f'I{from_state._index}',symbol)
         if value[0] == BottomUpParserAction.SHIFT:
             to_state = <LALRState>value[1]
+            new_value = (value[0],f'I{to_state._index}')
+        else:
+            new_value = (value[0],value[1])
+        result[new_key] = new_value
+    
+    return result
+
+cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_slr(dict[tuple[LR0State,Symbol],tuple] table):
+    cdef dict[tuple[str,Symbol],tuple[str,object]] result = {}
+    cdef LR0State from_state,to_state
+    cdef Symbol symbol
+    cdef tuple[LALRState,Symbol] key
+    cdef tuple value,new_value
+    cdef tuple[str,Symbol] new_key
+    cdef Production production
+
+    for key,value in table.items():
+        from_state = <LR0State>key[0]
+        symbol = <Symbol>key[1]
+        new_key = (f'I{from_state._index}',symbol)
+        if value[0] == BottomUpParserAction.SHIFT:
+            to_state = <LR0State>value[1]
             new_value = (value[0],f'I{to_state._index}')
         else:
             new_value = (value[0],value[1])
@@ -758,10 +799,37 @@ cdef BottomUpParser _build_lalr_parser(Grammar g):
     result = BottomUpParser('I0',plain_goto_table,plain_action_table) # type:ignore
     return result
 
+cdef BottomUpParser _build_slr_parser(Grammar g):
+    cdef dict[tuple[LR0State,Symbol],LR0State] goto_table
+    cdef dict[tuple[LR0State,Symbol],tuple] action_table
+    cdef dict[tuple[str,Symbol],str] plain_goto_table
+    cdef dict[tuple[str,Symbol],tuple[str,object]] plain_action_table
+    cdef Symbol non_terminal
+    cdef BottomUpParser result
+
+    goto_table,action_table = _get_goto_action_tables_slr(g)
+
+    plain_goto_table = _plain_goto_table_slr(goto_table)
+    plain_action_table = _plain_action_table_slr(action_table)
+
+    result = BottomUpParser('I0',plain_goto_table,plain_action_table) # type:ignore
+    return result
+
 cdef BottomUpParser _build_lalr_parser_from_attributed(AttributedGrammar g):
     cdef Production production
     cdef set[Production] productions
     cdef BottomUpParser result = _build_lalr_parser(g)
+
+    for productions in g._productions_by_symbol.values():
+        for production in productions:
+            result._set_reductor(production,g.get_reductor(production))
+    
+    return result
+
+cdef BottomUpParser _build_slr_parser_from_attributed(AttributedGrammar g):
+    cdef Production production
+    cdef set[Production] productions
+    cdef BottomUpParser result = _build_slr_parser(g)
 
     for productions in g._productions_by_symbol.values():
         for production in productions:
