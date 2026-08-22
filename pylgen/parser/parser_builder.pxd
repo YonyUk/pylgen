@@ -5,18 +5,28 @@ from .lr0_parser cimport LR0Item,LR0State
 from .lalr_parser cimport LALRState,LALRItem
 
 cdef class ParserBuildingConflictException(Exception):
-    pass
+    cdef Symbol _symbol
+    cdef Production _production
+
+cdef class SLRParserBuildingConflictException(ParserBuildingConflictException):
+    cdef LR0State _state
+    cdef LR0State _next
 
 cdef class LALRParserBuildingConflictException(ParserBuildingConflictException):
     cdef LALRState _state
-    cdef Symbol _symbol
     cdef LALRState _next
-    cdef Production _production
+    
+cdef class SLRShiftReduceConflictException(SLRParserBuildingConflictException):
+    pass
 
 cdef class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
     pass
 
 cdef class LALRReduceReduceConflictException(LALRParserBuildingConflictException):
+    cdef Production _old
+    cdef Production _new
+
+cdef class SLRReduceReduceConflictException(SLRParserBuildingConflictException):
     cdef Production _old
     cdef Production _new
 
@@ -33,6 +43,7 @@ cdef set[LALRItem] _get_kernel_items_lalr(LALRState state,Grammar g)
 cdef tuple[dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]],set[LR0State]] _build_lookaheads_propagation_edges(Grammar g)
 cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]],dict[tuple[str,LR0Item,Symbol,str,LR0Item],set[Symbol]]] _get_canonical_lalr_states(Grammar g,bint keep_edge_propagation_info=*)
 cdef tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],tuple]] _get_goto_action_tables_lalr(Grammar g)
+cdef tuple[dict[tuple[LR0State,Symbol],LR0State],dict[tuple[LR0State,Symbol],tuple]] _get_goto_action_tables_slr(Grammar g)
 cdef dict[tuple[str,Symbol],str] _plain_goto_table_lalr(dict[tuple[LALRState,Symbol],LALRState] table)
 cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_lalr(dict[tuple[LALRState,Symbol],tuple] table)
 cdef BottomUpParser _build_lalr_parser(Grammar g)
