@@ -270,7 +270,6 @@ class TestIntegrationParserBuilder:
         tokens = [number1,plus_token,number2,mul_token,number3,end]
         
         ast = parser.parse(tokens)
-        breakpoint()
         assert ast.symbol == E
         assert ast.line == plus_token.line and ast.column == plus_token.column
 
