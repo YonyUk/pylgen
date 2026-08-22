@@ -30,11 +30,13 @@ jobs:
       - name: Clean previous build
         run: |
           python setup.py clean --all
+          find . -name "*.so" -delete
           rm -rf build/*.so *.c
+          rm -rf build*.egg-info
       
       - name: Build extensions
         run: |
-          pip install -e .
+          python setup.py build_ext --inplace --force
 
 
       - name: Run tests with coverage
