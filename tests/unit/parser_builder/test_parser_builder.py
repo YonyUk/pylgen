@@ -1210,15 +1210,15 @@ class TestParserBuilder:
             assert not self.simulate_parsing(tokens,goto,action)
 
     def test_slr_goto_action_tables_correctness_2(self,arithmetic_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
-            G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
-    
-            goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
-            for _ in range(100):
-                tokens = self.generate_valid_tokens_string(G) + [end_symbol]
-                assert self.simulate_parsing(tokens,goto,action)
-                index = randint(0,len(tokens) - 1)
-                tokens.insert(index,tokens[index])
-                assert not self.simulate_parsing(tokens,goto,action)
+        G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
+
+        goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
+        for _ in range(100):
+            tokens = self.generate_valid_tokens_string(G) + [end_symbol]
+            assert self.simulate_parsing(tokens,goto,action)
+            index = randint(0,len(tokens) - 1)
+            tokens.insert(index,tokens[index])
+            assert not self.simulate_parsing(tokens,goto,action)
     
     def test_lalr_goto_action_tables_correctness_3(self,classic_lalr_1_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
         G,_ = classic_lalr_1_grammar
