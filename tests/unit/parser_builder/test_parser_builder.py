@@ -136,10 +136,14 @@ class TestParserBuilder:
             state = initial_state
             stack_states = [state]
             for symbol in stack:
-                if not (state,symbol) in goto:
+                if not (state,symbol) in action:
                     break
-                state = goto[(state,symbol)] # type: ignore
-                stack_states.append(state)
+                act = action[(state,symbol)] # type: ignore
+                if act[0] == BottomUpParserAction.SHIFT:
+                    state = goto[(state,symbol)] # type: ignore
+                    stack_states.append(state)
+                elif act[0] == BottomUpParserAction.REDUCE and len(tokens) > 0:
+                    break
             if len(tokens) == 0 or not (state,tokens[0]) in action:
                 break
             act = action[(state,tokens[0])] # type: ignore
@@ -148,7 +152,10 @@ class TestParserBuilder:
                 stack = stack[:-1*len(p.production)] + [p.head]
                 stack_states = stack_states[:-1*len(p.production)]
                 state = stack_states[-1]
-                if not (state,stack[-1]) in goto:
+                if not (state,stack[-1]) in action:
+                    break
+                act = action[(state,stack[-1])] # type: ignore
+                if act[0] != BottomUpParserAction.SHIFT:
                     break
                 state = goto[(state,stack[-1])] # type: ignore
                 stack_states.append(state)
