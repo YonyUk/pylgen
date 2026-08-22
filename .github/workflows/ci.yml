@@ -39,6 +39,6 @@ jobs:
           python setup.py build_ext --inplace --force
 
 
-      - name: Run tests with coverage
+      - name: Run tests
         run: |
-          pytest tests
+          python -m pytest tests
