@@ -689,6 +689,8 @@ cdef tuple[dict[tuple[LR0State,Symbol],LR0State],dict[tuple[LR0State,Symbol],tup
                     next_state = LR0State(_goto_lr0(state._items,symbol,g)) # type:ignore
                     next_state = states_by_hash[next_state._hash]
                     goto[key] = next_state
+                    action_value = (f'{BottomUpParserAction.SHIFT}',next_state)
+                    action[key] = action_value
             elif item._head in g._non_terminals:
                 for symbol in g.follow(item._head):
                     key = state,symbol
