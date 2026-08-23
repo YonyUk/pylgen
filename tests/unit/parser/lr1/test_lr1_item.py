@@ -1,4 +1,4 @@
-from pylgen.parser.lalr_parser import LALRItem
+from pylgen.parser.lr1_parser import LR1Item
 from pylgen.common.types import Symbol
 
 class TestLALRItem:
@@ -10,19 +10,19 @@ class TestLALRItem:
         p = Symbol('+',True)
         end = Symbol('$',True)
 
-        item = LALRItem(E,[E,p],[T])
+        item = LR1Item(E,[E,p],[T],end)
 
         assert item.head == E
         assert item.left == [E,p]
         assert item.right == [T]
-        assert len(item.lookaheads) == 0
+        assert item.lookahead == end
 
-        item = LALRItem(E,[E,p],[T],{end})
+        item = LR1Item(E,[E,end],[T],p)
 
         assert item.head == E
-        assert item.left == [E,p]
+        assert item.left == [E,end]
         assert item.right == [T]
-        assert item.lookaheads == { end }
+        assert item.lookahead == p
     
     def test_lalr_item_equality_1(self):
         E = Symbol('E')
@@ -30,10 +30,11 @@ class TestLALRItem:
 
         p = Symbol('+',True)
         end = Symbol('$',True)
+        m = Symbol('-',True)
 
-        item1 = LALRItem(E,[E,p],[T])
-        item2 = LALRItem(E,[E,p],[T],{end})
-        item3 = LALRItem(E,[E,p],[T],{end})
+        item1 = LR1Item(E,[E,p],[T],m)
+        item2 = LR1Item(E,[E,p],[T],end)
+        item3 = LR1Item(E,[E,p],[T],end)
 
         assert item1 != item2
         assert item1 != item3
@@ -44,10 +45,9 @@ class TestLALRItem:
 
         id_ = Symbol('id',True)
         eq = Symbol('=',True)
-        end = Symbol('$',True)
 
-        item1 = LALRItem(L,[],[id_],{eq,end})
-        item2 = LALRItem(L,[],[id_],{eq,end})
+        item1 = LR1Item(L,[],[id_],eq)
+        item2 = LR1Item(L,[],[id_],eq)
 
         assert item1 == item2
         assert item1 in {item2}
