@@ -60,6 +60,13 @@ parser_lr0_extensions = Extension(
         'pylgen/parser/lr0_parser.pyx'
     ]
 )
+
+parser_lr1_extensions = Extension(
+    name='pylgen.parser.lr1_parser',
+    sources=[
+        'pylgen/parser/lr1_parser.pyx'
+    ]
+)
 parser_lalr_extensions = Extension(
     name='pylgen.parser.lalr_parser',
     sources=[
@@ -144,6 +151,7 @@ setup(
         regex_extensions,
         regex_parser_extensions,
         parser_lr0_extensions,
+        parser_lr1_extensions,
         parser_lalr_extensions,
         parser_builder_extensions,
         parser_extensions,
