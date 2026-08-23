@@ -18,8 +18,7 @@ from ..parser.parser_type import ParserType
 
 from .table import (
     build_propagation_edges_table,
-    build_action_goto_lalr_tables,
-    build_action_goto_lalr_html_tables
+    build_action_goto_html_tables
 )
 
 CACHE_FILE:str | None = None
@@ -750,11 +749,7 @@ def lr_inspect_grammar(g:Grammar,type_:str | ParserType=ParserType.LALR1,**kwarg
     output_path = f'{filename}.html'
     html = ''
     conflicts = False
-    if type_ == ParserType.LALR1:
-        action,goto = build_action_goto_lalr_tables(g)
-        html,conflicts = build_action_goto_lalr_html_tables(g,action,goto)
-    else:
-        raise NotImplementedError()
+    html,conflicts = build_action_goto_html_tables(g,type_)
 
     if cache:
         cache = {}
