@@ -6,6 +6,7 @@ from pylgen.grammar.grammar import Grammar, Production
 from pylgen.parser.parser import BottomUpParser,ParsingException
 from pylgen.parser.bottom_up_parser_actions import BottomUpParserAction
 from pylgen.parser.lalr_parser import LALRState
+from pylgen.parser.lr0_parser import LR0State
 from pylgen.parser.parser_builder import ParserBuilder
 from pylgen.analysis.error import SemanticError
 
@@ -15,13 +16,19 @@ class TokenTypeEnum(TokenType):
 
 class TestIntegrationBottomUpParser:
 
-    def plain_goto_table(self,goto:Dict[Tuple[LALRState,Symbol],LALRState]) -> Dict[Tuple[str,Symbol],str]:
+    def plain_goto_table(
+            self,
+            goto:Dict[Tuple[LALRState,Symbol],LALRState] | Dict[Tuple[LR0State,Symbol],LR0State]
+        ) -> Dict[Tuple[str,Symbol],str]:
         result = {}
         for (state,symbol),to_state in goto.items():
             result[(f'I{state.index}',symbol)] = f'I{to_state.index}'
         return result
 
-    def plain_action_table(self,action:Dict[Tuple[LALRState,Symbol],Tuple[str,LALRState|Production]]) -> Dict[Tuple[str,Symbol],Tuple[str, str | Production]]:
+    def plain_action_table(
+            self,
+            action:Dict[Tuple[LALRState,Symbol],Tuple[str,LALRState|Production]] | Dict[Tuple[LR0State,Symbol],Tuple[str,LR0State|Production]]
+        ) -> Dict[Tuple[str,Symbol],Tuple[str, str | Production]]:
         result = {}
         for (state,symbol),(act,to_state_or_production) in action.items():
             if act == BottomUpParserAction.SHIFT:
@@ -119,7 +126,7 @@ class TestIntegrationBottomUpParser:
         assert ast.symbol == E
         assert ast.line == t2.line and ast.column == t2.column
     
-    def test_parsing_3(self):
+    def test_parsing_3_lalr(self):
         E = Symbol('E')
         T = Symbol('T')
         F = Symbol('F')
@@ -202,8 +209,92 @@ class TestIntegrationBottomUpParser:
         ast = parser.parse(tokens)
         assert ast.symbol == E
         assert ast.line == mul_token.line and ast.column == mul_token.column
+
+    def test_parsing_3_slr(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        F = Symbol('F')
+        plus = Symbol('+',True)
+        mul = Symbol('*',True)
+        n = Symbol('n',True)
+        lp = Symbol('(',True)
+        rp = Symbol(')',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += T,mul,F
+        G[T] += F,
+
+        G[F] += lp,E,rp
+        G[F] += n,
+
+        def reductor_E_plus_T(asts:ASTListView) -> AST:
+            return AST(E,asts[1].line,asts[1].column)
+        
+        def reductor_E_T(asts:ASTListView) -> AST:
+            return AST(E,asts[0].line,asts[0].column)
+        
+        def reductor_T_mul_F(asts:ASTListView) -> AST:
+            return AST(T,asts[1].line,asts[1].column)
+        
+        def reductor_T_F(asts:ASTListView) -> AST:
+            return AST(T,asts[0].line,asts[0].column)
+        
+        def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
+            return AST(F,asts[1].line,asts[1].column)
+        
+        def reductor_F_n(asts:ASTListView) -> AST:
+            return AST(F,asts[0].line,asts[0].column)
+
+        goto,action = ParserBuilder.get_goto_action_tables_slr(G)
+
+        plain_goto = self.plain_goto_table(goto)
+        plain_action = self.plain_action_table(action)
+
+        parser = BottomUpParser('I0',plain_goto,plain_action)
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[F])] = reductor_T_F
+        parser[Production(F,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(F,[n])] = reductor_F_n
+
+        lp_token = Token('(',TokenTypeEnum.SYMBOL,lp,1,1)
+        rp_token = Token(')',TokenTypeEnum.SYMBOL,rp,1,11)
+
+        number1 = Token('12',TokenTypeEnum.NUMBER,n,1,1)
+        plus_token = Token('+',TokenTypeEnum.SYMBOL,plus,1,4)
+        number2 = Token('13',TokenTypeEnum.NUMBER,n,1,6)
+
+        mul_token = Token('*',TokenTypeEnum.SYMBOL,mul,1,9)
+        number3 = Token('2',TokenTypeEnum.NUMBER,n,1,11)
+        end = Token(G.end_symbol.symbol,TokenTypeEnum.SYMBOL,G.end_symbol,1,12)
+
+        tokens = [number1,plus_token,number2,mul_token,number3,end]
+        
+        ast = parser.parse(tokens)
+        assert ast.symbol == E
+        assert ast.line == plus_token.line and ast.column == plus_token.column
+
+        number1 = Token('12',TokenTypeEnum.NUMBER,n,1,3)
+        plus_token = Token('+',TokenTypeEnum.SYMBOL,plus,1,6)
+        number2 = Token('13',TokenTypeEnum.NUMBER,n,1,8)
+        mul_token = Token('*',TokenTypeEnum.SYMBOL,mul,1,13)
+        number3 = Token('2',TokenTypeEnum.NUMBER,n,1,15)
+        end = Token(G.end_symbol.symbol,TokenTypeEnum.SYMBOL,G.end_symbol,1,16)
+
+        tokens = [lp_token,number1,plus_token,number2,rp_token,mul_token,number3,end]
+
+        parser.reset()
+
+        ast = parser.parse(tokens)
+        assert ast.symbol == E
+        assert ast.line == mul_token.line and ast.column == mul_token.column
     
-    def test_parsing_error_collecting_1(self):
+    def test_parsing_error_collecting_1_lalr(self):
         E = Symbol('E')
         T = Symbol('T')
         F = Symbol('F')
@@ -274,8 +365,80 @@ class TestIntegrationBottomUpParser:
         error = next(iter(parser.errors))
         assert error.line == 1
         assert error.column == 4
+
+    def test_parsing_error_collecting_1_slr(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        F = Symbol('F')
+        plus = Symbol('+',True)
+        mul = Symbol('*',True)
+        n = Symbol('n',True)
+        lp = Symbol('(',True)
+        rp = Symbol(')',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += T,mul,F
+        G[T] += F,
+
+        G[F] += lp,E,rp
+        G[F] += n,
+
+        def reductor_E_plus_T(asts:ASTListView) -> AST:
+            return AST(E,asts[1].line,asts[1].column)
+        
+        def reductor_E_T(asts:ASTListView) -> AST:
+            return AST(E,asts[0].line,asts[0].column)
+        
+        def reductor_T_mul_F(asts:ASTListView) -> AST:
+            return AST(T,asts[1].line,asts[1].column)
+        
+        def reductor_T_F(asts:ASTListView) -> AST:
+            return AST(T,asts[0].line,asts[0].column)
+        
+        def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
+            return AST(F,asts[1].line,asts[1].column)
+        
+        def reductor_F_n(asts:ASTListView) -> AST:
+            return AST(F,asts[0].line,asts[0].column)
+
+        goto,action = ParserBuilder.get_goto_action_tables_slr(G)
+
+        plain_goto = self.plain_goto_table(goto)
+        plain_action = self.plain_action_table(action)
+
+        parser = BottomUpParser('I0',plain_goto,plain_action)
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[F])] = reductor_T_F
+        parser[Production(F,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(F,[n])] = reductor_F_n
+
+        number1 = Token('12',TokenTypeEnum.NUMBER,n,1,1)
+        plus_token = Token('+',TokenTypeEnum.SYMBOL,plus,1,4)
+        number2 = Token('13',TokenTypeEnum.NUMBER,n,1,6)
+
+        mul_token = Token('*',TokenTypeEnum.SYMBOL,mul,1,9)
+        number3 = Token('2',TokenTypeEnum.NUMBER,n,1,11)
+        end = Token(G.end_symbol.symbol,TokenTypeEnum.SYMBOL,G.end_symbol,1,12)
+
+        tokens = [number1,plus_token,plus_token,number2,mul_token,number3,end]
+
+        try:
+            ast = parser.parse(tokens)
+        except ParsingException:
+            pass
+        
+        assert len(parser.errors) == 1
+        error = next(iter(parser.errors))
+        assert error.line == 1
+        assert error.column == 4
     
-    def test_parsing_error_collecting_2(self):
+    def test_parsing_error_collecting_2_lalr(self):
         E = Symbol('E')
         T = Symbol('T')
         F = Symbol('F')
@@ -347,7 +510,79 @@ class TestIntegrationBottomUpParser:
         
         assert len(parser.errors) == 2
 
-    def test_parsing_error_collecting_3(self):
+    def test_parsing_error_collecting_2_slr(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        F = Symbol('F')
+        plus = Symbol('+',True)
+        mul = Symbol('*',True)
+        n = Symbol('n',True)
+        lp = Symbol('(',True)
+        rp = Symbol(')',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += T,mul,F
+        G[T] += F,
+
+        G[F] += lp,E,rp
+        G[F] += n,
+
+        def reductor_E_plus_T(asts:ASTListView) -> AST:
+            return AST(E,asts[1].line,asts[1].column)
+        
+        def reductor_E_T(asts:ASTListView) -> AST:
+            return AST(E,asts[0].line,asts[0].column)
+        
+        def reductor_T_mul_F(asts:ASTListView) -> AST:
+            return AST(T,asts[1].line,asts[1].column)
+        
+        def reductor_T_F(asts:ASTListView) -> AST:
+            return AST(T,asts[0].line,asts[0].column)
+        
+        def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
+            return AST(F,asts[1].line,asts[1].column)
+        
+        def reductor_F_n(asts:ASTListView) -> AST:
+            return AST(F,asts[0].line,asts[0].column)
+
+        goto,action = ParserBuilder.get_goto_action_tables_slr(G)
+
+        plain_goto = self.plain_goto_table(goto)
+        plain_action = self.plain_action_table(action)
+
+        parser = BottomUpParser('I0',plain_goto,plain_action)
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[F])] = reductor_T_F
+        parser[Production(F,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(F,[n])] = reductor_F_n
+
+        lp_token = Token('(',TokenTypeEnum.SYMBOL,lp,1,1)
+        rp_token = Token(')',TokenTypeEnum.SYMBOL,rp,1,11)
+
+        number1 = Token('12',TokenTypeEnum.NUMBER,n,1,1)
+        plus_token = Token('+',TokenTypeEnum.SYMBOL,plus,1,4)
+        number2 = Token('13',TokenTypeEnum.NUMBER,n,1,6)
+
+        mul_token = Token('*',TokenTypeEnum.SYMBOL,mul,1,9)
+        number3 = Token('2',TokenTypeEnum.NUMBER,n,1,11)
+        end = Token(G.end_symbol.symbol,TokenTypeEnum.SYMBOL,G.end_symbol,1,12)
+
+        tokens = [number1,plus_token,plus_token,number2,mul_token,mul_token,number3,end]
+
+        try:
+            ast = parser.parse(tokens)
+        except ParsingException:
+            pass
+        
+        assert len(parser.errors) == 2
+
+    def test_parsing_error_collecting_3_lalr(self):
         E = Symbol('E')
         T = Symbol('T')
         F = Symbol('F')
@@ -425,7 +660,85 @@ class TestIntegrationBottomUpParser:
         assert len(parser.errors) == 1
         assert ast is not None # type:ignore
 
-    def test_parsing_error_collecting_4(self):
+    def test_parsing_error_collecting_3_slr(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        F = Symbol('F')
+        plus = Symbol('+',True)
+        mul = Symbol('*',True)
+        n = Symbol('n',True)
+        lp = Symbol('(',True)
+        rp = Symbol(')',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += T,mul,F
+        G[T] += F,
+
+        G[F] += lp,E,rp
+        G[F] += n,
+
+        def reductor_E_plus_T(asts:ASTListView) -> AST:
+            return AST(E,asts[1].line,asts[1].column)
+        
+        def reductor_E_T(asts:ASTListView) -> AST:
+            return AST(E,asts[0].line,asts[0].column)
+        
+        def reductor_T_mul_F(asts:ASTListView) -> AST:
+            return AST(T,asts[1].line,asts[1].column)
+        
+        def reductor_T_F(asts:ASTListView) -> AST:
+            return AST(T,asts[0].line,asts[0].column)
+        
+        def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
+            return AST(F,asts[1].line,asts[1].column)
+        
+        def reductor_F_n(asts:ASTListView) -> AST:
+            token = asts[0]
+            if isinstance(token,Token):
+                if int(token.text) < 0:
+                    error = SemanticError('numbers cannot be less than 0',token.line,token.column)
+                    return ErrorAST(F,error.line,error.column,{error})
+            return AST(F,asts[0].line,asts[0].column)
+
+        goto,action = ParserBuilder.get_goto_action_tables_slr(G)
+
+        plain_goto = self.plain_goto_table(goto)
+        plain_action = self.plain_action_table(action)
+
+        parser = BottomUpParser('I0',plain_goto,plain_action)
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[F])] = reductor_T_F
+        parser[Production(F,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(F,[n])] = reductor_F_n
+
+        lp_token = Token('(',TokenTypeEnum.SYMBOL,lp,1,1)
+        rp_token = Token(')',TokenTypeEnum.SYMBOL,rp,1,11)
+
+        number1 = Token('-12',TokenTypeEnum.NUMBER,n,1,1)
+        plus_token = Token('+',TokenTypeEnum.SYMBOL,plus,1,4)
+        number2 = Token('13',TokenTypeEnum.NUMBER,n,1,6)
+
+        mul_token = Token('*',TokenTypeEnum.SYMBOL,mul,1,9)
+        number3 = Token('2',TokenTypeEnum.NUMBER,n,1,11)
+        end = Token(G.end_symbol.symbol,TokenTypeEnum.SYMBOL,G.end_symbol,1,12)
+
+        tokens = [number1,plus_token,number2,mul_token,number3,end]
+
+        try:
+            ast = parser.parse(tokens)
+        except ParsingException:
+            pass
+
+        assert len(parser.errors) == 1
+        assert ast is not None # type:ignore
+
+    def test_parsing_error_collecting_4_lalr(self):
         E = Symbol('E')
         T = Symbol('T')
         F = Symbol('F')
@@ -470,6 +783,84 @@ class TestIntegrationBottomUpParser:
             return AST(F,asts[0].line,asts[0].column)
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
+
+        plain_goto = self.plain_goto_table(goto)
+        plain_action = self.plain_action_table(action)
+
+        parser = BottomUpParser('I0',plain_goto,plain_action)
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[F])] = reductor_T_F
+        parser[Production(F,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(F,[n])] = reductor_F_n
+
+        lp_token = Token('(',TokenTypeEnum.SYMBOL,lp,1,1)
+        rp_token = Token(')',TokenTypeEnum.SYMBOL,rp,1,11)
+
+        number1 = Token('-12',TokenTypeEnum.NUMBER,n,1,1)
+        plus_token = Token('+',TokenTypeEnum.SYMBOL,plus,1,4)
+        number2 = Token('-13',TokenTypeEnum.NUMBER,n,1,6)
+
+        mul_token = Token('*',TokenTypeEnum.SYMBOL,mul,1,9)
+        number3 = Token('2',TokenTypeEnum.NUMBER,n,1,11)
+        end = Token(G.end_symbol.symbol,TokenTypeEnum.SYMBOL,G.end_symbol,1,12)
+
+        tokens = [number1,plus_token,number2,mul_token,number3,end]
+
+        try:
+            ast = parser.parse(tokens)
+        except ParsingException:
+            pass
+
+        assert len(parser.errors) == 2
+        assert ast is not None # type:ignore
+
+    def test_parsing_error_collecting_4_slr(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        F = Symbol('F')
+        plus = Symbol('+',True)
+        mul = Symbol('*',True)
+        n = Symbol('n',True)
+        lp = Symbol('(',True)
+        rp = Symbol(')',True)
+
+        G = Grammar(E,'$')
+
+        G[E] += E,plus,T
+        G[E] += T,
+
+        G[T] += T,mul,F
+        G[T] += F,
+
+        G[F] += lp,E,rp
+        G[F] += n,
+
+        def reductor_E_plus_T(asts:ASTListView) -> AST:
+            return AST(E,asts[1].line,asts[1].column)
+        
+        def reductor_E_T(asts:ASTListView) -> AST:
+            return AST(E,asts[0].line,asts[0].column)
+        
+        def reductor_T_mul_F(asts:ASTListView) -> AST:
+            return AST(T,asts[1].line,asts[1].column)
+        
+        def reductor_T_F(asts:ASTListView) -> AST:
+            return AST(T,asts[0].line,asts[0].column)
+        
+        def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
+            return AST(F,asts[1].line,asts[1].column)
+        
+        def reductor_F_n(asts:ASTListView) -> AST:
+            token = asts[0]
+            if isinstance(token,Token):
+                if int(token.text) < 0:
+                    error = SemanticError('numbers cannot be less than 0',token.line,token.column)
+                    return ErrorAST(F,error.line,error.column,{error})
+            return AST(F,asts[0].line,asts[0].column)
+
+        goto,action = ParserBuilder.get_goto_action_tables_slr(G)
 
         plain_goto = self.plain_goto_table(goto)
         plain_action = self.plain_action_table(action)
