@@ -10,6 +10,7 @@ from .lalr_parser cimport LALRState
 from .bottom_up_parser_actions import BottomUpParserAction
 
 _closures:dict[tuple[str,frozenset],set[LR0Item]] = {}
+_closures_lr1:dict[tuple[str,frozenset],set[LR1Item]] = {}
 _closures_lalr:dict[tuple[str,frozenset],set[LALRItem]] = {}
 
 cdef class ParserBuildingConflictException(Exception):
@@ -23,6 +24,20 @@ cdef class SLRParserBuildingConflictException(ParserBuildingConflictException):
     
     @property
     def state(self) -> LR0State:
+        return self._state
+    
+    @property
+    def symbol(self) -> Symbol:
+        return self._symbol
+
+cdef class LR1ParserBuildingConflictException(ParserBuildingConflictException):
+
+    def __init__(self, state:LR1State,symbol:Symbol):
+        self._state = state
+        self._symbol = symbol
+    
+    @property
+    def state(self) -> LR1State:
         return self._state
     
     @property
@@ -58,6 +73,21 @@ cdef class SLRShiftReduceConflictException(SLRParserBuildingConflictException):
     def production(self) -> Production:
         return self._production
 
+cdef class LR1ShiftReduceConflictException(LR1ParserBuildingConflictException):
+
+    def __init__(self, state: LR1State, symbol: Symbol,next_state:LR1State,production:Production):
+        super().__init__(state, symbol)
+        self._next = next_state
+        self._production = production
+    
+    @property
+    def next_state(self) -> LR1State:
+        return self._next
+    
+    @property
+    def production(self) -> Production:
+        return self._production
+
 cdef class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
     
     def __init__(self, state: LALRState, symbol: Symbol,next_state:LALRState,production:Production):
@@ -83,6 +113,21 @@ cdef class SLRReduceReduceConflictException(SLRParserBuildingConflictException):
     @property
     def old(self) -> Production:
         return  self._old
+    
+    @property
+    def new_(self) -> Production:
+        return self._new
+
+cdef class LR1ReduceReduceConflictException(LR1ParserBuildingConflictException):
+
+    def __init__(self, state: LR1State, symbol: Symbol, old:Production,new_:Production):
+        super().__init__(state, symbol)
+        self._new = new_
+        self._old = old
+    
+    @property
+    def old(self) -> Production:
+        return self._old
     
     @property
     def new_(self) -> Production:
@@ -122,6 +167,17 @@ cdef class ParserBuilder:
         return _closure_lr0(items,g)
     
     @staticmethod
+    def closure_lr1(items:Set[LR1Item],g:Grammar) -> Set[LR1Item]:
+        '''
+        Args:
+            items (Set[LR1Item])
+        
+        Returns:
+            Set[LR1Item]: the closure of the given set
+        '''
+        return _closure_lr1(items,g)
+    
+    @staticmethod
     def closure_lalr(items:Set[LALRItem],g:Grammar) -> Set[LALRItem]:
         '''
         Args:
@@ -144,6 +200,19 @@ cdef class ParserBuilder:
             Set[LR0Item]: The next state for the given state and the symbol x
         '''
         return _goto_lr0(items,x,g)
+
+    @staticmethod
+    def goto_lr1(items:Set[LR1Item],x:Symbol,g:Grammar) -> Set[LR1Item]:
+        '''
+        Args:
+            items (Set[LR1Item])
+            x (Symbol)
+            g (Grammar)
+        
+        Returns:
+            Set[LR1Item]: The next state for the given state and the symbol x
+        '''
+        return _goto_lr1(items,x,g)
     
     @staticmethod
     def goto_lalr(items:Set[LALRItem],x:Symbol,g:Grammar) -> Set[LALRItem]:
@@ -170,25 +239,46 @@ cdef class ParserBuilder:
         return _get_canonical_lr0_states(g)
     
     @staticmethod
+    def get_canonical_lr1_states(g:Grammar) -> Set[LR1State]:
+        '''
+        Args:
+            g (Grammar)
+        
+        Returns:
+            Set[LR1State]: the set of lr1 states canonical
+        '''
+        return _get_canonical_lr1_states(g)
+
+    @staticmethod
     def get_kernel_items_lr0(state:LR0State, g:Grammar) -> Set[LR0Item]:
         '''
         Args:
             state (LR0State)
-            start (Symbol): start symbol of the grammar
-                this is to accept the item S' -> . S
+            g (Grammar)
         
         Returns:
             Set[LR0Item]: the items kernel of the given state
         '''
         return _get_kernel_items_lr0(state,g)
+
+    @staticmethod
+    def get_kernel_items_lr1(state:LR1State, g:Grammar) -> Set[LR1Item]:
+        '''
+        Args:
+            state (LR1State)
+            g (Grammar)
+        
+        Returns:
+            Set[LR1Item]: the items kernel of the given state
+        '''
+        return _get_kernel_items_lr1(state,g)
     
     @staticmethod
     def get_kernel_items_lalr(state:LALRState, g:Grammar) -> Set[LALRItem]:
         '''
         Args:
             state (LALRState)
-            start (Symbol): start symbol of the grammar
-                this is to accept the item S' -> . S
+            g (Grammar)
         
         Returns:
             Set[LALRItem]: the items kernel of the given state
@@ -230,6 +320,18 @@ cdef class ParserBuilder:
         return _get_goto_action_tables_slr(g)
 
     @staticmethod
+    def get_goto_action_tables_lr1(g:Grammar) -> tuple[dict[tuple[LR1State,Symbol],LR1State],dict[tuple[LR1State,Symbol],tuple[str,LR1State | Production]]]:
+        '''
+        Args:
+            g (Grammar)
+        
+        Returns:
+            Tuple[Dict[Tuple[LR1State,Symbol],LR1State],Dict[Tuple[LR1State,Symbol],Tuple[str,LR1State | Production]]]:
+                The ACTION and GOTO tables for a LR(1) parser from the given grammar in a tuple (GOTO,ACTION)
+        '''
+        return _get_goto_action_tables_lr1(g)
+
+    @staticmethod
     def get_goto_action_tables_lalr(g:Grammar) -> tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],tuple[str,LALRState | Production]]]:
         '''
         Args:
@@ -255,6 +357,8 @@ cdef class ParserBuilder:
             return _build_lalr_parser(g)
         elif type_ == ParserType.SLR:
             return _build_slr_parser(g)
+        elif type_ == ParserType.LR1:
+            return _build_lr1_parser(g)
         raise NotImplementedError()
     
     @staticmethod
@@ -271,6 +375,8 @@ cdef class ParserBuilder:
             return _build_lalr_parser_from_attributed(g)
         elif type_ == ParserType.SLR:
             return _build_slr_parser_from_attributed(g)
+        elif type_ == ParserType.LR1:
+            return _build_lr1_parser_from_attributed(g)
         raise NotImplementedError()
     
     @staticmethod
@@ -314,6 +420,35 @@ cdef set[LR0Item] _closure_lr0(set[LR0Item] items,Grammar g):
                         worklist.append(new_item)
     
     _closures[key] = result
+    return result
+
+cdef set[LR1Item] _closure_lr1(set[LR1Item] items,Grammar g):
+    cdef LR1Item item,new_item
+    cdef Production production
+    cdef Symbol head,symbol
+    cdef set[LR1Item] result = items.copy()
+    cdef list[LR1Item] worklist = list(items)
+    cdef tuple[str,frozenset] key
+
+    key = (g._id(),frozenset(items))
+
+    # checks for a precomputed value
+    if key in _closures_lr1:
+        return _closures_lr1[key]
+
+    while worklist:
+        item = worklist.pop()
+        if len(item._right) > 0:
+            head = item._right[0]
+            if not head._is_terminal:
+                for production in g._productions_by_symbol[head]:
+                    for symbol in g.first(item._right[1:] + [item._lookahead]):
+                        new_item = LR1Item(head,[],production._production,symbol) # type:ignore
+                        if not new_item in result:
+                            result.add(new_item)
+                            worklist.append(new_item)
+    
+    _closures_lr1[key] = result
     return result
 
 cdef set[LALRItem] _closure_lalr(set[LALRItem] items,Grammar g):
@@ -382,6 +517,18 @@ cdef set[LR0Item] _goto_lr0(set[LR0Item] items,Symbol x,Grammar g):
     
     return result
 
+cdef set[LR1Item] _goto_lr1(set[LR1Item] items,Symbol x,Grammar g):
+    cdef Symbol head
+    cdef LR1Item item,new_item
+    cdef set[LR1Item] result = set()
+
+    for item in items:
+        if len(item._right) > 0 and item._right[0] == x:
+            new_item = LR1Item(item._head,item._left + [x],item._right[1:],item._lookahead) # type:ignore
+            result.update(_closure_lr1({new_item},g))
+    
+    return result
+
 cdef set[LALRItem] _goto_lalr(set[LALRItem] items,Symbol x,Grammar g):
     cdef Symbol head
     cdef LALRItem item,new_item
@@ -419,9 +566,46 @@ cdef set[LR0State] _get_canonical_lr0_states(Grammar g):
     
     return result
 
+cdef set[LR1State] _get_canonical_lr1_states(Grammar g):
+    cdef Grammar augmented = _augment_grammar(g)
+    cdef LR1Item start = LR1Item(augmented._start_symbol,[],[g._start_symbol],g._end_symbol) # type:ignore
+    cdef LR1State state,new_state
+    cdef set[LR1State] result = { LR1State(_closure_lr1({start},augmented)) } # type:ignore
+    cdef list[LR1State] worklist = list(result)
+    cdef set[LR1Item] items
+    cdef Symbol symbol
+
+    while worklist:
+
+        state = worklist.pop()
+
+        for symbol in g._symbols:
+            if symbol == g._end_symbol:
+                continue
+            items = _goto_lr1(state._items,symbol,g)
+            if len(items) > 0:
+                new_state = LR1State(items,len(result)) # type:ignore
+                if not new_state in result:
+                    result.add(new_state)
+                    worklist.append(new_state)
+    
+    return result
+
 cdef set[LR0Item] _get_kernel_items_lr0(LR0State state,Grammar g):
     cdef LR0Item item
     cdef set[LR0Item] result = set()
+
+    for item in state._items:
+        if not item._head in g._non_terminals and len(item._left) == 0:
+            result.add(item)
+        if len(item._left) > 0:
+            result.add(item)
+    
+    return result
+
+cdef set[LR1Item] _get_kernel_items_lr1(LR1State state,Grammar g):
+    cdef LR1Item item
+    cdef set[LR1Item] result = set()
 
     for item in state._items:
         if not item._head in g._non_terminals and len(item._left) == 0:
@@ -711,6 +895,61 @@ cdef tuple[dict[tuple[LR0State,Symbol],LR0State],dict[tuple[LR0State,Symbol],tup
     
     return goto,action
 
+cdef tuple[dict[tuple[LR1State,Symbol],LR1State],dict[tuple[LR1State,Symbol],tuple]] _get_goto_action_tables_lr1(Grammar g):
+    cdef dict[tuple[LR1State,Symbol],LR1State] goto = {}
+    cdef dict[tuple[LR1State,Symbol],tuple] action = {}
+    cdef set[LR1State] states = _get_canonical_lr1_states(g)
+    cdef LR1State state,next_state
+    cdef LR1Item item
+    cdef Symbol symbol
+    cdef dict[int,LR1State] states_by_hash = { state._hash: state for state in states }
+    cdef tuple[LR1State,Symbol] key
+    cdef tuple action_value
+    cdef str action_type
+    cdef Production production
+
+    for state in states:
+        for item in state._items:
+            if len(item._right) > 0:
+                symbol = item._right[0]
+                key = state,symbol
+                if symbol._is_terminal:
+                    next_state = LR1State(_goto_lr1(state._items,symbol,g)) # type:ignore
+                    next_state = states_by_hash[next_state._hash]
+                    goto[key] = next_state
+                    if key in action:
+                        action_value = action[key]
+                        action_type = action_value[0]
+                        if action_type != f'{BottomUpParserAction.SHIFT}':
+                            raise LR1ShiftReduceConflictException(state,symbol,next_state,action_value[1])
+                    else:
+                        action_value = (f'{BottomUpParserAction.SHIFT}',next_state)
+                        action[key] = action_value
+                else:
+                    next_state = LR1State(_goto_lr1(state._items,symbol,g)) # type:ignore
+                    next_state = states_by_hash[next_state._hash]
+                    goto[key] = next_state
+                    action_value = (f'{BottomUpParserAction.SHIFT}',next_state)
+                    action[key] = action_value
+            elif item._head in g._non_terminals:
+                key = state,item._lookahead
+                production = Production(item._head,item._left) # type:ignore
+                if key in action:
+                    action_value = action[key]
+                    action_type = action_value[0]
+                    if action_type != f'{BottomUpParserAction.REDUCE}':
+                        raise LR1ShiftReduceConflictException(state,item._lookahead,action_value[1],production)
+                    elif action_value[1] != production:
+                        raise LR1ReduceReduceConflictException(state,item._lookahead,action_value[1],production)
+                else:
+                    action_value = (f'{BottomUpParserAction.REDUCE}',production)
+                    action[key] = action_value
+            else:
+                key = state,g._end_symbol
+                action[key] = (f'{BottomUpParserAction.ACCEPT}',None)
+    
+    return goto,action
+
 cdef dict[tuple[str,Symbol],str] _plain_goto_table_lalr(dict[tuple[LALRState,Symbol],LALRState] table):
     cdef dict[tuple[str,Symbol],str] result = {}
     cdef LALRState from_state,to_state
@@ -735,6 +974,21 @@ cdef dict[tuple[str,Symbol],str] _plain_goto_table_slr(dict[tuple[LR0State,Symbo
 
     for key,to_state in table.items():
         from_state = <LR0State>key[0]
+        symbol = <Symbol>key[1]
+        new_key = (f'I{from_state._index}',symbol)
+        result[new_key] = f'I{to_state._index}'
+
+    return result
+
+cdef dict[tuple[str,Symbol],str] _plain_goto_table_lr1(dict[tuple[LR1State,Symbol],LR1State] table):
+    cdef dict[tuple[str,Symbol],str] result = {}
+    cdef LR1State from_state,to_state
+    cdef Symbol symbol
+    cdef tuple[LR1State,Symbol] key
+    cdef tuple[str,Symbol] new_key
+
+    for key,to_state in table.items():
+        from_state = <LR1State>key[0]
         symbol = <Symbol>key[1]
         new_key = (f'I{from_state._index}',symbol)
         result[new_key] = f'I{to_state._index}'
@@ -767,7 +1021,7 @@ cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_slr(dict[tupl
     cdef dict[tuple[str,Symbol],tuple[str,object]] result = {}
     cdef LR0State from_state,to_state
     cdef Symbol symbol
-    cdef tuple[LALRState,Symbol] key
+    cdef tuple[LR0State,Symbol] key
     cdef tuple value,new_value
     cdef tuple[str,Symbol] new_key
     cdef Production production
@@ -778,6 +1032,28 @@ cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_slr(dict[tupl
         new_key = (f'I{from_state._index}',symbol)
         if value[0] == BottomUpParserAction.SHIFT:
             to_state = <LR0State>value[1]
+            new_value = (value[0],f'I{to_state._index}')
+        else:
+            new_value = (value[0],value[1])
+        result[new_key] = new_value
+    
+    return result
+
+cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_lr1(dict[tuple[LR1State,Symbol],tuple] table):
+    cdef dict[tuple[str,Symbol],tuple[str,object]] result = {}
+    cdef LR1State from_state,to_state
+    cdef Symbol symbol
+    cdef tuple[LR1State,Symbol] key
+    cdef tuple value,new_value
+    cdef tuple[str,Symbol] new_key
+    cdef Production production
+
+    for key,value in table.items():
+        from_state = <LR1State>key[0]
+        symbol = <Symbol>key[1]
+        new_key = (f'I{from_state._index}',symbol)
+        if value[0] == BottomUpParserAction.SHIFT:
+            to_state = <LR1State>value[1]
             new_value = (value[0],f'I{to_state._index}')
         else:
             new_value = (value[0],value[1])
@@ -817,6 +1093,22 @@ cdef BottomUpParser _build_slr_parser(Grammar g):
     result = BottomUpParser('I0',plain_goto_table,plain_action_table) # type:ignore
     return result
 
+cdef BottomUpParser _build_lr1_parser(Grammar g):
+    cdef dict[tuple[LR1State,Symbol],LR1State] goto_table
+    cdef dict[tuple[LR1State,Symbol],tuple] action_table
+    cdef dict[tuple[str,Symbol],str] plain_goto_table
+    cdef dict[tuple[str,Symbol],tuple[str,object]] plain_action_table
+    cdef Symbol non_terminal
+    cdef BottomUpParser result
+
+    goto_table,action_table = _get_goto_action_tables_lr1(g)
+
+    plain_goto_table = _plain_goto_table_lr1(goto_table)
+    plain_action_table = _plain_action_table_lr1(action_table)
+
+    result = BottomUpParser('I0',plain_goto_table,plain_action_table) # type:ignore
+    return result
+
 cdef BottomUpParser _build_lalr_parser_from_attributed(AttributedGrammar g):
     cdef Production production
     cdef set[Production] productions
@@ -832,6 +1124,17 @@ cdef BottomUpParser _build_slr_parser_from_attributed(AttributedGrammar g):
     cdef Production production
     cdef set[Production] productions
     cdef BottomUpParser result = _build_slr_parser(g)
+
+    for productions in g._productions_by_symbol.values():
+        for production in productions:
+            result._set_reductor(production,g.get_reductor(production))
+    
+    return result
+
+cdef BottomUpParser _build_lr1_parser_from_attributed(AttributedGrammar g):
+    cdef Production production
+    cdef set[Production] productions
+    cdef BottomUpParser result = _build_lr1_parser(g)
 
     for productions in g._productions_by_symbol.values():
         for production in productions:

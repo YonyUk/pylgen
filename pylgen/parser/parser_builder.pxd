@@ -2,6 +2,7 @@ from ..grammar.grammar cimport Grammar,AttributedGrammar,Production
 from ..common.types cimport Symbol
 from .parser cimport BottomUpParser
 from .lr0_parser cimport LR0Item,LR0State
+from .lr1_parser cimport LR1Item,LR1State
 from .lalr_parser cimport LALRState,LALRItem
 
 cdef class ParserBuildingConflictException(Exception):
@@ -12,11 +13,18 @@ cdef class SLRParserBuildingConflictException(ParserBuildingConflictException):
     cdef LR0State _state
     cdef LR0State _next
 
+cdef class LR1ParserBuildingConflictException(ParserBuildingConflictException):
+    cdef LR1State _state
+    cdef LR1State _next
+
 cdef class LALRParserBuildingConflictException(ParserBuildingConflictException):
     cdef LALRState _state
     cdef LALRState _next
     
 cdef class SLRShiftReduceConflictException(SLRParserBuildingConflictException):
+    pass
+
+cdef class LR1ShiftReduceConflictException(LR1ParserBuildingConflictException):
     pass
 
 cdef class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
@@ -30,25 +38,38 @@ cdef class SLRReduceReduceConflictException(SLRParserBuildingConflictException):
     cdef Production _old
     cdef Production _new
 
+cdef class LR1ReduceReduceConflictException(LR1ParserBuildingConflictException):
+    cdef Production _old
+    cdef Production _new
+
 cdef class ParserBuilder:
     pass
 
 cdef set[LR0Item] _closure_lr0(set[LR0Item] items,Grammar g)
+cdef set[LR1Item] _closure_lr1(set[LR1Item] items,Grammar g)
 cdef set[LALRItem] _closure_lalr(set[LALRItem] items,Grammar g)
 cdef set[LR0Item] _goto_lr0(set[LR0Item] items,Symbol x,Grammar g)
+cdef set[LR1Item] _goto_lr1(set[LR1Item] items,Symbol x,Grammar g)
 cdef set[LALRItem] _goto_lalr(set[LALRItem] items,Symbol x,Grammar g)
 cdef set[LR0State] _get_canonical_lr0_states(Grammar g)
+cdef set[LR1State] _get_canonical_lr1_states(Grammar g)
 cdef set[LR0Item] _get_kernel_items_lr0(LR0State state,Grammar g)
+cdef set[LR1Item] _get_kernel_items_lr1(LR1State state,Grammar g)
 cdef set[LALRItem] _get_kernel_items_lalr(LALRState state,Grammar g)
 cdef tuple[dict[LR0State,dict[tuple[LR0Item,Symbol],tuple[LR0State,LR0Item]]],set[LR0State]] _build_lookaheads_propagation_edges(Grammar g)
 cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]],dict[tuple[str,LR0Item,Symbol,str,LR0Item],set[Symbol]]] _get_canonical_lalr_states(Grammar g,bint keep_edge_propagation_info=*)
 cdef tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],tuple]] _get_goto_action_tables_lalr(Grammar g)
 cdef tuple[dict[tuple[LR0State,Symbol],LR0State],dict[tuple[LR0State,Symbol],tuple]] _get_goto_action_tables_slr(Grammar g)
+cdef tuple[dict[tuple[LR1State,Symbol],LR1State],dict[tuple[LR1State,Symbol],tuple]] _get_goto_action_tables_lr1(Grammar g)
 cdef dict[tuple[str,Symbol],str] _plain_goto_table_lalr(dict[tuple[LALRState,Symbol],LALRState] table)
 cdef dict[tuple[str,Symbol],str] _plain_goto_table_slr(dict[tuple[LR0State,Symbol],LR0State] table)
+cdef dict[tuple[str,Symbol],str] _plain_goto_table_lr1(dict[tuple[LR1State,Symbol],LR1State] table)
 cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_lalr(dict[tuple[LALRState,Symbol],tuple] table)
 cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_slr(dict[tuple[LR0State,Symbol],tuple] table)
+cdef dict[tuple[str,Symbol],tuple[str,object]] _plain_action_table_lr1(dict[tuple[LR1State,Symbol],tuple] table)
 cdef BottomUpParser _build_lalr_parser(Grammar g)
 cdef BottomUpParser _build_slr_parser(Grammar g)
+cdef BottomUpParser _build_lr1_parser(Grammar g)
 cdef BottomUpParser _build_lalr_parser_from_attributed(AttributedGrammar g)
 cdef BottomUpParser _build_slr_parser_from_attributed(AttributedGrammar g)
+cdef BottomUpParser _build_lr1_parser_from_attributed(AttributedGrammar g)

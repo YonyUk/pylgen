@@ -3,6 +3,7 @@ from typing import Dict, Set, Tuple
 from ..common.types import Symbol
 from ..grammar.grammar import Grammar,Production,AttributedGrammar
 from .lr0_parser import LR0Item,LR0State
+from .lr1_parser import LR1Item,LR1State
 from .lalr_parser import LALRItem,LALRState
 from .parser import Parser
 from .parser_type import ParserType
@@ -16,6 +17,16 @@ class SLRParserBuildingConflictException(ParserBuildingConflictException):
     
     @property
     def state(self) -> LR0State: ...
+    
+    @property
+    def symbol(self) -> Symbol: ...
+
+class LR1ParserBuildingConflictException(ParserBuildingConflictException):
+
+    def __init__(self, state:LR1State,symbol:Symbol): ...
+    
+    @property
+    def state(self) -> LR1State: ...
     
     @property
     def symbol(self) -> Symbol: ...
@@ -40,6 +51,16 @@ class SLRShiftReduceConflictException(SLRParserBuildingConflictException):
     @property
     def production(self) -> Production: ...
 
+class LR1ShiftReduceConflictException(LR1ParserBuildingConflictException):
+
+    def __init__(self, state: LR1State, symbol: Symbol,next_state:LR1State,production:Production): ...
+    
+    @property
+    def next_state(self) -> LR1State: ...
+    
+    @property
+    def production(self) -> Production: ...
+
 class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
     
     def __init__(self, state: LALRState, symbol: Symbol,next_state:LALRState,production:Production): ...
@@ -53,6 +74,16 @@ class LALRShiftReduceConflictException(LALRParserBuildingConflictException):
 class SLRReduceReduceConflictException(SLRParserBuildingConflictException):
 
     def __init__(self, state: LR0State, symbol: Symbol,old:Production,new_:Production): ...
+    
+    @property
+    def old(self) -> Production: ...
+    
+    @property
+    def new_(self) -> Production: ...
+
+class LR1ReduceReduceConflictException(LR1ParserBuildingConflictException):
+
+    def __init__(self, state: LR1State, symbol: Symbol, old:Production,new_:Production): ...
     
     @property
     def old(self) -> Production: ...
@@ -77,12 +108,18 @@ class ParserBuilder:
 
     @staticmethod
     def closure_lr0(items:Set[LR0Item],g:Grammar) -> Set[LR0Item]: ...
-    
+
+    @staticmethod
+    def closure_lr1(items:Set[LR1Item],g:Grammar) -> Set[LR1Item]: ...
+
     @staticmethod
     def closure_lalr(items:Set[LALRItem],g:Grammar) -> Set[LALRItem]: ...
 
     @staticmethod
     def goto_lr0(items:Set[LR0Item],x:Symbol,g:Grammar) -> Set[LR0Item]: ...
+
+    @staticmethod
+    def goto_lr1(items:Set[LR1Item],x:Symbol,g:Grammar) -> Set[LR1Item]: ...
 
     @staticmethod
     def goto_lalr(items:Set[LALRItem],x:Symbol,g:Grammar) -> Set[LALRItem]: ...
@@ -91,7 +128,13 @@ class ParserBuilder:
     def get_canonical_lr0_states(g:Grammar) -> Set[LR0State]: ...
 
     @staticmethod
+    def get_canonical_lr1_states(g:Grammar) -> Set[LR1State]: ...
+
+    @staticmethod
     def get_kernel_items_lr0(state:LR0State, g:Grammar) -> Set[LR0Item]: ...
+
+    @staticmethod
+    def get_kernel_items_lr1(state:LR1State, g:Grammar) -> Set[LR1Item]: ...
 
     @staticmethod
     def get_kernel_items_lalr(state:LALRState, g:Grammar) -> Set[LALRItem]: ...
@@ -104,6 +147,9 @@ class ParserBuilder:
 
     @staticmethod
     def get_goto_action_tables_slr(g:Grammar) -> tuple[dict[tuple[LR0State,Symbol],LR0State],dict[tuple[LR0State,Symbol],tuple[str,LR0State | Production]]]: ...
+
+    @staticmethod
+    def get_goto_action_tables_lr1(g:Grammar) -> tuple[dict[tuple[LR1State,Symbol],LR1State],dict[tuple[LR1State,Symbol],tuple[str,LR1State | Production]]]: ...
 
     @staticmethod
     def get_goto_action_tables_lalr(g:Grammar) -> Tuple[Dict[Tuple[LALRState,Symbol],LALRState],dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]]]: ...
