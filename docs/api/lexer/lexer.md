@@ -92,6 +92,7 @@ BaseLexer(get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: DFA
 | :---: | :---: |
 | **`load_text(text:str)`** | Loads a new input string for tokenization. Resets line/column counters. |
 | **`initialize()`** | Builds the combined DFA from the provided automata and minimizes it. Called automatically when `tokens` is accessed, but can be called manually to force early initialization. |
+| **`__setitem__(key: Tuple[int, object], automaton: Automaton)`** | Allows adding an automaton (DFA or NFA) directly using the syntax `lexer[priority, type_] = automaton`. The priority (integer, lower value = higher priority) and token type are specified in the key.
 
 > ### `Lexer` (The User‑Facing Lexer)
 
@@ -121,6 +122,31 @@ Lexer(get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: str, ch
 | **`clear_errors()`** | Clears all collected lexical errors. |
 | **`__setitem__(key:int, re:str)`** | Allows adding token patterns with `lexer[priority, type_] = r'regex'` syntax. |
 | **`tokens` (property)** | Yields tokens, including the EOF token at the end. This overrides the base property to add EOF handling. |
+
+> ### `IdentedLexer`
+
+`IdentedLexer` extends `Lexer` to handle languages with significant indentation (like Python). It generates `INDENT` and `DEDENT` tokens based on the indentation level of each line, allowing block structure to be represented in the token stream.
+
+#### Constructor
+
+```python
+IdentedLexer(get_symbol_function: Callable[[Any, str], Symbol], ignore_pattern: str, check_annotation: bool = True)
+```
+
+Parameters are the same as for `Lexer`.
+
+#### Methods
+
+| **Method** | **Description** |
+| :---: | :---: |
+| **`set_ident(ident_type: object)`** | Sets the token type (An instance of a subclass of `TokenType` ) that represents indentation (e.g., `MyToken.INDENT`). |
+| **`set_indent_symbol(symbol: Symbol)`** | Sets the symbol to be used for `INDENT` tokens. |
+| **`set_dedent_symbol(symbol: Symbol)`** | Sets the symbol to be used for `DEDENT` tokens. |
+| **`set_text_sanitize_function(sanitaze_function: Callable[[str], str])`** | Assigns a function that is applied to the full text before tokenisation (useful for converting tabs to spaces, normalising line breaks, etc.). |
+| **`load_text(text: str)`** | Loads the text and, if a sanitisation function is defined, applies it before storing. |
+
+!!! note
+    Whitespace tokens that do not appear at the beginning of a line are automatically ignored.
 
 ## Lexical Rules and Error Handling
 
@@ -218,6 +244,7 @@ This minimization step is crucial for performance: it reduces the DFA to its sma
         return Symbol(tx, True)
 
     cdef Lexer lexer = Lexer(get_symbol_function, r'\n|\t| ')
+    lexer._enum_type = TokenTypeEnum
     lexer.set_eof_token(END_SYMBOL, TokenTypeEnum.SYMBOL)
 
     # Add patterns with priority (lower = higher)
@@ -235,6 +262,132 @@ This minimization step is crucial for performance: it reduces the DFA to its sma
             return str(float(text)) == text or str(int(text)) == text
 
     lexer.add_rule(TokenTypeEnum.NUMBER, NumberLexicalRule('message'))
+    ```
+
+> ### Minimal `IdentedLexer` configuration
+
+=== "Python"
+
+    ```python
+    from pylgen.common.enums import TokenType
+    from pylgen.common.types import Symbol
+    from pylgen.lexer.lexer import IdentedLexer
+
+    # ...
+
+    class TokenTypeEnum(TokenType):
+        NUMBER = 'NUMBER'
+        STRING = 'STRING'
+        BOOLEAN = 'BOOLEAN'
+        NEWLINE = 'NEWLINE'
+        SYMBOL = 'SYMBOL'
+        EOF = 'EOF'
+        VARIABLE = 'VARIABLE'
+        IDENTATION = 'IDENTATION'
+        WHITESPACEMARKER = 'WHITESPACEMARKER'
+        SINGLEWHITESPACE = 'SINGLEWHITESPACE'
+
+    def get_symbol_function(t:TokenTypeEnum,tx:str) -> Symbol:
+        if t == TokenTypeEnum.NEWLINE:
+            return newline
+        if t == TokenTypeEnum.NUMBER:
+            return number
+        if t == TokenTypeEnum.BOOLEAN:
+            return boolean
+        if t == TokenTypeEnum.STRING:
+            return string
+        if t == TokenTypeEnum.IDENTATION:
+            return indent
+        if t == TokenTypeEnum.VARIABLE:
+            return variable
+        if t == TokenTypeEnum.SYMBOL:
+            return Symbol(tx,True)
+        return Symbol(tx,True)
+
+    def sanitaze_text(text:str) -> str:
+        lines = text.split('\n')
+        lines = list(map(lambda line:line if not line.strip() == '' else '#ignore#', lines))
+        return '\n'.join(lines)
+
+    lexer = IdentedLexer(get_symbol_function,'#ignore#\n?')
+    lexer.set_text_sanitize_function(sanitaze_text)
+    lexer[0,TokenTypeEnum.NUMBER] = r'\d+(\.\d+)?'
+    lexer[1,TokenTypeEnum.BOOLEAN] = 'true|false'
+    lexer[2,TokenTypeEnum.VARIABLE] = r'[a-zA-Z_]\w*'
+    lexer[3,TokenTypeEnum.IDENTATION] = '    |\t'
+    lexer[4,TokenTypeEnum.NEWLINE] = '\n'
+    lexer[5,TokenTypeEnum.SYMBOL] = r'\-|:|\[|\]'
+    lexer[6,TokenTypeEnum.STRING] = '".*"'
+    lexer[7,TokenTypeEnum.WHITESPACEMARKER] = '#ignore#\n'
+    lexer[8,TokenTypeEnum.SINGLEWHITESPACE] = ' '
+
+    lexer.set_ident(TokenTypeEnum.IDENTATION)
+    lexer.set_indent_symbol(indent)
+    lexer.set_dedent_symbol(dedent)
+    lexer.set_eof_token('$',TokenTypeEnum.SYMBOL)
+    ```
+
+=== "Cython"
+
+    ```cython
+    from pylgen.common.enums cimport TokenType
+    from pylgen.common.types cimport Symbol
+    from pylgen.lexer.lexer cimport IdentedLexer
+
+    # ...
+
+    class TokenTypeEnum(TokenType):
+        NUMBER = 'NUMBER'
+        STRING = 'STRING'
+        BOOLEAN = 'BOOLEAN'
+        NEWLINE = 'NEWLINE'
+        SYMBOL = 'SYMBOL'
+        EOF = 'EOF'
+        VARIABLE = 'VARIABLE'
+        IDENTATION = 'IDENTATION'
+        WHITESPACEMARKER = 'WHITESPACEMARKER'
+        SINGLEWHITESPACE = 'SINGLEWHITESPACE'
+
+    cdef Symbol get_symbol_function(object t,str tx):
+        if t == TokenTypeEnum.NEWLINE:
+            return newline
+        if t == TokenTypeEnum.NUMBER:
+            return number
+        if t == TokenTypeEnum.BOOLEAN:
+            return boolean
+        if t == TokenTypeEnum.STRING:
+            return string
+        if t == TokenTypeEnum.IDENTATION:
+            return indent
+        if t == TokenTypeEnum.VARIABLE:
+            return variable
+        if t == TokenTypeEnum.SYMBOL:
+            return Symbol(tx,True)
+        return Symbol(tx,True)
+
+    cdef str sanitaze_text(str text):
+        lines = text.split('\n')
+        lines = list(map(lambda line:line if not line.strip() == '' else '#ignore#', lines))
+        return '\n'.join(lines)
+
+    cdef IdentedLexer lexer = IdentedLexer(get_symbol_function,'#ignore#\n?')
+    lexer.set_text_sanitize_function(sanitaze_text)
+    lexer._enum_type = TokenTypeEnum
+
+    lexer.add_token_regex(0,TokenTypeEnum.NUMBER, r'\d+(\.\d+)?')
+    lexer.add_token_regex(1,TokenTypeEnum.BOOLEAN, 'true|false')
+    lexer.add_token_regex(2,TokenTypeEnum.VARIABLE, r'[a-zA-Z_]\w*')
+    lexer.add_token_regex(3,TokenTypeEnum.IDENTATION, '    |\t')
+    lexer.add_token_regex(4,TokenTypeEnum.NEWLINE, '\n')
+    lexer.add_token_regex(5,TokenTypeEnum.SYMBOL, r'\-|:|\[|\]')
+    lexer.add_token_regex(6,TokenTypeEnum.STRING, '".*"')
+    lexer.add_token_regex(7,TokenTypeEnum.WHITESPACEMARKER, '#ignore#\n')
+    lexer.add_token_regex(8,TokenTypeEnum.SINGLEWHITESPACE, ' ')
+
+    lexer.set_ident(TokenTypeEnum.IDENTATION)
+    lexer.set_indent_symbol(indent)
+    lexer.set_dedent_symbol(dedent)
+    lexer.set_eof_token('$',TokenTypeEnum.SYMBOL)
     ```
 
 > ### Using the Lexer
