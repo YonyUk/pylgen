@@ -113,7 +113,7 @@ Performs a full LR analysis on the grammar and generates an HTML report containi
 
     - **`g`**: The grammar to inspect.
 
-    - **`type_`**: The parser type (currently only `ParserType.LALR1` is supported; others raise `NotImplementedError`).
+    - **`type_`**: The parser type (`ParserType.SLR`,`ParserType.LR1`, and `ParserType.LALR1` are supported; others raise `NotImplementedError`).
 
     - **`**kwargs`**: Supports `filename`, `show`, `cache`, and a special flag `report`; if `True`, the HTML file is generated, if `False`, no file is written (but the conflict check is still performed).
 
