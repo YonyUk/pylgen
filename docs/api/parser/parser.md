@@ -56,7 +56,7 @@ These classes represent the fundamental units of LR parsing: items with (for LAL
 | **`left`** | 	`list[Symbol]` | The symbols before the dot. |
 | **`right`** | `list[Symbol]` | The symbols after the dot. |
 
-The `LR0Item` equality and hashing include all the properies, making each item unique, so two items are equal only if they have the same `head`, `left`, and `right`.
+The `LR0Item` equality and hashing include all the properties, making each item unique, so two items are equal only if they have the same `head`, `left`, and `right`.
 
 #### `LR1Item` (Parser Item with Single Lookahead)
 
