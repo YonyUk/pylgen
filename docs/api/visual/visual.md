@@ -109,6 +109,7 @@ show_propagation_edges_table(grammar, show=True)
 
 Performs a full LR analysis on the grammar and generates an HTML report containing the **`ACTION`** and **`GOTO`** tables. The report highlights conflicts (`shift/reduce` or `reduce/reduce`) in red. This function is essential for diagnosing ambiguities.
 
+
  - **Parameters**:
 
     - **`g`**: The grammar to inspect.
