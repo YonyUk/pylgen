@@ -302,6 +302,86 @@ class TestIntegrationLexerParser:
         parser[Production(P,[n])] = reductor_E_T
         return parser
 
+    @pytest.fixture
+    def parser4(self) -> BottomUpParser:
+        parser:BottomUpParser = ParserBuilder.build_parser(G1,ParserType.SLR) # type: ignore
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[F])] = reductor_E_T
+        parser[Production(F,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(F,[n])] = reductor_E_T
+        return parser
+    
+    @pytest.fixture
+    def parser5(self) -> BottomUpParser:
+        parser:BottomUpParser = ParserBuilder.build_parser(G2,ParserType.SLR) # type: ignore
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[E,minus,T])] = reductor_E_minus_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[T,div,F])] = reductor_T_div_F
+        parser[Production(T,[F])] = reductor_E_T
+        parser[Production(F,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(F,[n])] = reductor_E_T
+        return parser
+    
+    @pytest.fixture
+    def parser6(self) -> BottomUpParser:
+        parser:BottomUpParser = ParserBuilder.build_parser(G3,ParserType.SLR) # type: ignore
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[E,minus,T])] = reductor_E_minus_T
+        parser[Production(E,[E,mod,T])] = reductor_E_mod_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[T,div,F])] = reductor_T_div_F
+        parser[Production(T,[F])] = reductor_E_T
+        parser[Production(F,[F,exp,P])] = reductor_F_exp_P
+        parser[Production(F,[P])] = reductor_E_T
+        parser[Production(P,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(P,[n])] = reductor_E_T
+        return parser
+
+    @pytest.fixture
+    def parser7(self) -> BottomUpParser:
+        parser:BottomUpParser = ParserBuilder.build_parser(G1,ParserType.LR1) # type: ignore
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[F])] = reductor_E_T
+        parser[Production(F,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(F,[n])] = reductor_E_T
+        return parser
+    
+    @pytest.fixture
+    def parser8(self) -> BottomUpParser:
+        parser:BottomUpParser = ParserBuilder.build_parser(G2,ParserType.LR1) # type: ignore
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[E,minus,T])] = reductor_E_minus_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[T,div,F])] = reductor_T_div_F
+        parser[Production(T,[F])] = reductor_E_T
+        parser[Production(F,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(F,[n])] = reductor_E_T
+        return parser
+    
+    @pytest.fixture
+    def parser9(self) -> BottomUpParser:
+        parser:BottomUpParser = ParserBuilder.build_parser(G3,ParserType.LR1) # type: ignore
+        parser[Production(E,[E,plus,T])] = reductor_E_plus_T
+        parser[Production(E,[E,minus,T])] = reductor_E_minus_T
+        parser[Production(E,[E,mod,T])] = reductor_E_mod_T
+        parser[Production(E,[T])] = reductor_E_T
+        parser[Production(T,[T,mul,F])] = reductor_T_mul_F
+        parser[Production(T,[T,div,F])] = reductor_T_div_F
+        parser[Production(T,[F])] = reductor_E_T
+        parser[Production(F,[F,exp,P])] = reductor_F_exp_P
+        parser[Production(F,[P])] = reductor_E_T
+        parser[Production(P,[lp,E,rp])] = reductor_F_lp_E_rp
+        parser[Production(P,[n])] = reductor_E_T
+        return parser
+
     @pytest.mark.parametrize("text",[
         "12 + 4",
         "9 *3",
@@ -311,10 +391,10 @@ class TestIntegrationLexerParser:
         "9+4*5",
         "(1 + 3)* (5+7) *(2 +10 * 15)"
     ])
-    def test_simple_arithmetic_parser_1(self,text:str,lexer:BaseLexer,parser1:BottomUpParser):
+    def test_simple_arithmetic_parser_1_1(self,text:str,lexer:BaseLexer,parser1:BottomUpParser):
         lexer.load_text(text)
         ast = parser1.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
-    
+
     @pytest.mark.parametrize("text",[
         "12 + 4",
         "9 *3",
@@ -324,10 +404,62 @@ class TestIntegrationLexerParser:
         "9+4*5",
         "(1 + 3)* (5+7) *(2 +10 * 15)"
     ])
-    def test_simple_arithmetic_parser_2(self,text:str,lexer1:Lexer,parser1:BottomUpParser):
+    def test_simple_arithmetic_parser_1_2(self,text:str,lexer:BaseLexer,parser4:BottomUpParser):
+        lexer.load_text(text)
+        ast = parser4.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
+
+    @pytest.mark.parametrize("text",[
+        "12 + 4",
+        "9 *3",
+        "(8*5)",
+        "7 +5",
+        "9+ 2",
+        "9+4*5",
+        "(1 + 3)* (5+7) *(2 +10 * 15)"
+    ])
+    def test_simple_arithmetic_parser_1_3(self,text:str,lexer:BaseLexer,parser7:BottomUpParser):
+        lexer.load_text(text)
+        ast = parser7.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
+
+    @pytest.mark.parametrize("text",[
+        "12 + 4",
+        "9 *3",
+        "(8*5)",
+        "7 +5",
+        "9+ 2",
+        "9+4*5",
+        "(1 + 3)* (5+7) *(2 +10 * 15)"
+    ])
+    def test_simple_arithmetic_parser_2_1(self,text:str,lexer1:Lexer,parser1:BottomUpParser):
         lexer1.load_text(text)
         ast = parser1.parse(lexer1.tokens)
-    
+
+    @pytest.mark.parametrize("text",[
+        "12 + 4",
+        "9 *3",
+        "(8*5)",
+        "7 +5",
+        "9+ 2",
+        "9+4*5",
+        "(1 + 3)* (5+7) *(2 +10 * 15)"
+    ])
+    def test_simple_arithmetic_parser_2_2(self,text:str,lexer1:Lexer,parser4:BottomUpParser):
+        lexer1.load_text(text)
+        ast = parser4.parse(lexer1.tokens)
+
+    @pytest.mark.parametrize("text",[
+        "12 + 4",
+        "9 *3",
+        "(8*5)",
+        "7 +5",
+        "9+ 2",
+        "9+4*5",
+        "(1 + 3)* (5+7) *(2 +10 * 15)"
+    ])
+    def test_simple_arithmetic_parser_2_3(self,text:str,lexer1:Lexer,parser7:BottomUpParser):
+        lexer1.load_text(text)
+        ast = parser7.parse(lexer1.tokens)
+
     @pytest.mark.parametrize("text",[
         "1-2",
         "4 / 2",
@@ -335,7 +467,7 @@ class TestIntegrationLexerParser:
         "(1 - 5) / 10",
         "1 + 4 * (3/2) - 9"
     ])
-    def test_normal_arithmetic_parser_1(self,text:str,lexer:BaseLexer,parser2:BottomUpParser):
+    def test_normal_arithmetic_parser_1_1(self,text:str,lexer:BaseLexer,parser2:BottomUpParser):
         lexer.load_text(text)
         ast = parser2.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
 
@@ -346,17 +478,60 @@ class TestIntegrationLexerParser:
         "(1 - 5) / 10",
         "1 + 4 * (3/2) - 9"
     ])
-    def test_normal_arithmetic_parser_2(self,text:str,lexer1:Lexer,parser2:BottomUpParser):
+    def test_normal_arithmetic_parser_1_2(self,text:str,lexer:BaseLexer,parser5:BottomUpParser):
+        lexer.load_text(text)
+        ast = parser5.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
+
+    @pytest.mark.parametrize("text",[
+        "1-2",
+        "4 / 2",
+        "1 -2/4",
+        "(1 - 5) / 10",
+        "1 + 4 * (3/2) - 9"
+    ])
+    def test_normal_arithmetic_parser_1_3(self,text:str,lexer:BaseLexer,parser8:BottomUpParser):
+        lexer.load_text(text)
+        ast = parser8.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
+
+    @pytest.mark.parametrize("text",[
+        "1-2",
+        "4 / 2",
+        "1 -2/4",
+        "(1 - 5) / 10",
+        "1 + 4 * (3/2) - 9"
+    ])
+    def test_normal_arithmetic_parser_2_1(self,text:str,lexer1:Lexer,parser2:BottomUpParser):
         lexer1.load_text(text)
         ast = parser2.parse(lexer1.tokens)
 
+    @pytest.mark.parametrize("text",[
+        "1-2",
+        "4 / 2",
+        "1 -2/4",
+        "(1 - 5) / 10",
+        "1 + 4 * (3/2) - 9"
+    ])
+    def test_normal_arithmetic_parser_2_2(self,text:str,lexer1:Lexer,parser5:BottomUpParser):
+        lexer1.load_text(text)
+        ast = parser5.parse(lexer1.tokens)
+
+    @pytest.mark.parametrize("text",[
+        "1-2",
+        "4 / 2",
+        "1 -2/4",
+        "(1 - 5) / 10",
+        "1 + 4 * (3/2) - 9"
+    ])
+    def test_normal_arithmetic_parser_2_3(self,text:str,lexer1:Lexer,parser8:BottomUpParser):
+        lexer1.load_text(text)
+        ast = parser8.parse(lexer1.tokens)
 
     @pytest.mark.parametrize("text",[
         " 2 % 1",
         " 3 ** 2",
         " 23+342 / (4**9 + 10) -235/4 + 20**3%3"
     ])
-    def test_extended_arithmetic_parser_1(self,text:str,lexer:BaseLexer,parser3:BottomUpParser):
+    def test_extended_arithmetic_parser_1_1(self,text:str,lexer:BaseLexer,parser3:BottomUpParser):
         lexer.load_text(text)
         ast = parser3.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
 
@@ -365,11 +540,47 @@ class TestIntegrationLexerParser:
         " 3 ** 2",
         " 23+342 / (4**9 + 10) -235/4 + 20**3%3"
     ])
-    def test_extended_arithmetic_parser_2(self,text:str,lexer1:Lexer,parser3:BottomUpParser):
+    def test_extended_arithmetic_parser_1_2(self,text:str,lexer:BaseLexer,parser6:BottomUpParser):
+        lexer.load_text(text)
+        ast = parser6.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
+
+    @pytest.mark.parametrize("text",[
+        " 2 % 1",
+        " 3 ** 2",
+        " 23+342 / (4**9 + 10) -235/4 + 20**3%3"
+    ])
+    def test_extended_arithmetic_parser_1_3(self,text:str,lexer:BaseLexer,parser9:BottomUpParser):
+        lexer.load_text(text)
+        ast = parser9.parse(get_tokens(Symbol(END_SYMBOL,True),lexer.tokens))
+
+    @pytest.mark.parametrize("text",[
+        " 2 % 1",
+        " 3 ** 2",
+        " 23+342 / (4**9 + 10) -235/4 + 20**3%3"
+    ])
+    def test_extended_arithmetic_parser_2_1(self,text:str,lexer1:Lexer,parser3:BottomUpParser):
         lexer1.load_text(text)
         ast = parser3.parse(lexer1.tokens)
 
-    def test_error_detecting_1(self,lexer1:Lexer,parser1:BottomUpParser):
+    @pytest.mark.parametrize("text",[
+        " 2 % 1",
+        " 3 ** 2",
+        " 23+342 / (4**9 + 10) -235/4 + 20**3%3"
+    ])
+    def test_extended_arithmetic_parser_2_2(self,text:str,lexer1:Lexer,parser6:BottomUpParser):
+        lexer1.load_text(text)
+        ast = parser6.parse(lexer1.tokens)
+
+    @pytest.mark.parametrize("text",[
+        " 2 % 1",
+        " 3 ** 2",
+        " 23+342 / (4**9 + 10) -235/4 + 20**3%3"
+    ])
+    def test_extended_arithmetic_parser_2_3(self,text:str,lexer1:Lexer,parser9:BottomUpParser):
+        lexer1.load_text(text)
+        ast = parser9.parse(lexer1.tokens)
+
+    def test_error_detecting_1_1(self,lexer1:Lexer,parser1:BottomUpParser):
         text = "(01 + 3)* (5+7) *(2 +010 * 15)"
         lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicalRule())
         
@@ -391,8 +602,54 @@ class TestIntegrationLexerParser:
         except ParsingException:
             pass
         assert len(parser1.errors) == 2
-    
-    def test_error_detecting_2(self,lexer1:Lexer,parser3:BottomUpParser):
+
+    def test_error_detecting_1_2(self,lexer1:Lexer,parser4:BottomUpParser):
+        text = "(01 + 3)* (5+7) *(2 +010 * 15)"
+        lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicalRule())
+        
+        lexer1.load_text(text)
+        try:
+            ast = parser4.parse(lexer1.tokens)
+        except ParsingException:
+            pass
+
+        errors = [(1,2),(1,22)]
+        assert len(lexer1.errors) == 2
+        for error in lexer1.errors:
+            assert (error.line,error.column) in errors
+        parser4.reset()
+        text = "(1 + 3) * (5++7) *(2 + 10 * * 15)"
+        lexer1.load_text(text)
+        try:
+            ast = parser4.parse(lexer1.tokens)
+        except ParsingException:
+            pass
+        assert len(parser4.errors) == 2
+
+    def test_error_detecting_1_3(self,lexer1:Lexer,parser7:BottomUpParser):
+        text = "(01 + 3)* (5+7) *(2 +010 * 15)"
+        lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicalRule())
+        
+        lexer1.load_text(text)
+        try:
+            ast = parser7.parse(lexer1.tokens)
+        except ParsingException:
+            pass
+
+        errors = [(1,2),(1,22)]
+        assert len(lexer1.errors) == 2
+        for error in lexer1.errors:
+            assert (error.line,error.column) in errors
+        parser7.reset()
+        text = "(1 + 3) * (5++7) *(2 + 10 * * 15)"
+        lexer1.load_text(text)
+        try:
+            ast = parser7.parse(lexer1.tokens)
+        except ParsingException:
+            pass
+        assert len(parser7.errors) == 2
+
+    def test_error_detecting_2_1(self,lexer1:Lexer,parser3:BottomUpParser):
         lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicalRule())
         text = '23+0342 / (4**9 + + 10) -0235//4 9 + 20**3%3'
 
@@ -404,6 +661,32 @@ class TestIntegrationLexerParser:
         
         assert len(lexer1.errors) == 2
         assert len(parser3.errors) == 3
+
+    def test_error_detecting_2_2(self,lexer1:Lexer,parser6:BottomUpParser):
+        lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicalRule())
+        text = '23+0342 / (4**9 + + 10) -0235//4 9 + 20**3%3'
+
+        lexer1.load_text(text)
+        try:
+            ast = parser6.parse(lexer1.tokens)
+        except ParsingException:
+            pass
+        
+        assert len(lexer1.errors) == 2
+        assert len(parser6.errors) == 3
+
+    def test_error_detecting_2_3(self,lexer1:Lexer,parser9:BottomUpParser):
+        lexer1.add_rule(TokenTypeEnum.NUMBER,NumberLexicalRule())
+        text = '23+0342 / (4**9 + + 10) -0235//4 9 + 20**3%3'
+
+        lexer1.load_text(text)
+        try:
+            ast = parser9.parse(lexer1.tokens)
+        except ParsingException:
+            pass
+        
+        assert len(lexer1.errors) == 2
+        assert len(parser9.errors) == 3
 
     def test_token_ignoring_1(self):
         lexer = Lexer(get_symbol_function,'\n|\t| |//.*\n')
