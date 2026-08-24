@@ -126,7 +126,7 @@ PyLGEN provides the `ASTVisitor` base class, and we extend it for our specific n
 
 Before evaluating anything, we run a **semantic error collection** pass. These visitors traverse the AST and llok for issues that can be detected statically, without executing the code:
 
- - `VariableASTSemanticErrorCollectorVisitor`: checks that the right-hand side of an assignment doesn't reference an undeclared variable.
+ - `VariableASTSemanticErrorCollectorVisitor`: checks that the variable was declared previously.
  - `AssignmentASTSemanticErrorCollector`:  checks that the right-hand side of an assignment doesn't reference an undeclared variable.
 
 These collectors add `SemanticError` objects to the context, which we can report to the user before any evaluation takes place. This early detection prevents runtime surprises.
