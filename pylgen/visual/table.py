@@ -4,6 +4,7 @@ from typing import Dict,Tuple,Any
 from ..grammar.grammar import Grammar,Production
 from ..parser.parser_builder import ParserBuilder
 from ..parser.lalr_parser import LALRState
+from ..parser.lr1_parser import LR1State
 from ..parser.lr0_parser import LR0Item,LR0State
 from ..parser.bottom_up_parser_actions import BottomUpParserAction
 from ..common.types import Symbol
@@ -159,6 +160,48 @@ def build_action_goto_slr_tables(g:Grammar) -> Tuple[Dict[Tuple[LR0State,Symbol]
 
     return action,goto
 
+def build_action_goto_lr1_tables(g:Grammar) -> Tuple[Dict[Tuple[LR1State,Symbol],Any],Dict[Tuple[LR1State,Symbol],LR1State]]:
+    states = ParserBuilder.get_canonical_lr1_states(g)
+
+    states_by_hash = { hash(state): state for state in states }
+
+    goto:Dict[Tuple[LR1State,Symbol],LR1State] = {}
+    action:Dict[Tuple[LR1State,Symbol],Any] = {}
+
+    for state in states:
+        for item in state.items:
+            if len(item.right) > 0:
+                symbol = item.right[0]
+                key = state,symbol
+                if not key in action:
+                    action[key] = []
+                if symbol.is_terminal:
+                    next_state = LR1State(ParserBuilder.goto_lr1(state.items,symbol,g))
+                    next_state = states_by_hash[hash(next_state)]
+                    goto[key] = next_state
+                    action_value = (f'{BottomUpParserAction.SHIFT}',next_state)
+                    if not action_value in action[key]:
+                        action[key].append(action_value)
+                else:
+                    next_state = LR1State(ParserBuilder.goto_lr1(state.items,symbol,g))
+                    next_state = states_by_hash[hash(next_state)]
+                    goto[key] = next_state
+                    action_value = (f'{BottomUpParserAction.SHIFT}',next_state)
+                    action[key].append(action_value)
+            elif item.head in g.non_terminals:
+                key = state,item.lookahead
+                if not key in action:
+                    action[key] = []
+                production = Production(item.head,item.left)
+                action_value = (f'{BottomUpParserAction.REDUCE}',production)
+                if not action_value in action[key]:
+                    action[key].append(action_value)
+            else:
+                key = state,g.end_symbol
+                action[key] = [(f'{BottomUpParserAction.ACCEPT}',None)]
+    
+    return action,goto    
+
 def build_action_goto_html_tables(
         g:Grammar,
         type_:ParserType | str,
@@ -177,6 +220,9 @@ def build_action_goto_html_tables(
     elif type_ == ParserType.SLR:
         action_table,goto_table = build_action_goto_slr_tables(g)
         states = ParserBuilder.get_canonical_lr0_states(g)
+    elif type_ == ParserType.LR1:
+        action_table,goto_table = build_action_goto_lr1_tables(g)
+        states = ParserBuilder.get_canonical_lr1_states(g)
     else:
         raise NotImplementedError()
 
@@ -200,6 +246,8 @@ def build_action_goto_html_tables(
             kernel_items = ParserBuilder.get_kernel_items_lalr(state,g) # type: ignore
         elif type_ == ParserType.SLR:
             kernel_items = ParserBuilder.get_kernel_items_lr0(state,g) # type: ignore
+        elif type_ == ParserType.LR1:
+            kernel_items = ParserBuilder.get_kernel_items_lr1(state,g) # type: ignore
 
         kernel_items_html_details = ['\t'*8 + f'<li>{item}</li>' for item in kernel_items]
         non_kernel_items_html_details = ['\t'*8 + f'<li>{item}</li>' for item in state.items if not item in kernel_items]
