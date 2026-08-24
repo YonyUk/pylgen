@@ -1,5 +1,4 @@
 from typing import Dict, List, Tuple
-from datetime import datetime
 from random import choice, randint, random
 
 import pytest
@@ -11,10 +10,13 @@ from pylgen.parser.parser_builder import (
     LALRShiftReduceConflictException,
     SLRReduceReduceConflictException,
     SLRShiftReduceConflictException,
+    LR1ShiftReduceConflictException,
+    LR1ReduceReduceConflictException,
     ParserBuilder
 )
 from pylgen.parser.bottom_up_parser_actions import BottomUpParserAction
 from pylgen.parser.lr0_parser import LR0Item,LR0State
+from pylgen.parser.lr1_parser import LR1Item,LR1State
 from pylgen.parser.lalr_parser import LALRItem,LALRState
 
 class TestParserBuilder:
@@ -123,8 +125,8 @@ class TestParserBuilder:
     def simulate_parsing(
             self,
             tokens:List[Symbol],
-            goto:Dict[Tuple[LALRState,Symbol],LALRState] | Dict[Tuple[LR0State,Symbol],LR0State],
-            action:Dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]] | Dict[Tuple[LR0State,Symbol],Tuple[str,LR0State | Production]]
+            goto:Dict[Tuple[LALRState,Symbol],LALRState] | Dict[Tuple[LR0State,Symbol],LR0State] | Dict[Tuple[LR1State,Symbol],LR1State],
+            action:Dict[Tuple[LALRState,Symbol],Tuple[str,LALRState | Production]] | Dict[Tuple[LR0State,Symbol],Tuple[str,LR0State | Production]] | Dict[Tuple[LR1State,Symbol],Tuple[str,LR1State | Production]]
         ) -> bool:
         '''
         simulate the parsing and return True if the sequence of tokens was successfully parsed, False otherwise
@@ -258,6 +260,278 @@ class TestParserBuilder:
 
         closure = ParserBuilder.closure_lr0({item1},G)
         assert closure == {item1,item2,item3,item4,item5,item6,item7,item8,item9,item10,item11,item12}
+
+    def test_lr1_closure_1(self):
+        closure = ParserBuilder.closure_lr1(set(),Grammar(Symbol('S')))
+        assert len(closure) == 0
+
+    def test_lr1_closure_2(self):
+        A = Symbol('A')
+        a = Symbol('a',True)
+        b = Symbol('b',True)
+
+        lr1_item = LR1Item(A,[a],[b],Symbol('$',True))
+        closure = ParserBuilder.closure_lr1({lr1_item},Grammar(Symbol('S')))
+
+        assert closure == {lr1_item}
+
+    def test_lr1_closure_3(self):
+        S = Symbol('S')
+        E = Symbol('E')
+        id_ = Symbol('id',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += E,
+        G[E] += id_,
+
+        lr1_item = LR1Item(S,[],[E],G.end_symbol)
+        new_item = LR1Item(E,[],[id_],G.end_symbol)
+
+        closure = ParserBuilder.closure_lr1({lr1_item},G)
+        assert closure == {lr1_item,new_item}
+
+    def test_lr1_closure_4(self):
+        S = Symbol('S')
+        A = Symbol('A')
+        B = Symbol('B')
+
+        G = Grammar(S,'$')
+
+        G[S] += A,
+        G[A] += B,
+        G[B] += A,
+
+        item1 = LR1Item(A,[],[B],G.end_symbol)
+        item2 = LR1Item(B,[],[A],G.end_symbol)
+
+        closure = ParserBuilder.closure_lr1({item1,item2},G)
+
+        assert closure == {item1,item2}
+
+    def test_lr1_closure_5(self):
+        S = Symbol('S')
+        A = Symbol('A')
+        eps = Symbol('ε', True, True)
+
+        G = Grammar(S, '$')
+        G[S] += A,
+        G[A] += eps,
+
+        item = LR1Item(A, [], [eps], G.end_symbol)
+        closure = ParserBuilder.closure_lr1({item}, G)
+        assert closure == {item}
+
+    def test_lr1_closure_6(self, classic_lalr_1_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G, (S, L, R, mul, id_, eq, end_symbol) = classic_lalr_1_grammar
+
+        item1 = LR1Item(Symbol("S'"), [], [S], G.end_symbol)
+        item2 = LR1Item(S, [], [R], G.end_symbol)
+        item3 = LR1Item(S, [], [L, eq, R], G.end_symbol)
+        item4 = LR1Item(L, [], [mul, R], G.end_symbol)
+        item5 = LR1Item(L, [], [mul, R], eq)
+        item6 = LR1Item(L, [], [id_], G.end_symbol)
+        item7 = LR1Item(L, [], [id_], eq)
+        item8 = LR1Item(R, [], [L], G.end_symbol)
+
+        closure = ParserBuilder.closure_lr1({item1}, G)
+        assert closure == {item1, item2, item3, item4, item5, item6,item7,item8}
+
+    def test_lr1_closure_7(self, arithmetic_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G, (E, T, F, P, plus, minus, mul, div, exp, mod, lp, rp, id_, end_symbol) = arithmetic_grammar
+
+        item1 = LR1Item(Symbol("E'"), [], [E], G.end_symbol)
+        item2 = LR1Item(E, [], [E, plus, T], G.end_symbol)
+        item3 = LR1Item(E, [], [E, minus, T], G.end_symbol)
+        item4 = LR1Item(E, [], [E, mod, T], G.end_symbol)
+        item5 = LR1Item(E, [], [T], G.end_symbol)
+        item6 = LR1Item(E, [], [T], mod)
+        item7 = LR1Item(T, [], [T, mul, F], G.end_symbol)
+        item8 = LR1Item(T, [], [T, mul, F], mul)
+        item9 = LR1Item(T, [], [T, div, F], G.end_symbol)
+        item10 = LR1Item(T, [], [F], G.end_symbol)
+        item11 = LR1Item(F, [], [F, exp, P], G.end_symbol)
+        item12 = LR1Item(F, [], [P], G.end_symbol)
+        item13 = LR1Item(P, [], [lp, E, rp], G.end_symbol)
+        item14 = LR1Item(P, [], [lp, E, rp], div)
+        item15 = LR1Item(P, [], [lp, E, rp], mul)
+        item16 = LR1Item(P, [], [lp, E, rp], plus)
+        item17 = LR1Item(P, [], [lp, E, rp], minus)
+        item18 = LR1Item(P, [], [lp, E, rp], mod)
+        item19 = LR1Item(P, [], [lp, E, rp], exp)
+        item20 = LR1Item(P, [], [id_], G.end_symbol)
+        item21 = LR1Item(E, [], [E, plus, T], plus)
+        item22 = LR1Item(E, [], [E, plus, T], minus)
+        item23 = LR1Item(E, [], [E, plus, T], mod)
+        item24 = LR1Item(E, [], [E, minus, T], plus)
+        item25 = LR1Item(E, [], [E, minus, T], minus)
+        item26 = LR1Item(E, [], [E, minus, T], mod)
+        item27 = LR1Item(F, [], [F, exp, P], exp)
+        item28 = LR1Item(F, [], [F, exp, P], plus)
+        item29 = LR1Item(F, [], [F, exp, P], minus)
+        item30 = LR1Item(F, [], [F, exp, P], mul)
+        item31 = LR1Item(F, [], [F, exp, P], div)
+        item32 = LR1Item(F, [], [F, exp, P], mod)
+        item33 = LR1Item(T, [], [F], plus)
+        item34 = LR1Item(T, [], [F], minus)
+        item35 = LR1Item(T, [], [F], mod)
+        item36 = LR1Item(T, [], [F], mul)
+        item37 = LR1Item(T, [], [F], div)
+        item38 = LR1Item(T, [], [T, mul, F], div)
+        item39 = LR1Item(T, [], [T, mul, F], plus)
+        item40 = LR1Item(T, [], [T, mul, F], minus)
+        item41 = LR1Item(T, [], [T, mul, F], mod)
+        item42 = LR1Item(T, [], [T, div, F], plus)
+        item43 = LR1Item(T, [], [T, div, F], minus)
+        item44 = LR1Item(T, [], [T, div, F], mul)
+        item45 = LR1Item(T, [], [T, div, F], div)
+        item46 = LR1Item(T, [], [T, div, F], mod)
+        item47 = LR1Item(E, [], [T], plus)
+        item48 = LR1Item(E, [], [T], minus)
+        item49 = LR1Item(E, [], [E, mod, T], mod)
+        item50 = LR1Item(E, [], [E, mod, T], plus)
+        item51 = LR1Item(E, [], [E, mod, T], minus)
+        item52 = LR1Item(P, [], [id_], plus)
+        item53 = LR1Item(P, [], [id_], minus)
+        item54 = LR1Item(P, [], [id_], mod)
+        item55 = LR1Item(P, [], [id_], mul)
+        item56 = LR1Item(P, [], [id_], div)
+        item57 = LR1Item(P, [], [id_], exp)
+        item58 = LR1Item(F, [], [P], plus)
+        item59 = LR1Item(F, [], [P], minus)
+        item60 = LR1Item(F, [], [P], mod)
+        item61 = LR1Item(F, [], [P], mul)
+        item62 = LR1Item(F, [], [P], div)
+        item63 = LR1Item(F, [], [P], exp)
+
+        closure = ParserBuilder.closure_lr1({item1}, G)
+        assert closure == {item1, item2, item3, item4, item5, item6,
+                        item7, item8, item9, item10, item11, item12,
+                        item13,item14,item15,item16,item17,item18,
+                        item19,item20,item21,item22,item23,item24,
+                        item25,item26,item27,item28,item29,item30,
+                        item31,item32,item33,item34,item35,item36,
+                        item37,item38,item39,item40,item41,item42,
+                        item43,item44,item45,item46,item47,item48,
+                        item49,item50,item51,item52,item53,item54,
+                        item55,item56,item57,item58,item59,item60,
+                        item61,item62,item63}
+
+    def test_lr1_closure_8(self, classic_lalr_1_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G, (S, L, R, mul, id_, eq, end_symbol) = classic_lalr_1_grammar
+
+        item = LR1Item(Symbol("S'"), [], [S], G.end_symbol)
+        closure = ParserBuilder.closure_lr1({item}, G)
+
+        assert LR1Item(S, [], [R], G.end_symbol) in closure
+        assert LR1Item(S, [], [L, eq, R], G.end_symbol) in closure
+        assert LR1Item(L, [], [mul, R], G.end_symbol) in closure
+        assert LR1Item(L, [], [id_], G.end_symbol) in closure
+        assert LR1Item(R, [], [L], G.end_symbol) in closure
+
+    def test_lr1_closure_9(self):
+        S = Symbol('S')
+        A = Symbol('A')
+        B = Symbol('B')
+        a = Symbol('a', True)
+        b = Symbol('b', True)
+
+        G = Grammar(S, '$')
+        G[S] += A, B
+        G[A] += a,
+        G[B] += b,
+
+        item = LR1Item(Symbol("S'"), [], [S], G.end_symbol)
+        closure = ParserBuilder.closure_lr1({item}, G)
+
+        assert LR1Item(A, [], [a], b) in closure
+
+    def test_lr1_closure_10(self):
+        S = Symbol('S')
+        A = Symbol('A')
+        B = Symbol('B')
+        a = Symbol('a', True)
+        b = Symbol('b', True)
+
+        G = Grammar(S, '$')
+        G[S] += A, B
+        G[A] += B, a
+        G[B] += A, b
+        G[B] += b,
+
+        item1 = LR1Item(A, [], [B, a], a)
+        item2 = LR1Item(A, [], [B, a], b)
+
+        closure = ParserBuilder.closure_lr1({item1, item2}, G)
+
+        # FIRST([a, a]) = {a}  and  FIRST([a, b]) = {a}
+        assert LR1Item(B, [], [A, b], a) in closure
+        assert LR1Item(B, [], [b], a) in closure
+
+    def test_lr1_closure_11(self):
+        S = Symbol('S')
+        A = Symbol('A')
+        B = Symbol('B')
+        C = Symbol('C')
+        a = Symbol('a', True)
+        b = Symbol('b', True)
+
+        G = Grammar(S, '$')
+        G[S] += A, B
+        G[A] += B, a
+        G[A] += B, C
+        G[B] += A, b
+        G[B] += b,
+        G[C] += A, b
+
+        item1 = LR1Item(A, [], [B, C], a)
+        item2 = LR1Item(A, [], [B, C], b)
+
+        closure = ParserBuilder.closure_lr1({item1, item2}, G)
+
+        # FIRST([C, a]) = FIRST(C) = {b}
+        # FIRST([C, b]) = FIRST(C) = {b}
+        assert LR1Item(B, [], [A, b], b) in closure
+        assert LR1Item(B, [], [b], b) in closure
+
+    def test_lr1_closure_12(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        plus = Symbol('+', True)
+        id_ = Symbol('id', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, T
+        G[E] += T,
+        G[E] += id_,
+
+        item1 = LR1Item(T, [id_], [], plus)
+        item2 = LR1Item(T, [id_], [], G.end_symbol)
+
+        closure = ParserBuilder.closure_lr1({item1, item2}, G)
+        assert closure == {item1, item2}
+
+    def test_lr1_closure_13(self):
+        S = Symbol('S')
+        A = Symbol('A')
+        B = Symbol('B')
+        a = Symbol('a', True)
+        b = Symbol('b', True)
+        plus = Symbol('+', True)
+
+        G = Grammar(S, '$')
+        G[S] += A, B
+        G[A] += a,
+        G[B] += b,
+        G[S] += plus,
+
+        item1 = LR1Item(S, [A], [B], G.end_symbol)
+        item2 = LR1Item(S, [A], [B], plus)
+
+        closure = ParserBuilder.closure_lr1({item1, item2}, G)
+
+        assert LR1Item(B, [], [b], G.end_symbol) in closure
+        assert LR1Item(B, [], [b], plus) in closure
 
     def test_lalr1_closure_1(self,classic_lalr_1_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
         G,(S,L,R,mul,id_,eq,end_symbol) = classic_lalr_1_grammar
@@ -445,6 +719,143 @@ class TestParserBuilder:
         expected = { LR0Item(Symbol("E'"),[E],[]) }
 
         assert goto == expected
+
+    def test_lr1_goto_1(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        plus = Symbol('+', True)
+        id_ = Symbol('id', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, T
+        G[E] += T,
+        G[T] += id_,
+
+        item = LR1Item(T, [id_], [], G.end_symbol)  # lookahead arbitrario
+        goto = ParserBuilder.goto_lr1({item}, plus, G)
+
+        assert len(goto) == 0
+
+    def test_lr1_goto_2(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        plus = Symbol('+', True)
+        id_ = Symbol('id', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, T
+        G[E] += T,
+        G[T] += id_,
+
+        item = LR1Item(T, [], [id_], G.end_symbol)   # T -> . id
+        goto = ParserBuilder.goto_lr1({item}, id_, G)
+
+        expected = { LR1Item(T, [id_], [], G.end_symbol) }  # T -> id .
+        assert goto == expected
+
+
+    def test_lr1_goto_3(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        plus = Symbol('+', True)
+        id_ = Symbol('id', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, T
+        G[E] += T,
+        G[T] += id_,
+
+        item = LR1Item(Symbol("E'"), [], [E], G.end_symbol)
+        goto = ParserBuilder.goto_lr1({item}, E, G)
+
+        expected = { LR1Item(Symbol("E'"), [E], [], G.end_symbol) }  # E' -> E .
+        assert goto == expected
+
+    def test_lr1_goto_4(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        plus = Symbol('+', True)
+        id_ = Symbol('id', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, T
+        G[E] += T,
+        G[T] += id_,
+
+        item1 = LR1Item(T, [id_], [], plus)
+        item2 = LR1Item(T, [id_], [], G.end_symbol)
+
+        goto = ParserBuilder.goto_lr1({item1, item2}, Symbol('*', True), G)
+        assert len(goto) == 0
+
+
+    def test_lr1_goto_5(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        plus = Symbol('+', True)
+        id_ = Symbol('id', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, T
+        G[E] += T,
+        G[T] += id_,
+
+        item1 = LR1Item(T, [], [id_], plus)          # T -> . id  with lookahead '+'
+        item2 = LR1Item(T, [], [id_], G.end_symbol)  # T -> . id  with lookahead '$'
+
+        goto = ParserBuilder.goto_lr1({item1, item2}, id_, G)
+
+        expected = {
+            LR1Item(T, [id_], [], plus),          # T -> id .  with '+'
+            LR1Item(T, [id_], [], G.end_symbol)   # T -> id .  with '$'
+        }
+        assert goto == expected
+
+    def test_lr1_goto_6(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        plus = Symbol('+', True)
+        id_ = Symbol('id', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, T
+        G[E] += T,
+        G[T] += id_,
+
+        item = LR1Item(Symbol("E'"), [], [E], G.end_symbol)
+        goto = ParserBuilder.goto_lr1({item}, E, G)
+
+        expected = { LR1Item(Symbol("E'"), [E], [], G.end_symbol) }
+        assert goto == expected
+
+    def test_lr1_goto_7(self):
+        S = Symbol('S')
+        A = Symbol('A')
+        B = Symbol('B')
+        a = Symbol('a', True)
+        b = Symbol('b', True)
+        plus = Symbol('+', True)
+
+        G = Grammar(S, '$')
+        G[S] += A, B
+        G[A] += a,
+        G[B] += b,
+        G[S] += plus,
+
+        item1 = LR1Item(S, [], [A, B], plus)          # S -> . A B  with lookahead '+'
+        item2 = LR1Item(S, [], [A, B], G.end_symbol)  # S -> . A B  with lookahead '$'
+
+        goto = ParserBuilder.goto_lr1({item1, item2}, A, G)
+
+        expected = {
+            LR1Item(S, [A], [B], plus),          # S -> A . B  with '+'
+            LR1Item(S, [A], [B], G.end_symbol),  # S -> A . B  with '$'
+            LR1Item(B, [], [b], plus),           # B -> . b  with '+'
+            LR1Item(B, [], [b], G.end_symbol),   # B -> . b  with '$'
+        }
+
+        assert len(goto) == 4
+        assert goto == expected
     
     def test_lalr_goto_1(self):
         E = Symbol('E')
@@ -623,7 +1034,178 @@ class TestParserBuilder:
         for state in states:
             for item in state.items:
                 assert B != item.head and B not in item.left and not B in item.right
-    
+
+    def test_get_canonical_lr1_states_1(self):
+        S = Symbol('S')
+        a = Symbol('a', True)
+
+        G = Grammar(S, '$')
+        G[S] += a,
+
+        states = ParserBuilder.get_canonical_lr1_states(G)
+
+        assert len(states) == 3
+
+        i0 = LR1State({
+            LR1Item(Symbol("S'"), [], [S], G.end_symbol),
+            LR1Item(S, [], [a], G.end_symbol)
+        })
+
+        i1 = LR1State({
+            LR1Item(Symbol("S'"), [S], [], G.end_symbol)
+        })
+
+        i2 = LR1State({
+            LR1Item(S, [a], [], G.end_symbol)
+        })
+
+        assert i0 in states
+        assert i1 in states
+        assert i2 in states
+
+    def test_get_canonical_lr1_states_2(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        id_ = Symbol('id', True)
+        plus = Symbol('+', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, T
+        G[E] += T,
+        G[T] += id_,
+
+        states = ParserBuilder.get_canonical_lr1_states(G)
+        assert len(states) == 6
+
+        i0 = LR1State({
+            LR1Item(Symbol("E'"), [], [E], G.end_symbol),
+            LR1Item(E, [], [E, plus, T], G.end_symbol),
+            LR1Item(E, [], [E, plus, T], plus),
+            LR1Item(E, [], [T], G.end_symbol),
+            LR1Item(E, [], [T], plus),
+            LR1Item(T, [], [id_], G.end_symbol),
+            LR1Item(T, [], [id_], plus)
+        })
+
+        i1 = LR1State({
+            LR1Item(Symbol("E'"), [E], [], G.end_symbol),
+            LR1Item(E, [E], [plus, T], G.end_symbol),
+            LR1Item(E, [E], [plus, T], plus)
+        })
+
+        i2 = LR1State({
+            LR1Item(E, [T], [], G.end_symbol),
+            LR1Item(E, [T], [], plus)
+        })
+
+        i3 = LR1State({
+            LR1Item(T, [id_], [], G.end_symbol),
+            LR1Item(T, [id_], [], plus)
+        })
+
+        i4 = LR1State({
+            LR1Item(E, [E, plus], [T], G.end_symbol),
+            LR1Item(E, [E, plus], [T], plus),
+            LR1Item(T, [], [id_], G.end_symbol),
+            LR1Item(T, [], [id_], plus)
+        })
+
+        i5 = LR1State({
+            LR1Item(E, [E, plus, T], [], G.end_symbol),
+            LR1Item(E, [E, plus, T], [], plus)
+        })
+
+        expected = {i0, i1, i2, i3, i4, i5}
+        assert states == expected
+
+    def test_get_canonical_lr1_states_3(self):
+        S = Symbol('S')
+        A = Symbol('A')
+        B = Symbol('B')
+        a = Symbol('a', True)
+        b = Symbol('b', True)
+
+        G = Grammar(S, '$')
+        G[S] += A, b
+        G[A] += a,
+
+        states = ParserBuilder.get_canonical_lr1_states(G)
+
+        for state in states:
+            for item in state.items:
+                assert B != item.head
+                assert B not in item.left
+                assert B not in item.right
+
+    def test_get_canonical_lr1_states_4(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        F = Symbol('F')
+
+        plus = Symbol('+', True)
+        mul = Symbol('*', True)
+        lp = Symbol('(', True)
+        rp = Symbol(')', True)
+        id_ = Symbol('id', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, T
+        G[E] += T,
+        G[T] += T, mul, F
+        G[T] += F,
+        G[F] += lp, E, rp
+        G[F] += id_,
+
+        states = ParserBuilder.get_canonical_lr1_states(G)
+
+        found_state_with_plus_and_dollar = False
+
+        for state in states:
+            has_e_t_dollar = LR1Item(E, [T], [], G.end_symbol) in state.items
+            has_e_t_plus = LR1Item(E, [T], [], plus) in state.items
+            has_e_t_rp = LR1Item(E, [T], [], rp) in state.items
+
+            if has_e_t_dollar and has_e_t_plus and not has_e_t_rp:
+                found_state_with_plus_and_dollar = True
+
+        assert found_state_with_plus_and_dollar
+
+    def test_get_canonical_lr1_states_5(self):
+        S = Symbol('S')
+        A = Symbol('A')
+        a = Symbol('a', True)
+        b = Symbol('b', True)
+        c = Symbol('c', True)
+        d = Symbol('d', True)
+        e = Symbol('e', True)
+
+        G = Grammar(S, '$')
+        G[S] += a, A, d
+        G[S] += b, A, e
+        G[A] += c,
+
+        states = ParserBuilder.get_canonical_lr1_states(G)
+
+        found_d = False
+        found_e = False
+
+        for state in states:
+            item_d = LR1Item(A, [c], [], d)
+            item_e = LR1Item(A, [c], [], e)
+
+            if item_d in state.items:
+                found_d = True
+            if item_e in state.items:
+                found_e = True
+
+        assert found_d, "No se encontró A -> c .  con lookahead 'd'"
+        assert found_e, "No se encontró A -> c .  con lookahead 'e'"
+
+        for state in states:
+            item_d = LR1Item(A, [c], [], d)
+            item_e = LR1Item(A, [c], [], e)
+            assert not (item_d in state.items and item_e in state.items)
+
     def test_get_kernel_items_lr0(self):
         E = Symbol('E')
         T = Symbol('T')
@@ -673,7 +1255,76 @@ class TestParserBuilder:
         assert i3_kernel in kernels
         assert i4_kernel in kernels
         assert i5_kernel in kernels
-    
+
+    def test_get_kernel_items_lr1(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        id_ = Symbol('id', True)
+        plus = Symbol('+', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, T
+        G[E] += T,
+        G[T] += id_,
+
+        states = ParserBuilder.get_canonical_lr1_states(G)
+
+        k0 = {LR1Item(Symbol("E'"), [], [E], G.end_symbol)}
+        k1 = {
+            LR1Item(Symbol("E'"), [E], [], G.end_symbol),
+            LR1Item(E, [E], [plus, T], G.end_symbol),
+            LR1Item(E, [E], [plus, T], plus)
+        }
+        k2 = {LR1Item(E, [T], [], G.end_symbol),LR1Item(E, [T], [], plus)}
+        k3 = {LR1Item(T, [id_], [], G.end_symbol),LR1Item(T, [id_], [], plus)}
+        k4 = {LR1Item(E, [E, plus], [T], G.end_symbol),LR1Item(E, [E, plus], [T], plus)}
+        k5 = {LR1Item(E, [E, plus, T], [], G.end_symbol),LR1Item(E, [E, plus, T], [], plus)}
+
+        expected_kernels = [k0, k1, k2, k3, k4, k5]
+
+        for state in states:
+            kernel = ParserBuilder.get_kernel_items_lr1(state, G)
+            assert kernel in expected_kernels
+
+    def test_get_kernel_items_lr1_2(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        plus = Symbol('+', True)
+        mul = Symbol('*', True)
+        id_ = Symbol('id', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, T
+        G[E] += T,
+        G[T] += T, mul, id_
+        G[T] += id_,
+
+        states = ParserBuilder.get_canonical_lr1_states(G)
+
+        target_state = None
+        for state in states:
+            kernel = ParserBuilder.get_kernel_items_lr1(state, G)
+            if any(item.head == E and item.left == [T] and len(item.right) == 0
+                for item in kernel):
+                target_state = state
+                break
+
+        assert target_state is not None
+
+        kernel = ParserBuilder.get_kernel_items_lr1(target_state, G)
+
+        has_e_t_dollar = LR1Item(E, [T], [], G.end_symbol) in kernel
+        has_e_t_plus = LR1Item(E, [T], [], plus) in kernel
+
+        assert has_e_t_dollar, "E -> T .  con lookahead '$' debe estar en el núcleo"
+        assert has_e_t_plus, "E -> T .  con lookahead '+' debe estar en el núcleo"
+
+        has_tt_mul_dollar = LR1Item(T, [T], [mul, id_], G.end_symbol) in kernel
+        has_tt_mul_plus = LR1Item(T, [T], [mul, id_], plus) in kernel
+
+        assert has_tt_mul_dollar
+        assert has_tt_mul_plus
+
     def test_get_canonical_lalr_states_1(self):
         E = Symbol('E')
         T = Symbol('T')
@@ -953,6 +1604,161 @@ class TestParserBuilder:
 
         with pytest.raises(SLRReduceReduceConflictException):
             _,_ = ParserBuilder.get_goto_action_tables_slr(G)
+
+    def test_lr1_goto_action_tables_1(self, classic_lalr_1_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G, (S, L, R, mul, id_, eq, end_symbol) = classic_lalr_1_grammar
+
+        goto, action = ParserBuilder.get_goto_action_tables_lr1(G)
+        states = ParserBuilder.get_canonical_lr1_states(G)
+
+        accept_state = None
+        for state in states:
+            if any(
+                item.head not in G.non_terminals and
+                len(item.right) == 0 and
+                item.left == [G.start_symbol] and
+                item.lookahead == G.end_symbol
+                for item in state.items
+            ):
+                accept_state = state
+                break
+
+        assert accept_state is not None
+        assert (accept_state, G.end_symbol) in action
+        assert action[(accept_state, G.end_symbol)][0] == BottomUpParserAction.ACCEPT
+
+        found_s_r_reduce = False
+        for state in states:
+            if any(
+                item.head == S and item.left == [R] and len(item.right) == 0
+                for item in state.items
+            ):
+                assert (state, G.end_symbol) in action
+                assert action[(state, G.end_symbol)][0] == BottomUpParserAction.REDUCE
+                assert action[(state, G.end_symbol)][1] == Production(S, [R])
+                found_s_r_reduce = True
+                break
+        assert found_s_r_reduce
+
+        found_shift_state = False
+        for state in states:
+            has_shift_item = any(
+                item.head == S and item.left == [L] and item.right == [eq, R]
+                for item in state.items
+            )
+            has_reduce_item = any(
+                item.head == R and item.left == [L] and len(item.right) == 0 and
+                item.lookahead == G.end_symbol
+                for item in state.items
+            )
+            if has_shift_item and has_reduce_item:
+                # Desplazamiento en '='
+                assert (state, eq) in action
+                assert action[(state, eq)][0] == BottomUpParserAction.SHIFT
+
+                assert (state, G.end_symbol) in action
+                assert action[(state, G.end_symbol)][0] == BottomUpParserAction.REDUCE
+                assert action[(state, G.end_symbol)][1] == Production(R, [L])
+                found_shift_state = True
+                break
+        assert found_shift_state
+
+        found_reduce_state = False
+        for state in states:
+            has_reduce_eq = any(
+                item.head == R and item.left == [L] and len(item.right) == 0 and
+                item.lookahead == eq
+                for item in state.items
+            )
+            has_reduce_dollar = any(
+                item.head == R and item.left == [L] and len(item.right) == 0 and
+                item.lookahead == G.end_symbol
+                for item in state.items
+            )
+            has_shift_item = any(
+                item.head == S and item.left == [L] and item.right == [eq, R]
+                for item in state.items
+            )
+            if has_reduce_eq and has_reduce_dollar and not has_shift_item:
+                assert (state, eq) in action
+                assert action[(state, eq)][0] == BottomUpParserAction.REDUCE
+                assert action[(state, eq)][1] == Production(R, [L])
+
+                assert (state, G.end_symbol) in action
+                assert action[(state, G.end_symbol)][0] == BottomUpParserAction.REDUCE
+                assert action[(state, G.end_symbol)][1] == Production(R, [L])
+                found_reduce_state = True
+                break
+        assert found_reduce_state
+
+    def test_lr1_goto_action_tables_2(self, arithmetic_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G, (E, T, F, P, plus, minus, mul, div, exp, mod, lp, rp, id_, end_symbol) = arithmetic_grammar
+
+        goto, action = ParserBuilder.get_goto_action_tables_lr1(G)
+        states = ParserBuilder.get_canonical_lr1_states(G)
+
+        accept_state = None
+        for state in states:
+            if any(
+                item.head not in G.non_terminals and
+                len(item.right) == 0 and
+                item.left == [G.start_symbol] and
+                item.lookahead == G.end_symbol
+                for item in state.items
+            ):
+                accept_state = state
+                break
+        assert accept_state is not None
+        assert (accept_state, G.end_symbol) in action
+        assert action[(accept_state, G.end_symbol)][0] == BottomUpParserAction.ACCEPT
+
+        for state in states:
+            for item in state.items:
+                if len(item.right) == 0:
+                    head = item.head
+                    if head not in G.non_terminals:
+                        continue
+
+                    prod = Production(head, item.left)
+                    lookahead = item.lookahead
+
+                    assert (state, lookahead) in action
+                    assert action[(state, lookahead)][0] == BottomUpParserAction.REDUCE
+                    assert action[(state, lookahead)][1] == prod
+
+        for state in states:
+            for item in state.items:
+                if item.head == P and item.left == [id_] and len(item.right) == 0:
+                    assert (state, item.lookahead) in action
+                    assert action[(state, item.lookahead)][0] == BottomUpParserAction.REDUCE
+                    assert action[(state, item.lookahead)][1] == Production(P, [id_])
+
+    def test_lr1_goto_action_tables_3(self):
+        E = Symbol('E')
+        plus = Symbol('+', True)
+        id_ = Symbol('id', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, E
+        G[E] += id_,
+
+        with pytest.raises(LR1ShiftReduceConflictException):
+            _, _ = ParserBuilder.get_goto_action_tables_lr1(G)
+
+    def test_lr1_goto_action_tables_5(self):
+        E = Symbol('E')
+        T = Symbol('T')
+        plus = Symbol('+', True)
+        id_ = Symbol('id', True)
+
+        G = Grammar(E, '$')
+        G[E] += E, plus, T
+        G[E] += T,
+        G[E] += id_,
+        G[T] += id_,
+
+        with pytest.raises(LR1ReduceReduceConflictException):
+            _, _ = ParserBuilder.get_goto_action_tables_lr1(G)
     
     def test_cache_closure_lr0(self):
         S = Symbol('S')
@@ -966,6 +1772,21 @@ class TestParserBuilder:
 
         cl1 = ParserBuilder.closure_lr0({item},G)
         cl2 = ParserBuilder.closure_lr0({item},G)
+
+        assert cl1 is cl2
+
+    def test_cache_closure_lr1(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += a,
+
+        item = LR1Item(S,[],[a],G.end_symbol)
+
+        cl1 = ParserBuilder.closure_lr1({item},G)
+        cl2 = ParserBuilder.closure_lr1({item},G)
 
         assert cl1 is cl2
     
@@ -1014,6 +1835,22 @@ class TestParserBuilder:
         cl2 = ParserBuilder.closure_lalr({item},G)
 
         assert cl1 is not cl2
+
+    def test_clear_cache_closure_3(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+
+        G = Grammar(S,'$')
+
+        G[S] += a,
+
+        item = LR1Item(S,[],[a],G.end_symbol)
+
+        cl1 = ParserBuilder.closure_lr1({item},G)
+        ParserBuilder.clear_cache()
+        cl2 = ParserBuilder.closure_lr1({item},G)
+
+        assert cl1 is not cl2
     
     def test_cache_different_grammars_lr0(self):
         S = Symbol('S')
@@ -1035,6 +1872,48 @@ class TestParserBuilder:
         cl1 = ParserBuilder.closure_lr0({item2},G1)
         cl2 = ParserBuilder.closure_lr0({item2},G2)
         assert cl1 is not cl2
+
+    def test_cache_different_grammars_lr1(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+        b = Symbol('b',True)
+
+        G1 = Grammar(S,'$')
+        G2 = Grammar(S,'$')
+
+        G1[S] += a,
+
+        G2[S] += b,
+
+        item1 = LR1Item(S,[],[a],G1.end_symbol)
+        item2 = LR1Item(S,[],[b],G2.end_symbol)
+        cl1 = ParserBuilder.closure_lr1({item1},G1)
+        cl2 = ParserBuilder.closure_lr1({item1},G2)
+        assert cl1 is not cl2
+        cl1 = ParserBuilder.closure_lr1({item2},G1)
+        cl2 = ParserBuilder.closure_lr1({item2},G2)
+        assert cl1 is not cl2
+
+    def test_cache_different_grammars_lalr(self):
+        S = Symbol('S')
+        a = Symbol('a',True)
+        b = Symbol('b',True)
+
+        G1 = Grammar(S,'$')
+        G2 = Grammar(S,'$')
+
+        G1[S] += a,
+
+        G2[S] += b,
+
+        item1 = LALRItem(S,[],[a],{G1.end_symbol})
+        item2 = LALRItem(S,[],[b],{G2.end_symbol})
+        cl1 = ParserBuilder.closure_lalr({item1},G1)
+        cl2 = ParserBuilder.closure_lalr({item1},G2)
+        assert cl1 is not cl2
+        cl1 = ParserBuilder.closure_lalr({item2},G1)
+        cl2 = ParserBuilder.closure_lalr({item2},G2)
+        assert cl1 is not cl2
     
     def test_cyclic_grammar(self):
         A = Symbol('A')
@@ -1048,6 +1927,8 @@ class TestParserBuilder:
         states = ParserBuilder.get_canonical_lr0_states(G)
         assert len(states) > 0
         states = ParserBuilder.get_canonical_lalr_states(G)
+        assert len(states) > 0
+        states = ParserBuilder.get_canonical_lr1_states(G)
         assert len(states) > 0
     
     def test_duplicated_productions(self):
@@ -1063,6 +1944,8 @@ class TestParserBuilder:
         assert len(states) == 3
         states = ParserBuilder.get_canonical_lalr_states(G)
         assert len(states) == 3
+        states = ParserBuilder.get_canonical_lr1_states(G)
+        assert len(states) == 3
     
     def test_unused_terminals(self):
         S = Symbol('S')
@@ -1074,6 +1957,12 @@ class TestParserBuilder:
         G[S] += a,
 
         states = ParserBuilder.get_canonical_lr0_states(G)
+
+        for state in states:
+            for item in state.items:
+                assert b not in item.right
+
+        states = ParserBuilder.get_canonical_lr1_states(G)
 
         for state in states:
             for item in state.items:
@@ -1101,6 +1990,26 @@ class TestParserBuilder:
 
         start_time = time.time()
         states = ParserBuilder.get_canonical_lr0_states(G)
+        elapsed = time.time() - start_time
+        assert len(states) > 0
+        assert elapsed < 2.0
+
+    def test_performance_lr1_1(self):
+        S = Symbol('S')
+        G = Grammar(S,'$')
+
+        symbols = [Symbol(f'N{i}') for i in range(50)]
+        id_ = Symbol('id',True)
+        G[S] += symbols[0],
+
+        for i in range(49):
+            G[symbols[i]] += symbols[i + 1],
+            G[symbols[i]] += id_,
+
+        G[symbols[49]] += id_,
+
+        start_time = time.time()
+        states = ParserBuilder.get_canonical_lr1_states(G)
         elapsed = time.time() - start_time
         assert len(states) > 0
         assert elapsed < 2.0
@@ -1204,6 +2113,36 @@ class TestParserBuilder:
         # ( id )
         tokens = [lp,id_,rp,end_symbol]
         assert self.simulate_parsing(tokens,goto,action)
+
+    def test_lr1_goto_action_tables_correctness_1(self,arithmetic_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
+
+        goto,action = ParserBuilder.get_goto_action_tables_lr1(G)
+
+        # id
+        tokens = [id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id + id
+        tokens = [id_,plus,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id - id
+        tokens = [id_,minus,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id % id
+        tokens = [id_,mod,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id * id
+        tokens = [id_,mul,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id / id
+        tokens = [id_,div,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # id ** id
+        tokens = [id_,exp,id_,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
+        # ( id )
+        tokens = [lp,id_,rp,end_symbol]
+        assert self.simulate_parsing(tokens,goto,action)
     
     def test_lalr_goto_action_tables_correctness_2(self,arithmetic_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
         G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
@@ -1220,6 +2159,17 @@ class TestParserBuilder:
         G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
+        for _ in range(100):
+            tokens = self.generate_valid_tokens_string(G) + [end_symbol]
+            assert self.simulate_parsing(tokens,goto,action)
+            index = randint(0,len(tokens) - 1)
+            tokens.insert(index,tokens[index])
+            assert not self.simulate_parsing(tokens,goto,action)
+
+    def test_lr1_goto_action_tables_correctness_2(self,arithmetic_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,(E,T,F,P,plus,minus,mul,div,exp,mod,lp,rp,id_,end_symbol) = arithmetic_grammar
+
+        goto,action = ParserBuilder.get_goto_action_tables_lr1(G)
         for _ in range(100):
             tokens = self.generate_valid_tokens_string(G) + [end_symbol]
             assert self.simulate_parsing(tokens,goto,action)
@@ -1243,3 +2193,26 @@ class TestParserBuilder:
 
         with pytest.raises(SLRShiftReduceConflictException):
             _,_ = ParserBuilder.get_goto_action_tables_slr(G)
+
+    def test_lr1_goto_action_tables_correctness_3(self,classic_lalr_1_grammar:Tuple[Grammar,Tuple[Symbol,...]]):
+        G,_ = classic_lalr_1_grammar
+
+        goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
+        for _ in range(100):
+            tokens = self.generate_valid_tokens_string(G) + [G.end_symbol]
+            assert self.simulate_parsing(tokens,goto,action)
+            index = randint(0,len(tokens) - 1)
+            tokens.insert(index,tokens[index])
+            assert not self.simulate_parsing(tokens,goto,action)
+
+    def test_lr1_goto_action_tables_correctness_4(self,conflict_reduce_reduce_lalr_1_grammar_1:Tuple[Grammar,Tuple[Symbol,...]]):
+
+        G,_ = conflict_reduce_reduce_lalr_1_grammar_1
+
+        goto,action = ParserBuilder.get_goto_action_tables_lr1(G)
+        for _ in range(100):
+            tokens = self.generate_valid_tokens_string(G) + [G.end_symbol]
+            assert self.simulate_parsing(tokens,goto,action)
+            index = randint(0,len(tokens) - 1)
+            tokens.insert(index,tokens[index])
+            assert not self.simulate_parsing(tokens,goto,action)

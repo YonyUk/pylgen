@@ -153,6 +153,7 @@ cdef class ParserBuilder:
     @staticmethod
     def clear_cache() -> None:
         _closures.clear()
+        _closures_lr1.clear()
         _closures_lalr.clear()
 
     @staticmethod
