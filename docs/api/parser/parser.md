@@ -31,23 +31,23 @@ The construction of an LR parser begins with **LR(0) items**, which represent a 
 
 An **LR(0) state** is a set of LR(0) items that are reachable from the start state via a sequence of symbols. The collection of all such states forms the **canonical LR(0) automaton**. This automaton is the foundation for constructing the parsing tables.
 
-> ### LALR(1) Lookaheads
+For more powerful parsers, additional lookahead information is added to the items:
 
-While LR(0) parsers are simple to build, they are too weak for many practical grammars (they cannot resolve shift‑reduce conflicts). **SLR** and **LALR(1)** parsers address this by adding **lookahead** information to the items:
+ - **SLR (Simple LR)** parsers use the `FOLLOW` sets of the grammar to decide when to reduce. During table construction, each LR(0) state with a completed item (dot at the end) generates reduce actions for all terminals in the `FOLLOW` set of the production's head. This is a simple and efficient approach, but it is not powerful enough for many practical grammars.
 
- - In an **LALR(1) item**, each LR(0) item is augmented with a set of lookahead symbols. The lookahead set tells the parser which terminals can legally follow the production when it is used in a reduction.
+ - **LR(1)** items extend LR(0) items with a **single lookahead terminal**. An LR(1) item is written as [$A \rightarrow \alpha \cdot \beta,a$] where $a$ is a terminal that must follow the production. The closure and goto operations are augmented to propagate these lookaheads precisely. LR(1) parsers are the most powerful (they can handle any deterministic context‑free language), but they can generate a very large number of states (often hundreds or thousands).
 
- - The lookaheads are computed using a propagation algorithm that starts with the lookahead `$` (end‑of‑file) for the initial item and propagates lookaheads through transitions in the LR(0) automaton.
-
-The LALR(1) construction merges LR(0) states that have identical kernels (the items without lookaheads), then computes the lookaheads for the merged states. This results in a parser that is almost as powerful as a full LR(1) parser but with a much smaller number of states (comparable to LR(0)).
+ - **LALR(1) (Look‑Ahead LR)** items also carry lookahead information, but they use **set of lookaheads** (instead of a single one) and merge LR(0) states that have identical kernels (the items without lookaheads). This reduces the number of states to that of LR(0), while still retaining much of the power of LR(1). The lookaheads are computed using a propagation algorithm that starts with the lookahead `$` (end‑of‑file) for the initial item and propagates lookaheads through transitions in the LR(0) automaton.
 
 ## Core Classes
 
-> ### `LR0Item` and `LALRItem` (Parser Items)
+> ### `LR0Item`, `LR1Item` and `LALRItem` (Parser Items)
 
 These classes represent the fundamental units of LR parsing: items with (for LALR) or without (for LR0) lookahead sets.
 
-#### `LR0Item`
+#### `LR0Item` (Parser Item without Lookahead)
+
+`LR0Item` represents the fundamental unit of **LR(0) parsing**: a production with a dot somewhere in its right-hand side. It does not carry lookahead information.
 
 | **Attribute** | **Type** | **Description** |
 | :---: | :---: | :---: |
@@ -56,17 +56,29 @@ These classes represent the fundamental units of LR parsing: items with (for LAL
 | **`left`** | 	`list[Symbol]` | The symbols before the dot. |
 | **`right`** | `list[Symbol]` | The symbols after the dot. |
 
-The hash of an `LR0Item` is computed deterministically from its string representation, ensuring stable hashing across runs.
+The `LR0Item` equality and hashing include the lookahead, making each item unique based on the full LR(1) context, so two items are equal only if they have the same `head`, `left`, `right`, and identical `lookahead`.
 
-#### `LALRItem` (extends `LR0Item`)
+#### `LR1Item` (Parser Item with Single Lookahead)
+
+`LR1Item` extends `LR0Item` by adding a single lookahead symbol. This is used in **full LR(1) parser** construction, where each item is augmented with a specific terminal that can follow the production.
+
+| **Attribute** | **Type** | **Description** |
+| :---: | :---: | :---: |
+| **`lookahead`** | `Symbol` | The terminal symbol that can follow this item. |
+
+The `LR1Item` equality and hashing include the lookahead, making each item unique based on the full LR(1) context, so two items are equal only if they have the same `head`, `left`, `right`, and identical `lookahead`.
+
+#### `LALRItem` (Parser Item with Lookahead Set)
+
+`LALRItem` extends `LR0Item` by adding a set of lookahead symbols. This is used in **LALR(1) parser** construction, where multiple lookaheads are merged from **LR(1) items** that share the same kernel.
 
 | **Attribute** | **Type** | **Description** |
 | :---: | :---: | :---: |
 | **`lookaheads`** | `Set[Symbol]` | The set of terminal symbols that can follow this item. |
 
-The equality semantics for `LALRItem` include the lookahead set, so two items are equal only if they have the same `head`, `left`, `right`, and identical `lookaheads`.
+The `LALRItem` equality and hashing include the lookaheads set, making each item unique based on the full LR(1) context, so two items are equal only if they have the same `head`, `left`, `right`, and identical `lookaheads`.
 
-> ### `LR0State` and `LALRState` (Parser States)
+> ### `LR0State`, `LR1State`, and `LALRState` (Parser States)
 
 States are sets of items. Each state has a unique identifier (a hash of its items) and an index (assigned during construction).
 
@@ -74,7 +86,7 @@ States are sets of items. Each state has a unique identifier (a hash of its item
 | :---: | :---: | :---: |
 | **`id`** | `str` | A unique hash‑based identifier for the state. |
 | **`index`** |	`int` | A sequential index (0, 1, 2, ...) assigned during state construction. |
-| **`items`** |	`Set[LALRItem]` or `Set[LR0Item]` | The items in this state. |
+| **`items`** |	`Set[LALRItem]`,`Set[LR1Item]` or `Set[LR0Item]` | The items in this state. |
 
 The `index` is used to create human‑readable state names (`I0`, `I1`, etc.) in the parsing tables.
 
@@ -138,7 +150,7 @@ BottomUpParser(start_state: str, goto_table: Dict[Tuple[str, Symbol], str], acti
 
 > ### `ParserBuilder` (The Parser Generator)
 
-`ParserBuilder` is a static class that constructs parsers from grammars. It implements the LALR(1) construction algorithm, including:
+`ParserBuilder` is a static class that constructs parsers from grammars.  It implements the parser construction algorithms for **SLR**, **LR(1)**, and **LALR(1)** parsers, including:
 
  - `1`. Computing `FIRST` and `FOLLOW` sets (from the grammar module).
 
@@ -154,18 +166,24 @@ BottomUpParser(start_state: str, goto_table: Dict[Tuple[str, Symbol], str], acti
 
 | **Method** | **Description** |
 | :---: | :---: |
-| **`build_parser(g: Grammar, type_: ParserType) -> Parser`** | Builds a parser from a grammar (without reductors). Currently supports `ParserType.LALR1`; others raise `NotImplementedError`. |
+| **`build_parser(g: Grammar, type_: ParserType) -> Parser`** | Builds a parser from a grammar (without reductors). Supports `SLR`, `LR1`, and `LALR1` parser types. |
 | **`build_parser_from_attributed(g: AttributedGrammar, type_: ParserType) -> Parser`** | Builds a parser from an attributed grammar, attaching reductors to productions. |
 | **`clear_cache()`** | Clears the internal cache of closures and states. Useful when modifying grammars dynamically. |
 | **`closure_lr0(items: Set[LR0Item], g: Grammar) -> Set[LR0Item]`** | Computes the LR(0) closure of a set of items. |
+| **`closure_lr1(items: Set[LR1Item], g: Grammar) -> Set[LR1Item]`** | Computes the LR(1) closure of a set of items. |
 | **`closure_lalr(items: Set[LALRItem], g: Grammar) -> Set[LALRItem]`** | Computes the LALR(1) closure of a set of items (including lookahead propagation). |
 | **`goto_lr0(items: Set[LR0Item], x: Symbol, g: Grammar) -> Set[LR0Item]`** | Computes the LR(0) `GOTO` of a set of items on symbol `x`. |
+| **`goto_lr1(items: Set[LR1Item], x: Symbol, g: Grammar) -> Set[LR1Item]`** | Computes the LR(1) `GOTO` of a set of items on symbol `x`. |
 | **`goto_lalr(items: Set[LALRItem], x: Symbol, g: Grammar) -> Set[LALRItem]`** | Computes the LALR(1) `GOTO` of a set of items on symbol `x`. |
 | **`get_canonical_lr0_states(g: Grammar) -> Set[LR0State]`** | Returns the canonical collection of LR(0) states for the grammar. |
+| **`get_canonical_lr1_states(g: Grammar) -> Set[LR1State]`** | Returns the canonical collection of LR(1) states for the grammar. |
+| **`get_canonical_lalr_states(g: Grammar) -> Set[LALRState]`** | Returns the canonical collection of LALR(1) states. |
 | **`get_kernel_items_lr0(state: LR0State, g: Grammar) -> Set[LR0Item]`** | Extracts the kernel items (items with dot not at the beginning) from an LR(0) state. |
+| **`get_kernel_items_lr1(state: LR1State, g: Grammar) -> Set[LR1Item]`** | Extracts the kernel items (items with dot not at the beginning) from an LR(1) state. |
 | **`get_kernel_items_lalr(state: LALRState, g: Grammar) -> Set[LALRItem]`** | Extracts the kernel items from an LALR(1) state. |
 | **`build_lookaheads_propagation_edges(g: Grammar) -> Tuple[Dict[LR0State, Dict[Tuple[LR0Item, Symbol], Tuple[LR0State, LR0Item]]], Set[LR0State]]`** | Builds the lookahead propagation edges used in LALR(1) construction. |
-| **`get_canonical_lalr_states(g: Grammar) -> Set[LALRState]`** | Returns the canonical collection of LALR(1) states. |
+| **`get_goto_action_tables_slr(g: Grammar) -> Tuple[Dict[Tuple[LR0State, Symbol], LR0State], Dict[Tuple[LR0State, Symbol], Tuple[str, LR0State | Production]]]`** | Returns the `GOTO` and `ACTION` tables as dictionaries keyed by `(LR0State, Symbol)`. |
+| **`get_goto_action_tables_lr1(g: Grammar) -> Tuple[Dict[Tuple[LR1State, Symbol], LR1State], Dict[Tuple[LR1State, Symbol], Tuple[str, LR1State | Production]]]`** | Returns the `GOTO` and `ACTION` tables as dictionaries keyed by `(LR1State, Symbol)`. |
 | **`get_goto_action_tables_lalr(g: Grammar) -> Tuple[Dict[Tuple[LALRState, Symbol], LALRState], Dict[Tuple[LALRState, Symbol], Tuple[str, LALRState | Production]]]`** | Returns the `GOTO` and `ACTION` tables as dictionaries keyed by `(LALRState, Symbol)`. |
 | **`get_propagated_lookaheads(g: Grammar) -> Tuple[Dict[Tuple[LR0State, LR0Item], Set[Symbol]], Dict[Tuple[str, LR0Item, Symbol, str, LR0Item], Set[Symbol]]]`** | Returns detailed lookahead propagation information for debugging. |
 
@@ -174,14 +192,18 @@ BottomUpParser(start_state: str, goto_table: Dict[Tuple[str, Symbol], str], acti
 
 > ### Conflict Exceptions
 
-LALR(1) grammars can sometimes have conflicts, where the parser cannot decide between shifting and reducing (shift‑reduce conflict) or between two different reductions (reduce‑reduce conflict). The parser builder detects these conflicts and raises specific exceptions that include detailed information for debugging.
+LR parsers can have conflicts where the parser cannot decide between shifting and reducing (shift‑reduce conflict) or between two different reductions (reduce‑reduce conflict). The parser builder detects these conflicts and raises specific exceptions that include detailed information for debugging.
 
 | **Exception** | **Description** |
 | :---: | :---: |
+| **`SLRShiftReduceConflictException`** | Raised when a state has both a `SHIFT` and a `REDUCE` action. Includes the state, symbol, the next state (for shift), and the production (for reduce). |
+| **`SLRReduceReduceConflictException`** | Raised when a state has two different `REDUCE` actions. Includes the state, symbol, and the two conflicting productions. |
+| **`LR1ShiftReduceConflictException`** | Raised during LR(1) construction when a state has both a `SHIFT` and a `REDUCE` action for the same lookahead symbol. Includes the state, symbol, the next state (for shift), and the production (for reduce). |
+| **`LR1ReduceReduceConflictException`** | Raised during LR(1) construction when a state has two different `REDUCE` actions for the same lookahead symbol. Includes the state, symbol, and the two conflicting productions. |
 | **`LALRShiftReduceConflictException`** | Raised when a state has both a SHIFT and a REDUCE action for the same lookahead symbol. Includes the state, symbol, the next state (for shift), and the production (for reduce). |
 | **`LALRReduceReduceConflictException`** | Raised when a state has two different REDUCE actions for the same lookahead symbol. Includes the state, symbol, and the two conflicting productions. |
 
-These exceptions allow you to inspect the conflict and, if necessary, resolve it by modifying the grammar (e.g., by changing precedence, restructuring productions, or adding disambiguation rules).
+All conflict exceptions inherit from a common base class (e.g., `SLRParserBuildingConflictException`, `LR1ParserBuildingConflictException`, `LALRParserBuildingConflictException`) and include the state, symbol, and the conflicting actions (next state or production). This allows you to inspect the conflict and resolve it by modifying the grammar (e.g., by changing precedence, restructuring productions, or adding disambiguation rules).
 
 > ### Integration with Attributed Grammars
 
@@ -251,14 +273,16 @@ This tight integration between syntactic analysis (shift/reduce) and semantic ch
     G[T] += number,
 
     # Build a parser
-    parser = ParserBuilder.build_parser(G, ParserType.LALR1)
+    slr_parser = ParserBuilder.build_parser(G, ParserType.SLR)
+    lr1_parser = ParserBuilder.build_parser(G, ParserType.LR1)
+    lalr_parser = ParserBuilder.build_parser(G, ParserType.LALR1)
     ```
 
 === "Cython"
 
     ```cython
     from pylgen.grammar.grammar cimport Grammar
-    from pylgen.parser.parser_builder cimport _build_lalr_parser 
+    from pylgen.parser.parser_builder cimport _build_lalr_parser , _build_slr_parser, _build_lr1_parser
     from pylgen.parser.parser cimport BottomUpParser
     from pylgen.parser.parser_type import ParserType
     from pylgen.common.types cimport Symbol
@@ -275,7 +299,9 @@ This tight integration between syntactic analysis (shift/reduce) and semantic ch
     G._add_production(T,[number])
 
     # Build a parser
-    cdef BottomUpParser parser = _build_lalr_parser(G)
+    cdef BottomUpParser slr_parser = _build_slr_parser(G, ParserType.SLR)
+    cdef BottomUpParser lr1_parser = _build_lr1_parser(G, ParserType.LR1)
+    cdef BottomUpParser lalr_parser = _build_lalr_parser(G, ParserType.LALR1)
     ```
 
 > ### Building an Attributed Parser with Reductors
