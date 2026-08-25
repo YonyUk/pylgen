@@ -1,4 +1,5 @@
 site_name: PyLGEN
+site_url: https://pylgen.readthedocs.io/en/latest/
 
 nav:
   - Overview: index.md
