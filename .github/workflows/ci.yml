@@ -30,19 +30,19 @@ jobs:
 
       - name: Clean previous build (Linux/macOS)
         if: runner.os == 'Linux' || runner.os == 'macOS'
-          run: |
-            python setup.py clean --all || true
-            rm -rf build/*.so *.c
-            rm -rf build*.egg-info
+        run: |
+          python setup.py clean --all || true
+          rm -rf build/*.so *.c
+          rm -rf build*.egg-info
       
       - name: Clean previous build (Windows)
         if: runner.os == 'Windows'
-          run: |
-            python setup.py clean --all || true
-            Remove-Item -Recurse -Force build -ErrorAction SilentlyContinue
-            Remove-Item -Recurse -Force *.egg-info -ErrorAction SilentlyContinue
-            Get-ChildItem -Recurse -Filter *.pyd | Remove-Item -Force -ErrorAction SilentlyContinue
-          shell: pwsh
+        run: |
+          python setup.py clean --all || true
+          Remove-Item -Recurse -Force build -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force *.egg-info -ErrorAction SilentlyContinue
+          Get-ChildItem -Recurse -Filter *.pyd | Remove-Item -Force -ErrorAction SilentlyContinue
+        shell: pwsh
       
       - name: Build extensions
         run: |
