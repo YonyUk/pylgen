@@ -8,9 +8,10 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: [ "3.12", "3.13", "3.14"]
 
     steps:
@@ -42,3 +43,25 @@ jobs:
       - name: Run tests
         run: |
           python -m pytest tests
+  
+  build_wheels:
+    name: Build wheels
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install build dependencies
+        uses: pypa/cibuildwheel@v2.23.1
+        env:
+          CIBW_BUILD: "cp312-* cp313-* cp314-*"
+          CIBW_ARCHS: "auto64"
+      
+      - name: Save wheels
+        uses: actions/upload-artifact@v4
+        with:
+          path: wheelhouse/*.whl
