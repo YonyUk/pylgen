@@ -78,7 +78,7 @@ jobs:
         uses: pypa/cibuildwheel@v3.3.1
         env:
           CIBW_BUILD: "cp312-* cp313-* cp314-*"
-          CIBW_ARCHS: ${{ matrix.os }}
+          CIBW_ARCHS: ${{ matrix.archs }}
       
       - name: Save wheels
         uses: actions/upload-artifact@v4
