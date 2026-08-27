@@ -197,6 +197,8 @@ cdef class BottomUpParser(Parser):
         # local references for micro-optimizations
         cdef unsigned int symbol_id
         cdef set[SemanticError] errors
+        cdef Symbol token_symbol = token._symbol
+        cdef Symbol stack_top_symbol
 
         if self._parsed:
             raise ValueError('EOF token already readed')
@@ -208,7 +210,7 @@ cdef class BottomUpParser(Parser):
                 return # type:ignore
 
         state = self._stack_states[self._stack_states_top - 1]
-        symbol_id = (<Symbol>token._symbol)._hash & 0xFFFFFFFF
+        symbol_id = token_symbol._hash & 0xFFFFFFFF
 
         key = (state << _offset) | symbol_id
 
@@ -249,7 +251,8 @@ cdef class BottomUpParser(Parser):
 
             # sets the current state
             state = self._stack_states[self._stack_states_top - 1]
-            symbol_id = (<Symbol>self._stack[self._stack_top - 1])._hash & 0xFFFFFFFF
+            stack_top_symbol = self._stack[self._stack_top - 1]
+            symbol_id = stack_top_symbol._hash & 0xFFFFFFFF
 
             key = (state << _offset) | symbol_id
             current_action = self._action_table_optimized.get(key,None)
@@ -273,7 +276,7 @@ cdef class BottomUpParser(Parser):
             state = self._goto_table_optimized[key]
             self._stack_states[self._stack_states_top] = state
             self._stack_states_top += 1
-            symbol_id = (<Symbol>token._symbol)._hash & 0xFFFFFFFF
+            symbol_id = token_symbol._hash & 0xFFFFFFFF
             # checks for an action with the current state and the current token
             key = (state << _offset ) | symbol_id
             current_action = self._action_table_optimized.get(key,None)
