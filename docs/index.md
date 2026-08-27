@@ -6,6 +6,7 @@
 ![PyPI - 3.12](https://img.shields.io/pypi/pyversions/pylgen-core?cache=1)
 ![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen-core?cache=1)
 [![CI](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml/badge.svg)](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml?cache=1)
+![Supported OS](https://img.shields.io/badge/Platforms-macOS%20%7C%20Windows%20%7C%20Linux-blue)
 
 *From prototype to production: A **Python-native [compiler](https://en.wikipedia.org/wiki/Compiler-compiler) framework** that brings the ["**Dragon Book**"](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools) to life in Python with clarity throughout. A high-performance tool to build interpreters and [Domain-Specific Languages (DSLs)](https://en.wikipedia.org/wiki/Domain-specific_language). Master every step of the compilation pipeline, from lexing to semantic analysis, with full control and clarity.*
 
