@@ -60,6 +60,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-22.04, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            archs: "auto64"
+          - os: ubuntu-22.04
+            archs: "auto64"
+          - os: windows-latest
+            archs: "auto64"
+          - os: macos-latest
+            archs: "x86_64 arm64"
     
     steps:
       - name: Checkout code
@@ -69,7 +78,7 @@ jobs:
         uses: pypa/cibuildwheel@v3.3.1
         env:
           CIBW_BUILD: "cp312-* cp313-* cp314-*"
-          CIBW_ARCHS: "x86_64 arm64"
+          CIBW_ARCHS: ${{ matrix.os }}
       
       - name: Save wheels
         uses: actions/upload-artifact@v4
