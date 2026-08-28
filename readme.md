@@ -29,7 +29,9 @@ PyLGEN gives you **complete control** over every stage of language processing. B
 | **Parsing (2M lines, 40 MB)** | 116.73 s | 60.80 s |
 | **AST Construction** | Separate pass | Integrated |
 | **Full Interpreter** | — | ~66.03 s (incl. semantic checks + eval) |
-| **Peak Memory** | ~4 GB | ~927 MB |
+| **Peak Memory** | ~4 GB | ~928 MB |
+
+[more details in the benchmark section of documentation →](https://pylgen.readthedocs.io/en/latest/benchmark/benchmark-conclusion)
 
 > PyLGEN is **not just a parser**, it's a complete, production‑ready interpreter framework that outperforms industry‑standard tools.
 

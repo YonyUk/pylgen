@@ -140,7 +140,7 @@ You can explore the raw data here:
 
 > 1. **CPU Hotspots**: Both reports confirm that the parsing phase (specifically the `reductor` functions in PyLGEN) dominates the CPU cycles. In PyLGEN, this accounts for ~85% of the native execution time, validating our optimization priorities.
 >
-> 2. **Memory Timeline**: The memory allocation graphs provide a visual confirmation of the peak usage disparity—PyLGEN's graph stays in 927 MB, while Lark's allocation curve reaches 4 GB.
+> 2. **Memory Timeline**: The memory allocation graphs provide a visual confirmation of the peak usage disparity—PyLGEN's graph stays in 928 MB, while Lark's allocation curve reaches 4 GB.
 >
 > 3. **Line-by-line Overhead**: The HTML drill-down allows you to inspect exactly which regex patterns (in the lexer) or which visit methods (in the evaluator) incur the most cost, offering actionable insights for future micro-optimizations.
 >
@@ -156,7 +156,7 @@ You can explore the raw data here:
 | **Maximum Parsing Time** | 117.34 s | 61.65 s | – |
 | **Mean Parsing Time** | 116.73 s | 60.80 s | ~1.92x |
 | **AST Construction** | Separate pass | Integrated | **N/A** |
-| **Peak Memory Usage** | ~4 GB | ~927 MB | – |
+| **Peak Memory Usage** | ~4 GB | ~928 MB | – |
 
 **Interpretation**: Lark's parsing alone takes **over 116 seconds** on average. PyLGEN's parsing, which **includes AST construction** and **semantic errors collecting** via reductors, takes **about 60.8 seconds**, a **~1.92x speedup**. If we added a separate AST transformation pass to Lark (which is necessary in practice), the gap would widen further. Moreover, PyLGEN uses **~4x less memory**, a critical advantage for large-scale processing.
 
@@ -197,7 +197,7 @@ The benchmark hardware had only **8 GB of RAM**. For the 2M‑line file (≈40 M
 - **CPU contention**: The kernel spends more time managing memory pages, reducing the CPU cycles available for parsing.
 - **Cache thrashing**: Larger working sets degrade CPU cache efficiency.
 
-PyLGEN, by contrast, used only **~927 MB** for the 2M‑line file and **~2 GB** for the 4M‑line file, staying well within the physical RAM limit. This allowed it to avoid swapping and maintain consistent performance scaling.
+PyLGEN, by contrast, used only **~928 MB** for the 2M‑line file and **~2 GB** for the 4M‑line file, staying well within the physical RAM limit. This allowed it to avoid swapping and maintain consistent performance scaling.
 
 **Interpretation**: The widening speedup gap is also a consequence of Lark's higher memory pressure, which becomes a bottleneck under constrained hardware. In environments with abundant RAM (e.g., 32 GB or more), the difference might be smaller. However, for typical developer laptops or cloud instances with limited memory, PyLGEN's memory efficiency provides a tangible, real‑world advantage.
 
@@ -303,7 +303,7 @@ The semantic and evaluator visitors are `cdef` classes with typed attributes. Ea
 
 > ### 4. Memory Efficiency
 
-Lark's parse tree retains the entire CST before transformation, consuming more memory and causing more cache misses. **Scalene** confirmed that PyLGEN's peak memory was **~927 MB**, while Lark's was **~4 GB**, a significant difference.
+Lark's parse tree retains the entire CST before transformation, consuming more memory and causing more cache misses. **Scalene** confirmed that PyLGEN's peak memory was **~928 MB**, while Lark's was **~4 GB**, a significant difference.
 
 ## Addressing Potential Objections
 
@@ -327,7 +327,7 @@ The benchmark results are clear and robust:
  - **PyLGEN's full interpreter** (including AST construction, semantic checks, and evaluation) runs in ~66 seconds, an impressive feat for a full pipeline on such a large file.
  - **Correctness is verified**: current implementation produce identical outputs, confirming that the benchmark is not just a speed test but a functional test of the entire system.
  - **The speedup is attributable to fundamental architectural advantages**: Cython compilation, integrated AST construction; not just superficial tweaks.
- - **Memory usage is significantly lower**: PyLGEN uses **~927 MB** peak vs. Lark's **~4 GB**, making it more suitable for memory-constrained environments.
+ - **Memory usage is significantly lower**: PyLGEN uses **~928 MB** peak vs. Lark's **~4 GB**, making it more suitable for memory-constrained environments.
 
 > ### Final Thought
 
@@ -371,11 +371,9 @@ MEAN_KEYWORD: "mean"
 DOT_KEYWORD: "dot"
 PRINT_KEYWORD: "print"
 
-// ==================== IGNORAR ====================
 %ignore /[ \t]+/
-%ignore /\/\/.*\n/   // Ahora consume el salto de línea al final del comentario
+%ignore /\/\/.*\n/
 
-// ==================== REGLAS GRAMATICALES ====================
 start: vec_lang_program
 
 vec_lang_program: vec_lang_instructions_sequence
@@ -504,11 +502,9 @@ MEAN_KEYWORD: "mean"
 DOT_KEYWORD: "dot"
 PRINT_KEYWORD: "print"
 
-// ==================== IGNORAR ====================
 %ignore /[ \t]+/
-%ignore /\/\/.*\n/   // Ahora consume el salto de línea al final del comentario
+%ignore /\/\/.*\n/
 
-// ==================== REGLAS GRAMATICALES ====================
 start: vec_lang_program
 
 vec_lang_program: vec_lang_instructions_sequence
