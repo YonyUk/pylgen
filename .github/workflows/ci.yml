@@ -79,7 +79,8 @@ jobs:
         env:
           CIBW_BUILD: "cp312-* cp313-* cp314-*"
           CIBW_ARCHS: ${{ matrix.archs }}
-      
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+          
       - name: Save wheels
         uses: actions/upload-artifact@v4
         with:
