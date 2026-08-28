@@ -8,7 +8,7 @@ while True:
     lexer.clear_errors()
 
     text = input('>>> ')
-    if len(text) == 0:
+    if text.strip() == '':
         continue
     lexer.load_text(text)
     ast = parser.parse(lexer.tokens)

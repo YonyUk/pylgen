@@ -17,7 +17,7 @@ while True:
     lexer.clear_errors()
     
     text = input('>>> ')
-    if len(text) == 0:
+    if text.strip() == '':
         continue
     lexer.load_text(text)
     ast = parser.parse(lexer.tokens)
@@ -56,12 +56,12 @@ This ensures that each evaluation starts with a clean environment, free from res
 ```python
 # ...
 text = input('>>> ')
-if len(text) == 0:
+if text.strip() == '':
     continue
 # ...
 ```
 
-The REPL prompts the user with `>>>` and reads a line. If the user just presses **Enter** (empty input), we skip to the next iteration, no need to process nothing.
+The REPL prompts the user with `>>>` and reads a line. If the user just presses **Enter** and the input does not contain any data (empty input), we skip to the next iteration, no need to process nothing.
 
 > ### 3 Lexical and Sintatic Analysis
 
@@ -429,6 +429,11 @@ If you ever get lost extending the interpreter, come back to this diagram. It wi
  - How data flows from input to output.
 
 This mental model is invaluable as you grow your language from a simple arithmetic REPL into something much more powerful.
+
+!!! note "Sources"
+    The source code of the entire tutorial can be found on the [github repository](https://github.com/YonyUk/pylgen/tree/master/examples/arithmetic_interpreter)
+
+    [download source code<br>(arithmetic_interpreter)](https://download-directory.github.io/?url=https://github.com/YonyUk/pylgen/tree/master/examples/arithmetic_interpreter){ .md-button .md-button--primary }
 
 ## Next steps
 

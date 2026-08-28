@@ -64,6 +64,7 @@ theme:
         name: light mode
 
 markdown_extensions:
+  - attr_list
   - pymdownx.highlight:
         use_pygments: true
   - admonition
