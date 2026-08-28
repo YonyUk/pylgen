@@ -100,6 +100,6 @@ Then build your interpreter step by step, following the complete tutorial in the
 
  - **Deep‑dive API tour**: Understand every module inside out.
 
-[Read the full documentation →](https://pylgen.readthedocs.io)
+[Read the full documentation →](https://pylgen.readthedocs.io/en/latest)
 
 **PyLGEN**: Where compiler theory meets Python pragmatism.
