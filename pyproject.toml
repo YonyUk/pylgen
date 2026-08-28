@@ -36,9 +36,10 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Cython",
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
-    "Operating System :: Linux",
+    "Operating System :: POSIX :: Linux",
 ]
 
 [project.optional-dependencies]
