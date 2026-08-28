@@ -21,6 +21,12 @@ Create a new project folder `veclang/` with the following files:
 
 We'll write each file step by step.
 
+!!! note "Source code"
+
+    The source code of the test language **VecLang** can be found on the [github repository](https://github.com/YonyUk/pylgen/tree/master/examples/veclang)
+
+    [download source code<br>(veclang)](https://download-directory.github.io/?url=https://github.com/YonyUk/pylgen/tree/master/examples/veclang){ .md-button .md-button--primary style="text-align: center;" }
+
 ## 1.1 Token Types (`tokens_enum.py`)
 
 We define our token types using PyLGEN's `TokenType` base class:

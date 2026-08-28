@@ -10,8 +10,8 @@ This analysis is structured to be **objective, reproducible, and transparent**. 
 
     The source code of the test language **VecLang** and the benchmark file used, can be found both on the [github repository](https://github.com/YonyUk/pylgen/tree/master/examples/veclang)
 
-     - 2M lines file: [benchmark.zip](https://github.com/YonyUk/pylgen/raw/master/examples/veclang/benchmark.zip)
-     - source coude: [ veclang ](https://download-directory.github.io/?url=https://github.com/YonyUk/pylgen/tree/master/examples/veclang)
+    [download 2M lines file<br>(benchmark.zip)](https://github.com/YonyUk/pylgen/raw/master/examples/veclang/benchmark.zip){ .md-button .md-button--primary style="text-align: center;" }
+    [download source code<br>(veclang)](https://download-directory.github.io/?url=https://github.com/YonyUk/pylgen/tree/master/examples/veclang){ .md-button .md-button--primary style="text-align: center;" }
 
 > ### 1. What We Are Measuring
 
