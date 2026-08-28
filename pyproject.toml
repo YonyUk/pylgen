@@ -38,7 +38,7 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
-    "Operating System :: Posix :: Linux",
+    "Operating System :: Linux",
 ]
 
 [project.optional-dependencies]
