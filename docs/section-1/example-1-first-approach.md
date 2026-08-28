@@ -37,6 +37,6 @@ We'll build it in four steps, following the classic compiler pipeline: **Lexer**
 !!! note "Sources"
     The source code of the entire tutorial can be found on the [github repository](https://github.com/YonyUk/pylgen/tree/master/examples/arithmetic_interpreter)
 
-    [download source code<br>(arithmetic_interpreter)](https://download-directory.github.io/?url=https://github.com/YonyUk/pylgen/tree/master/examples/arithmetic_interpreter){ .md-button .md-button--primary }
+    [download source code<br>(arithmetic_interpreter)](https://download-directory.github.io/?url=https://github.com/YonyUk/pylgen/tree/master/examples/arithmetic_interpreter){ .md-button .md-button--primary style="text-align: center;"}
 
 Let's dive in and start building!
