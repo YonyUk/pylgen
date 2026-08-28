@@ -6,6 +6,13 @@ This analysis is structured to be **objective, reproducible, and transparent**. 
 
 ## Benchmark Objective and Methodology
 
+!!! note "Sources of the Benchmark"
+
+    The source code of the test language **VecLang** and the benchmark file used, can be found both on the [github repository](https://github.com/YonyUk/pylgen/tree/master/examples/veclang)
+
+     - 2M lines file: [benchmark.zip](https://github.com/YonyUk/pylgen/raw/master/examples/veclang/benchmark.zip)
+     - source coude: [ veclang ](https://download-directory.github.io/?url=https://github.com/YonyUk/pylgen/tree/master/examples/veclang)
+
 > ### 1. What We Are Measuring
 
 The benchmark compares two approaches:
