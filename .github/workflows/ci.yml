@@ -59,11 +59,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-22.04, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
-            archs: "auto64"
-          - os: ubuntu-22.04
             archs: "auto64"
           - os: windows-latest
             archs: "auto64"
