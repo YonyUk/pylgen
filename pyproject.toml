@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pylgen-core"
-version = "0.6.1"
+version = "0.6.2"
 description = "From prototype to production: a Python-native compiler framework that brings the Dragon Book to life in Python, with clarity throughout."
-readme = "readme.md"
+readme = "readme_pypi.md"
 authors = [
     {name = "YonyUk", email = "yonatanjoseguerraperez@gmail.com"}
 ]

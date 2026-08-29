@@ -60,17 +60,6 @@ ast = parser.parse(lexer.tokens)
 # ... your semantic visitors & evaluator ...
 ```
 
-## 🧩 Architecture
-
-```mermaid
-flowchart LR
-    Source["Source Code"] --> Lexer["Lexer"]
-    Lexer --> Parser["Parser LALR(1)"]
-    Parser --> AST["AST"]
-    AST --> Visitors["Visitors"]
-    Visitors --> Result["Result / Errors"] 
-```
-
 | **`Module`** | **Purpose** |
 | :---: | :---: |
 | **`common`** | Core types: `Symbol`, `AST`, `Token`, `ASTListView` |
@@ -103,3 +92,10 @@ Then build your interpreter step by step, following the complete tutorial in the
 [Read the full documentation →](https://pylgen.readthedocs.io/en/latest)
 
 **PyLGEN**: Where compiler theory meets Python pragmatism.
+
+
+## 📝 Changelog
+
+### v0.6.2 (2026-08-29) – Latest
+
+ - fixed bug of type mismatches of `BottomUpParser` with enum `BottomUpParserAction`
