@@ -103,14 +103,14 @@ If everything is clean, we run the evaluator pass, which computes values and sto
 ```python
 # ...
 errors += context.errors
-    errors = list(set(errors))
-    if errors:
-        for error in errors:
-            print(error)
-    else:
-        result = context.get_ast_value(ast) # type: ignore
-        if result is not None:
-            print(result)
+errors = list(set(errors))
+if errors:
+    for error in errors:
+        print(error)
+else:
+    result = context.get_ast_value(ast) # type: ignore
+    if result is not None:
+        print(result)
 ```
 
 After evaluation, we check for any runtime errors that may have occurred (like division by zero). We use `set(errors)` to remove duplicates, which can happen if the same error is reported multiple times.
