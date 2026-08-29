@@ -258,7 +258,7 @@ cdef class BottomUpParser(Parser):
             current_action = self._action_table_optimized.get(key,None)
             
             # checks for an action
-            if not current_action:
+            if current_action is None:
                 self._stack_states_top = self._stack_states_top
                 self._stack_ast_top = self._stack_ast_top
                 self._stack_top = self._stack_top
@@ -280,7 +280,7 @@ cdef class BottomUpParser(Parser):
             # checks for an action with the current state and the current token
             key = (state << _offset ) | symbol_id
             current_action = self._action_table_optimized.get(key,None)
-            if not current_action:
+            if current_action is None:
                 self._stack_states_top = self._stack_states_top
                 self._stack_ast_top = self._stack_ast_top
                 self._stack_top = self._stack_top
