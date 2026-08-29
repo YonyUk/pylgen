@@ -215,7 +215,7 @@ cdef class BottomUpParser(Parser):
         key = (state << _offset) | symbol_id
 
         current_action = self._action_table_optimized.get(key,None)
-        if not current_action:
+        if current_action is None:
             self._start_recovery_mode(token._symbol,token._line,token._column)
             return # type:ignore
 
@@ -286,6 +286,7 @@ cdef class BottomUpParser(Parser):
                 self._stack_top = self._stack_top
                 self._start_recovery_mode(token._symbol,token._line,token._column)
                 break
+            
         
         if not self._panic_mode and current_action[0] == BottomUpParserAction.SHIFT:
             state = self._goto_table_optimized[key]
