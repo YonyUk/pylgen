@@ -1,5 +1,5 @@
 # PyLGEN
-![PyPI - 0.6.2](https://img.shields.io/pypi/v/pylgen-core?cache=1)
+![PyPI - 0.6.3](https://img.shields.io/pypi/v/pylgen-core?cache=1)
 ![PyPI - 3.12](https://img.shields.io/pypi/pyversions/pylgen-core?cache=1)
 ![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen-core?cache=1)
 [![CI](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml/badge.svg)](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml?cache=1)
