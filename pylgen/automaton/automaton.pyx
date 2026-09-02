@@ -1022,6 +1022,55 @@ cdef class NFA(Automaton):
         self.add_transition(from_state,to_state,symbol)
         return self
 
+cdef class NonGreedyDFA(DFA):
+
+    def __init__(self,
+        str start_id,
+        object start_value,
+        set[str] alphabet,
+        bint start_accept=False # type:ignore
+    ):
+        '''
+        Args:
+            start_id (str): id of the start state
+            start_value (object): value of the start_state
+            alphabet (Set[str]): alphabet of this automaton
+            start_accept (bool): says if the start state is an accepting state
+        '''
+        if isinstance(start_value,set):
+            self._start_state = State(start_id,set(start_value),start_accept)
+        else:
+            self._start_state = State(start_id,start_value,start_accept)
+        self._alphabet = set(alphabet)
+        self._current_state = self._start_state
+        self._states_by_id = { start_id:self._start_state }
+        self._closures = {}
+        self._epsilons = {}
+        self._is_complete = False # type:ignore
+        self._is_stuck = False # type:ignore
+        self._trans_func = Table()
+        self._transitions_added_while_completing = []
+        self._fault_id = ''
+        self._preimages = {}
+
+    cpdef void walk(self,str symbol):
+        '''
+        Args:
+            symbol (str):
+        
+        Returns:
+            None: move forward with the given symbol if its possible
+        '''
+        cdef tuple[str,str] transition = (self._current_state._id,symbol)
+        
+        if self._current_state._is_accept:
+            self._is_stuck = True # type:ignore
+        elif not self._is_stuck:
+            if transition in self._trans_func._table:
+                self._current_state = self._states_by_id[self._trans_func._table[transition]]
+            else:
+                self._is_stuck = True # type:ignore
+
 cdef DFA _copy_dfa(DFA dfa):
     cdef DFA result
     cdef State state,copy_state

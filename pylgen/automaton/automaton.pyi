@@ -141,6 +141,16 @@ class NFA(Automaton):
 
     def __iadd__(self,transition:Tuple[State,str,State]) -> NFA: ...
 
+class NonGreedyDFA(DFA):
+
+    def __init__(
+            self,
+            start_id: str,
+            start_value: Any,
+            alphabet: Set[str],
+            start_accept:bool=False
+        ): ...
+
 def create_dfa(states:Set[State],transition_function:Table,start_id:str,alphabet:Set[str]) -> DFA: ...
 
 def create_nfa(states:Set[State],transition_function:Table,epsilon_transitions:Dict[str,Set[str]],start_id:str,alphabet:Set[str]) -> NFA: ...

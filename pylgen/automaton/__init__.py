@@ -3,6 +3,7 @@ from .automaton import (
     Automaton,
     DFA,
     NFA,
+    NonGreedyDFA,
     create_dfa,
     create_nfa,
     get_word_automaton,
