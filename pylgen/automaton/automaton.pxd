@@ -44,9 +44,6 @@ cdef class NFA(Automaton):
     cpdef void add_epsilon_transition(self,State from_state,State to_state)
     cpdef DFA to_deterministic(self)
 
-cdef class NonGreedyDFA(DFA):
-    pass
-
 cdef DFA _copy_dfa(DFA dfa)
 cdef NFA _copy_nfa(NFA nfa)
 cdef NFA _automaton_union(set[Automaton] automatons)
