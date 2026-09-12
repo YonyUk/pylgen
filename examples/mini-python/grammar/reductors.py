@@ -153,6 +153,12 @@ def Term1_Term1_mul_Term2_reductor(asts:ASTListView) -> AST:
         return OperationNotSupportedForTypesErrorAST(asts[0],asts[2],mul,asts[1].line,asts[1].column)
     return MulAST(asts[0],asts[2],asts[1].line,asts[1].column)
 
+def Term1_Term1_mul_minus_Term2_reductor(asts:ASTListView) -> AST:
+    if asts[0].symbol == String and asts[3].symbol == String:
+        return OperationNotSupportedForTypesErrorAST(asts[0],asts[2],mul,asts[1].line,asts[1].column)
+    right = MinusMathExprAST(asts[2],asts[3],asts[2].line,asts[2].column) # type: ignore
+    return MulAST(asts[0],right,asts[1].line,asts[1].column)
+
 def Term1_Term1_div_Term2_reductor(asts:ASTListView) -> AST:
     if asts[0].symbol == String:
         return OperationNotSupportedForTypeErrorAST(asts[0],div,asts[1].line,asts[1].column)
@@ -163,6 +169,17 @@ def Term1_Term1_div_Term2_reductor(asts:ASTListView) -> AST:
         return DivisionByLiteralZeroErrorAST(asts[0],asts[2],asts[1].line,asts[1].column)
     return DivAST(asts[0],asts[2],asts[1].line,asts[1].column)
 
+def Term1_Term1_div_minus_Term2_reductor(asts:ASTListView) -> AST:
+    if asts[0].symbol == String:
+        return OperationNotSupportedForTypeErrorAST(asts[0],div,asts[1].line,asts[1].column)
+    if asts[3].symbol == String:
+        return OperationNotSupportedForTypeErrorAST(asts[3],div,asts[1].line,asts[1].column)    
+    right:NumberAST = asts[3] # type: ignore
+    if right.symbol == Number and right._value_type(right._value) == 0:
+        return DivisionByLiteralZeroErrorAST(asts[0],asts[3],asts[1].line,asts[1].column)
+    right_term = MinusMathExprAST(asts[2],asts[3],asts[2].line,asts[2].column) # type: ignore
+    return DivAST(asts[0],right_term,asts[1].line,asts[1].column)
+
 def Term1_Term1_int_div_Term2_reductor(asts:ASTListView) -> AST:
     if asts[0].symbol == String:
         return OperationNotSupportedForTypeErrorAST(asts[0],int_div,asts[1].line,asts[1].column)
@@ -172,6 +189,17 @@ def Term1_Term1_int_div_Term2_reductor(asts:ASTListView) -> AST:
     if right.symbol == Number and right._value_type(right._value) == 0:
         return DivisionByLiteralZeroErrorAST(asts[0],asts[2],asts[1].line,asts[1].column)
     return IntDivAST(asts[0],asts[2],asts[1].line,asts[1].column)
+
+def Term1_Term1_int_div_minus_Term2_reductor(asts:ASTListView) -> AST:
+    if asts[0].symbol == String:
+        return OperationNotSupportedForTypeErrorAST(asts[0],int_div,asts[1].line,asts[1].column)
+    if asts[3].symbol == String:
+        return OperationNotSupportedForTypeErrorAST(asts[3],int_div,asts[1].line,asts[1].column)    
+    right:NumberAST = asts[3] # type: ignore
+    if right.symbol == Number and right._value_type(right._value) == 0:
+        return DivisionByLiteralZeroErrorAST(asts[0],asts[3],asts[1].line,asts[1].column)
+    right_term = MinusMathExprAST(asts[2],asts[3],asts[2].line,asts[2].column) # type: ignore
+    return IntDivAST(asts[0],right_term,asts[1].line,asts[1].column)
 
 def Term1_Term1_mod_Term2_reductor(asts:ASTListView) -> AST:
     if asts[0].symbol == String:
@@ -186,12 +214,34 @@ def Term1_Term1_mod_Term2_reductor(asts:ASTListView) -> AST:
         return ModuleWithComplexErrorAST(asts[0],asts[2],asts[1].line,asts[1].column)
     return ModAST(asts[0],asts[2],asts[1].line,asts[1].column)
 
-def Term2_Term2_power_Term3_reductor(asts:ASTListView) -> AST:
+def Term1_Term1_mod_minus_Term2_reductor(asts:ASTListView) -> AST:
+    if asts[0].symbol == String:
+        return OperationNotSupportedForTypeErrorAST(asts[0],mod,asts[1].line,asts[1].column)
+    if asts[3].symbol == String:
+        return OperationNotSupportedForTypeErrorAST(asts[3],mod,asts[1].line,asts[1].column)
+    left:NumberAST = asts[0] # type: ignore
+    right:NumberAST = asts[3] # type: ignore
+    if right.symbol == Number and right._value_type(right._value) == 0:
+        return ModuleByLiteralZeroErrorAST(asts[0],asts[3],asts[1].line,asts[1].column)
+    if left.symbol == Number and right.symbol == Number and (left._value_type == complex or right._value_type == complex):
+        return ModuleWithComplexErrorAST(asts[0],asts[3],asts[1].line,asts[1].column)
+    right_term = MinusMathExprAST(asts[2],asts[3],asts[2].line,asts[2].column) # type: ignore
+    return ModAST(asts[0],right_term,asts[1].line,asts[1].column)
+
+def Term2_Term3_power_Term2_reductor(asts:ASTListView) -> AST:
     if asts[0].symbol == String:
         return OperationNotSupportedForTypeErrorAST(asts[0],power,asts[1].line,asts[1].column)
     if asts[2].symbol == String:
         return OperationNotSupportedForTypeErrorAST(asts[2],power,asts[1].line,asts[1].column)    
     return PowAST(asts[0],asts[2],asts[1].line,asts[1].column)
+
+def Term2_Term3_power_minus_Term2_reductor(asts:ASTListView) -> AST:
+    if asts[0].symbol == String:
+        return OperationNotSupportedForTypeErrorAST(asts[0],power,asts[1].line,asts[1].column)
+    if asts[3].symbol == String:
+        return OperationNotSupportedForTypeErrorAST(asts[2],power,asts[1].line,asts[1].column)
+    right = MinusMathExprAST(asts[2],asts[3],asts[2].line,asts[2].column) # type: ignore
+    return PowAST(asts[0],right,asts[1].line,asts[1].column)
 
 def FuncCall_print_keyword_lparen_FuncCallArgs_rparen_reductor(asts:ASTListView) -> AST:
     return FuncCallAST('print',asts[2],asts[0].line,asts[0].column) # type: ignore

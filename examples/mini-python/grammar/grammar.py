@@ -62,12 +62,17 @@ G[UnaryMathExpr] += (UnaryMathExpr,minus,Term1),MathExpr_MathExpr_minus_Term1_re
 G[UnaryMathExpr] += (Term1,),single_reductor
 
 G[Term1] += (Term1,mul,Term2),Term1_Term1_mul_Term2_reductor
+G[Term1] += (Term1,mul,minus,Term2),Term1_Term1_mul_minus_Term2_reductor
 G[Term1] += (Term1,div,Term2),Term1_Term1_div_Term2_reductor
+G[Term1] += (Term1,div,minus,Term2),Term1_Term1_div_minus_Term2_reductor
 G[Term1] += (Term1,int_div,Term2),Term1_Term1_int_div_Term2_reductor
+G[Term1] += (Term1,int_div,minus,Term2),Term1_Term1_int_div_minus_Term2_reductor
 G[Term1] += (Term1,mod,Term2),Term1_Term1_mod_Term2_reductor
+G[Term1] += (Term1,mod,minus,Term2),Term1_Term1_mod_minus_Term2_reductor
 G[Term1] += (Term2,),single_reductor
 
-G[Term2] += (Term2,power,Term3),Term2_Term2_power_Term3_reductor
+G[Term2] += (Term3,power,Term2),Term2_Term3_power_Term2_reductor
+G[Term2] += (Term3,power,minus,Term2),Term2_Term3_power_minus_Term2_reductor
 G[Term2] += (Term3,),single_reductor
 
 G[Term3] += (Number,),single_reductor

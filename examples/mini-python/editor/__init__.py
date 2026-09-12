@@ -71,10 +71,13 @@ class TerminalInputBridge:
 
 class Popup(tk.Toplevel):
 
-    def __init__(self, master,title:str,callback:Callable[[str],None],*args,**kwargs) -> None:
+    def __init__(self, master,title:str,callback:Callable[[str],None],on_cancel_callback:Callable|None=None,*args,**kwargs) -> None:
         super().__init__(master,*args,**kwargs)
         self.title(title)
         self._callback = callback
+        if on_cancel_callback:
+            self.wm_protocol('WM_DELETE_WINDOW',on_cancel_callback)
+        self._on_cancel_callback = on_cancel_callback
         self.geometry('300x100')
 
         text_panel = tk.Frame(self)
@@ -107,6 +110,8 @@ class Popup(tk.Toplevel):
             self.after(0,self.destroy)
 
     def _cancel(self):
+        if self._on_cancel_callback:
+            self._on_cancel_callback()
         self.grab_release()
         self.after(0,self.destroy)
 
@@ -303,11 +308,14 @@ class PythonEditor(Editor):
         self._lexer.load_text(code)
         _ = self._parser.parse(self._lexer.tokens)
 
+        def _on_cancel():
+            self._parser.set_draw_parse_tree_flag(False)
+
         def get_name(text):
             draw_parse_tree_from_parser(self._parser,filename=text,show=True,cache=self._cache_option)
             self._parser.set_draw_parse_tree_flag(False)
 
-        popup = Popup(self,'Filename?',get_name)
+        popup = Popup(self,'Filename?',get_name,_on_cancel)
         popup.grab_set()
         popup.focus_set()
         popup.wait_window()

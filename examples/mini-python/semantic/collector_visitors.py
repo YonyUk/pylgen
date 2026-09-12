@@ -13,7 +13,7 @@ class FuncDefCollectorASTVisitor(ASTVisitor):
     def visit(self, ast: FuncDefAST, context: PythonContext) -> None: # type: ignore
         self._check_context_type(context)
         if context.exists_func(ast.func_name):
-            context.add_semantic_error(FunctionAlreadyDefinedError(ast.func_name,ast.column,ast.line))
+            context.add_semantic_error(FunctionAlreadyDefinedError(ast.func_name,ast.line,ast.column))
         else:
             func_args = [var.name for var in ast.args.args]
             context.define_func(ast.func_name,ast.body,*func_args)

@@ -6,13 +6,27 @@ from grammar.symbols import *
 
 from .tokens import PythonTokenType
 
-class NumericLexicalRule(LexicalRule):
+class IntegerLexicalRule(LexicalRule):
 
     def __init__(self) -> None:
-        super().__init__('non-zero numbers must starts with at most one 0 before the dot')
+        super().__init__('non-zero integers cannot start with 0 digit')
 
     def _check(self, text: str):
         return len(text) == 1 or text[0] != '0'
+
+class FloatingLexicalRule(LexicalRule):
+
+    def __init__(self) -> None:
+        super().__init__('non-zero numbers must have at most one 0 digit at the start')
+
+    def _check(self,text:str):
+        if len(text) <= 3:
+            return True
+        if text[0] == '0':
+            if text[1] not in ['.','e']:
+                return False
+            return True
+        return True
 
 class VariableLexicalRule(LexicalRule):
 
@@ -132,8 +146,8 @@ PythonLexer[9,PythonTokenType.WHITESPACEMARKER] = '#ignore#\n?'
 PythonLexer[10,PythonTokenType.JUMPLINE] = '\n'
 PythonLexer[11,PythonTokenType.STRING] = '"[^"]*"|\'[^\']*\''
 
-PythonLexer.add_rule(PythonTokenType.INTEGER,NumericLexicalRule())
-PythonLexer.add_rule(PythonTokenType.FLOATING,NumericLexicalRule())
+PythonLexer.add_rule(PythonTokenType.INTEGER,IntegerLexicalRule())
+PythonLexer.add_rule(PythonTokenType.FLOATING,FloatingLexicalRule())
 PythonLexer.add_rule(PythonTokenType.IDENTIFIER,VariableLexicalRule())
 
 print('initializing lexer...')
