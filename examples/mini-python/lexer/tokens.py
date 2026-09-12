@@ -1,0 +1,17 @@
+from pylgen.common.enums import TokenType
+
+class PythonTokenType(TokenType):
+
+    INTEGER = 'INTEGER'
+    BOOLEAN = 'BOOLEAN'
+    FLOATING = 'FLOATING'
+    STRING = 'STRING'
+    SYMBOL = 'SYMBOL'
+    OPERATOR = 'OPERATOR'
+    EOF = 'EOF'
+    JUMPLINE = 'JUMPLINE'
+    IDENTATION = 'IDENTATION'
+    KEYWORD = 'KEYWORD'
+    IDENTIFIER = 'IDENTIFIER'
+    WHITESPACE = 'WHITESPACE'
+    WHITESPACEMARKER = 'WHITESPACEMAKER'
