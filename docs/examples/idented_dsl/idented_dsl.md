@@ -2,9 +2,14 @@
 
 ## An everyday problem
 
-Imagine you have to design a configuration format for an application. You could use [**JSON**](https://www.json.org), [**YAML**](https://yaml.org), [**TOML**](https://toml.io), or [**INI**](https://en.wikipedia.org/wiki/INI_file). Each has its advantages, but they all share one thing: the user writes text, and the application must understand it. The interesting question isn't which format to use, but rather how to teach the machine to read it. And that is where PyLGEN comes into play.
+Imagine you have to design a configuration format for an application. You could use [**JSON**](https://www.json.org), [**YAML**](https://yaml.org), [**TOML**](https://toml.io), or [**INI**](https://en.wikipedia.org/wiki/INI_file). Each has its advantages, but they all share one thing: the user writes text, and the application must understand it. The interesting question isn't *which* format to use, it's *how* you teach a machine to read it. And that is where PyLGEN comes into play.
 
-`idented_dsl` is an example that answers that question. It defines a small, indentation-sensitive configuration language, similar to INI but with true nesting, and builds a complete interpreter that converts it into JSON. Throughout this walkthrough, we will see how each piece is assembled: the lexer, the grammar, the reducers, the AST, code generation, and the CLI.
+`idented_dsl` is a small, indentation‑sensitive configuration language, similar to INI but with true nesting. It's compact enough to fit in a single sitting, yet rich enough to exercise every stage of the compiler pipeline. By the end of this walkthrough, you'll have seen how each piece is assembled: the lexer, the grammar, the reducers, the AST, code generation, and the CLI.
+
+!!! note "Sources"
+    The source code of the entire example can be found on the [github repository](https://github.com/YonyUk/pylgen/tree/master/examples/idented_dsl)
+
+    [download source code<br>(idented_dsl)](https://download-directory.github.io/?url=https://github.com/YonyUk/pylgen/tree/master/examples/idented_dsl){ .md-button .md-button--primary style="text-align: center;"}
 
 ## The starting point: the configuration file
 
@@ -120,6 +125,14 @@ The tokens themselves are diverse: integers and floats, booleans (`true`/`false`
 
 A design choice is evident here: the lexer does not attempt to be *"smart."* It has no concept of sections or atoms; it simply classifies characters and detects changes in indentation. The intelligence comes later, within the grammar.
 
+!!! tip "The empty-line trick"
+
+    In an indentation-sensitive language, the lexer needs to compare the indentation level of each line to decide when to emit `indent` and `dedent`. An empty line has no content, but it may have zero spaces or accidental spaces; if it were processed as a normal line, its indentation could be interpreted as an unexpected `dedent` (or a spurious `indent`) and break the block structure.
+
+    Simply deleting empty lines is also problematic: it shifts `line` and `column` numbers, and it can alter the sequence of `newlines` that the lexer uses to delimit instructions. That is why they are replaced with a marker (`#ignore#`) that the lexer discards via the skip pattern (`'#ignore#\n?'`). This way the line still counts for position tracking, but it produces no tokens and does not interfere with the indentation logic.
+
+    It is a simple but effective trick: it turns an empty line into an ignorable token, preserving the structure and preventing whitespace from contaminating the analysis.
+
 ## Second stop: the attributed grammar
 
 The `grammar.py` file is the heart of the example. Here, the language structure is defined, and each production is associated with a function that constructs the AST.
@@ -212,7 +225,7 @@ The `ConfigAtom` productions are repeated for each value type: string, boolean, 
 
 The parser is built at the end. LALR(1) is more than sufficient for this grammar. There is no ambiguity, no conflicts, and no need for backtracking. PyLGEN builds the tables at import time, and the parser is ready for use.
 
-## Third stage: the AST
+## Third stop: the AST
 
 This is where the example determines how to represent the knowledge extracted from the text. `asts.py` defines five classes:
 
@@ -299,7 +312,7 @@ Each node inherits from `AST` and passes a `Symbol` that identifies it. Symbols 
 
 The nodes are deliberately simple. There are no visitor methods, no logic. They are data containers. The logic resides in the reducers and the code generator. That separation is intentional: the AST describes what is there, not what to do with it.
 
-## Fourth stage: the reducers
+## Fourth stop: the reducers
 
 Each grammar production has an associated reduction function. Reducers receive an ASTListView (a list of already constructed child nodes) and return a new node.
 
@@ -398,7 +411,7 @@ def configatom_variable_colon_number_reductor(asts:ASTListView) -> AST:
     return config
 ```
 
-## Fifth stage: code generation
+## Fifth stop: code generation
 
 With the AST in hand, the next step is to convert it into something useful. `codegen.py` implements two functions: `ast_to_dict` and `to_json`.
 
@@ -558,3 +571,9 @@ You don't need to use all of PyLGEN. The example uses `IdentedLexer`, `Attribute
 > ### Lesson 5:
 
 A small DSL can be implemented in just a few lines. All told, the example contains around 300 lines of code. Most of it is declarative: lexical rules, grammar productions, and one-line reducers. The imperative part (CLI, code generation) is minimal. That is exactly what one wants from a compiler framework: for language knowledge to be declarative and for imperative code to be incidental.
+
+## What's next?
+
+You've seen how a complete, working DSL can be built with PyLGEN in just a few hundred lines. The next example, `mini-python`, takes the same principles and applies them to a much larger language: a subset of Python with its own GUI. If `idented_dsl` is a sketch, `mini-python` is a full painting.
+
+Ready to see it? Let's go.
