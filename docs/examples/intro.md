@@ -10,7 +10,7 @@ In this section, we'll walk through two complete projects, each one designed to 
 
 An interpreter for an **indentation‑sensitive configuration language**. Think of it as INI with true nesting: sections, subsections, atoms, and indentation that actually means something. This example shows how PyLGEN handles significant whitespace without forcing the grammar to count spaces, and how a small DSL can be built in just a few hundred lines of declarative code.
 
-> ### `mini-python`
+> ### [`mini-python`](mini-python/mini-python.md)
 
 A complete interpreter with a **GUI included**, capable of handling a **subset of the Python language**. This example pushes the framework further: more grammar rules, more AST nodes, and a richer evaluation model. It's the natural next step after the [arithmetic REPL](../section-1/example-1-first-approach.md).
 
