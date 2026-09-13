@@ -3,6 +3,9 @@ from pylgen.common.types import ASTListView,AST
 from .asts import *
 from .error_asts import *
 
+def PythonInstruction_BoolExpr_reductor(asts:ASTListView) -> AST:
+    return InstructionAST(asts[0],asts[0].line,asts[0].column)
+
 def Variable_reductor(asts:ASTListView) -> AST:
     token:Token = asts[0] # type: ignore
     return VariableAST(token.text,token.line,token.column)
@@ -20,34 +23,44 @@ def PythonInstruction_return_keyword_reductor(asts:ASTListView) -> AST:
     return VoidReturnAST(asts[0].line,asts[0].column)
 
 def PythonInstruction_Variable_assign_BoolExpr_reductor(asts:ASTListView) -> AST:
-    return AssignAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    instruction = AssignAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    return InstructionAST(instruction,instruction.line,instruction.column)
 
 def PythonInstruction_Variable_plus_eq_MathExpr_reductor(asts:ASTListView) -> AST:
-    return PlusEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    instruction = PlusEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    return InstructionAST(instruction,instruction.line,instruction.column)
 
 def PythonInstruction_Variable_minus_eq_MathExpr_reductor(asts:ASTListView) -> AST:
-    return MinusEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    instruction = MinusEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    return InstructionAST(instruction,instruction.line,instruction.column)
 
 def PythonInstruction_Variable_mul_eq_MathExpr_reductor(asts:ASTListView) -> AST:
-    return MulEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    instruction = MulEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    return InstructionAST(instruction,instruction.line,instruction.column)
 
 def PythonInstruction_Variable_div_eq_MathExpr_reductor(asts:ASTListView) -> AST:
-    return DivEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    instruction = DivEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    return InstructionAST(instruction,instruction.line,instruction.column)
 
 def PythonInstruction_Variable_int_div_eq_MathExpr_reductor(asts:ASTListView) -> AST:
-    return IntDivEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    instruction = IntDivEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    return InstructionAST(instruction,instruction.line,instruction.column)
 
 def PythonInstruction_Variable_power_eq_MathExpr_reductor(asts:ASTListView) -> AST:
-    return PowEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    instruction = PowEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    return InstructionAST(instruction,instruction.line,instruction.column)
 
 def PythonInstruction_Variable_mod_eq_MathExpr_reductor(asts:ASTListView) -> AST:
-    return ModEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    instruction = ModEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    return InstructionAST(instruction,instruction.line,instruction.column)
 
 def PythonInstruction_Variable_bit_or_eq_BoolExpr_reductor(asts:ASTListView) -> AST:
-    return BitOrEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    instruction = BitOrEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    return InstructionAST(instruction,instruction.line,instruction.column)
 
 def PythonInstruction_Variable_bit_and_eq_BoolExpr_reductor(asts:ASTListView) -> AST:
-    return BitAndEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    instruction = BitAndEqAST(asts[0],asts[2],asts[1].line,asts[1].column)
+    return InstructionAST(instruction,instruction.line,instruction.column)
 
 def MathExpr_minus_UnaryMathExpr_reductor(asts:ASTListView) -> AST:
     return MinusMathExprAST(asts[0],asts[1],asts[0].line,asts[0].column) # type: ignore
@@ -280,11 +293,11 @@ def FuncCallArg_reductor(asts:ASTListView) -> AST:
     return FuncCallArgsAST([asts[0]],asts[0].line,asts[0].column)
 
 def Instructions_reductor(asts:ASTListView) -> AST:
-    return InstructionsAST([asts[0]],asts[0].line,asts[0].column)
+    return InstructionsAST([asts[0]],asts[0].line,asts[0].column) # type: ignore
 
 def Instructions_Instruction_reductor(asts:ASTListView) -> AST:
     instructions: InstructionsAST = asts[0] # type: ignore
-    instructions._instructions.append(asts[1])
+    instructions._instructions.append(asts[1]) # type: ignore
     return instructions
 
 def StringExpr_plus_String_reductor(asts:ASTListView) -> AST:

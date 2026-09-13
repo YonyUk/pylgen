@@ -111,7 +111,9 @@ class EvalPostOrder(PostOrder):
                     self._stack.pop()
                     continue
 
-                if ast.symbol == ReturnSmt:
+                if ast.symbol == PythonInstruction:
+                    context._ebps.append(len(context._eval_stack))
+                elif ast.symbol == ReturnSmt:
                     self._function_has_returned[-1] = True
                 elif ast.symbol in (IfSmt,IfElseSmt,IfElifSmt,IfElifElseSmt):
                     self._conditional_scopes.append(ast.symbol)
@@ -159,6 +161,8 @@ class EvalPostOrder(PostOrder):
                     self._handle_func_call(ast,context) # type: ignore
                 elif ast.symbol in (IfSmt,IfElseSmt,IfElifSmt,IfElifElseSmt):
                     self._conditional_scopes.pop()
+                elif ast.symbol == PythonInstruction:
+                    del context._eval_stack[context._ebps.pop():]
 
                 return ast
 

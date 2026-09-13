@@ -269,18 +269,32 @@ class FuncCallAST(AST):
     def children(self) -> List[AST]:
         return self._children # type: ignore
 
+class InstructionAST(AST):
+
+    def __init__(self, instruction:AST, line: int, column: int):
+        super().__init__(PythonInstruction, line, column)
+        self._instruction = instruction
+        self._children = [instruction]
+
+    @property
+    def instruction(self) -> AST:
+        return self._instruction
+
+    def children(self) -> List[AST]:
+        return self._children
+
 class InstructionsAST(AST):
 
-    def __init__(self, instructions:List[AST], line: int, column: int):
+    def __init__(self, instructions:List[InstructionAST], line: int, column: int):
         super().__init__(PythonInstructions, line, column)
         self._instructions = instructions
 
     @property
-    def instructions(self) -> List[AST]:
+    def instructions(self) -> List[InstructionAST]:
         return self._instructions
 
     def children(self) -> List[AST]:
-        return self._instructions
+        return self._instructions # type: ignore
 
 class BooleanAST(AST):
 
@@ -312,13 +326,13 @@ class StringAST(AST):
 
 class IfBodyAST(InstructionsAST):
 
-    def __init__(self, instructions: List[AST], line: int, column: int):
+    def __init__(self, instructions: List[InstructionAST], line: int, column: int):
         AST.__init__(self,IfBody,line,column)
         self._instructions = instructions
 
 class ElseBodyAST(InstructionsAST):
 
-    def __init__(self, instructions: List[AST], line: int, column: int):
+    def __init__(self, instructions: List[InstructionAST], line: int, column: int):
         AST.__init__(self,ElseBody,line,column)
         self._instructions = instructions
 
@@ -405,7 +419,7 @@ class IfElifElseAST(IfElifAST):
 
 class WhileBodyAST(InstructionsAST):
 
-    def __init__(self, instructions: List[AST], line: int, column: int):
+    def __init__(self, instructions: List[InstructionAST], line: int, column: int):
         AST.__init__(self,WhileBody,line,column)
         self._instructions = instructions
 
@@ -430,7 +444,7 @@ class WhileAST(AST):
 
 class FuncBodyAST(InstructionsAST):
 
-    def __init__(self, instructions: List[AST], line: int, column: int):
+    def __init__(self, instructions: List[InstructionAST], line: int, column: int):
         AST.__init__(self,FuncBody,line,column)
         self._instructions = instructions
 

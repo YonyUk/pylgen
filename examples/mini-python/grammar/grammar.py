@@ -11,7 +11,7 @@ G[PythonProgram] += (PythonInstructions,),single_reductor
 G[PythonInstructions] += (PythonInstruction,),Instructions_reductor
 G[PythonInstructions] += (PythonInstructions,PythonInstruction),Instructions_Instruction_reductor
 
-G[PythonInstruction] += (BoolExpr,jumpline),single_reductor
+G[PythonInstruction] += (BoolExpr,jumpline),PythonInstruction_BoolExpr_reductor
 G[PythonInstruction] += (Variable,assign,BoolExpr,jumpline),PythonInstruction_Variable_assign_BoolExpr_reductor
 G[PythonInstruction] += (Variable,plus_eq,MathExpr,jumpline),PythonInstruction_Variable_plus_eq_MathExpr_reductor
 G[PythonInstruction] += (Variable,minus_eq,MathExpr,jumpline),PythonInstruction_Variable_minus_eq_MathExpr_reductor
