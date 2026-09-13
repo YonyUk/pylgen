@@ -37,6 +37,9 @@ nav:
       - Parser Module: api/parser/parser.md
       - Analysis Module: api/analysis/analysis.md
       - Visual Module (Bonus): api/visual/visual.md
+    - Examples:
+      - Introduction: examples/intro.md
+      - idented_dsl: examples/idented_dsl/idented_dsl.md
 
 theme:
   name: material
