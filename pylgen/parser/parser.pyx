@@ -77,6 +77,10 @@ cdef class Parser:
         raise ParsingException('Nothing parsed')
     
     @property
+    def syntax_errors(self) -> bint:
+        return self._syntax_error
+    
+    @property
     def errors(self) -> List[Error]:
         return list(self._errors)
 
@@ -140,7 +144,7 @@ cdef class BottomUpParser(Parser):
     cdef void _set_reductor(self,Production production,object reductor): # type:ignore
         self._reductor_by_production[(<Production>production)._hash] = reductor
 
-    cdef void _start_recovery_mode(self,Symbol symbol,int line, int column):
+    cdef void _start_recovery_mode(self,Symbol symbol,int line, int column, int source_line_interval_start, int source_line_interval_end):
         cdef Symbol stack_symbol,follow_symbol
         cdef tuple[str,Symbol] key
         cdef set[Symbol] expected_symbols = set()
@@ -156,7 +160,7 @@ cdef class BottomUpParser(Parser):
                 if follow_symbol._is_terminal:
                     expected_symbols.add(follow_symbol)
 
-        error = SyntaxError(f'Unexpected symbol "{symbol}"; expected {expected_symbols}',line,column) # type:ignore
+        error = SyntaxError(f'Unexpected symbol "{symbol}"; expected {expected_symbols}',line,column,source_line_interval_start,source_line_interval_end) # type:ignore
         self._errors.add(error)
         self._panic_mode = True # type:ignore
         self._current_syncronization_set = set()
@@ -215,7 +219,7 @@ cdef class BottomUpParser(Parser):
 
         current_action = self._action_table_optimized.get(key,None)
         if current_action is None:
-            self._start_recovery_mode(token._symbol,token._line,token._column)
+            self._start_recovery_mode(token._symbol,token._line,token._column,token._column,token._column + len(token._text))
             return # type:ignore
 
         # while the action is reduce
@@ -261,7 +265,7 @@ cdef class BottomUpParser(Parser):
                 self._stack_states_top = self._stack_states_top
                 self._stack_ast_top = self._stack_ast_top
                 self._stack_top = self._stack_top
-                self._start_recovery_mode(self._stack[self._stack_top - 1],new_ast._line,new_ast._column)
+                self._start_recovery_mode(self._stack[self._stack_top - 1],new_ast._line,new_ast._column,new_ast._column,new_ast._column + 1)
                 break
             
             # checks if the action is shift, due to reductions only may occur at top of the stack
@@ -269,7 +273,7 @@ cdef class BottomUpParser(Parser):
                 self._stack_states_top = self._stack_states_top
                 self._stack_ast_top = self._stack_ast_top
                 self._stack_top = self._stack_top
-                self._start_recovery_mode(self._stack[self._stack_top - 1],new_ast._line,new_ast._column)
+                self._start_recovery_mode(self._stack[self._stack_top - 1],new_ast._line,new_ast._column,new_ast._column,new_ast._column + 1)
                 break
             # sets the state by the GOTO table and put it at stack of states top
             state = self._goto_table_optimized[key]
@@ -283,7 +287,7 @@ cdef class BottomUpParser(Parser):
                 self._stack_states_top = self._stack_states_top
                 self._stack_ast_top = self._stack_ast_top
                 self._stack_top = self._stack_top
-                self._start_recovery_mode(token._symbol,token._line,token._column)
+                self._start_recovery_mode(token._symbol,token._line,token._column,token._column,token._column + len(token._text))
                 break
             
         

@@ -42,6 +42,6 @@ cdef class BottomUpParser(Parser):
     cdef int _stack_states_top
     cdef int _stack_states_len
 
-    cdef void _start_recovery_mode(self,Symbol symbol,int line,int column)
+    cdef void _start_recovery_mode(self,Symbol symbol,int line,int column, int source_line_interval_start, int source_line_interval_end)
     cdef void _end_recovery_mode(self,Symbol symbol)
     cdef void _set_reductor(self,Production production,object reductor)
