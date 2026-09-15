@@ -17,6 +17,8 @@ cdef class Error:
     cdef object _type
     cdef int _line
     cdef int _column
+    cdef int _source_line_interval_start
+    cdef int _source_line_interval_end
     cdef str _msg
     cdef int _hash
 

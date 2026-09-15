@@ -102,9 +102,9 @@ cdef class AST:
 
 cdef class Error:
 
-    def __init__(self,object type_,int line,int column,str msg) -> None:
+    def __init__(self,object type_,int line,int column,int source_line_interval_start,int source_line_interval_end,str msg) -> None:
     
-        cdef bytes digest = sha256(f'{type_}-{line}-{column}-{msg}'.encode()).digest()
+        cdef bytes digest = sha256(f'{type_}-{line}-{column}-{source_line_interval_start}-{source_line_interval_end}-{msg}'.encode()).digest()
         cdef long long h = 0 # type:ignore
         cdef int i
 
@@ -117,12 +117,17 @@ cdef class Error:
         else:
             self._type = type_
         
+        if source_line_interval_start >= source_line_interval_end:
+            raise ValueError('source_line_interval_start must be estrictly less than source_line_interval_end')
+        
         for i in range(8):
             h = (h << 8) | digest[i]
         
         self._hash = h
         self._line = line
         self._column = column
+        self._source_line_interval_start = source_line_interval_start
+        self._source_line_interval_end = source_line_interval_end
         self._msg = msg
     
     @property
@@ -136,16 +141,20 @@ cdef class Error:
     @property
     def type(self) -> ErrorType:
         return self._type # type:ignore
+    
+    @property
+    def source_line_interval(self) -> tuple[int,int]:
+        return self._source_line_interval_start,self._source_line_interval_end
 
     @property
     def message(self) -> str:
-        return f'{self._type} ERROR at line {self._line}, column {self._column}: {self._msg}'
+        return self._msg
     
     def __str__(self) -> str:
-        return self.message
+        return f'{self._type} ERROR at line {self._line}, column {self._column}: {self._msg}'
     
     def __repr__(self) -> str:
-        return self.message
+        return str(self)
     
     def __hash__(self) -> int:
         return self._hash
@@ -162,23 +171,23 @@ cdef class Error:
 
 cdef class LexicalError(Error):
 
-    def __init__(self, str msg,int line, int column) -> None:
-        super().__init__(ErrorType.LEXICAL, line, column, msg)
+    def __init__(self, str msg,int line, int column, int source_line_interval_start, int source_line_interval_end) -> None:
+        super().__init__(ErrorType.LEXICAL, line, column, source_line_interval_start,source_line_interval_end,msg)
 
 cdef class SyntaxError(Error):
 
-    def __init__(self, str msg,int line, int column) -> None:
-        super().__init__(ErrorType.SYNTAX, line, column, msg)
+    def __init__(self, str msg,int line, int column, int source_line_interval_start, int source_line_interval_end) -> None:
+        super().__init__(ErrorType.SYNTAX, line, column, source_line_interval_start, source_line_interval_end, msg)
 
 cdef class SemanticError(Error):
 
-    def __init__(self, str msg,int line, int column) -> None:
-        super().__init__(ErrorType.SEMANTIC, line, column, msg)
+    def __init__(self, str msg,int line, int column, int source_line_interval_start, int source_line_interval_end) -> None:
+        super().__init__(ErrorType.SEMANTIC, line, column, source_line_interval_start, source_line_interval_end, msg)
 
 cdef class RuntimeError(Error):
 
-    def __init__(self,list[str] stack_trace,int line,int column,str msg) -> None:
-        super().__init__(ErrorType.RUNTIME,line,column,msg)
+    def __init__(self,list[str] stack_trace,int line,int column, int source_line_interval_start, int source_line_interval_end, str msg) -> None:
+        super().__init__(ErrorType.RUNTIME,line,column,source_line_interval_start,source_line_interval_end,msg)
         self._stack_trace = stack_trace
     
     @property
