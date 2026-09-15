@@ -1,7 +1,6 @@
 from typing import List,Any,Dict
-from pylgen.common.types import AST
+from pylgen.common.types import AST,RuntimeError
 from pylgen.analysis.context import Context
-from pylgen.analysis.error import RuntimeError
 
 from .asts import VarAST
 
