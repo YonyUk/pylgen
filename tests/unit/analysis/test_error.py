@@ -1,5 +1,5 @@
-from pylgen.analysis.error import Error,LexicalError,SyntaxError,SemanticError,RuntimeError
-from pylgen.analysis.error_type import ErrorType
+from pylgen.common.types import Error,LexicalError,SyntaxError,SemanticError,RuntimeError
+from pylgen.common.enums import ErrorType
 
 import pytest
 

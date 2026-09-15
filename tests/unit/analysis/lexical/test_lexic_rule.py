@@ -1,8 +1,6 @@
-from pylgen.analysis.error import LexicalError
-from pylgen.analysis.error_type import ErrorType
 from pylgen.analysis.lexical import LexicalRule
-from pylgen.common.types import Token,Symbol
-from pylgen.common.enums import TokenType
+from pylgen.common.types import Token,Symbol,LexicalError
+from pylgen.common.enums import TokenType,ErrorType
 
 import pytest
 
