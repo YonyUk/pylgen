@@ -850,7 +850,7 @@ class TestIntegrationBottomUpParser:
             token = asts[0]
             if isinstance(token,Token):
                 if int(token.text) < 0:
-                    error = SemanticError('numbers cannot be less than 0',token.line,token.column)
+                    error = SemanticError('numbers cannot be less than 0',token.line,token.column,token.column,token.column + len(token.text))
                     return ErrorAST(F,error.line,error.column,{error})
             return AST(F,asts[0].line,asts[0].column)
 
@@ -928,7 +928,7 @@ class TestIntegrationBottomUpParser:
             token = asts[0]
             if isinstance(token,Token):
                 if int(token.text) < 0:
-                    error = SemanticError('numbers cannot be less than 0',token.line,token.column)
+                    error = SemanticError('numbers cannot be less than 0',token.line,token.column,token.column,token.column + len(token.text))
                     return ErrorAST(F,error.line,error.column,{error})
             return AST(F,asts[0].line,asts[0].column)
 
@@ -1006,7 +1006,7 @@ class TestIntegrationBottomUpParser:
             token = asts[0]
             if isinstance(token,Token):
                 if int(token.text) < 0:
-                    error = SemanticError('numbers cannot be less than 0',token.line,token.column)
+                    error = SemanticError('numbers cannot be less than 0',token.line,token.column,token.column,token.column + len(token.text))
                     return ErrorAST(F,error.line,error.column,{error})
             return AST(F,asts[0].line,asts[0].column)
 
@@ -1084,7 +1084,7 @@ class TestIntegrationBottomUpParser:
             token = asts[0]
             if isinstance(token,Token):
                 if int(token.text) < 0:
-                    error = SemanticError('numbers cannot be less than 0',token.line,token.column)
+                    error = SemanticError('numbers cannot be less than 0',token.line,token.column,token.column,token.column + len(token.text))
                     return ErrorAST(F,error.line,error.column,{error})
             return AST(F,asts[0].line,asts[0].column)
 
@@ -1162,7 +1162,7 @@ class TestIntegrationBottomUpParser:
             token = asts[0]
             if isinstance(token,Token):
                 if int(token.text) < 0:
-                    error = SemanticError('numbers cannot be less than 0',token.line,token.column)
+                    error = SemanticError('numbers cannot be less than 0',token.line,token.column,token.column,token.column + len(token.text))
                     return ErrorAST(F,error.line,error.column,{error})
             return AST(F,asts[0].line,asts[0].column)
 
@@ -1240,7 +1240,7 @@ class TestIntegrationBottomUpParser:
             token = asts[0]
             if isinstance(token,Token):
                 if int(token.text) < 0:
-                    error = SemanticError('numbers cannot be less than 0',token.line,token.column)
+                    error = SemanticError('numbers cannot be less than 0',token.line,token.column,token.column,token.column + len(token.text))
                     return ErrorAST(F,error.line,error.column,{error})
             return AST(F,asts[0].line,asts[0].column)
 

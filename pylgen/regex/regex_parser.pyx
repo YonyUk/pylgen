@@ -497,10 +497,10 @@ cdef class RepeatPatternASTVisitor(ASTVisitor):
         right = _ast._max # type:ignore
 
         if not left._string.isnumeric():
-            error1 = RuntimeError([],left._line,left._column,'not a number') # type:ignore
+            error1 = RuntimeError([],left._line,left._column,left._column,left._column + len(left._string),'not a number') # type:ignore
             context.add_runtime_error(ast,error1)
         if not right._string.isnumeric():
-            error2 = RuntimeError([],right._line,right._column,'not a number') # type:ignore
+            error2 = RuntimeError([],right._line,right._column,right._column,right._column + len(right._string),'not a number') # type:ignore
             context.add_runtime_error(ast,error2)
 
 cdef class PostOrderStrategy(TraversalStrategy):

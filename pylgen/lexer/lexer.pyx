@@ -68,7 +68,7 @@ cdef class Lexer(BaseLexer):
                     self._errors.add(error)
         
         if self._current_token._type == self._enum_type.INVALID_TOKEN: # type:ignore
-            error = LexicalError("Invalid token",self._current_token._line,self._current_token._column) # type:ignore
+            error = LexicalError("Invalid token",self._current_token._line,self._current_token._column,self._current_token._column,self._current_token._column + len(self._current_token._text)) # type:ignore
             self._errors.add(error)
         
         return self._current_token
@@ -148,7 +148,7 @@ cdef class IdentedLexer(Lexer):
 
             if current_token._text != '\n' and current_token._text.strip() == '' and current_token._column > 1:
                 if current_token._type == 'INVALID_TOKEN':
-                    error = LexicalError("Invalid token",current_token._line,current_token._column) # type:ignore
+                    error = LexicalError("Invalid token",current_token._line,current_token._column,current_token._column,current_token._column + len(current_token._text)) # type:ignore
                     self._errors.remove(error)
                 continue
 

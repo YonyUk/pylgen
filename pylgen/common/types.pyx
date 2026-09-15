@@ -167,7 +167,7 @@ cdef class Error:
         
         other = __o
 
-        return other._type == self._type and other._line == self._line and other._column == self._column and other._msg == self._msg
+        return other._type == self._type and other._line == self._line and other._column == self._column and other._msg == self._msg and other._source_line_interval_start == self._source_line_interval_start and other._source_line_interval_end == self._source_line_interval_end
 
 cdef class LexicalError(Error):
 

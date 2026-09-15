@@ -34,7 +34,7 @@ class TestAST:
         with pytest.raises(NotImplementedError):
             ast.children()
 
-        error = SemanticError('error 1',line,column)
+        error = SemanticError('error 1',line,column,column,column + 1)
         error_ast = ErrorAST(symbol,line,column,{error})
 
         assert error_ast.symbol == symbol
