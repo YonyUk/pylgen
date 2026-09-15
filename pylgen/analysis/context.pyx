@@ -1,5 +1,4 @@
-from .error cimport SemanticError,RuntimeError
-from ..common.types cimport AST
+from ..common.types cimport AST,SemanticError,RuntimeError
 
 cdef class Context:
     '''

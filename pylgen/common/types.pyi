@@ -1,8 +1,6 @@
 from typing import List, Set
 
-from ..analysis.error import SemanticError
-
-from .enums import TokenType
+from .enums import TokenType,ErrorType
 
 class Symbol:
 
@@ -48,6 +46,52 @@ class AST:
     def __str__(self) -> str: ...
     
     def __repr__(self) -> str: ...
+
+from typing import List
+
+
+class Error:
+
+    def __init__(self,type_:ErrorType,line:int,column:int,msg:str) -> None: ...
+    
+    @property
+    def line(self) -> int: ...
+
+    @property
+    def column(self) -> int: ...
+    
+    @property
+    def type(self) -> ErrorType: ...
+
+    @property
+    def message(self) -> str: ...
+
+    def __str__(self) -> str: ...
+    
+    def __repr__(self) -> str: ...
+
+    def __hash__(self) -> int: ...
+    
+    def __eq__(self, __o: object) -> bool: ...
+
+class LexicalError(Error):
+
+    def __init__(self, msg:str, line:int, column:int) -> None: ...
+
+class SyntaxError(Error):
+
+    def __init__(self, msg:str ,line:int, column:int) -> None: ...
+
+class SemanticError(Error):
+
+    def __init__(self, msg:str,line:int, column:int) -> None: ...
+
+class RuntimeError(Error):
+
+    def __init__(self,stack_trace:List[str], line:int, column:int, msg:str) -> None: ...
+
+    @property
+    def stack_trace(self) -> List[str]: ...
 
 class ErrorAST(AST):
 

@@ -1,6 +1,5 @@
 from typing import List
-from .error import SemanticError,RuntimeError
-from ..common.types import AST
+from ..common.types import AST,SemanticError,RuntimeError
 
 class Context:
 

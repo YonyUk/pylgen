@@ -1,10 +1,9 @@
-from ..common.types cimport AST
+from ..common.types cimport AST,RuntimeError
 from ..automaton.automaton cimport Automaton
 from ..parser.parser cimport BottomUpParser
 from ..lexer.base_lexer cimport BaseLexer
 from ..analysis.context cimport Context
 from ..analysis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
-from ..analysis.error cimport RuntimeError
 
 cdef class RegexAST(AST):
     cdef Automaton _get_automaton(self)

@@ -107,13 +107,6 @@ lexer_extensions = Extension(
 
 #                                  ANALYSIS
 ###################################################################################
-error_extensions = Extension(
-    name='pylgen.analysis.error',
-    sources=[
-        'pylgen/analysis/error.pyx'
-    ]
-)
-
 lexical_rule_extension = Extension(
     name='pylgen.analysis.lexical',
     sources=[
@@ -157,7 +150,6 @@ setup(
         parser_extensions,
         base_lexer_extensions,
         lexer_extensions,
-        error_extensions,
         lexical_rule_extension,
         visitor_extension,
         context_extension

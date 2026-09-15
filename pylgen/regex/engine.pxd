@@ -1,6 +1,6 @@
 from ..automaton.automaton cimport DFA,NFA,Automaton,State
 from ..grammar.grammar cimport Grammar
-from ..analysis.error cimport RuntimeError
+from ..common.types cimport RuntimeError
 
 cdef class RegexEngine:
     pass

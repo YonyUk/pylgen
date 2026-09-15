@@ -3,11 +3,10 @@
 # cython: nonecheck=False
 from typing import Callable,Any,Tuple,Iterable,Set
 
-from ..common.types cimport Symbol,Token
+from ..common.types cimport Symbol,Token,LexicalError
 from ..automaton.automaton cimport DFA,State
 from ..regex.engine cimport _parse
 from ..analysis.lexical cimport LexicalRule
-from ..analysis.error cimport LexicalError
 from ..regex.engine import RegexParsingException
 from .base_lexer cimport BaseLexer
 

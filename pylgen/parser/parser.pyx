@@ -3,9 +3,8 @@
 # cython: nonecheck=False
 import inspect
 from typing import Iterable,Callable,List
-from ..common.types cimport Token,AST,Symbol,ASTListView,ErrorAST
+from ..common.types cimport Token,AST,Symbol,ASTListView,ErrorAST,SyntaxError,SemanticError
 from ..grammar.grammar cimport Production
-from ..analysis.error cimport SyntaxError,SemanticError
 from .bottom_up_parser_actions import BottomUpParserAction
 
 _offset:int = 32

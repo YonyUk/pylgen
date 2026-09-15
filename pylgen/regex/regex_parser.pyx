@@ -2,7 +2,7 @@ from typing import List,Set
 from string import ascii_letters,digits,printable,whitespace
 
 from ..common.types cimport Symbol as cSymbol ,AST,Token,ASTListView
-from ..common.types import Symbol
+from ..common.types import Symbol,RuntimeError
 from ..automaton.automaton cimport (
     get_word_automaton,
     _automaton_concatenation,
@@ -18,7 +18,6 @@ from ..parser.parser_builder cimport _build_lalr_parser_from_attributed
 from ..lexer.base_lexer cimport BaseLexer
 from ..analysis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
 from ..analysis.context cimport Context
-from ..analysis.error cimport RuntimeError
 
 from .enums import ReTokenType
 

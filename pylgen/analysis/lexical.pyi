@@ -1,5 +1,4 @@
-from .error import LexicError
-from ..common.types import Token
+from ..common.types import Token,LexicalError
 
 class LexicalRule:
     
@@ -7,4 +6,4 @@ class LexicalRule:
 
     def _check(self, text:str): ...
 
-    def check(self,token:Token) -> LexicError: ...
+    def check(self,token:Token) -> LexicalError: ...

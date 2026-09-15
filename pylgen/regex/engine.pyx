@@ -1,10 +1,9 @@
 from ..automaton.automaton cimport NFA,DFA,State,Automaton
 from ..grammar.grammar cimport Grammar,_is_left_regular,_is_right_regular,ProductionsSet
-from ..common.types cimport Symbol,Token
+from ..common.types cimport Symbol,Token,RuntimeError
 from ..parser.parser cimport Parser
 from ..lexer.base_lexer cimport BaseLexer
 from ..analysis.visitor cimport ASTWalker
-from ..analysis.error cimport RuntimeError
 from .enums import ReTokenType
 
 from .regex_parser cimport (

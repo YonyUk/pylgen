@@ -1,9 +1,7 @@
 from typing import Callable,Any,Tuple,Set
 
-from ..common.types import Symbol
-from ..automaton.automaton import DFA
+from ..common.types import Symbol,LexicalError
 from ..analysis.lexical import LexicalRule
-from ..analysis.error import LexicalError
 from .base_lexer import BaseLexer
 
 class Lexer(BaseLexer):

@@ -2,8 +2,7 @@
 from typing import get_type_hints
 import inspect
 
-from ..common.types cimport AST
-from .error cimport SemanticError
+from ..common.types cimport AST,SemanticError
 from .context cimport Context
 
 cdef class ASTVisitor:

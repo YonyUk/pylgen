@@ -1,7 +1,6 @@
-from typing import Callable, Dict, Iterable, List, Set, Tuple
-from ..common.types import ASTListView, Token,AST,Symbol
+from typing import Callable, Dict, Iterable, List, Tuple
+from ..common.types import ASTListView, Token,AST,Symbol,Error
 from ..grammar.grammar import Production
-from ..analysis.error import Error
 
 class ParsingException(Exception):
     

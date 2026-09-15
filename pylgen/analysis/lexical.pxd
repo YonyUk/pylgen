@@ -1,5 +1,4 @@
-from .error cimport LexicalError
-from ..common.types cimport Token
+from ..common.types cimport Token,LexicalError
 
 cdef class LexicalRule:
     cdef str _msg

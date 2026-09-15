@@ -1,6 +1,5 @@
-from ..common.types cimport Token,AST,Symbol,ASTListView
+from ..common.types cimport Token,AST,Symbol,ASTListView,Error
 from ..grammar.grammar cimport Production
-from ..analysis.error cimport Error
 
 cdef class ParsingException(Exception):
     pass

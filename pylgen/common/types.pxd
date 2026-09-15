@@ -1,5 +1,3 @@
-from ..analysis.error cimport SemanticError
-
 cdef class Symbol:
 
     cdef int _hash
@@ -14,6 +12,25 @@ cdef class AST:
     cdef bint _is_error
 
     cpdef list[AST] children(self)
+
+cdef class Error:
+    cdef object _type
+    cdef int _line
+    cdef int _column
+    cdef str _msg
+    cdef int _hash
+
+cdef class LexicalError(Error):
+    pass
+
+cdef class SyntaxError(Error):
+    pass
+
+cdef class SemanticError(Error):
+    pass
+
+cdef class RuntimeError(Error):
+    cdef list[str] _stack_trace
 
 cdef class ErrorAST(AST):
     cdef set[SemanticError] _errors

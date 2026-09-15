@@ -9,3 +9,9 @@ class TokenTypeMeta(EnumMeta):
 
 class TokenType(StrEnum,metaclass=TokenTypeMeta):
     pass
+
+class ErrorType(StrEnum):
+    LEXICAL = 'LEXICAL'
+    SYNTAX = 'SYNTAX'
+    SEMANTIC = 'SEMANTIC'
+    RUNTIME = 'RUNTIME'
