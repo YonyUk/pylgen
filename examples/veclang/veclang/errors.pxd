@@ -1,4 +1,4 @@
-from pylgen.analysis.error cimport RuntimeError
+from pylgen.common.types cimport RuntimeError
 
 cdef class DivisionByZeroError(RuntimeError):
     pass

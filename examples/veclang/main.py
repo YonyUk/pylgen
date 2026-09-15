@@ -5,6 +5,8 @@ from veclang.lexer import build_lexer
 from veclang.parser import build_parser
 from veclang.visitors import build_walkers,get_ast_value
 
+from datetime import datetime
+
 lexer = build_lexer()
 VecLangParser = build_parser()
 context,error_collector,functions_collector,evaluator = build_walkers()
@@ -26,7 +28,9 @@ if len(argv) >= 3 and argv[2] == '--help':
 with open(file,'r') as f:
     text = f.read()
     lexer.load_text(text)
+    t = datetime.now()
     ast = VecLangParser.parse(lexer.tokens)
+    print(datetime.now() - t)
     errors = []
     errors += list(lexer.errors)
     errors += VecLangParser.errors
