@@ -1,7 +1,6 @@
 from typing import List
 
-from pylgen.analysis.error import SemanticError
-from pylgen.common.types import AST,Symbol,ErrorAST
+from pylgen.common.types import AST,Symbol,ErrorAST,SemanticError
 from .grammar_symbols import (
     clear,
     plus,
@@ -54,7 +53,9 @@ class ModAST(BinaryAST):
 class ModuleByZeroErrorAST(ErrorAST):
 
     def __init__(self, line: int, column: int,left:AST,right:AST):
-        errors = {SemanticError('module by zero not allowed',line,column)}
+        start = left.column
+        end = right.column + len(right.text) # type: ignore
+        errors = {SemanticError('module by zero not allowed',line,column,start,end)}
         super().__init__(mod_error, line, column, errors)
         self._left = left
         self._right = right
@@ -65,7 +66,9 @@ class ModuleByZeroErrorAST(ErrorAST):
 class ModuleByNotIntegerErrorAST(ErrorAST):
 
     def __init__(self, line: int, column: int,left:AST,right:AST):
-        errors = {SemanticError('module by a non-integer not allowed',line,column)}
+        start = left.column
+        end = right.column + len(right.text) # type: ignore
+        errors = {SemanticError('module by a non-integer not allowed',line,column,start,end)}
         super().__init__(mod_error, line, column, errors)
         self._left = left
         self._right = right
@@ -87,7 +90,9 @@ class DivAST(BinaryAST):
 class DivisionByZeroErrorAST(ErrorAST):
 
     def __init__(self,line: int, column: int,left:AST,right:AST):
-        errors = {SemanticError('division by zero not allowed',line,column)}
+        start = left.column
+        end = right.column + len(right.text) # type: ignore
+        errors = {SemanticError('division by zero not allowed',line,column,start,end)}
         super().__init__(div_error, line, column, errors)
         self._left = left
         self._right = right
