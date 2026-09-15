@@ -1,6 +1,5 @@
 import pytest
-from pylgen.common.types import AST,Symbol,ErrorAST
-from pylgen.analysis.error import SemanticError
+from pylgen.common.types import AST,Symbol,ErrorAST,SemanticError
 
 class TestAST:
 
