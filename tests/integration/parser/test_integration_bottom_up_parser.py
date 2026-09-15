@@ -1,6 +1,6 @@
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
-from pylgen.common.types import AST, Token,Symbol,ASTListView,ErrorAST
+from pylgen.common.types import AST, Token,Symbol,ASTListView,ErrorAST,SemanticError
 from pylgen.common.enums import TokenType
 from pylgen.grammar.grammar import Grammar, Production
 from pylgen.parser.parser import BottomUpParser,ParsingException
@@ -9,7 +9,6 @@ from pylgen.parser.lalr_parser import LALRState
 from pylgen.parser.lr0_parser import LR0State
 from pylgen.parser.lr1_parser import LR1State
 from pylgen.parser.parser_builder import ParserBuilder
-from pylgen.analysis.error import SemanticError
 
 class TokenTypeEnum(TokenType):
     NUMBER = 'NUMBER'

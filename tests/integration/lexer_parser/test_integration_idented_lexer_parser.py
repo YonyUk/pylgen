@@ -1,12 +1,11 @@
 from typing import List
 
 from pylgen.common.types import Symbol,ASTListView,AST,Token
-from pylgen.common.enums import TokenType
+from pylgen.common.enums import TokenType,ErrorType
 from pylgen.grammar.grammar import AttributedGrammar
 from pylgen.lexer.lexer import IdentedLexer
 from pylgen.parser import ParserBuilder,Parser
 from pylgen.parser.parser_type import ParserType
-from pylgen.analysis.error_type import ErrorType
 
 import pytest
 

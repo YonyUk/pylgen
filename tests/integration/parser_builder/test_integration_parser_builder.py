@@ -1,5 +1,3 @@
-from typing import List
-
 from pylgen.common.types import Symbol,AST,Token,ASTListView
 from pylgen.common.enums import TokenType
 from pylgen.grammar.grammar import Grammar,AttributedGrammar,Production
