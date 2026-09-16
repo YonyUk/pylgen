@@ -144,7 +144,7 @@ cdef class BottomUpParser(Parser):
     cdef void _set_reductor(self,Production production,object reductor): # type:ignore
         self._reductor_by_production[(<Production>production)._hash] = reductor
 
-    cdef void _start_recovery_mode(self,Symbol symbol,int line, int column, int source_line_interval_start, int source_line_interval_end):
+    cdef void _start_recovery_mode(self,Symbol symbol,int start_line, int start_column, int end_line, int end_column):
         cdef Symbol stack_symbol,follow_symbol
         cdef tuple[str,Symbol] key
         cdef set[Symbol] expected_symbols = set()
@@ -160,7 +160,7 @@ cdef class BottomUpParser(Parser):
                 if follow_symbol._is_terminal:
                     expected_symbols.add(follow_symbol)
 
-        error = SyntaxError(f'Unexpected symbol "{symbol}"; expected {expected_symbols}',line,column,source_line_interval_start,source_line_interval_end) # type:ignore
+        error = SyntaxError(f'Unexpected symbol "{symbol}"; expected {expected_symbols}',start_line,start_column,end_line,end_column) # type:ignore
         self._errors.add(error)
         self._panic_mode = True # type:ignore
         self._current_syncronization_set = set()
@@ -219,7 +219,7 @@ cdef class BottomUpParser(Parser):
 
         current_action = self._action_table_optimized.get(key,None)
         if current_action is None:
-            self._start_recovery_mode(token._symbol,token._line,token._column,token._column,token._column + len(token._text))
+            self._start_recovery_mode(token._symbol,token._start_line,token._start_column,token._end_line,token._end_column)
             return # type:ignore
 
         # while the action is reduce
@@ -235,7 +235,7 @@ cdef class BottomUpParser(Parser):
             if not self._syntax_error and self._draw_parse_tree:
                 # build the parse tree
                 childrens = self._parse_tree_nodes[-1*production_len:]
-                new_node = ParseTreeNode(p._head,new_ast._line,new_ast._column,childrens)
+                new_node = ParseTreeNode(p._head,new_ast._start_line,new_ast._start_column,childrens)
                 # updates the stack of parse tree nodes
                 del self._parse_tree_nodes[-1*production_len:]
                 self._parse_tree_nodes.append(new_node)
@@ -265,7 +265,7 @@ cdef class BottomUpParser(Parser):
                 self._stack_states_top = self._stack_states_top
                 self._stack_ast_top = self._stack_ast_top
                 self._stack_top = self._stack_top
-                self._start_recovery_mode(self._stack[self._stack_top - 1],new_ast._line,new_ast._column,new_ast._column,new_ast._column + 1)
+                self._start_recovery_mode(self._stack[self._stack_top - 1],new_ast._start_line,new_ast._start_column,new_ast._end_line,new_ast._end_column)
                 break
             
             # checks if the action is shift, due to reductions only may occur at top of the stack
@@ -273,7 +273,7 @@ cdef class BottomUpParser(Parser):
                 self._stack_states_top = self._stack_states_top
                 self._stack_ast_top = self._stack_ast_top
                 self._stack_top = self._stack_top
-                self._start_recovery_mode(self._stack[self._stack_top - 1],new_ast._line,new_ast._column,new_ast._column,new_ast._column + 1)
+                self._start_recovery_mode(self._stack[self._stack_top - 1],new_ast._start_line,new_ast._start_column,new_ast._end_line,new_ast._end_column)
                 break
             # sets the state by the GOTO table and put it at stack of states top
             state = self._goto_table_optimized[key]
@@ -287,7 +287,7 @@ cdef class BottomUpParser(Parser):
                 self._stack_states_top = self._stack_states_top
                 self._stack_ast_top = self._stack_ast_top
                 self._stack_top = self._stack_top
-                self._start_recovery_mode(token._symbol,token._line,token._column,token._column,token._column + len(token._text))
+                self._start_recovery_mode(token._symbol,token._start_line,token._start_column,token._end_line,token._end_column)
                 break
             
         
@@ -295,7 +295,7 @@ cdef class BottomUpParser(Parser):
             state = self._goto_table_optimized[key]
             if not self._syntax_error and self._draw_parse_tree:
                 # adds a new parse tree node to the parse tree
-                new_node = ParseTreeNode(token._symbol,token._line,token._column)
+                new_node = ParseTreeNode(token._symbol,token._start_line,token._start_column)
                 self._parse_tree_nodes.append(new_node)
             # push the symbol in the stack
             if self._stack_top >= self._stack_len:
