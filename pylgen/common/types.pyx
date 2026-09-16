@@ -61,18 +61,26 @@ cdef class AST:
     '''
     Abstract Syntax Tree class
     '''
-    def __init__(self,Symbol symbol,int line,int column):
+    def __init__(self,Symbol symbol,int start_line,int start_column, int end_line, int end_column):
         '''
         Args:
             symbol (Symbol): internal symbol of this ast
-            line (int): line in the source code where this ast is located
-            column (int): column in the source code where this ast is located
+            start_line (int): line in the source code where this ast starts
+            start_column (int): column in the source code where this ast starts
+            end_line (int): line in the source code where this ast ends
+            end_column (int): column in the source code where this ast ends
         '''
+        if start_line < 0 or start_column < 0:
+            raise ValueError('start_line and start_column must be non-negative values')
+        if end_line < start_line:
+            raise ValueError('end_line cannot be less than start_line')
+        if end_line == start_line and end_column <= start_column:
+            raise ValueError('start_column must be less than end_column')
         self._symbol = symbol
-        if line < 0 or column < 0:
-            raise ValueError('line and column must be non-negative values')
-        self._line = line
-        self._column = column
+        self._start_line = start_line
+        self._start_column = start_column
+        self._end_line = end_line
+        self._end_column = end_column
         self._is_error = False # type:ignore
     
     @property
@@ -80,12 +88,12 @@ cdef class AST:
         return self._symbol
     
     @property
-    def line(self) -> int:
-        return self._line
+    def start_position(self) -> tuple[int,int]:
+        return (self._start_line,self._start_column)
     
     @property
-    def column(self) -> int:
-        return self._column
+    def end_position(self) -> tuple[int,int]:
+        return (self._end_line,self._end_column)
     
     @property
     def is_error(self) -> bool:
@@ -102,9 +110,9 @@ cdef class AST:
 
 cdef class Error:
 
-    def __init__(self,object type_,int line,int column,int source_line_interval_start,int source_line_interval_end,str msg) -> None:
+    def __init__(self,object type_,int start_line,int start_column, int end_line, int end_column,str msg) -> None:
     
-        cdef bytes digest = sha256(f'{type_}-{line}-{column}-{source_line_interval_start}-{source_line_interval_end}-{msg}'.encode()).digest()
+        cdef bytes digest = sha256(f'{type_}-{start_line}-{start_column}-{end_line}-{end_column}-{msg}'.encode()).digest()
         cdef long long h = 0 # type:ignore
         cdef int i
 
@@ -112,46 +120,46 @@ cdef class Error:
             raise TypeError('type_ must be a member of ErrorType')
         if isinstance(type_,str) and not type_ in ErrorType: # type:ignore
             raise ValueError('type_ must be a member of ErrorType')
+        if start_line < 0 or start_column < 0:
+            raise ValueError('start_line and start_column must be non-negative values')
+        if end_line < start_line:
+            raise ValueError('end_line cannot be less than start_line')
+        if end_line == start_line and end_column <= start_column:
+            raise ValueError('start_column must be less than end_column')
+        
         if isinstance(type_,str):
             self._type = ErrorType[type_] # type:ignore
         else:
             self._type = type_
-        
-        if source_line_interval_start >= source_line_interval_end:
-            raise ValueError('source_line_interval_start must be estrictly less than source_line_interval_end')
-        
+
         for i in range(8):
             h = (h << 8) | digest[i]
         
         self._hash = h
-        self._line = line
-        self._column = column
-        self._source_line_interval_start = source_line_interval_start
-        self._source_line_interval_end = source_line_interval_end
+        self._start_line = start_line
+        self._start_column = start_column
+        self._end_line = end_line
+        self._end_column = end_column
         self._msg = msg
     
     @property
-    def line(self) -> int:
-        return self._line
+    def start_position(self) -> tuple[int,int]:
+        return (self._start_line,self._start_column)
 
     @property
-    def column(self) -> int:
-        return self._column
+    def end_position(self) -> tuple[int,int]:
+        return (self._end_line,self._end_column)
     
     @property
     def type(self) -> ErrorType:
         return self._type # type:ignore
     
     @property
-    def source_line_interval(self) -> tuple[int,int]:
-        return self._source_line_interval_start,self._source_line_interval_end
-
-    @property
     def message(self) -> str:
         return self._msg
     
     def __str__(self) -> str:
-        return f'{self._type} ERROR at line {self._line}, column {self._column}: {self._msg}'
+        return f'{self._type} ERROR at line {self._start_line}: {self._msg}'
     
     def __repr__(self) -> str:
         return str(self)
@@ -167,27 +175,39 @@ cdef class Error:
         
         other = __o
 
-        return other._type == self._type and other._line == self._line and other._column == self._column and other._msg == self._msg and other._source_line_interval_start == self._source_line_interval_start and other._source_line_interval_end == self._source_line_interval_end
+        if other._type != self._type:
+            return False
+        
+        if other._msg != self._msg:
+            return False
+
+        if other._start_line != self._start_line or other._start_column != self._start_column:
+            return False
+        
+        if other._end_line != self._end_line or other._end_column != self._end_column:
+            return False
+
+        return True
 
 cdef class LexicalError(Error):
 
-    def __init__(self, str msg,int line, int column, int source_line_interval_start, int source_line_interval_end) -> None:
-        super().__init__(ErrorType.LEXICAL, line, column, source_line_interval_start,source_line_interval_end,msg)
+    def __init__(self, str msg,int start_line,int start_column, int end_line, int end_column) -> None:
+        super().__init__(ErrorType.LEXICAL, start_line, start_column, end_line, end_column,msg)
 
 cdef class SyntaxError(Error):
 
-    def __init__(self, str msg,int line, int column, int source_line_interval_start, int source_line_interval_end) -> None:
-        super().__init__(ErrorType.SYNTAX, line, column, source_line_interval_start, source_line_interval_end, msg)
+    def __init__(self, str msg,int start_line,int start_column, int end_line, int end_column) -> None:
+        super().__init__(ErrorType.SYNTAX, start_line, start_column, end_line, end_column, msg)
 
 cdef class SemanticError(Error):
 
-    def __init__(self, str msg,int line, int column, int source_line_interval_start, int source_line_interval_end) -> None:
-        super().__init__(ErrorType.SEMANTIC, line, column, source_line_interval_start, source_line_interval_end, msg)
+    def __init__(self, str msg,int start_line,int start_column, int end_line, int end_column) -> None:
+        super().__init__(ErrorType.SEMANTIC, start_line, start_column, end_line, end_column, msg)
 
 cdef class RuntimeError(Error):
 
-    def __init__(self,list[str] stack_trace,int line,int column, int source_line_interval_start, int source_line_interval_end, str msg) -> None:
-        super().__init__(ErrorType.RUNTIME,line,column,source_line_interval_start,source_line_interval_end,msg)
+    def __init__(self,list[str] stack_trace,int start_line,int start_column, int end_line, int end_column,str msg) -> None:
+        super().__init__(ErrorType.RUNTIME,start_line,start_column,end_line,end_column,msg)
         self._stack_trace = stack_trace
     
     @property
@@ -198,19 +218,27 @@ cdef class ErrorAST(AST):
     '''
     Error Syntax Tree Class
     '''
-    def __init__(self,Symbol symbol,int line,int column,set[SemanticError] errors):
+    def __init__(self,Symbol symbol,int start_line,int start_column, int end_line, int end_column,set[SemanticError] errors):
         '''
         Args:
             symbol (Symbol): internal symbol of this ast
-            line (int): line in the source code where this ast is located
-            column (int): column in the source code where this ast is located
-            error (Error)
+            start_line (int): line in the source code where this ast starts
+            start_column (int): column in the source code where this ast starts
+            end_line (int): line in the source code where this ast ends
+            end_column (int): column in the source code where this ast ends
+            errors (Set[SemanticError])
         '''
+        if start_line < 0 or start_column < 0:
+            raise ValueError('start_line and start_column must be non-negative values')
+        if end_line < start_line:
+            raise ValueError('end_line cannot be less than start_line')
+        if end_line == start_line and end_column <= start_column:
+            raise ValueError('start_column must be less than end_column')
         self._symbol = symbol
-        if line < 0 or column < 0:
-            raise ValueError('line and column must be non-negative values')
-        self._line = line
-        self._column = column
+        self._start_line = start_line
+        self._start_column = start_column
+        self._end_line = end_line
+        self._end_column = end_column
         self._is_error = True # type:ignore
         self._errors = errors
 
@@ -235,7 +263,7 @@ cdef class Token(AST):
     def __init__(self,str text, object type_, Symbol symbol, int line, int column):
         if not issubclass(type(type_),TokenType):
             raise ValueError('type_ parameter must be a subclass of TokenType')
-        super().__init__(symbol, line, column)
+        super().__init__(symbol,line,column,line,column + len(text))
         self._text = text
         self._type = type_
     
