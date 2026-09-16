@@ -25,21 +25,40 @@ class TestAST:
     ])
     def test_correct_ast_creation(self,symbol:Symbol,line:int,column:int):
 
-        ast = AST(symbol,line,column)
+        ast = AST(symbol,line,column,line,column+1)
 
         assert ast.symbol == symbol
-        assert ast.line == line
-        assert ast.column == column
+        assert ast.start_position == (line,column)
+        assert ast.end_position == (line,column+1)
         assert not ast.is_error
         with pytest.raises(NotImplementedError):
             ast.children()
 
-        error = SemanticError('error 1',line,column,column,column + 1)
-        error_ast = ErrorAST(symbol,line,column,{error})
+        error = SemanticError('error 1',line,column,line,column + 1)
+        error_ast = ErrorAST(symbol,line,column,line,column+1,{error})
 
         assert error_ast.symbol == symbol
-        assert error_ast.line == line
-        assert error_ast.column == column
+        assert error_ast.start_position == (line,column)
+        assert error_ast.end_position == (line,column+1)
         assert error_ast.is_error
         with pytest.raises(NotImplementedError):
             ast.children()
+
+    def test_invalid_ast_creation(self):
+        symbol = Symbol('s')
+
+        with pytest.raises(ValueError,match='start_line and start_column must be non-negative values'):
+            ast = AST(symbol,-1,1,1,1)
+
+        with pytest.raises(ValueError,match='start_line and start_column must be non-negative values'):
+            ast = AST(symbol,1,-1,1,1)
+
+        with pytest.raises(ValueError,match='end_line cannot be less than start_line'):
+            ast = AST(symbol,1,1,0,1)
+
+        ast = AST(symbol,1,1,1,2)
+
+        with pytest.raises(ValueError,match='start_column must be less than end_column'):
+            ast = AST(symbol,1,1,1,0)
+
+        ast = AST(symbol,1,1,2,0)
