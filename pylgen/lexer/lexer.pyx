@@ -39,11 +39,13 @@ cdef class Lexer(BaseLexer):
         self.initialize()
         while self._move_next():
             yield self._current()
-            line = self._current_token._line
-            column = self._current_token._column
+            line = self._current_token._start_line
+            column = self._current_token._start_column
         if self._eof:
-            self._eof._line = line
-            self._eof._column = column + 1
+            self._eof._start_line = line
+            self._eof._start_column = column + 1
+            self._eof._end_line = line
+            self._eof._end_column = column + 2
             yield self._eof
 
     cdef bint _move_next(self):
@@ -143,42 +145,42 @@ cdef class IdentedLexer(Lexer):
             self._ident_counter = 0
             idents.clear()
             current_token = self._current()
-            line = self._current_token._line
-            column = self._current_token._column
+            line = self._current_token._start_line
+            column = self._current_token._start_column
 
-            if current_token._text != '\n' and current_token._text.strip() == '' and current_token._column > 1:
+            if current_token._text != '\n' and current_token._text.strip() == '' and current_token._start_column > 1:
                 if current_token._type == 'INVALID_TOKEN':
-                    error = LexicalError("Invalid token",current_token._line,current_token._column,current_token._column,current_token._column + len(current_token._text)) # type:ignore
+                    error = LexicalError("Invalid token",current_token._start_line,current_token._start_column,current_token._end_line,current_token._end_column) # type:ignore
                     self._errors.remove(error)
                 continue
 
             if current_token._type == self._ident_type:
                 
-                if current_token._column > 1:
+                if current_token._start_column > 1:
                     continue
                     
                 while current_token._type == self._ident_type and self._move_next():
                     idents.append(current_token)
                     self._ident_counter += 1
                     current_token = self._current()            
-                    line = self._current_token._line
-                    column = self._current_token._column
+                    line = self._current_token._start_line
+                    column = self._current_token._start_column
 
                 while self._last_ident_value < self._ident_counter:
                     idx = len(idents) + self._last_ident_value - self._ident_counter
-                    yield Token('IDENT',self._ident_type,self._indent_symbol,(<Token>idents[idx])._line,(<Token>idents[idx])._column) # type:ignore
+                    yield Token('IDENT',self._ident_type,self._indent_symbol,(<Token>idents[idx])._start_line,(<Token>idents[idx])._start_column) # type:ignore
                     self._last_ident_value += 1
                 
                 while self._last_ident_value > self._ident_counter:
-                    yield Token('DEDENT',self._ident_type,self._dedent_symbol,current_token._line,current_token._column) # type:ignore
+                    yield Token('DEDENT',self._ident_type,self._dedent_symbol,current_token._start_line,current_token._start_column) # type:ignore
                     self._last_ident_value -= 1
                 
                 yield current_token
                 last_token = current_token
             else:
-                if last_token and line > last_token._line:
+                if last_token and line > last_token._start_line:
                     while self._ident_counter < self._last_ident_value:
-                        yield Token('DEDENT',self._ident_type,self._dedent_symbol,current_token._line,current_token._column) # type:ignore
+                        yield Token('DEDENT',self._ident_type,self._dedent_symbol,current_token._start_line,current_token._start_column) # type:ignore
                         self._last_ident_value -= 1
 
                 yield current_token
@@ -189,6 +191,8 @@ cdef class IdentedLexer(Lexer):
             self._last_ident_value -= 1
 
         if self._eof:
-            self._eof._line = line
-            self._eof._column = column + 1
+            self._eof._start_line = line
+            self._eof._start_column = column + 1
+            self._eof._end_line = line
+            self._eof._end_column = column + 2
             yield self._eof
