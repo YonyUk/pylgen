@@ -33,6 +33,5 @@ class TestLexicalRule:
         error = rule.check(token)
         assert isinstance(error,LexicalError)
         assert error.type == ErrorType.LEXICAL
-        assert error.line == token.line
-        assert error.column == token.column
+        assert error.start_position == token.start_position
         assert 'numbers must star with only one 0' in error.message
