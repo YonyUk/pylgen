@@ -32,7 +32,7 @@ class TestContext:
             context.reset()
 
         with pytest.raises(NotImplementedError):
-            ast = AST(Symbol('s'),0,0)
+            ast = AST(Symbol('s'),0,0,0,1)
             context.add_runtime_error(ast,RuntimeError([],0,0,0,1,''))
     
     def test_context_trace_pushing(self):
