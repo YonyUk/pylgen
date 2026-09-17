@@ -16,10 +16,12 @@ cdef class ParsingException(Exception):
 
 cdef class ParseTreeNode:
 
-    def __init__(self,Symbol symbol,int line,int column,list[ParseTreeNode] childrens=[]):
+    def __init__(self,Symbol symbol,int start_line,int start_column,int end_line,int end_column,list[ParseTreeNode] childrens=[]):
         self._symbol = symbol
-        self._line = line
-        self._column = column
+        self._start_line = start_line
+        self._start_column = start_column
+        self._end_line = end_line
+        self._end_column = end_column
         self._childrens = childrens
     
     @property
@@ -27,12 +29,12 @@ cdef class ParseTreeNode:
         return self._symbol
     
     @property
-    def line(self) -> int:
-        return self._line
+    def start_position(self) -> tuple[int,int]:
+        return self._start_line,self._start_column
     
     @property
-    def column(self) -> int:
-        return self._column
+    def end_position(self) -> tuple[int,int]:
+        return self._end_line,self._end_column
     
     @property
     def childrens(self) -> List[ParseTreeNode]:
@@ -235,7 +237,7 @@ cdef class BottomUpParser(Parser):
             if not self._syntax_error and self._draw_parse_tree:
                 # build the parse tree
                 childrens = self._parse_tree_nodes[-1*production_len:]
-                new_node = ParseTreeNode(p._head,new_ast._start_line,new_ast._start_column,childrens)
+                new_node = ParseTreeNode(p._head,new_ast._start_line,new_ast._start_column,new_ast._end_line,new_ast._end_column,childrens)
                 # updates the stack of parse tree nodes
                 del self._parse_tree_nodes[-1*production_len:]
                 self._parse_tree_nodes.append(new_node)
@@ -295,7 +297,7 @@ cdef class BottomUpParser(Parser):
             state = self._goto_table_optimized[key]
             if not self._syntax_error and self._draw_parse_tree:
                 # adds a new parse tree node to the parse tree
-                new_node = ParseTreeNode(token._symbol,token._start_line,token._start_column)
+                new_node = ParseTreeNode(token._symbol,token._start_line,token._start_column,token._end_line,token._end_column)
                 self._parse_tree_nodes.append(new_node)
             # push the symbol in the stack
             if self._stack_top >= self._stack_len:
