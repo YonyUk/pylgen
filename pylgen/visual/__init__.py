@@ -171,11 +171,13 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
     while stack:
         entered = False
         ast,attrs,index,level = stack[-1]
-        from_node = f'{ast.line}-{ast.column}-{level}'
+        (sl,sc),(el,ec) = ast.start_position,ast.end_position
+        from_node = f'{sl}-{sc}-{el}-{ec}-{level}'
         childs = ast.children()
         for i in range(index,len(childs)):
             child = childs[i]
-            to_node = f'{child.line}-{child.column}-{level + 1}'
+            (sl,sc),(el,ec) = child.start_position,child.end_position
+            to_node = f'{sl}-{sc}-{el}-{ec}-{level + 1}'
             G.add_edge(from_node,to_node)
             if not from_node in asts:
                 asts[from_node] = ast
@@ -208,7 +210,8 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
             stack.pop()
 
     if len(G.edges) == 0:
-        node = f'{ast_root.line}-{ast_root.column}'
+        (sl,sc),(el,ec) = ast_root.start_position,ast_root.end_position
+        node = f'{sl}-{sc}-{el}-{ec}-0'
         G.add_node(node)
         asts[node] = ast_root
         ast_attrs[node] = list(
