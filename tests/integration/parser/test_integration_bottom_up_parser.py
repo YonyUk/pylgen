@@ -40,7 +40,7 @@ class TestIntegrationBottomUpParser:
     def test_parsing_1(self):
         
         def reductor(asts:ASTListView) -> AST:
-            return AST(E,1,1)
+            return AST(E,1,1,1,2)
 
         E = Symbol('E')
         n = Symbol('n',True)
@@ -77,13 +77,16 @@ class TestIntegrationBottomUpParser:
         end = Symbol('$',True)
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_n(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
 
         t1 = Token('12',TokenTypeEnum.NUMBER,n,1,1)
         t2 = Token('+',TokenTypeEnum.SYMBOL,plus,1,4)
@@ -124,7 +127,7 @@ class TestIntegrationBottomUpParser:
 
         ast = parser.parse(tokens)
         assert ast.symbol == E
-        assert ast.line == t2.line and ast.column == t2.column
+        assert ast.start_position == t1.start_position and ast.end_position == t3.end_position
     
     def test_parsing_3_lalr(self):
         E = Symbol('E')
@@ -148,22 +151,28 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
-        
-        def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
-        
-        def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
-        
-        def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
-            return AST(F,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
+        
+        def reductor_T_mul_F(asts:ASTListView) -> AST:
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
+        
+        def reductor_T_F(asts:ASTListView) -> AST:
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
+        
+        def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
 
@@ -193,7 +202,7 @@ class TestIntegrationBottomUpParser:
         
         ast = parser.parse(tokens)
         assert ast.symbol == E
-        assert ast.line == plus_token.line and ast.column == plus_token.column
+        assert ast.start_position == number1.start_position and ast.end_position == number3.end_position
 
         number1 = Token('12',TokenTypeEnum.NUMBER,n,1,3)
         plus_token = Token('+',TokenTypeEnum.SYMBOL,plus,1,6)
@@ -208,7 +217,7 @@ class TestIntegrationBottomUpParser:
 
         ast = parser.parse(tokens)
         assert ast.symbol == E
-        assert ast.line == mul_token.line and ast.column == mul_token.column
+        assert ast.start_position == lp_token.start_position and ast.end_position == number3.end_position
 
     def test_parsing_3_slr(self):
         E = Symbol('E')
@@ -232,22 +241,28 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
-            return AST(F,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_slr(G)
 
@@ -277,7 +292,7 @@ class TestIntegrationBottomUpParser:
         
         ast = parser.parse(tokens)
         assert ast.symbol == E
-        assert ast.line == plus_token.line and ast.column == plus_token.column
+        assert ast.start_position == number1.start_position and ast.end_position == number3.end_position
 
         number1 = Token('12',TokenTypeEnum.NUMBER,n,1,3)
         plus_token = Token('+',TokenTypeEnum.SYMBOL,plus,1,6)
@@ -292,7 +307,7 @@ class TestIntegrationBottomUpParser:
 
         ast = parser.parse(tokens)
         assert ast.symbol == E
-        assert ast.line == mul_token.line and ast.column == mul_token.column
+        assert ast.start_position == lp_token.start_position and ast.end_position == number3.end_position
 
     def test_parsing_3_lr1(self):
         E = Symbol('E')
@@ -316,22 +331,28 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
-            return AST(F,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_lr1(G)
 
@@ -361,7 +382,7 @@ class TestIntegrationBottomUpParser:
         
         ast = parser.parse(tokens)
         assert ast.symbol == E
-        assert ast.line == plus_token.line and ast.column == plus_token.column
+        assert ast.start_position == number1.start_position and ast.end_position == number3.end_position
 
         number1 = Token('12',TokenTypeEnum.NUMBER,n,1,3)
         plus_token = Token('+',TokenTypeEnum.SYMBOL,plus,1,6)
@@ -376,7 +397,7 @@ class TestIntegrationBottomUpParser:
 
         ast = parser.parse(tokens)
         assert ast.symbol == E
-        assert ast.line == mul_token.line and ast.column == mul_token.column
+        assert ast.start_position == lp_token.start_position and ast.end_position == number3.end_position
     
     def test_parsing_error_collecting_1_lalr(self):
         E = Symbol('E')
@@ -400,22 +421,28 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
-            return AST(F,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
 
@@ -447,8 +474,7 @@ class TestIntegrationBottomUpParser:
         
         assert len(parser.errors) == 1
         error = next(iter(parser.errors))
-        assert error.line == 1
-        assert error.column == 4
+        assert error.start_position == plus_token.start_position and error.end_position == plus_token.end_position
 
     def test_parsing_error_collecting_1_slr(self):
         E = Symbol('E')
@@ -472,22 +498,28 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
-            return AST(F,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_slr(G)
 
@@ -519,8 +551,7 @@ class TestIntegrationBottomUpParser:
         
         assert len(parser.errors) == 1
         error = next(iter(parser.errors))
-        assert error.line == 1
-        assert error.column == 4
+        assert error.start_position == plus_token.start_position and error.end_position == plus_token.end_position
 
     def test_parsing_error_collecting_1_lr1(self):
         E = Symbol('E')
@@ -544,22 +575,28 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
-            return AST(F,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_lr1(G)
 
@@ -591,8 +628,7 @@ class TestIntegrationBottomUpParser:
         
         assert len(parser.errors) == 1
         error = next(iter(parser.errors))
-        assert error.line == 1
-        assert error.column == 4
+        assert error.start_position == plus_token.start_position and error.end_position == plus_token.end_position
     
     def test_parsing_error_collecting_2_lalr(self):
         E = Symbol('E')
@@ -616,22 +652,28 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
-            return AST(F,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
 
@@ -663,8 +705,14 @@ class TestIntegrationBottomUpParser:
             ast = parser.parse(tokens)
         except ParsingException:
             pass
-        
+
         assert len(parser.errors) == 2
+
+        err1 = parser.errors[0]
+        err2 = parser.errors[1]
+
+        assert err1.start_position == plus_token.start_position and err1.end_position == plus_token.end_position
+        assert err2.start_position == mul_token.start_position and err2.end_position == mul_token.end_position
 
     def test_parsing_error_collecting_2_slr(self):
         E = Symbol('E')
@@ -688,22 +736,28 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
-            return AST(F,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_slr(G)
 
@@ -737,6 +791,12 @@ class TestIntegrationBottomUpParser:
             pass
         
         assert len(parser.errors) == 2
+
+        err1 = parser.errors[0]
+        err2 = parser.errors[1]
+
+        assert err1.start_position == plus_token.start_position and err1.end_position == plus_token.end_position
+        assert err2.start_position == mul_token.start_position and err2.end_position == mul_token.end_position
 
     def test_parsing_error_collecting_2_lr1(self):
         E = Symbol('E')
@@ -760,22 +820,28 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
-            return AST(F,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_lr1(G)
 
@@ -810,6 +876,12 @@ class TestIntegrationBottomUpParser:
         
         assert len(parser.errors) == 2
 
+        err1 = parser.errors[0]
+        err2 = parser.errors[1]
+
+        assert err1.start_position == plus_token.start_position and err1.end_position == plus_token.end_position
+        assert err2.start_position == mul_token.start_position and err2.end_position == mul_token.end_position
+
     def test_parsing_error_collecting_3_lalr(self):
         E = Symbol('E')
         T = Symbol('T')
@@ -832,27 +904,33 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
             token = asts[0]
+            (sl,sc),(el,ec) = token.start_position,token.end_position
             if isinstance(token,Token):
                 if int(token.text) < 0:
-                    error = SemanticError('numbers cannot be less than 0',token.line,token.column,token.column,token.column + len(token.text))
-                    return ErrorAST(F,error.line,error.column,{error})
-            return AST(F,asts[0].line,asts[0].column)
+                    error = SemanticError('numbers cannot be less than 0',sl,sc,el,ec)
+                    return ErrorAST(F,sl,sc,el,ec,{error})
+            return AST(F,sl,sc,el,ec)
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
 
@@ -887,6 +965,10 @@ class TestIntegrationBottomUpParser:
 
         assert len(parser.errors) == 1
         assert ast is not None # type:ignore
+
+        error = parser.errors[0]
+
+        assert error.start_position == number1.start_position and error.end_position == number1.end_position
 
     def test_parsing_error_collecting_3_slr(self):
         E = Symbol('E')
@@ -910,27 +992,33 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
             token = asts[0]
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
             if isinstance(token,Token):
                 if int(token.text) < 0:
-                    error = SemanticError('numbers cannot be less than 0',token.line,token.column,token.column,token.column + len(token.text))
-                    return ErrorAST(F,error.line,error.column,{error})
-            return AST(F,asts[0].line,asts[0].column)
+                    error = SemanticError('numbers cannot be less than 0',s_l,s_c,e_l,e_c)
+                    return ErrorAST(F,s_l,s_c,e_l,e_c,{error})
+            return AST(F,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_slr(G)
 
@@ -966,6 +1054,10 @@ class TestIntegrationBottomUpParser:
         assert len(parser.errors) == 1
         assert ast is not None # type:ignore
 
+        error = parser.errors[0]
+
+        assert error.start_position == number1.start_position and error.end_position == number1.end_position
+
     def test_parsing_error_collecting_3_lr1(self):
         E = Symbol('E')
         T = Symbol('T')
@@ -988,27 +1080,33 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
             token = asts[0]
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position            
             if isinstance(token,Token):
                 if int(token.text) < 0:
-                    error = SemanticError('numbers cannot be less than 0',token.line,token.column,token.column,token.column + len(token.text))
-                    return ErrorAST(F,error.line,error.column,{error})
-            return AST(F,asts[0].line,asts[0].column)
+                    error = SemanticError('numbers cannot be less than 0',s_l,s_c,e_l,e_c)
+                    return ErrorAST(F,s_l,s_c,e_l,e_c,{error})
+            return AST(F,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_lr1(G)
 
@@ -1044,6 +1142,10 @@ class TestIntegrationBottomUpParser:
         assert len(parser.errors) == 1
         assert ast is not None # type:ignore
 
+        error = parser.errors[0]
+
+        assert error.start_position == number1.start_position and error.end_position == number1.end_position
+
     def test_parsing_error_collecting_4_lalr(self):
         E = Symbol('E')
         T = Symbol('T')
@@ -1066,27 +1168,33 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
             token = asts[0]
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
             if isinstance(token,Token):
                 if int(token.text) < 0:
-                    error = SemanticError('numbers cannot be less than 0',token.line,token.column,token.column,token.column + len(token.text))
-                    return ErrorAST(F,error.line,error.column,{error})
-            return AST(F,asts[0].line,asts[0].column)
+                    error = SemanticError('numbers cannot be less than 0',s_l,s_c,e_l,e_c)
+                    return ErrorAST(F,s_l,s_c,e_l,e_c,{error})
+            return AST(F,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_lalr(G)
 
@@ -1122,6 +1230,12 @@ class TestIntegrationBottomUpParser:
         assert len(parser.errors) == 2
         assert ast is not None # type:ignore
 
+        err1 = parser.errors[0]
+        err2 = parser.errors[1]
+
+        assert err1.start_position == number2.start_position and err1.end_position == number2.end_position
+        assert err2.start_position == number1.start_position and err2.end_position == number1.end_position
+
     def test_parsing_error_collecting_4_slr(self):
         E = Symbol('E')
         T = Symbol('T')
@@ -1144,27 +1258,33 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
             token = asts[0]
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
             if isinstance(token,Token):
                 if int(token.text) < 0:
-                    error = SemanticError('numbers cannot be less than 0',token.line,token.column,token.column,token.column + len(token.text))
-                    return ErrorAST(F,error.line,error.column,{error})
-            return AST(F,asts[0].line,asts[0].column)
+                    error = SemanticError('numbers cannot be less than 0',s_l,s_c,e_l,e_c)
+                    return ErrorAST(F,s_l,s_c,e_l,e_c,{error})
+            return AST(F,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_slr(G)
 
@@ -1200,6 +1320,12 @@ class TestIntegrationBottomUpParser:
         assert len(parser.errors) == 2
         assert ast is not None # type:ignore
 
+        err1 = parser.errors[0]
+        err2 = parser.errors[1]
+
+        assert err1.start_position == number2.start_position and err1.end_position == number2.end_position
+        assert err2.start_position == number1.start_position and err2.end_position == number1.end_position
+
     def test_parsing_error_collecting_4_lr1(self):
         E = Symbol('E')
         T = Symbol('T')
@@ -1222,27 +1348,33 @@ class TestIntegrationBottomUpParser:
         G[F] += n,
 
         def reductor_E_plus_T(asts:ASTListView) -> AST:
-            return AST(E,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_E_T(asts:ASTListView) -> AST:
-            return AST(E,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_mul_F(asts:ASTListView) -> AST:
-            return AST(T,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_T_F(asts:ASTListView) -> AST:
-            return AST(T,asts[0].line,asts[0].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
-            return AST(F,asts[1].line,asts[1].column)
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[2].end_position
+            return AST(E,s_l,s_c,e_l,e_c)
         
         def reductor_F_n(asts:ASTListView) -> AST:
             token = asts[0]
+            (s_l,s_c),(e_l,e_c) = asts[0].start_position,asts[0].end_position
             if isinstance(token,Token):
                 if int(token.text) < 0:
-                    error = SemanticError('numbers cannot be less than 0',token.line,token.column,token.column,token.column + len(token.text))
-                    return ErrorAST(F,error.line,error.column,{error})
-            return AST(F,asts[0].line,asts[0].column)
+                    error = SemanticError('numbers cannot be less than 0',s_l,s_c,e_l,e_c)
+                    return ErrorAST(F,s_l,s_c,e_l,e_c,{error})
+            return AST(F,s_l,s_c,e_l,e_c)
 
         goto,action = ParserBuilder.get_goto_action_tables_lr1(G)
 
@@ -1277,3 +1409,9 @@ class TestIntegrationBottomUpParser:
 
         assert len(parser.errors) == 2
         assert ast is not None # type:ignore
+
+        err1 = parser.errors[0]
+        err2 = parser.errors[1]
+
+        assert err1.start_position == number2.start_position and err1.end_position == number2.end_position
+        assert err2.start_position == number1.start_position and err2.end_position == number1.end_position

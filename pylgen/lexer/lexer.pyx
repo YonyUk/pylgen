@@ -70,7 +70,7 @@ cdef class Lexer(BaseLexer):
                     self._errors.add(error)
         
         if self._current_token._type == self._enum_type.INVALID_TOKEN: # type:ignore
-            error = LexicalError("Invalid token",self._current_token._line,self._current_token._column,self._current_token._column,self._current_token._column + len(self._current_token._text)) # type:ignore
+            error = LexicalError("Invalid token",self._current_token._start_line,self._current_token._start_column,self._current_token._end_line,self._current_token._end_column) # type:ignore
             self._errors.add(error)
         
         return self._current_token

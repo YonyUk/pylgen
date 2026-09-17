@@ -308,8 +308,7 @@ class TestIntegrationBaseLexer:
         assert len(tokens) == 11
         assert all(map(lambda token:token.type==TokenTypeTestEnum.NUMBER,tokens))
         for i in range(len(tokens)):
-            assert tokens[i].column == pos[i][0]
-            assert tokens[i].line == pos[i][1]
+            assert tokens[i].start_position == (pos[i][1],pos[i][0])
 
     def test_lexer_tokenization_2_2(self,ignore_pattern:str):
         lexer = Lexer(get_symbol_function,ignore_pattern)
@@ -339,8 +338,7 @@ class TestIntegrationBaseLexer:
         assert len(tokens) == 11
         assert all(map(lambda token:token.type==TokenTypeTestEnum.NUMBER,tokens))
         for i in range(len(tokens)):
-            assert tokens[i].column == pos[i][0]
-            assert tokens[i].line == pos[i][1]
+            assert tokens[i].start_position == (pos[i][1],pos[i][0])
     
     def test_lexer_tokenization_3_1(self,keyword_nfa:NFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
@@ -363,8 +361,7 @@ len input print
         assert len(tokens) == 5
         assert all(map(lambda token:token.type==TokenTypeTestEnum.KEYWORD,tokens))
         for i in range(len(tokens)):
-            assert tokens[i].column == pos[i][0]
-            assert tokens[i].line == pos[i][1]
+            assert tokens[i].start_position == (pos[i][1],pos[i][0])
 
     def test_lexer_tokenization_3_2(self,keywords:list[str],ignore_pattern:str):
         lexer = Lexer(get_symbol_function,ignore_pattern)
@@ -387,8 +384,7 @@ len input print
         assert len(tokens) == 5
         assert all(map(lambda token:token.type==TokenTypeTestEnum.KEYWORD,tokens))
         for i in range(len(tokens)):
-            assert tokens[i].column == pos[i][0]
-            assert tokens[i].line == pos[i][1]
+            assert tokens[i].start_position == (pos[i][1],pos[i][0])
     
     def test_lexer_tokenization_4_1(self,variable_dfa:DFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
@@ -413,8 +409,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         assert len(tokens) == 7
         assert all(map(lambda token:token.type==TokenTypeTestEnum.VARIABLE,tokens))
         for i in range(len(tokens)):
-            assert tokens[i].column == pos[i][0]
-            assert tokens[i].line == pos[i][1]
+            assert tokens[i].start_position == (pos[i][1],pos[i][0])
 
     def test_lexer_tokenization_4_2(self,ignore_pattern:str):
         lexer = Lexer(get_symbol_function,ignore_pattern)
@@ -439,8 +434,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         assert len(tokens) == 7
         assert all(map(lambda token:token.type==TokenTypeTestEnum.VARIABLE,tokens))
         for i in range(len(tokens)):
-            assert tokens[i].column == pos[i][0]
-            assert tokens[i].line == pos[i][1]
+            assert tokens[i].start_position == (pos[i][1],pos[i][0])
     
     def test_lexer_tokenization_5_1(self,keyword_nfa:NFA,number_dfa:DFA,variable_dfa:DFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
@@ -471,8 +465,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             pos = match_.start()
             column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
             line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
-            assert token.column == column
-            assert token.line == line
+            assert token.start_position == (line,column)
 
     def test_lexer_tokenization_5_2(self,keywords:list[str],ignore_pattern:str):
         lexer = Lexer(get_symbol_function,ignore_pattern)
@@ -503,8 +496,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             pos = match_.start()
             column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
             line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
-            assert token.column == column
-            assert token.line == line
+            assert token.start_position == (line,column)
     
     def test_lexer_tokenization_6_1(self,number_dfa:DFA,symbol_dfa:NFA,operator_dfa:NFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
@@ -532,8 +524,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             pos = match_.start()
             column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
             line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
-            assert token.column == column
-            assert token.line == line
+            assert token.start_position == (line,column)
 
     def test_lexer_tokenization_6_2(self,ignore_pattern:str):
         lexer = Lexer(get_symbol_function,ignore_pattern)
@@ -561,8 +552,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             pos = match_.start()
             column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
             line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
-            assert token.column == column
-            assert token.line == line
+            assert token.start_position == (line,column)
 
     def test_lexer_tokenization_7_1(self,number_dfa:DFA,symbol_dfa:NFA,operator_dfa:NFA,ignore_dfa:DFA):
         lexer = BaseLexer(get_symbol_function,ignore_dfa)
@@ -588,8 +578,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             pos = match_.start()
             column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
             line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
-            assert token.column == column
-            assert token.line == line
+            assert token.start_position == (line,column)
 
     def test_lexer_tokenization_7_2(self,ignore_pattern:str):
         lexer = Lexer(get_symbol_function,ignore_pattern)
@@ -615,8 +604,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             pos = match_.start()
             column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
             line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
-            assert token.column == column
-            assert token.line == line
+            assert token.start_position == (line,column)
     
     def test_lexer_tokenization_with_error_collecting_1(self,ignore_pattern:str):
 
@@ -641,7 +629,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         errors = [(1,1),(1,8),(1,20)]
         assert len(lexer.errors) != 0
         for error in lexer.errors:
-            assert (error.line,error.column) in errors
+            assert error.start_position in errors
 
     def test_lexer_tokenization_with_error_collecting_2(self,ignore_pattern:str):
 
@@ -678,7 +666,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         errors = [(1,1),(1,8),(1,20),(1,36),(1,42)]
         assert len(lexer.errors) != 0
         for error in lexer.errors:
-            assert (error.line,error.column) in errors
+            assert error.start_position in errors
 
     def test_lexer_tokenization_with_invalid_tokens_collecting(self,ignore_pattern:str):
         lexer = Lexer(get_symbol_function,ignore_pattern)
@@ -732,8 +720,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         assert len(tokens) == 11
         assert all(map(lambda token:token.type==TokenTypeTestEnum.NUMBER,tokens))
         for i in range(len(tokens)):
-            assert tokens[i].column == pos[i][0]
-            assert tokens[i].line == pos[i][1]
+            assert tokens[i].start_position == (pos[i][1],pos[i][0])
 
     def test_idented_lexer_tokenization_3(self):
         lexer = IdentedLexer(get_symbol_function,' |\n')
@@ -768,8 +755,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         ]
         assert len(tokens) == 13
         for i in range(len(tokens)):
-            assert tokens[i].column == pos[i][0]
-            assert tokens[i].line == pos[i][1]
+            assert tokens[i].start_position == (pos[i][1],pos[i][0])
             assert tokens[i].type == pos[i][2]
 
     def test_idented_lexer_tokenization_4(self):
@@ -795,8 +781,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         assert len(tokens) == 7
         assert all(map(lambda token:token.type==TokenTypeTestEnum.VARIABLE,tokens))
         for i in range(len(tokens)):
-            assert tokens[i].column == pos[i][0]
-            assert tokens[i].line == pos[i][1]
+            assert tokens[i].start_position == (pos[i][1],pos[i][0])
 
     def test_idented_lexer_tokenization_5(self):
         lexer = IdentedLexer(get_symbol_function,' |\n')
@@ -828,8 +813,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
         ]
         assert len(tokens) == 11
         for i in range(len(tokens)):
-            assert tokens[i].column == pos[i][0]
-            assert tokens[i].line == pos[i][1]
+            assert tokens[i].start_position == (pos[i][1],pos[i][0])
             assert tokens[i].type == pos[i][2]
 
     def test_idented_lexer_tokenization_6(self,keywords:list[str]):
@@ -861,8 +845,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             pos = match_.start()
             column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
             line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
-            assert token.column == column
-            assert token.line == line
+            assert token.start_position == (line,column)
 
     def test_idented_lexer_tokenization_7(self,keywords:list[str]):
         lexer = IdentedLexer(get_symbol_function,' |\n')
@@ -901,8 +884,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             pos = match_.start()
             column = pos - text.rindex('\n',0,pos) if '\n' in text[:pos] else pos + 1
             line = 1 + text.count('\n',pos) if '\n' in text[:pos] else 1
-            assert token.column == column
-            assert token.line == line
+            assert token.start_position == (line,column)
 
     def test_idented_lexer_tokenization_with_error_collecting_1(self):
     
@@ -939,8 +921,8 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             errors = [(1,1),(1,8),(1,20),(1,36),(1,42)]
             assert len(lexer.errors) != 0
             for error in lexer.errors:
-                assert (error.line,error.column) in errors
-
+                assert error.start_position in errors
+                
     def test_idented_lexer_tokenization_with_error_collecting_2(self):
     
             class IntegerRule(LexicalRule):
@@ -982,7 +964,7 @@ var_3 var_4_ _var_5 nad_2_nad_12_token
             errors = [(1,1),(1,8),(2,23),(2,7),(2,29)]
             assert len(lexer.errors) != 0
             for error in lexer.errors:
-                assert (error.line,error.column) in errors
+                assert error.start_position in errors
 
     def test_idented_lexer_tokenization_with_invalid_tokens_collecting_1(self):
         lexer = IdentedLexer(get_symbol_function,' |\n')
