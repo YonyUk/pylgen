@@ -131,7 +131,7 @@ jobs:
         run: |
           python - <<'EOF'
           import importlib, inspect, sys
-          mod = importlib.import_module("<tu_paquete>")
+          mod = importlib.import_module("pylgen")
           path = inspect.getfile(mod)
           print("Imported from:", path)
       
