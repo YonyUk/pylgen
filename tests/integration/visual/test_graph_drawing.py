@@ -144,9 +144,12 @@ def get_tokens(end_symbol:Symbol,tokens:Iterable[Token]):
         yield token
     yield Token(end_symbol.symbol,TokenTypeEnum.SYMBOL,end_symbol,line,column + 1)
 
-def is_cyclic(graph:nx.DiGraph,root:AST|ParseTreeNode) -> bool:
+def is_cyclic(graph:nx.DiGraph,root:AST|ParseTreeNode,parse_tree:bool=False) -> bool:
     (sl,sc),(el,ec) = root.start_position,root.end_position
-    node_id = f'{sl}-{sc}-{el}-{ec}-0'
+    if parse_tree:
+        node_id = f'{root.symbol.symbol}-{sl}-{sc}-{el}-{ec}-0'
+    else:
+        node_id = f'{sl}-{sc}-{el}-{ec}-0'
     node = graph.nodes[node_id]
 
     seens = []
@@ -155,13 +158,14 @@ def is_cyclic(graph:nx.DiGraph,root:AST|ParseTreeNode) -> bool:
     while work_list:
         current = work_list[-1]
         change = False
-        for child in graph.neighbors(current):
-            if child in seens:
-                continue
-            if child in work_list:
-                return True
-            change = True
-            work_list.append(child)
+        for u,child in graph.edges:
+            if u == current:
+                if child in seens:
+                    continue
+                if child in work_list:
+                    return True
+                change = True
+                work_list.append(child)
         if not change:
             seens.append(work_list.pop())
 
@@ -223,7 +227,7 @@ class TestGraphDrawing:
         lexer.load_text(sample)
         parser.set_draw_parse_tree_flag(True)
         _ = parser.parse(lexer.tokens)
-        graph = _get_graph_from_parse_tree(parser)
         tree = parser.parse_tree
-        assert not is_cyclic(graph,tree)
+        graph = _get_graph_from_parse_tree(tree)
+        assert not is_cyclic(graph,tree,True)
         
