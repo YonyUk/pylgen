@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, List
 
 import pytest
 import networkx as nx
@@ -8,7 +8,7 @@ from pylgen.grammar import AttributedGrammar
 from pylgen.common.types import Symbol,AST,ASTListView, Token
 from pylgen.common.enums import TokenType
 from pylgen.lexer import Lexer
-from pylgen.parser import Parser,ParserBuilder,ParserType
+from pylgen.parser import Parser,ParserBuilder,ParserType,ParseTreeNode
 
 END_SYMBOL = '$'
 
@@ -34,6 +34,7 @@ class BinaryAST(AST):
         super().__init__(symbol, s_l,s_c,e_l,e_c)
         self._left = left
         self._right = right
+        self._children = [left,right]
 
     @property
     def left(self) -> AST:
@@ -42,6 +43,9 @@ class BinaryAST(AST):
     @property
     def right(self) -> AST:
         return self._right # type: ignore
+
+    def children(self) -> List[AST]:
+        return self._children
 
 class PlusAST(BinaryAST):
 
@@ -140,7 +144,27 @@ def get_tokens(end_symbol:Symbol,tokens:Iterable[Token]):
         yield token
     yield Token(end_symbol.symbol,TokenTypeEnum.SYMBOL,end_symbol,line,column + 1)
 
-def is_cyclic(graph:nx.DiGraph) -> bool:
+def is_cyclic(graph:nx.DiGraph,root:AST|ParseTreeNode) -> bool:
+    (sl,sc),(el,ec) = root.start_position,root.end_position
+    node_id = f'{sl}-{sc}-{el}-{ec}-0'
+    node = graph.nodes[node_id]
+
+    seens = []
+    work_list = [node]
+
+    while work_list:
+        current = work_list[-1]
+        change = False
+        for child in graph.neighbors(current):
+            if child in seens:
+                continue
+            if child in work_list:
+                return True
+            change = True
+            work_list.append(child)
+        if not change:
+            seens.append(work_list.pop())
+
     return False
 
 class TestGraphDrawing:
@@ -180,7 +204,7 @@ class TestGraphDrawing:
         lexer.load_text(sample)
         ast = parser.parse(lexer.tokens)
         graph = _ast_to_graph(ast)
-        assert not is_cyclic(graph)
+        assert not is_cyclic(graph,ast)
 
     @pytest.mark.parametrize("sample",[
         '1 + 2',
@@ -200,5 +224,6 @@ class TestGraphDrawing:
         parser.set_draw_parse_tree_flag(True)
         _ = parser.parse(lexer.tokens)
         graph = _get_graph_from_parse_tree(parser)
-        assert not is_cyclic(graph)
+        tree = parser.parse_tree
+        assert not is_cyclic(graph,tree)
         
