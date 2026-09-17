@@ -146,10 +146,39 @@ cdef class Error:
     def start_position(self) -> tuple[int,int]:
         return (self._start_line,self._start_column)
 
+    @start_position.setter
+    def start_position(self,tuple[int,int] start_position):
+        sl,sc = start_position
+
+        if sl < 0 or sc < 0:
+            raise ValueError('start_line and start_column must be non-negative values')
+
+        if self._end_line < sl:
+            raise ValueError('end_line cannot be less than start_line')
+
+        if self._end_line == sl and self._end_column <= sc:
+            raise ValueError('start_column must be less than end_column')
+
+        self._start_line = sl
+        self._start_column = sc
+    
     @property
     def end_position(self) -> tuple[int,int]:
         return (self._end_line,self._end_column)
-    
+        
+    @end_position.setter
+    def end_position(self,tuple[int,int] end_position):
+        el,ec = end_position
+
+        if el < self._start_line:
+            raise ValueError('end_line cannot be less than start_line')
+            
+        if el == self._start_line and ec <= self._start_column:
+            raise ValueError('start_column must be less than end_column')
+
+        self._end_line = el
+        self._end_column = ec
+
     @property
     def type(self) -> ErrorType:
         return self._type # type:ignore
