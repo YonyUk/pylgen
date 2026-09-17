@@ -17,6 +17,7 @@ class TestToken:
         assert t.symbol == n
         assert t.type == TokenTypeEnumForTest.GARBAGE
         assert t.start_position == (1,0)
+        assert t.end_position == (1,2)
     
     def test_token_creation_fail(self):
         n = Symbol('n',True)

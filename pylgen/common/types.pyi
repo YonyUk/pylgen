@@ -37,9 +37,15 @@ class AST:
     
     @property
     def start_position(self) -> Tuple[int,int]: ...
-    
+
+    @start_position.setter
+    def start_position(self, start_position:Tuple[int,int]): ...
+
     @property
     def end_position(self) -> Tuple[int,int]: ...
+
+    @end_position.setter
+    def end_position(self, end_position:Tuple[int,int]): ...
     
     @property
     def is_error(self) -> bool: ...

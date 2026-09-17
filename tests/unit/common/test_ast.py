@@ -62,3 +62,44 @@ class TestAST:
             ast = AST(symbol,1,1,1,0)
 
         ast = AST(symbol,1,1,2,0)
+
+    def test_ast_getter_and_setter(self):
+
+        symbol = Symbol('s')
+
+        ast = AST(symbol,1,2,1,3)
+
+        assert ast.start_position == (1,2)
+        assert ast.end_position == (1,3)
+
+        with pytest.raises(ValueError,match='start_line and start_column must be non-negative values'):
+            ast.start_position = -1,-1
+
+        with pytest.raises(ValueError,match='start_line and start_column must be non-negative values'):
+            ast.start_position = -1,1
+
+        with pytest.raises(ValueError,match='start_line and start_column must be non-negative values'):
+            ast.start_position = 1,-1
+
+        with pytest.raises(ValueError,match='end_line cannot be less than start_line'):
+            ast.start_position = 2,1
+
+        with pytest.raises(ValueError,match='start_column must be less than end_column'):
+            ast.start_position = 1,3
+
+        with pytest.raises(ValueError,match='start_column must be less than end_column'):
+            ast.start_position = 1,4
+
+        ast.start_position = 1,1
+
+        with pytest.raises(ValueError,match='end_line cannot be less than start_line'):
+            ast.end_position = -1,1
+
+        with pytest.raises(ValueError,match='start_column must be less than end_column'):
+            ast.end_position = 1,-1
+
+        with pytest.raises(ValueError,match='end_line cannot be less than start_line'):
+            ast.end_position = -1,-1
+
+        with pytest.raises(ValueError,match='start_column must be less than end_column'):
+            ast.end_position = 1,1
