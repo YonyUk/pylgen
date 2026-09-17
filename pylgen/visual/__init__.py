@@ -233,19 +233,20 @@ def _ast_to_graph(ast_root:AST) -> nx.DiGraph:
     
     return G
 
-def _get_graph_from_parse_tree(parser:Parser) -> nx.DiGraph:
+def _get_graph_from_parse_tree(tree:ParseTreeNode) -> nx.DiGraph:
     G = nx.DiGraph()
-    tree = parser.parse_tree
     nodes_by_id:Dict[str,Tuple[ParseTreeNode,int]] = {}
 
     stack = [(tree,0)]
     while stack:
         current,level = stack.pop()
-        current_id = f'{current.symbol}-{current.line}-{current.column}-{level}'
+        (sl,sc),(el,ec) = current.start_position,current.end_position
+        current_id = f'{current.symbol}-{sl}-{sc}-{el}-{ec}-{level}'
         if not current_id in nodes_by_id:
             nodes_by_id[current_id] = (current,level)
         for children in current.childrens:
-            children_id = f'{children.symbol}-{children.line}-{children.column}-{level + 1}'
+            (sl,sc),(el,ec) = children.start_position,children.end_position
+            children_id = f'{children.symbol}-{sl}-{sc}-{el}-{ec}-{level + 1}'
             stack.append((children,level + 1))
             nodes_by_id[children_id] = (children,level+1)
             G.add_edge(current_id,children_id)
@@ -531,7 +532,7 @@ def draw_ast(ast:AST,**kwargs) -> None:
     if show:
         webbrowser.open(output_path,2)
 
-def draw_parse_tree_from_parser(parser:Parser,**kwargs) -> None:
+def draw_parse_tree(tree:ParseTreeNode,**kwargs) -> None:
     '''
     Args:
         parser (Parser): parser to draw
@@ -590,7 +591,7 @@ def draw_parse_tree_from_parser(parser:Parser,**kwargs) -> None:
     if edges:
         filters.append('edges')
     
-    G = _get_graph_from_parse_tree(parser)
+    G = _get_graph_from_parse_tree(tree)
     if not filename:
         filename = f'ast'
     
