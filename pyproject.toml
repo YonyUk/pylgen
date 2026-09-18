@@ -91,4 +91,4 @@ include = ["pylgen*"]
 exclude = ["tests*", "docs*"]
 
 [tool.setuptools.package-data]
-pylgen = ["*.pyx", "*.c", "*.pxd"]
+"*" = ["*.pyx", "*.c", "*.pxd"]
