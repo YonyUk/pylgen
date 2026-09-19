@@ -113,7 +113,7 @@ jobs:
           path: wheelhouse
       
       - name: Remove old builds
-        sheel: bash
+        shell: bash
         run : |
           rm -f pylgen/**/*.c
 
