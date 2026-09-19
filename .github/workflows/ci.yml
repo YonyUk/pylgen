@@ -124,7 +124,7 @@ jobs:
 
       - name: Install build wheel
         run: |
-          python -m pip install --no-deps --force-reinstall --find-links=wheelhouse pylgen-core[all]
+          python -m pip install --force-reinstall --find-links=wheelhouse pylgen-core[all]
       
       - name: Remove source tree (force import from installed wheel)
         shell: bash
