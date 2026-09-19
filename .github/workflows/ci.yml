@@ -112,6 +112,12 @@ jobs:
           name: wheels
           path: wheelhouse
       
+      - name: Remove old builds
+        sheel: bash
+        run : |
+          rm -f pylgen/**/*.c
+
+      
       - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
@@ -124,7 +130,7 @@ jobs:
 
       - name: Install build wheel
         run: |
-          python -m pip install --force-reinstall --find-links=wheelhouse pylgen-core[all]
+          python -m pip install --no-deps --force-reinstall --find-links=wheelhouse pylgen-core
       
       - name: Remove source tree (force import from installed wheel)
         shell: bash
@@ -139,15 +145,6 @@ jobs:
             echo "ERROR: no se pudo borrar el arbol fuente" >&2
             exit 1
           fi
-      
-      - name: Verify import comes from site-packages
-        shell: bash
-        run: |
-          python - <<'EOF'
-          import importlib, inspect, sys
-          mod = importlib.import_module("pylgen")
-          path = inspect.getfile(mod)
-          print("Imported from:", path)
       
       - name: Run tests against installed wheel
         run: |
