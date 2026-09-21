@@ -10,4 +10,4 @@ cdef class LexicalRule:
 
     cpdef LexicalError check(self,Token token):
         if not self._check(token._text):
-            return LexicalError(self._msg,token._line,token._column,token._column,token._column + len(token._text)) # type:ignore
+            return LexicalError(self._msg,token._start_line,token._start_column,token._end_line,token._end_column) # type:ignore

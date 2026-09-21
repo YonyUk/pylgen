@@ -22,7 +22,8 @@ class CounterContext(Context):
 class BinaryAST(AST):
 
     def __init__(self, left:AST, right:AST):
-        super().__init__(Symbol('binary'), 0, 0)
+        (s_l,s_c),(e_l,e_c) = left.start_position,right.end_position
+        super().__init__(Symbol('binary'),s_l,s_c,e_l,e_c)
         self._left = left
         self._right = right
     
@@ -39,8 +40,8 @@ class BinaryAST(AST):
     
 class AtomicAST(AST):
 
-    def __init__(self):
-        super().__init__(Symbol('atomic'), 0, 0)
+    def __init__(self,start_line:int,start_column:int,end_line:int,end_column:int):
+        super().__init__(Symbol('atomic'), start_line,start_column,end_line,end_column)
     
     def children(self) -> List[AST]:
         return []
@@ -120,8 +121,8 @@ class TestIntegrationSemantic:
 
     @pytest.fixture
     def ast1(self) -> AST:
-        left = AtomicAST()
-        right = AtomicAST()
+        left = AtomicAST(1,1,1,2)
+        right = AtomicAST(1,6,1,7)
         return BinaryAST(left,right)
 
     def build_walker1(self,context:CounterContext) -> ASTWalker:

@@ -623,8 +623,8 @@ cdef DFA _parse(str re):
     _lexer.load_text(re)
     while _lexer._move_next():
         _parser._try_parse(_lexer._current_token)
-        line = _lexer._current_token._line
-        column = _lexer._current_token._column
+        line = _lexer._current_token._start_line
+        column = _lexer._current_token._start_column
     end_token = Token('\x00',ReTokenType.SYMBOL,Symbol('\x00',True),line,column + 1) # type:ignore
     _parser._try_parse(end_token)
     if _parser._parsed:

@@ -32,10 +32,11 @@ rp = Symbol(')',True)
 
 class BinaryAST(AST):
 
-    def __init__(self, symbol: Symbol, line: int, column: int):
-        super().__init__(symbol, line, column)
-        self._left = None
-        self._right = None
+    def __init__(self, symbol: Symbol,left:AST,right:AST):
+        (s_l,s_c),(e_l,e_c) = left.start_position,right.end_position
+        super().__init__(symbol, s_l,s_c,e_l,e_c)
+        self._left = left
+        self._right = right
 
     @property
     def left(self) -> AST:
@@ -45,81 +46,61 @@ class BinaryAST(AST):
     def right(self) -> AST:
         return self._right # type: ignore
 
-    @left.setter
-    def left(self,value:AST) -> None:
-        self._left = value
-    
-    @right.setter
-    def right(self,value:AST) -> None:
-        self._right = value
-
 class PlusAST(BinaryAST):
 
-    def __init__(self,line: int, column: int):
-        super().__init__(plus, line, column)
+    def __init__(self,left:AST,right:AST):
+        super().__init__(plus, left,right)
 
 class MinusAST(BinaryAST):
     
-    def __init__(self,line: int, column: int):
-        super().__init__(minus, line, column)
+    def __init__(self,left:AST,right:AST):
+        super().__init__(minus, left,right)
 
 class ModAST(BinaryAST):
 
-    def __init__(self,line: int, column: int):
-        super().__init__(mod, line, column)
+    def __init__(self,left:AST,right:AST):
+        super().__init__(mod, left,right)
 
 class MulAST(BinaryAST):
 
-    def __init__(self,line: int, column: int):
-        super().__init__(mul, line, column)
+    def __init__(self,left:AST,right:AST):
+        super().__init__(mul, left,right)
 
 class DivAST(BinaryAST):
 
-    def __init__(self,line: int, column: int):
-        super().__init__(div, line, column)
+    def __init__(self,left:AST,right:AST):
+        super().__init__(div, left,right)
 
 class ExpAST(BinaryAST):
 
-    def __init__(self,line: int, column: int):
-        super().__init__(exp, line, column)
+    def __init__(self,left:AST,right:AST):
+        super().__init__(exp,left,right)
 
 def reductor_E_plus_T(asts:ASTListView) -> AST:
-    result = PlusAST(asts[1].line,asts[1].column)
-    result.left = asts[0]
-    result.right = asts[2]
+    result = PlusAST(asts[0],asts[2])
     return result
 
 def reductor_E_minus_T(asts:ASTListView) -> AST:
-    result = MinusAST(asts[1].line,asts[1].column)
-    result.left = asts[0]
-    result.right = asts[2]
+    result = MinusAST(asts[0],asts[2])
     return result
 
 def reductor_E_mod_T(asts:ASTListView) -> AST:
-    result = ModAST(asts[1].line,asts[1].column)
-    result.left = asts[0]
-    result.right = asts[2]
+    result = ModAST(asts[0],asts[2])
     return result
 
 def reductor_E_T(asts:ASTListView) -> AST:
     return asts[0]
         
 def reductor_T_mul_F(asts:ASTListView) -> AST:
-    result = MulAST(asts[1].line,asts[1].column)
-    result.left = asts[0]
-    result.right = asts[2]
+    result = MulAST(asts[0],asts[2])
     return result
 
 def reductor_T_div_F(asts:ASTListView) -> AST:
-    result = DivAST(asts[1].line,asts[1].column)
-    result.left = asts[0]
-    result.right = asts[2]
+    result = DivAST(asts[0],asts[2])
     return result
 
 def reductor_F_exp_P(asts:ASTListView) -> AST:
-    result = ExpAST(asts[1].line,asts[1].column)
-    result.left = asts[0]
-    result.right = asts[2]
+    result = ExpAST(asts[0],asts[2])
     return result
 
 def reductor_F_lp_E_rp(asts:ASTListView) -> AST:
@@ -189,8 +170,7 @@ def get_tokens(end_symbol:Symbol,tokens:Iterable[Token]):
     line = 0
     column = 0
     for token in tokens:
-        line = token.line
-        column = token.column
+        line,column = token.start_position
         yield token
     yield Token(end_symbol.symbol,TokenTypeEnum.SYMBOL,end_symbol,line,column + 1)
 
@@ -518,7 +498,7 @@ class TestIntegrationLexerParser:
         errors = [(1,2),(1,22)]
         assert len(lexer1.errors) == 2
         for error in lexer1.errors:
-            assert (error.line,error.column) in errors
+            assert error.start_position in errors
         parser1.reset()
         text = "(1 + 3) * (5++7) *(2 + 10 * * 15)"
         lexer1.load_text(text)
@@ -541,7 +521,7 @@ class TestIntegrationLexerParser:
         errors = [(1,2),(1,22)]
         assert len(lexer1.errors) == 2
         for error in lexer1.errors:
-            assert (error.line,error.column) in errors
+            assert error.start_position in errors
         parser4.reset()
         text = "(1 + 3) * (5++7) *(2 + 10 * * 15)"
         lexer1.load_text(text)
@@ -564,7 +544,7 @@ class TestIntegrationLexerParser:
         errors = [(1,2),(1,22)]
         assert len(lexer1.errors) == 2
         for error in lexer1.errors:
-            assert (error.line,error.column) in errors
+            assert error.start_position in errors
         parser7.reset()
         text = "(1 + 3) * (5++7) *(2 + 10 * * 15)"
         lexer1.load_text(text)

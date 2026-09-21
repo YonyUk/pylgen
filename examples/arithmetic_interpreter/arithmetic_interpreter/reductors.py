@@ -6,7 +6,9 @@ from .grammar_symbols import (
     div,
     exp,
     mod,
-    eq
+    eq,
+    variable,
+    number
 )
 from .asts import (
     ClearAST,
@@ -35,7 +37,7 @@ def binary_reductor(asts:ASTListView) -> AST:
     elif asts[1].symbol == div:
         right = asts[2]
         if isinstance(right,Token) and float(right.text) == 0:
-            return DivisionByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
+            return DivisionByZeroErrorAST(asts[0],asts[2])
         ast_type = DivAST
     elif asts[1].symbol == exp:
         ast_type = ExpAST
@@ -43,27 +45,31 @@ def binary_reductor(asts:ASTListView) -> AST:
         right = asts[2]
         if isinstance(right,Token):
             if float(right.text) == 0:
-                return ModuleByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
+                return ModuleByZeroErrorAST(asts[0],asts[2])
             if '.' in right.text:
-                return ModuleByNotIntegerErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
+                return ModuleByNotIntegerErrorAST(asts[0],asts[2])
         ast_type = ModAST
     elif asts[1].symbol == eq:
         ast_type = AssignmentAST
     else:
         raise ValueError()
-    return ast_type(asts[0],asts[2],asts[1].line,asts[1].column)
+    return ast_type(asts[0],asts[2])
 
 def single_reductor(asts:ASTListView) -> AST:
     return asts[0]
 
 def parenthesis_reductor(asts:ASTListView) -> AST:
+    asts[1].start_position = asts[0].start_position
+    asts[1].end_position = asts[2].end_position
     return asts[1]
 
 def variable_reductor(asts:ASTListView) -> AST:
-    return VarAST(asts[0].text,asts[0].line,asts[0].column) # type: ignore
+    return VarAST(asts[0]) # type: ignore
 
 def exit_reductor(asts:ASTListView) -> AST:
-    return ExitAST(asts[0].line,asts[0].column)
+    (sl,sc),(el,ec) = asts[0].start_position,asts[2].end_position
+    return ExitAST(sl,sc,el,ec)
 
 def clear_reductor(asts:ASTListView) -> AST:
-    return ClearAST(asts[0].line,asts[0].column)
+    (sl,sc),(el,ec) = asts[0].start_position,asts[2].end_position
+    return ClearAST(sl,sc,el,ec)

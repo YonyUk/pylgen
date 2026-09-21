@@ -15,7 +15,7 @@ class TestTraversalStrategy:
     def test_traversal_strategy_creation(self):
 
         context = Context()
-        ast = AST(Symbol('s'),0,0)
+        ast = AST(Symbol('s'),0,0,0,1)
         strategy = TraversalStrategy(Context)
 
         strategy._check_context_type(context)

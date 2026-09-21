@@ -95,8 +95,8 @@ STRING = cSymbol('STRING') # type:ignore
 
 cdef class RegexAST(AST):
 
-    def __init__(self,cSymbol symbol, int line, int column):
-        super().__init__(symbol, line, column) # type:ignore
+    def __init__(self,cSymbol symbol, int start_line, int start_column, int end_line, int end_column):
+        super().__init__(symbol, start_line,start_column,end_line,end_column) # type:ignore
     
     cdef Automaton _get_automaton(self):
         raise NotImplementedError()
@@ -107,8 +107,8 @@ cdef class RegexAST(AST):
 
 cdef class CharAST(RegexAST):
 
-    def __init__(self,str char, int line,int column):
-        super().__init__(re_char, line, column)
+    def __init__(self,str char, int start_line, int start_column, int end_line, int end_column):
+        super().__init__(re_char, start_line,start_column,end_line,end_column)
         self._char = char
 
     @property
@@ -123,8 +123,8 @@ cdef class CharAST(RegexAST):
 
 cdef class RegexBinaryAST(RegexAST):
 
-    def __init__(self,RegexAST left, RegexAST right,cSymbol symbol, int line, int column):
-        super().__init__(symbol, line, column)
+    def __init__(self,RegexAST left, RegexAST right,cSymbol symbol):
+        super().__init__(symbol, left._start_line,left._start_column,right._end_line,right._end_column)
         self._right = right # type:ignore
         self._left = left # type:ignore
     
@@ -141,8 +141,8 @@ cdef class RegexBinaryAST(RegexAST):
 
 cdef class ConcatenationAST(RegexAST):
 
-    def __init__(self, list[RegexAST] sequence, cSymbol symbol, int line, int column):
-        super().__init__(symbol, line, column)
+    def __init__(self, list[RegexAST] sequence, cSymbol symbol, int start_line, int start_column, int end_line, int end_column):
+        super().__init__(symbol, start_line,start_column,end_line,end_column)
         self._sequence = sequence
 
     cdef Automaton _get_automaton(self):
@@ -160,16 +160,16 @@ cdef class ConcatenationAST(RegexAST):
 
 cdef class OrAST(RegexBinaryAST):
 
-    def __init__(self, RegexAST left, RegexAST right, int line, int column):
-        super().__init__(left, right, re_or, line, column)
+    def __init__(self, RegexAST left, RegexAST right):
+        super().__init__(left, right, re_or)
     
     cdef Automaton _get_automaton(self):
         return _automaton_union({self._left._get_automaton(),self._right._get_automaton()})
 
 cdef class ConstantRegexAST(RegexAST):
 
-    def __init__(self, str re,int line, int column):
-        super().__init__(re_constant, line, column)
+    def __init__(self, str re, int start_line, int start_column, int end_line, int end_column):
+        super().__init__(re_constant, start_line,start_column,end_line,end_column)
         self._re = re
     
     @property
@@ -208,8 +208,8 @@ cdef class ConstantRegexAST(RegexAST):
 
 cdef class RegexUnaryAST(RegexAST):
 
-    def __init__(self, RegexAST regex, cSymbol symbol, int line, int column):
-        super().__init__(symbol, line, column)
+    def __init__(self, RegexAST regex, cSymbol symbol, int start_line, int start_column, int end_line, int end_column):
+        super().__init__(symbol, start_line,start_column,end_line,end_column)
         self._regex = regex # type:ignore
     
     @property
@@ -221,8 +221,8 @@ cdef class RegexUnaryAST(RegexAST):
     
 cdef class KleeneStarAST(RegexUnaryAST):
 
-    def __init__(self,RegexAST regex, int line, int column):
-        super().__init__(regex, re_kleene_star, line, column)
+    def __init__(self,RegexAST regex, int start_line, int start_column, int end_line, int end_column):
+        super().__init__(regex, re_kleene_star, start_line,start_column,end_line,end_column)
         self._regex = regex # type:ignore
 
     cdef Automaton _get_automaton(self):
@@ -230,24 +230,24 @@ cdef class KleeneStarAST(RegexUnaryAST):
 
 cdef class PositiveClosureAST(RegexUnaryAST):
 
-    def __init__(self, RegexAST regex, int line, int column):
-        super().__init__(regex, re_positive_closure, line, column)
+    def __init__(self, RegexAST regex, int start_line, int start_column, int end_line, int end_column):
+        super().__init__(regex, re_positive_closure,start_line,start_column,end_line,end_column)
     
     cdef Automaton _get_automaton(self):
         return _automaton_closure(self._regex._get_automaton(),1)
 
 cdef class OptionalAST(RegexUnaryAST):
 
-    def __init__(self, regex: RegexAST, line: int, column: int):
-        super().__init__(regex, re_optional, line, column)
+    def __init__(self, regex: RegexAST, int start_line, int start_column, int end_line, int end_column):
+        super().__init__(regex, re_optional,start_line,start_column,end_line,end_column)
     
     cdef Automaton _get_automaton(self):
         return _automaton_closure(self._regex._get_automaton(),2)
 
 cdef class CharSetAST(RegexAST):
 
-    def __init__(self, cSymbol symbol, int line, int column):
-        super().__init__(symbol, line, column)
+    def __init__(self, cSymbol symbol, int start_line, int start_column, int end_line, int end_column):
+        super().__init__(symbol, start_line,start_column,end_line,end_column)
         self._next = None # type:ignore
         self._preceding = None # type:ignore
 
@@ -274,8 +274,8 @@ cdef class CharSetAST(RegexAST):
 
 cdef class CharSetExplicitAST(CharSetAST):
 
-    def __init__(self, line: int, column: int):
-        super().__init__(CHAR_SET,line, column)
+    def __init__(self, int start_line, int start_column, int end_line, int end_column):
+        super().__init__(CHAR_SET,start_line,start_column,end_line,end_column)
         self._char_set = set()
     
     @property
@@ -284,6 +284,7 @@ cdef class CharSetExplicitAST(CharSetAST):
     
     cdef void _add_char(self,str char):
         self._char_set.add(char)
+        self._end_column += len(char)
 
     cdef Automaton _get_automaton(self):
         cdef DFA result = DFA('start','start',self._char_set) # type:ignore
@@ -296,8 +297,8 @@ cdef class CharSetExplicitAST(CharSetAST):
 
 cdef class CharRangeAST(CharSetAST):
 
-    def __init__(self, CharAST left, CharAST right, int line, int column):
-        super().__init__(CHAR_RANGE, line, column)
+    def __init__(self, CharAST left, CharAST right):
+        super().__init__(CHAR_RANGE, left._start_line,left._start_column,right._end_line,right._end_column)
         self._left = left # type:ignore
         self._right = right # type:ignore
     
@@ -325,8 +326,8 @@ cdef class CharRangeAST(CharSetAST):
 
 cdef class ComplementCharSetAST(CharSetAST):
 
-    def __init__(self, CharSetAST char_set,int line, int column):
-        super().__init__(CHAR_SET, line, column)
+    def __init__(self, CharSetAST char_set, int start_line, int start_column, int end_line, int end_column):
+        super().__init__(CHAR_SET, start_line,start_column,end_line,end_column)
         self._char_set = char_set # type:ignore
     
     @property
@@ -349,8 +350,8 @@ cdef class ComplementCharSetAST(CharSetAST):
 
 cdef class RepeatPatternAST(RegexAST):
 
-    def __init__(self, RegexAST regex, StringAST min_, StringAST max_, int line, int column):
-        super().__init__(REPEAT, line, column)
+    def __init__(self, RegexAST regex, StringAST min_, StringAST max_, int start_line, int start_column, int end_line, int end_column):
+        super().__init__(REPEAT, start_line,start_column,end_line,end_column)
         self._min = min_ # type:ignore
         self._min._symbol = cSymbol('min') # type:ignore
         self._max = max_ # type:ignore
@@ -439,7 +440,7 @@ cdef class RepeatPatternAST(RegexAST):
 cdef class StringAST(AST):
 
     def __init__(self,str string, int line, int column):
-        super().__init__(STRING, line, column) # type:ignore
+        super().__init__(STRING, line, column,line,column + len(string)) # type:ignore
         self._string = string
     
     @property
@@ -497,10 +498,10 @@ cdef class RepeatPatternASTVisitor(ASTVisitor):
         right = _ast._max # type:ignore
 
         if not left._string.isnumeric():
-            error1 = RuntimeError([],left._line,left._column,left._column,left._column + len(left._string),'not a number') # type:ignore
+            error1 = RuntimeError([],left._start_line,left._start_column,left._end_line,left._end_column,'not a number') # type:ignore
             context.add_runtime_error(ast,error1)
         if not right._string.isnumeric():
-            error2 = RuntimeError([],right._line,right._column,right._column,right._column + len(right._string),'not a number') # type:ignore
+            error2 = RuntimeError([],right._start_line,right._start_column,right._end_line,right._end_column,'not a number') # type:ignore
             context.add_runtime_error(ast,error2)
 
 cdef class PostOrderStrategy(TraversalStrategy):
@@ -544,81 +545,80 @@ cdef class PostOrderStrategy(TraversalStrategy):
 ###################################################################################################
 
 def single_ast_reductor(asts:ASTListView) -> RegexAST:
-    return asts[0]
+    return asts._get(0) # type:ignore
 
 def concatenation_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef ConcatenationAST conc
     
     if isinstance(asts[0],ConcatenationAST): # type:ignore
-        conc = asts[0]
-        conc._sequence.append(asts[1])
+        conc = asts._get(0)
+        conc._sequence.append(asts._get(1))
     else:
-        conc = ConcatenationAST([asts[0],asts[1]],cSymbol('CONCATENATION'),(<AST>asts[0])._line,(<AST>asts[0])._column) # type:ignore
+        conc = ConcatenationAST([asts._get(0),asts._get(1)],cSymbol('CONCATENATION'),asts._get(0)._start_line,asts._get(0)._start_column,asts._get(1)._end_line,asts._get(1)._end_column)
     
     return conc
 
 def char_ast_reductor(asts:ASTListView) -> RegexAST:
-    cdef Token token = asts[0] # type:ignore
+    cdef Token token = asts._get(0) # type:ignore
     if token._type == ReTokenType.ESCAPE_CHAR:
-        return CharAST(token._text[1],token._line,token._column)
-    return CharAST(token._text,token._line,token._column)
+        return CharAST(token._text[1],token._start_line,token._start_column,token._end_line,token._end_column)
+    return CharAST(token._text,token._start_line,token._start_column,token._end_line,token._end_column)
 
 def re_constant_ast_reductor(asts:ASTListView) -> RegexAST:
-    cdef Token token = asts[0] # type:ignore
-    return ConstantRegexAST(token._text,token._line,token._column)
+    cdef Token token = asts._get(0) # type:ignore
+    return ConstantRegexAST(token._text,token._start_line,token._start_column,token._end_line,token._end_column)
 
 def kleene_ast_reductor(asts:ASTListView) -> RegexAST:
-    cdef RegexAST regex = asts[0]
-    return KleeneStarAST(regex,regex._line,regex._column)
+    cdef RegexAST regex = asts._get(0) # type:ignore
+    return KleeneStarAST(regex,regex._start_line,regex._start_column,asts._get(1)._end_line,asts._get(1)._end_column)
 
 def positive_closure_ast_reductor(asts:ASTListView) -> RegexAST:
-    cdef RegexAST regex = asts[0]
-    return PositiveClosureAST(regex,regex._line,regex._column)
+    cdef RegexAST regex = asts._get(0) # type:ignore
+    return PositiveClosureAST(regex,regex._start_line,regex._start_column,asts._get(1)._end_line,asts._get(1)._end_column)
 
 def optional_ast_reductor(asts:ASTListView) -> RegexAST:
-    cdef RegexAST regex = asts[0]
-    return OptionalAST(regex,regex._line,regex._column)
+    cdef RegexAST regex = asts._get(0) # type:ignore
+    return OptionalAST(regex,regex._start_line,regex._start_column,asts._get(1)._end_line,asts._get(1)._end_column)
 
 def union_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef RegexAST left,right
-    cdef Token token = asts[1] # type:ignore
 
-    left = asts[0]
-    right = asts[2]
+    left = asts._get(0) # type:ignore
+    right = asts._get(2) # type:ignore
 
-    return OrAST(left,right,token._line,token._column)
+    return OrAST(left,right)
 
 def group_ast_reductor(asts:ASTListView) -> RegexAST:
-    return asts[1]
+    return asts._get(1) # type:ignore
 
 def repeat_ast_reductor(asts:ASTListView) -> RegexAST:
-    cdef RegexAST regex = asts[0]
+    cdef RegexAST regex = asts._get(0) # type:ignore
     cdef StringAST min_,max_
 
-    min_ = asts[2] # type:ignore
-    max_ = asts[4] # type:ignore
+    min_ = asts._get(2) # type:ignore
+    max_ = asts._get(4) # type:ignore
 
-    return RepeatPatternAST(regex,min_,max_,regex._line,regex._column)
+    return RepeatPatternAST(regex,min_,max_,regex._start_line,regex._start_column,asts._get(5)._end_line,asts._get(5)._end_column)
 
 def repeat_re_constant_ast_reductor(asts:ASTListView) -> RegexAST:
-    cdef Token constant = asts[0] # type:ignore
+    cdef Token constant = asts._get(0) # type:ignore
     cdef StringAST min_,max_
-    cdef RegexAST regex = ConstantRegexAST(constant._text,constant._line,constant._column)
+    cdef RegexAST regex = ConstantRegexAST(constant._text,constant._start_line,constant._start_column,constant._end_line,constant._end_column)
 
-    min_ = asts[2] # type:ignore
-    max_ = asts[4] # type:ignore
+    min_ = asts._get(2) # type:ignore
+    max_ = asts._get(4) # type:ignore
 
-    return RepeatPatternAST(regex,min_,max_,constant._line,constant._column)
+    return RepeatPatternAST(regex,min_,max_,constant._start_line,constant._start_column,asts._get(5)._end_line,asts._get(5)._end_column)
 
 def char_set_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef RegexAST regex
-    cdef Token token = asts[0] # type:ignore
+    cdef Token token = asts._get(0) # type:ignore
 
-    if len(asts) == 3:
-        return asts[1]
+    if asts._size() == 3:
+        return asts._get(1) # type:ignore
 
-    regex = asts[2]
-    return ComplementCharSetAST(regex,token._line,token._column) # type:ignore
+    regex = asts._get(2) # type:ignore
+    return ComplementCharSetAST(regex,token._start_line,token._start_column,regex._end_line,regex._end_column) # type:ignore
 
 def char_set_sequence_atom_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef Token token
@@ -626,21 +626,21 @@ def char_set_sequence_atom_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef CharRangeAST char_range
     cdef CharAST char_ast,char_ast1
 
-    if len(asts) == 1:
-        if isinstance(asts[0],Token):
-            token = asts[0]
-            explicit = CharSetExplicitAST(token._line,token._column)
+    if asts._size() == 1:
+        if isinstance(asts._get(0),Token):
+            token = asts._get(0) # type:ignore
+            explicit = CharSetExplicitAST(token._start_line,token._start_column,token._end_line,token._end_column)
             explicit._char_set = set(token._text)
             return explicit
-        char_ast = asts[0] # type:ignore
-        explicit = CharSetExplicitAST(char_ast._line,char_ast._column)
+        char_ast = asts._get(0) # type:ignore
+        explicit = CharSetExplicitAST(char_ast._start_line,char_ast._start_column,char_ast._end_line,char_ast._end_column)
         explicit._add_char(char_ast._char)
         return explicit
     
-    token = asts[1] # type:ignore
-    char_ast = asts[0] # type:ignore
-    char_ast1 = asts[2] # type:ignore
-    char_range = CharRangeAST(char_ast,char_ast1,token._line,token._column)
+    token = asts._get(1) # type:ignore
+    char_ast = asts._get(0) # type:ignore
+    char_ast1 = asts._get(2) # type:ignore
+    char_range = CharRangeAST(char_ast,char_ast1)
     return char_range
 
 def char_set_sequence_ast_reductor(asts:ASTListView) -> RegexAST:
@@ -648,49 +648,53 @@ def char_set_sequence_ast_reductor(asts:ASTListView) -> RegexAST:
     cdef CharRangeAST char_range1
     cdef CharSetAST result,new_result
 
-    if isinstance(asts[0],CharSetExplicitAST):
-        explicit1 = asts[0]
+    if isinstance(asts._get(0),CharSetExplicitAST):
+        explicit1 = asts._get(0) # type:ignore
 
-        if isinstance(asts[1],CharSetExplicitAST):
-            explicit2 = asts[1]
+        if isinstance(asts._get(1),CharSetExplicitAST):
+            explicit2 = asts._get(1) # type:ignore
             explicit1._char_set.update(explicit2._char_set)
+            explicit1._end_column = explicit2._end_column
+            explicit1._end_line = explicit2._end_line
             return explicit1
         
-        char_range1 = asts[1] # type:ignore
-        result = CharSetAST(CHAR_SET_SEQUENCE,explicit1._line,explicit1._column)
+        char_range1 = asts._get(1) # type:ignore
+        result = CharSetAST(CHAR_SET_SEQUENCE,explicit1._start_line,explicit1._start_column,char_range1._end_line,char_range1._end_column)
         result._preceding = explicit1 # type:ignore
         result._next = char_range1 # type:ignore
         return result
     
-    if isinstance(asts[0],CharRangeAST):
-        char_range1 = asts[0]
-        result = CharSetAST(CHAR_SET_SEQUENCE,char_range1._left._line,char_range1._left._column)
+    if isinstance(asts._get(0),CharRangeAST):
+        char_range1 = asts._get(0) # type:ignore
+        result = CharSetAST(CHAR_SET_SEQUENCE,char_range1._start_line,char_range1._start_column,asts._get(1)._end_line,asts._get(1)._end_column)
         result._preceding = char_range1 # type:ignore
-        result._next = asts[1] # type:ignore
+        result._next = asts._get(1) # type:ignore
         return result
     
-    result = asts[0] # type:ignore
+    result = asts._get(0) # type:ignore
     if isinstance(result._next,CharSetExplicitAST):
         explicit1 = result._next
-        if isinstance(asts[1],CharSetExplicitAST):
-            explicit2 = asts[1]
+        if isinstance(asts._get(1),CharSetExplicitAST):
+            explicit2 = asts._get(1) # type:ignore
             explicit1._char_set.update(explicit2._char_set)
+            explicit1._end_line = explicit2._end_line
+            explicit1._end_column = explicit2._end_column
             return result
-        char_range1 = asts[1] # type:ignore
-        new_result = CharSetAST(CHAR_SET_SEQUENCE,result._line,result._column)
+        char_range1 = asts._get(1) # type:ignore
+        new_result = CharSetAST(CHAR_SET_SEQUENCE,result._start_line,result._start_column,char_range1._end_line,char_range1._end_column)
         new_result._preceding = result # type:ignore
         new_result._next = char_range1 # type:ignore
         return new_result
     
-    if isinstance(asts[1],CharSetExplicitAST):
-        explicit1 = asts[1]
-        new_result = CharSetAST(CHAR_SET_SEQUENCE,result._line,result._column)
+    if isinstance(asts._get(1),CharSetExplicitAST):
+        explicit1 = asts._get(1) # type:ignore
+        new_result = CharSetAST(CHAR_SET_SEQUENCE,result._start_line,result._start_column,explicit1._end_line,explicit1._end_column)
         new_result._preceding = result # type:ignore
         new_result._next = explicit1 # type:ignore
         return new_result
 
-    char_range1 = asts[1] # type:ignore
-    new_result = CharSetAST(CHAR_SET_SEQUENCE,result._line,result._column)
+    char_range1 = asts._get(1) # type:ignore
+    new_result = CharSetAST(CHAR_SET_SEQUENCE,result._start_line,result._start_column,char_range1._end_line,char_range1._end_column)
     new_result._preceding = result # type:ignore
     new_result._next = char_range1 # type:ignore
     return new_result
@@ -699,9 +703,9 @@ def string_ast_reductor(asts:ASTListView) -> AST:
     cdef StringAST string
     cdef CharAST char
 
-    if len(asts) == 1:
+    if asts._size() == 1:
         char = asts[0] # type:ignore
-        string = StringAST(char._char,char._line,char._column)
+        string = StringAST(char._char,char._start_line,char._start_column)
         return string
     
     string = asts[0] # type:ignore

@@ -15,7 +15,7 @@ class TestASTChildrenSelector:
     def test_ast_children_selector_creation(self):
 
         context = Context()
-        ast = AST(Symbol('n'),0,0)
+        ast = AST(Symbol('n'),0,0,0,1)
 
         selector = ASTChildrenSelector(Context)
 
@@ -34,7 +34,7 @@ class TestASTChildrenSelector:
         context = ValidContext()
         visitor = ASTChildrenSelector(ValidContext)
 
-        ast = AST(Symbol('s'),0,0)
+        ast = AST(Symbol('s'),0,0,0,1)
 
         visitor._check_context_type(context)
     

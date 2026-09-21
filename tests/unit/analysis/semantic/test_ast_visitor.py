@@ -17,7 +17,7 @@ class TestASTVisitor:
         context = Context()
         visitor = ASTVisitor(Context)
 
-        ast = AST(Symbol('s'),0,0)
+        ast = AST(Symbol('s'),0,0,0,1)
 
         visitor._check_context_type(context)
 
@@ -34,7 +34,7 @@ class TestASTVisitor:
         context = ValidContext()
         visitor = ASTVisitor(ValidContext)
 
-        ast = AST(Symbol('s'),0,0)
+        ast = AST(Symbol('s'),0,0,0,1)
 
         visitor._check_context_type(context)
     

@@ -7,18 +7,20 @@ cdef class Symbol:
 
 cdef class AST:
     cdef Symbol _symbol
-    cdef int _line
-    cdef int _column
+    cdef int _start_line
+    cdef int _start_column
+    cdef int _end_line
+    cdef int _end_column
     cdef bint _is_error
 
     cpdef list[AST] children(self)
 
 cdef class Error:
     cdef object _type
-    cdef int _line
-    cdef int _column
-    cdef int _source_line_interval_start
-    cdef int _source_line_interval_end
+    cdef int _start_line
+    cdef int _start_column
+    cdef int _end_line
+    cdef int _end_column
     cdef str _msg
     cdef int _hash
 

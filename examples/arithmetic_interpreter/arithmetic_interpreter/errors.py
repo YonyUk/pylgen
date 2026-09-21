@@ -3,20 +3,20 @@ from pylgen.common.types import RuntimeError
 
 class DivisionByZeroError(RuntimeError):
 
-    def __init__(self, stack_trace: List[str], line: int, column: int, source_line_interval_start: int, source_line_interval_end: int) -> None:
-        super().__init__(stack_trace, line, column, source_line_interval_start, source_line_interval_end ,'division by zero not allowed')
+    def __init__(self, stack_trace: List[str], start_line: int, start_column: int, end_line: int, end_column: int) -> None:
+        super().__init__(stack_trace, start_line, start_column, end_line, end_column, 'division by zero not allowed')
 
 class ModuleByZeroError(RuntimeError):
 
-    def __init__(self, stack_trace: List[str], line: int, column: int, source_line_interval_start: int, source_line_interval_end: int) -> None:
-        super().__init__(stack_trace, line, column, source_line_interval_start, source_line_interval_end,'module by zero not allowed')
+    def __init__(self, stack_trace: List[str], start_line: int, start_column: int, end_line: int, end_column: int) -> None:
+        super().__init__(stack_trace, start_line, start_column, end_line, end_column, 'module by zero not allowed')
 
 class ModuleByNotIntegerError(RuntimeError):
 
-    def __init__(self, stack_trace: List[str], line: int, column: int, source_line_interval_start: int, source_line_interval_end: int) -> None:
-        super().__init__(stack_trace, line, column, source_line_interval_start, source_line_interval_end ,'module by a not-integer not allowed')
+    def __init__(self, stack_trace: List[str], start_line: int, start_column: int, end_line: int, end_column: int) -> None:
+        super().__init__(stack_trace, start_line, start_column, end_line, end_column, 'module by a not-integer not allowed')
 
 class ModuleWithComplexNumberError(RuntimeError):
 
-    def __init__(self, stack_trace: List[str], line: int, column: int, source_line_interval_start: int, source_line_interval_end: int) -> None:
-        super().__init__(stack_trace, line, column, source_line_interval_start, source_line_interval_end, 'module operation not supported for complex numbers')
+    def __init__(self, stack_trace: List[str], start_line: int, start_column: int, end_line: int, end_column: int) -> None:
+        super().__init__(stack_trace, start_line, start_column, end_line, end_column, 'module operation not supported for complex numbers')

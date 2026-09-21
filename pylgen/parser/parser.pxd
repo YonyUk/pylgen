@@ -6,7 +6,7 @@ cdef class ParsingException(Exception):
 
 cdef class ParseTreeNode:
     cdef Symbol _symbol
-    cdef int _line,_column
+    cdef int _start_line,_start_column,_end_line,_end_column
     cdef list[ParseTreeNode] _childrens
 
 cdef class Parser:
