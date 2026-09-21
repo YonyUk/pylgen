@@ -6,9 +6,10 @@ from .symbols import *
 
 class VariableAST(AST):
 
-    def __init__(self, name:str, line: int, column: int):
-        super().__init__(Variable, line, column)
-        self._name = name
+    def __init__(self, token:Token):
+        (sl,sc),(el,ec) = token.start_position,token.end_position
+        super().__init__(Variable,sl,sc,el,ec)
+        self._name = token.text
         self._children = []
 
     @property
@@ -20,8 +21,9 @@ class VariableAST(AST):
 
 class UnaryAST(AST):
 
-    def __init__(self, operator:Token,child:AST,symbol: Symbol, line: int, column: int):
-        super().__init__(symbol, line, column)
+    def __init__(self, operator:Token,child:AST,symbol: Symbol):
+        (sl,sc),(el,ec) = operator.start_position,child.end_position
+        super().__init__(symbol, sl,sc,el,ec)
         self._child = child
         self._operator = operator
         self._children = [child]
@@ -43,18 +45,19 @@ class UnaryAST(AST):
 
 class MinusMathExprAST(UnaryAST):
 
-    def __init__(self, operator: Token, child: AST, line: int, column: int):
-        super().__init__(operator, child, MathExpr, line, column)
+    def __init__(self, operator: Token, child: AST):
+        super().__init__(operator, child, MathExpr)
 
 class NotBoolExprAST(UnaryAST):
 
-    def __init__(self, operator: Token, child: AST, line: int, column: int):
-        super().__init__(operator, child, BoolExpr, line, column)
+    def __init__(self, operator: Token, child: AST):
+        super().__init__(operator, child, BoolExpr)
 
 class BinaryAST(AST):
 
-    def __init__(self, left:AST, right:AST, symbol: Symbol, line: int, column: int):
-        super().__init__(symbol, line, column)
+    def __init__(self, left:AST, right:AST, symbol: Symbol):
+        (sl,sc),(el,ec) = left.start_position,right.end_position
+        super().__init__(symbol, sl,sc,el,ec)
         self._left = left
         self._right = right
         self._children = [left,right]
@@ -72,8 +75,8 @@ class BinaryAST(AST):
 
 class BinaryAssignAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, symbol: Symbol, line: int, column: int):
-        super().__init__(left, right, symbol, line, column)
+    def __init__(self, left: AST, right: AST, symbol: Symbol):
+        super().__init__(left, right, symbol)
 
     @property
     def variable(self) -> VariableAST:
@@ -81,8 +84,8 @@ class BinaryAssignAST(BinaryAST):
 
 class AssignAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, assign, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, assign)
 
     @property
     def target(self) -> VariableAST:
@@ -90,139 +93,140 @@ class AssignAST(BinaryAST):
 
 class BitOrAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, bit_or, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, bit_or)
 
 class BitAndAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, bit_and, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, bit_and)
 
 class OrAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, or_op, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, or_op)
 
 class AndAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, and_op, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, and_op)
 
 class PlusAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, plus, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, plus)
 
 class MinusAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, minus, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, minus)
 
 class MulAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, mul, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, mul)
 
 class DivAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, div, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, div)
 
 class IntDivAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, int_div, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, int_div)
 
 class ModAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, mod, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, mod)
 
 class PowAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, power, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, power)
 
 class EqAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, eq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, eq)
 
 class NeqAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, neq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, neq)
 
 class LeAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, le, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, le)
 
 class GeAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, ge, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, ge)
 
 class LeqAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, leq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, leq)
 
 class GeqAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, geq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, geq)
 
 class PlusEqAST(BinaryAssignAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, plus_eq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, plus_eq)
 
 class MinusEqAST(BinaryAssignAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, minus_eq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, minus_eq)
 
 class MulEqAST(BinaryAssignAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, mul_eq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, mul_eq)
 
 class DivEqAST(BinaryAssignAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, div_eq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, div_eq)
 
 class IntDivEqAST(BinaryAssignAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, int_div_eq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, int_div_eq)
 
 class PowEqAST(BinaryAssignAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, power_eq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, power_eq)
 
 class ModEqAST(BinaryAssignAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, mod_eq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, mod_eq)
 
 class BitOrEqAST(BinaryAssignAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, bit_or_eq, line, column)    
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, bit_or_eq)    
 
 class BitAndEqAST(BinaryAssignAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, bit_and_eq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, bit_and_eq)
 
 class NumberAST(AST):
 
-    def __init__(self, value:str, value_type:type, line: int, column: int):
-        super().__init__(Number, line, column)
-        self._value = value
+    def __init__(self, token:Token, value_type:type):
+        (sl,sc),(el,ec) = token.start_position,token.end_position
+        super().__init__(Number,sl,sc,el,ec)
+        self._value = token.text
         self._value_type = value_type
         self._children = []
 
@@ -239,8 +243,8 @@ class NumberAST(AST):
 
 class FuncCallArgsAST(AST):
 
-    def __init__(self, args:List[AST], line: int, column: int):
-        super().__init__(FuncCallArgs, line, column)
+    def __init__(self, args:List[AST], start_line:int, start_column:int, end_line:int, end_column:int):
+        super().__init__(FuncCallArgs,start_line,start_column,end_line,end_column)
         self._args = args
 
     @property
@@ -252,9 +256,10 @@ class FuncCallArgsAST(AST):
 
 class FuncCallAST(AST):
 
-    def __init__(self, func_name:str, args:FuncCallArgsAST, line: int, column: int):
-        super().__init__(FuncCall, line, column)
-        self._func_name = func_name
+    def __init__(self, token:Token, args:FuncCallArgsAST):
+        (sl,sc),(el,ec) = token.start_position,args.end_position
+        super().__init__(FuncCall, sl,sc,el,ec)
+        self._func_name = token.text
         self._args = args
         self._children = [self._args]
 
@@ -271,8 +276,9 @@ class FuncCallAST(AST):
 
 class InstructionAST(AST):
 
-    def __init__(self, instruction:AST, line: int, column: int):
-        super().__init__(PythonInstruction, line, column)
+    def __init__(self, instruction:AST):
+        (sl,sc),(el,ec) = instruction.start_position,instruction.end_position
+        super().__init__(PythonInstruction,sl,sc,el,ec)
         self._instruction = instruction
         self._children = [instruction]
 
@@ -285,8 +291,8 @@ class InstructionAST(AST):
 
 class InstructionsAST(AST):
 
-    def __init__(self, instructions:List[InstructionAST], line: int, column: int):
-        super().__init__(PythonInstructions, line, column)
+    def __init__(self, instructions:List[InstructionAST], start_line:int,start_column:int,end_line:int,end_column:int):
+        super().__init__(PythonInstructions, start_line,start_column,end_line,end_column)
         self._instructions = instructions
 
     @property
@@ -298,9 +304,10 @@ class InstructionsAST(AST):
 
 class BooleanAST(AST):
 
-    def __init__(self, val:str, line: int, column: int):
-        super().__init__(Boolean, line, column)
-        self._val = val
+    def __init__(self, token:Token):
+        (sl,sc),(el,ec) = token.start_position,token.end_position
+        super().__init__(Boolean, sl,sc,el,ec)
+        self._val = token.text
         self._children = []
 
     @property
@@ -312,9 +319,10 @@ class BooleanAST(AST):
 
 class StringAST(AST):
 
-    def __init__(self, value:str, line: int, column: int):
-        super().__init__(String, line, column)
-        self._value = value
+    def __init__(self, token:Token):
+        (sl,sc),(el,ec) = token.start_position,token.end_position
+        super().__init__(String, sl,sc,el,ec)
+        self._value = token.text
         self._children = []
 
     @property
@@ -326,20 +334,22 @@ class StringAST(AST):
 
 class IfBodyAST(InstructionsAST):
 
-    def __init__(self, instructions: List[InstructionAST], line: int, column: int):
-        AST.__init__(self,IfBody,line,column)
+    def __init__(self, instructions: List[InstructionAST]):
+        (sl,sc),(el,ec) = instructions[0].start_position,instructions[-1].end_position
+        AST.__init__(self,IfBody,sl,sc,el,ec)
         self._instructions = instructions
 
 class ElseBodyAST(InstructionsAST):
 
-    def __init__(self, instructions: List[InstructionAST], line: int, column: int):
-        AST.__init__(self,ElseBody,line,column)
+    def __init__(self, instructions: List[InstructionAST]):
+        (sl,sc),(el,ec) = instructions[0].start_position,instructions[-1].end_position
+        AST.__init__(self,ElseBody,sl,sc,el,ec)
         self._instructions = instructions
 
 class IfAST(AST):
 
-    def __init__(self, condition:AST, body:IfBodyAST, line: int, column: int):
-        super().__init__(IfSmt, line, column)
+    def __init__(self, condition:AST, body:IfBodyAST, start_line: int, start_column: int, end_line:int, end_column:int):
+        super().__init__(IfSmt, start_line,start_column,end_line,end_column)
         self._condition = condition
         self._body = body
         self._children = [condition,body]
@@ -357,16 +367,17 @@ class IfAST(AST):
 
 class InnerIfAST(IfAST):
 
-    def __init__(self, condition: AST, body: IfBodyAST, line: int, column: int):
-        AST.__init__(self,InnerIfSmt,line,column)
+    def __init__(self, condition: AST, body: IfBodyAST, start_line: int, start_column: int, end_line:int, end_column:int):
+        AST.__init__(self,InnerIfSmt,start_line,start_column,end_line,end_column)
         self._condition = condition
         self._body = body
         self._children = [condition,body]
 
 class IfElifAST(AST):
 
-    def __init__(self, conditionals:List[InnerIfAST], line: int, column: int):
-        super().__init__(IfElifSmt, line, column)
+    def __init__(self, conditionals:List[InnerIfAST]):
+        (sl,sc),(el,ec) = conditionals[0].start_position,conditionals[-1].end_position
+        super().__init__(IfElifSmt,sl,sc,el,ec)
         self._conditionals = conditionals
 
     @property
@@ -378,8 +389,8 @@ class IfElifAST(AST):
 
 class IfElseAST(AST):
 
-    def __init__(self, condition:AST, ifbody:IfBodyAST, elsebody:ElseBodyAST, line: int, column: int):
-        super().__init__(IfElseSmt, line, column)
+    def __init__(self, condition:AST, ifbody:IfBodyAST, elsebody:ElseBodyAST,start_line:int,start_column:int,end_line:int,end_column:int):
+        super().__init__(IfElseSmt,start_line,start_column,end_line,end_column)
         self._condition = condition
         self._if_body = ifbody
         self._else_body = elsebody
@@ -402,8 +413,9 @@ class IfElseAST(AST):
 
 class IfElifElseAST(IfElifAST):
 
-    def __init__(self, conditionals: List[InnerIfAST],elsebody:ElseBodyAST, line: int, column: int):
-        AST.__init__(self,IfElifElseSmt,line,column)
+    def __init__(self, conditionals: List[InnerIfAST],elsebody:ElseBodyAST):
+        (sl,sc),(el,ec) = conditionals[0].start_position,elsebody.end_position
+        AST.__init__(self,IfElifElseSmt,sl,sc,el,ec)
         self._conditionals = conditionals
         self._else_body = elsebody
         self._children = []
@@ -419,14 +431,15 @@ class IfElifElseAST(IfElifAST):
 
 class WhileBodyAST(InstructionsAST):
 
-    def __init__(self, instructions: List[InstructionAST], line: int, column: int):
-        AST.__init__(self,WhileBody,line,column)
+    def __init__(self, instructions: List[InstructionAST]):
+        (sl,sc),(el,ec) = instructions[0].start_position,instructions[-1].end_position
+        AST.__init__(self,WhileBody,sl,sc,el,ec)
         self._instructions = instructions
 
 class WhileAST(AST):
 
-    def __init__(self, condition:AST, instructions:WhileBodyAST, line: int, column: int):
-        super().__init__(WhileSmt, line, column)
+    def __init__(self, condition:AST, instructions:WhileBodyAST, start_line:int,start_column:int,end_line:int,end_column:int):
+        super().__init__(WhileSmt,start_line,start_column,end_line,end_column)
         self._condition = condition
         self._instructions = instructions
         self._children = [condition,instructions]
@@ -444,14 +457,15 @@ class WhileAST(AST):
 
 class FuncBodyAST(InstructionsAST):
 
-    def __init__(self, instructions: List[InstructionAST], line: int, column: int):
-        AST.__init__(self,FuncBody,line,column)
+    def __init__(self, instructions: List[InstructionAST]):
+        (sl,sc),(el,ec) = instructions[0].start_position,instructions[-1].end_position
+        AST.__init__(self,FuncBody,sl,sc,el,ec)
         self._instructions = instructions
 
 class FuncArgsAST(AST):
 
-    def __init__(self, args:List[VariableAST], line: int, column: int):
-        super().__init__(FuncArgs, line, column)
+    def __init__(self, args:List[VariableAST],start_line:int,start_column:int,end_line:int,end_column:int):
+        super().__init__(FuncArgs, start_line,start_column,end_line,end_column)
         self._args = args
 
     @property
@@ -463,8 +477,8 @@ class FuncArgsAST(AST):
 
 class FuncDefAST(AST):
 
-    def __init__(self, func_name:str,args:FuncArgsAST,body:FuncBodyAST, line: int, column: int):
-        super().__init__(FuncDef, line, column)
+    def __init__(self, func_name:str,args:FuncArgsAST,body:FuncBodyAST, start_line: int, start_column: int, end_line:int, end_column:int):
+        super().__init__(FuncDef, start_line,start_column,end_line,end_column)
         self._func_name = func_name
         self._body = body
         self._children = [args,body]
@@ -487,8 +501,9 @@ class FuncDefAST(AST):
 
 class VoidReturnAST(AST):
 
-    def __init__(self, line: int, column: int):
-        super().__init__(VoidReturnSmt, line, column)
+    def __init__(self, token:Token):
+        (sl,sc),(el,ec) = token.start_position,token.end_position
+        super().__init__(VoidReturnSmt, sl,sc,el,ec)
         self._children = []
 
     def children(self) -> List[AST]:
@@ -496,8 +511,9 @@ class VoidReturnAST(AST):
 
 class ReturnAST(VoidReturnAST):
 
-    def __init__(self, instruction:AST, line: int, column: int):
-        AST.__init__(self,ReturnSmt,line,column)
+    def __init__(self, token:Token,instruction:AST):
+        (sl,sc),(el,ec) = token.start_position,instruction.end_position
+        AST.__init__(self,ReturnSmt,sl,sc,el,ec)
         self._instruction = instruction
         self._children = [instruction]
 
@@ -510,8 +526,9 @@ class ReturnAST(VoidReturnAST):
 
 class BreakAST(AST):
 
-    def __init__(self, line: int, column: int):
-        super().__init__(break_keyword, line, column)
+    def __init__(self, token:Token):
+        (sl,sc),(el,ec) = token.start_position,token.end_position
+        super().__init__(break_keyword, sl,sc,el,ec)
         self._children = []
 
     def children(self) -> List[AST]:
@@ -519,8 +536,9 @@ class BreakAST(AST):
 
 class ContinueAST(AST):
 
-    def __init__(self, line: int, column: int):
-        super().__init__(continue_keyword, line, column)
+    def __init__(self, token:Token):
+        (sl,sc),(el,ec) = token.start_position,token.end_position
+        super().__init__(continue_keyword, sl,sc,el,ec)
         self._children = []
 
     def children(self) -> List[AST]:

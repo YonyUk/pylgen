@@ -2,8 +2,7 @@ from typing import Any, List, Set, Tuple
 from enum import StrEnum
 
 from pylgen.analysis import Context
-from pylgen.analysis.error import RuntimeError
-from pylgen.common.types import AST
+from pylgen.common.types import AST,RuntimeError
 
 import sys
 

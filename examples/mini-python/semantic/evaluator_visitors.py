@@ -1,6 +1,4 @@
-from pylgen.analysis import ASTVisitor,ASTWalker
-from pylgen.analysis.context import Context
-from pylgen.common.types import AST
+from pylgen.analysis import ASTVisitor
 
 from grammar.asts import *
 from grammar.asts import BinaryAST
@@ -26,7 +24,9 @@ class MinusMathExprASTEvaluatorVisitor(ASTVisitor):
         self._check_context_type(context)
         val = context.pop_val()
         if type(val) != int and type(val) != float and type(val) != complex:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'-',type(val)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'-',type(val))
+            context.add_runtime_error(ast,error)
         else:
             context.push_val(-val)
 
@@ -62,12 +62,14 @@ class PlusEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
             if self._left_type == str and self._right_type != str or self._right_type == str and self._left_type != str:
-                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,ast.line,ast.column,plus.symbol,self._left_type,self._right_type) # type: ignore
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,sl,sc,el,ec,plus.symbol,self._left_type,self._right_type) # type: ignore
                 context.add_runtime_error(ast,error)
             else:
                 context.assign_var(ast.variable.name,self._left_value + self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'+',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'+',type(None)))
 
 class MinusEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -75,12 +77,14 @@ class MinusEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
             if self._left_type == str or self._right_type == str:
-                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,minus.symbol,str)
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,minus.symbol,str)
                 context.add_runtime_error(ast,error)
             else:
                 context.assign_var(ast.variable.name,self._left_value - self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'-',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'-',type(None)))
 
 class MulEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -88,12 +92,14 @@ class MulEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
             if self._left_type == str and self._right_type == str:
-                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,ast.line,ast.column,mul.symbol,self._left_type,self._right_type) # type: ignore
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,sl,sc,el,ec,mul.symbol,self._left_type,self._right_type) # type: ignore
                 context.add_runtime_error(ast,error)
             else:
                 context.assign_var(ast.variable.name,self._left_value * self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'*',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'*',type(None)))
 
 class DivEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -101,14 +107,17 @@ class DivEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
             if self._right_value == 0:
-                context.add_runtime_error(ast,DivizionByZeroRuntimeError(context.stack_trace,ast.line,ast.column))
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                context.add_runtime_error(ast,DivizionByZeroRuntimeError(context.stack_trace,sl,sc,el,ec))
             elif self._left_type == str or self._right_type == str:
-                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,div.symbol,str)
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,div.symbol,str)
                 context.add_runtime_error(ast,error)
             else:
                 context.assign_var(ast.variable.name,self._left_value / self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'/',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'/',type(None)))
 
 class IntDivEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -116,14 +125,17 @@ class IntDivEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
             if self._right_value == 0:
-                context.add_runtime_error(ast,DivizionByZeroRuntimeError(context.stack_trace,ast.line,ast.column))
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                context.add_runtime_error(ast,DivizionByZeroRuntimeError(context.stack_trace,sl,sc,el,ec))
             elif self._left_type == str or self._right_type == str:
-                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,int_div.symbol,str)
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,int_div.symbol,str)
                 context.add_runtime_error(ast,error)
             else:
                 context.assign_var(ast.variable.name,self._left_value // self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'//',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'//',type(None)))
 
 class ModEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -131,16 +143,20 @@ class ModEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
                 if self._right_value == 0:
-                    context.add_runtime_error(ast,DivizionByZeroRuntimeError(context.stack_trace,ast.line,ast.column))
+                    (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                    context.add_runtime_error(ast,DivizionByZeroRuntimeError(context.stack_trace,sl,sc,el,ec))
                 elif self._left_type == complex or self._right_type == complex:
-                    context.add_runtime_error(ast,ModuleWithComplexRuntimeError(context.stack_trace,ast.line,ast.column))
+                    (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                    context.add_runtime_error(ast,ModuleWithComplexRuntimeError(context.stack_trace,sl,sc,el,ec))
                 elif self._left_type == str or self._right_type == str:
-                    error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,mod.symbol,str)
+                    (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                    error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,mod.symbol,str)
                     context.add_runtime_error(ast,error)
                 else:
                     context.assign_var(ast.variable.name,self._left_value % self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'%',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'%',type(None)))
 
 class PowEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -148,12 +164,14 @@ class PowEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
             if self._left_type == str or self._right_type == str:
-                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,power.symbol,str)
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,power.symbol,str)
                 context.add_runtime_error(ast,error)
             else:
                 context.assign_var(ast.variable.name,self._left_value ** self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'**',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'**',type(None)))
 
 class BitOrEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -162,7 +180,8 @@ class BitOrEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         if not (self._left_value is None or self._right_value is None):
             context.assign_var(ast.variable.name,self._left_value | self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'|',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'|',type(None)))
 
 class BitAndEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -171,7 +190,8 @@ class BitAndEqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         if not (self._left_value is None or self._right_value is None):
             context.assign_var(ast.variable.name,self._left_value & self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'&',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'&',type(None)))
 
 class EqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -193,12 +213,14 @@ class LeASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
             has_error = self._left_type == str and (self._right_type == bool or self._right_type == int or self._right_type == float or self._right_type == complex)
             has_error |= self._right_type == str and (self._left_type == bool or self._left_type == int or self._left_type == float or self._left_type == complex)
             if has_error:
-                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,ast.line,ast.column,le.symbol,self._left_type,self._right_type) # type: ignore
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,sl,sc,el,ec,le.symbol,self._left_type,self._right_type) # type: ignore
                 context.add_runtime_error(ast,error)
             else:
                 context.push_val(self._left_value < self._right_value) # type: ignore
         else:
-            error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,le.symbol,type(None))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,le.symbol,type(None))
             context.add_runtime_error(ast,error)
 
 class LeqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
@@ -209,12 +231,14 @@ class LeqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
             has_error = self._left_type == str and (self._right_type == bool or self._right_type == int or self._right_type == float or self._right_type == complex)
             has_error |= self._right_type == str and (self._left_type == bool or self._left_type == int or self._left_type == float or self._left_type == complex)
             if has_error:
-                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,ast.line,ast.column,leq.symbol,self._left_type,self._right_type) # type: ignore
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,sl,sc,el,ec,leq.symbol,self._left_type,self._right_type) # type: ignore
                 context.add_runtime_error(ast,error)
             else:
                 context.push_val(self._left_value <= self._right_value) # type: ignore
         else:
-            error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,leq.symbol,type(None))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,leq.symbol,type(None))
             context.add_runtime_error(ast,error)
 
 class GeASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
@@ -225,12 +249,14 @@ class GeASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
             has_error = self._left_type == str and (self._right_type == bool or self._right_type == int or self._right_type == float or self._right_type == complex)
             has_error |= self._right_type == str and (self._left_type == bool or self._left_type == int or self._left_type == float or self._left_type == complex)
             if has_error:
-                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,ast.line,ast.column,ge.symbol,self._left_type,self._right_type) # type: ignore
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,sl,sc,el,ec,ge.symbol,self._left_type,self._right_type) # type: ignore
                 context.add_runtime_error(ast,error)
             else:
                 context.push_val(self._left_value > self._right_value) # type: ignore
         else:
-            error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,ge.symbol,type(None))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,ge.symbol,type(None))
             context.add_runtime_error(ast,error)
 
 class GeqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
@@ -241,12 +267,14 @@ class GeqASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
             has_error = self._left_type == str and (self._right_type == bool or self._right_type == int or self._right_type == float or self._right_type == complex)
             has_error |= self._right_type == str and (self._left_type == bool or self._left_type == int or self._left_type == float or self._left_type == complex)
             if has_error:
-                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,ast.line,ast.column,geq.symbol,self._left_type,self._right_type) # type: ignore
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,sl,sc,el,ec,geq.symbol,self._left_type,self._right_type) # type: ignore
                 context.add_runtime_error(ast,error)
             else:
                 context.push_val(self._left_value >= self._right_value) # type: ignore
         else:
-            error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,geq.symbol,type(None))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,geq.symbol,type(None))
             context.add_runtime_error(ast,error)
 
 class AssignASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
@@ -263,12 +291,14 @@ class PlusASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast,context)
         if not (self._left_value is None or self._right_value is None):
             if self._left_type == str and self._right_type != str or self._right_type == str and self._left_type != str:
-                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,ast.line,ast.column,plus.symbol,self._left_type,self._right_type) # type: ignore
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,sl,sc,el,ec,plus.symbol,self._left_type,self._right_type) # type: ignore
                 context.add_runtime_error(ast,error)
             else:
                 context.push_val(self._left_value + self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'+',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'+',type(None)))
 
 class MinusASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -276,12 +306,14 @@ class MinusASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
             if self._left_type == str or self._right_type == str:
-                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,minus.symbol,str)
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,minus.symbol,str)
                 context.add_runtime_error(ast,error)
             else:
                 context.push_val(self._left_value - self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'-',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'-',type(None)))
 
 class MulASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -289,12 +321,14 @@ class MulASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
             if self._left_type == str and self._right_type == str:
-                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,ast.line,ast.column,mul.symbol,self._left_type,self._right_type) # type: ignore
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypesRuntimeError(context.stack_trace,sl,sc,el,ec,mul.symbol,self._left_type,self._right_type) # type: ignore
                 context.add_runtime_error(ast,error)
             else:
                 context.push_val(self._left_value * self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'*',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'*',type(None)))
 
 class DivASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -302,14 +336,17 @@ class DivASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
             if self._right_value == 0:
-                context.add_runtime_error(ast,DivizionByZeroRuntimeError(context.stack_trace,ast.line,ast.column))
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                context.add_runtime_error(ast,DivizionByZeroRuntimeError(context.stack_trace,sl,sc,el,ec))
             elif self._left_type == str or self._right_type == str:
-                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,div.symbol,str)
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,div.symbol,str)
                 context.add_runtime_error(ast,error)
             else:
                 context.push_val(self._left_value / self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'/',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'/',type(None)))
 
 class IntDivASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -317,14 +354,17 @@ class IntDivASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
             if self._right_value == 0:
-                context.add_runtime_error(ast,DivizionByZeroRuntimeError(context.stack_trace,ast.line,ast.column))
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                context.add_runtime_error(ast,DivizionByZeroRuntimeError(context.stack_trace,sl,sc,el,ec))
             elif self._left_type == str or self._right_type == str:
-                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,int_div.symbol,str)
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,int_div.symbol,str)
                 context.add_runtime_error(ast,error)
             else:
                 context.push_val(self._left_value // self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'//',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'//',type(None)))
 
 class ModASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -332,16 +372,20 @@ class ModASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
                 if self._right_value == 0:
-                    context.add_runtime_error(ast,DivizionByZeroRuntimeError(context.stack_trace,ast.line,ast.column))
+                    (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                    context.add_runtime_error(ast,DivizionByZeroRuntimeError(context.stack_trace,sl,sc,el,ec))
                 elif self._left_type == complex or self._right_type == complex:
-                    context.add_runtime_error(ast,ModuleWithComplexRuntimeError(context.stack_trace,ast.line,ast.column))
+                    (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                    context.add_runtime_error(ast,ModuleWithComplexRuntimeError(context.stack_trace,sl,sc,el,ec))
                 elif self._left_type == str or self._right_type == str:
-                    error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,mod.symbol,str)
+                    (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                    error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,mod.symbol,str)
                     context.add_runtime_error(ast,error)
                 else:
                     context.push_val(self._left_value % self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'%',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'%',type(None)))
 
 class PowASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -349,12 +393,14 @@ class PowASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         super().visit(ast, context)
         if not (self._left_value is None or self._right_value is None):
             if self._left_type == str or self._right_type == str:
-                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,power.symbol,str)
+                (sl,sc),(el,ec) = ast.start_position,ast.end_position
+                error = OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,power.symbol,str)
                 context.add_runtime_error(ast,error)
             else:
                 context.push_val(self._left_value ** self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'**',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'**',type(None)))
 
 class OrASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -363,7 +409,8 @@ class OrASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         if not (self._left_value is None or self._right_value is None):
             context.push_val(self._left_value or self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'|',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'or',type(None)))
 
 class AndASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -372,7 +419,8 @@ class AndASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         if not (self._left_value is None or self._right_value is None):
             context.push_val(self._left_value and self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'&',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'and',type(None)))
 
 class BitOrASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -381,7 +429,8 @@ class BitOrASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         if not (self._left_value is None or self._right_value is None):
             context.push_val(self._left_value | self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'|',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'|',type(None)))
 
 class BitAndASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
@@ -390,7 +439,8 @@ class BitAndASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
         if not (self._left_value is None or self._right_value is None):
             context.push_val(self._left_value & self._right_value)
         else:
-            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,ast.line,ast.column,'&',type(None)))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_runtime_error(ast,OperationNotSupportedForTypeRuntimeError(context.stack_trace,sl,sc,el,ec,'&',type(None)))
 
 class NumberASTEvaluatorVisitor(ASTVisitor):
 

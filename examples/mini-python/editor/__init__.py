@@ -11,8 +11,10 @@ from datetime import datetime
 
 from pylgen.lexer import Lexer
 from pylgen.parser import Parser
-from pylgen.analysis import Context,ASTWalker,ErrorType,Error
-from pylgen.visual import draw_ast,draw_parse_tree_from_parser,set_cache_file
+from pylgen.analysis import Context,ASTWalker
+from pylgen.common.types import Error
+from pylgen.common.enums import ErrorType
+from pylgen.visual import draw_ast,draw_parse_tree,set_cache_file
 
 class TerminalOutputBridge:
 
@@ -160,12 +162,13 @@ class PythonEditor(Editor):
         terminal_font = font.Font(family='Consolas',size=12,weight='normal')
         self.terminal = tk.Text(lower,state=tk.DISABLED,font=terminal_font)
         sys.stdout = TerminalOutputBridge(self.terminal)
+        sys.stderr = TerminalOutputBridge(self.terminal)
         self._input_queue = Queue()
         sys.stdin = TerminalInputBridge(self._input_queue,self,self._input_callback,self._editor_set_writable_callback)
         self.terminal.configure(bg='black',fg='white',insertbackground='white',state=tk.DISABLED)
         self.terminal.pack(expand=True,fill=tk.BOTH)
 
-        self.content.tag_config("error",background='red',foreground='black') # type: ignore
+        self.content.tag_config("error_loc",underline=True,underlinefg='red') # type: ignore
         self._input_start = '1.0'
         self._waiting_input = False
         self._cache_option = False
@@ -176,19 +179,18 @@ class PythonEditor(Editor):
 
     def _clear_error_highlights(self):
         try:
-            self.content.tag_remove("error",1.0,tk.END) # type: ignore
+            self.content.tag_remove("error_loc",1.0,tk.END) # type: ignore
         except Exception:
             pass
 
     def _highlight_error(self,error:Error):
-        line = error.line
-        column = error.column
-        err_index = f'{line}.{column}'
-        start_idx = f'{line}.0'
-        end_idx = f'{line}.end'
-        self.content.tag_add("error",start_idx,end_idx) # type: ignore
-        self.content.mark_set(tk.INSERT,err_index) # type: ignore
-        self.content.see(err_index) # type: ignore
+        start_line,start_column = error.start_position
+        end_line,end_column = error.end_position
+        loc_start_idx = f'{start_line}.{start_column - 1}'
+        loc_end_idx = f'{end_line}.{end_column - 1}'
+        self.content.tag_add("error_loc",loc_start_idx,loc_end_idx) # type: ignore
+        self.content.mark_set(tk.INSERT,loc_start_idx) # type: ignore
+        self.content.see(loc_start_idx) # type: ignore
         self.content.focus_set()
 
     def _input_callback(self,prompt):
@@ -312,7 +314,7 @@ class PythonEditor(Editor):
             self._parser.set_draw_parse_tree_flag(False)
 
         def get_name(text):
-            draw_parse_tree_from_parser(self._parser,filename=text,show=True,cache=self._cache_option)
+            draw_parse_tree(self._parser.parse_tree,filename=text,show=True,cache=self._cache_option)
             self._parser.set_draw_parse_tree_flag(False)
 
         popup = Popup(self,'Filename?',get_name,_on_cancel)
@@ -366,51 +368,56 @@ class PythonEditor(Editor):
         if code.strip() == '':
             self.btn_run.after(0,unlock_btns)
             return
-        
-        t = datetime.now()
-        self._lexer.load_text(code)
-        ast = self._parser.parse(self._lexer.tokens)
-        errors = list(self._lexer.errors) + self._parser.errors
-        no_sintax_errors = list(filter(lambda error:error.type != ErrorType.SEMANTIC,errors))
-        if no_sintax_errors:
-            self.terminal.after(0,make_normal)
-            for error in no_sintax_errors:
-                self.terminal.after(0,insert,f'{error}\n')
-                self.after(0,self._highlight_error,error)
-            self.terminal.after(0,see)
-            self.terminal.after(0,make_disabled)
-            self.btn_run.after(0,unlock_btns)
-            return
-        self._collector.walk(ast)
-        self._checker.walk(ast)
-        errors.extend(self._context.errors)
-        if errors:
-            self.terminal.after(0,make_normal)
-            for error in errors:
-                self.terminal.after(0,insert,f'{error}\n')
-                self.after(0,self._highlight_error,error)
-            self.terminal.after(0,see)
-            self.terminal.after(0,make_disabled)
-            self.btn_run.after(0,unlock_btns)
-            return
 
-        self._evaluator.walk(ast)
-        errors.extend(self._context.errors)
-        if errors:
+        try:
+            t = datetime.now()
+            self._lexer.load_text(code)
+            ast = self._parser.parse(self._lexer.tokens)
+            errors = list(self._lexer.errors) + self._parser.errors
+            if self._parser.syntax_errors or self._lexer.errors:
+                self.terminal.after(0,make_normal)
+                for error in errors:
+                    self.terminal.after(0,insert,f'{error}\n')
+                    self.after(0,self._highlight_error,error)
+                self.terminal.after(0,see)
+                self.terminal.after(0,make_disabled)
+                self.btn_run.after(0,unlock_btns)
+                return
+            self._collector.walk(ast)
+            self._checker.walk(ast)
+            errors.extend(self._context.errors)
+            if errors:
+                self.terminal.after(0,make_normal)
+                for error in errors:
+                    self.terminal.after(0,insert,f'{error}\n')
+                    self.after(0,self._highlight_error,error)
+                self.terminal.after(0,see)
+                self.terminal.after(0,make_disabled)
+                self.btn_run.after(0,unlock_btns)
+                return
+
+            self._evaluator.walk(ast)
+            errors.extend(self._context.errors)
+            if errors:
+                self.terminal.after(0,make_normal)
+                for error in errors:
+                    self.terminal.after(0,insert,f'{error}\n')
+                    self.after(0,self._highlight_error,error)
+                self.terminal.after(0,see)
+                self.terminal.after(0,make_disabled)
+                self.btn_run.after(0,unlock_btns)
+                return
+
             self.terminal.after(0,make_normal)
-            for error in errors:
-                self.terminal.after(0,insert,f'{error}\n')
-                self.after(0,self._highlight_error,error)
+            val = self._context.last_instruction_result # type: ignore
+            if not val is None:
+                self.terminal.after(0,insert,f'{val}\n')
+            self.terminal.after(0,insert,f'\nexecution time: {datetime.now() - t}')
             self.terminal.after(0,see)
             self.terminal.after(0,make_disabled)
-            self.btn_run.after(0,unlock_btns)
-            return
-
-        self.terminal.after(0,make_normal)
-        val = self._context.last_instruction_result # type: ignore
-        if not val is None:
-            self.terminal.after(0,insert,f'{val}\n')
-        self.terminal.after(0,insert,f'\nexecution time: {datetime.now() - t}')
-        self.terminal.after(0,see)
-        self.terminal.after(0,make_disabled)
-        self.btn_run.after(0,unlock_btns)
+            self.after(0,unlock_btns)
+        except Exception as ex:
+            sys.stdout.write(f'{ex}')
+            self.terminal.after(0,see)
+            self.terminal.after(0,make_disabled)
+            self.after(0,unlock_btns)

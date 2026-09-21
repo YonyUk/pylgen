@@ -90,8 +90,8 @@ class EvalPostOrder(PostOrder):
                     self._stack.append((False,body))
                     self._function_has_returned.append(False)
                     for i in range(len(variant)):
-                        context.define_var(variant[i])
-                        context.assign_var(variant[i],call_args[i])
+                        context.define_var(variant[len(variant) - 1 - i])
+                        context.assign_var(variant[len(variant) - 1 - i],call_args[i])
 
     def current(self, context: PythonContext) -> AST: # type: ignore
         if context.get_runtime_errors():
