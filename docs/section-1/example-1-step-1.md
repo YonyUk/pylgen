@@ -123,17 +123,17 @@ Putting it all together, here is the complete `lexer.py` module:
 
 File: `lexer.py`
 ```python
-from pylgen.lexer.lexer import Lexer
-from pylgen.common.types import Symbol
 from pylgen.common.enums import TokenType
+from pylgen.common.types import Symbol
+from pylgen.lexer.lexer import Lexer
 from pylgen.analysis.lexical import LexicalRule
-from .grammar_symbols import END_SYMBOL
 from .grammar_symbols import (
     END_SYMBOL,
     number,
     variable
 )
 
+# Enumeration of token types of our language
 class TokenTypeEnum(TokenType):
     NUMBER = 'NUMBER'
     SYMBOL = 'SYMBOL'
@@ -145,7 +145,7 @@ class NumberLexicalRule(LexicalRule):
 
     def __init__(self) -> None:
         super().__init__('number must be 0 or star with a non-zero digit')
-    
+
     def _check(self, text: str):
         if '.' in text:
             return str(float(text)) == text
@@ -155,7 +155,7 @@ class VariableLexicalRule(LexicalRule):
 
     def __init__(self) -> None:
         super().__init__('variables names can\'t star with a number')
-    
+
     def _check(self, text: str):
         return not text[0].isdigit()
 
@@ -172,6 +172,7 @@ def get_symbol_function(t:TokenTypeEnum,tx:str) -> Symbol:
 
 lexer = Lexer(get_symbol_function,'\n|\t| ')
 lexer.set_eof_token(END_SYMBOL,TokenTypeEnum.SYMBOL)
+
 lexer[0,TokenTypeEnum.NUMBER] = '\\d+(\\.\\d+)?'
 lexer[1,TokenTypeEnum.SYMBOL] = '\\(|\\)'
 lexer[2,TokenTypeEnum.OPERATOR] = '\\+|\\*\\*?|\\-|/|%|='

@@ -15,7 +15,7 @@ while True:
     context.clear_garbage()
     parser.reset()
     lexer.clear_errors()
-    
+
     text = input('>>> ')
     if text.strip() == '':
         continue
@@ -186,8 +186,8 @@ Let's trace through a few examples.
 `5` - The errors are printed:
 
 ```bash
-LEXICAL ERROR at line 1, column 1: number must be 0 or star with a non-zero digit
-SYNTAX ERROR at line 1, column 7: Unexpected symbol ")"; expected {number, variable, (}
+LEXICAL ERROR at line 1: number must be 0 or star with a non-zero digit
+SYNTAX ERROR at line 1: Unexpected symbol ")"; expected {number, variable, (}
 ```
 
 ### Semantic error
@@ -204,7 +204,7 @@ SYNTAX ERROR at line 1, column 7: Unexpected symbol ")"; expected {number, varia
 
 `4` - Evaluation is skipped.
 
-`5` - The error message is printed: `SEMANTIC ERROR at line 1, column 1: undeclared variable "y"`.
+`5` - The error message is printed: `SEMANTIC ERROR at line 1: undeclared variable "y"`.
 
 ### Runtime error
 
@@ -218,7 +218,7 @@ SYNTAX ERROR at line 1, column 7: Unexpected symbol ")"; expected {number, varia
 
 `3` - Evaluation is detects a division by zero.
 
-`4` - The error message is printed: `RUNTIME ERROR: division by zero not allowed at line 1, column 4`
+`4` - The error message is printed: `RUNTIME ERROR at line 1: division by zero not allowed`
 
 ## Why this design?
 

@@ -64,8 +64,7 @@ File `asts.py`
 ```python
 from typing import List
 
-from pylgen.common.types import AST,Symbol,ErrorAST
-from pylgen.analysis.error import SemanticError
+from pylgen.common.types import AST,Symbol,ErrorAST,SemanticError, Token
 from .grammar_symbols import (
     clear,
     plus,
@@ -79,91 +78,101 @@ from .grammar_symbols import (
     exit
 )
 
-# used later
 div_error = Symbol('Division SemanticError')
 mod_error = Symbol('Module SemanticError')
 
 class BinaryAST(AST):
 
-    def __init__(self, left:AST,right:AST,symbol: Symbol, line: int, column: int):
-        super().__init__(symbol, line, column)
+    def __init__(self, left:AST,right:AST,symbol: Symbol):
+        (sl,sc),(el,ec) = left.start_position,right.end_position
+        super().__init__(symbol,sl,sc,el,ec)
         self._left:AST = left
         self._right:AST = right
 
     @property
     def left(self) -> AST:
         return self._left # type:ignore
-    
+
     @property
     def right(self) -> AST:
         return self._right # type: ignore
-    
+
     def children(self) -> List[AST]:
         return [self._left,self._right]
 ```
+
+!!! note "Inherited positions"
+    Note that `BinaryAST` derives its full range from its children: it starts where the left operand begins and ends where the right one ends. This keeps position information consistent without requiring each reducer to calculate it manually.
 
 Now we can create a dedicated node for each binary operation, simply forwarding the operands and the corresponding symbol:
 
 ```python
 class PlusAST(BinaryAST):
 
-    def __init__(self, left:AST,right:AST, line: int, column: int):
-        super().__init__(left,right,plus, line, column)
+    def __init__(self, left:AST,right:AST):
+        super().__init__(left,right,plus)
 
 class MinusAST(BinaryAST):
-    
-    def __init__(self, left:AST,right:AST, line: int, column: int):
-        super().__init__(left,right,minus, line, column)
+
+    def __init__(self, left:AST,right:AST):
+        super().__init__(left,right,minus)
 
 class ModAST(BinaryAST):
 
-    def __init__(self, left:AST,right:AST, line: int, column: int):
-        super().__init__(left,right,mod, line, column)
+    def __init__(self, left:AST,right:AST):
+        super().__init__(left,right,mod)
 
 class ModuleByZeroErrorAST(ErrorAST):
-    def __init__(self, line: int, column: int, left: AST, right: AST):
-        errors = {SemanticError('module by zero not allowed', line, column)}
-        super().__init__(mod_error, line, column, errors)
+
+    def __init__(self,left:AST,right:AST):
+        (sl,sc),(el,ec) = left.start_position,right.end_position
+        errors = {SemanticError('module by zero not allowed',sl,sc,el,ec)}
+        super().__init__(mod_error,sl,sc,el,ec,errors)
         self._left = left
         self._right = right
 
     def children(self) -> List[AST]:
-        return [self._left, self._right]
+        return [self._left,self._right]
 
 class ModuleByNotIntegerErrorAST(ErrorAST):
-    def __init__(self, line: int, column: int, left: AST, right: AST):
-        errors = {SemanticError('module by a non-integer not allowed', line, column)}
-        super().__init__(mod_error, line, column, errors)
+
+    def __init__(self,left:AST,right:AST):
+        (sl,sc),(el,ec) = left.start_position,right.end_position 
+        errors = {SemanticError('module by a non-integer not allowed',sl,sc,el,ec)}
+        super().__init__(mod_error,sl,sc,el,ec,errors)
         self._left = left
         self._right = right
 
     def children(self) -> List[AST]:
-        return [self._left, self._right]
+        return [self._left,self._right]
 
-class DivisionByZeroErrorAST(ErrorAST):
-    def __init__(self, line: int, column: int, left: AST, right: AST):
-        errors = {SemanticError('division by zero not allowed', line, column)}
-        super().__init__(div_error, line, column, errors)
-        self._left = left
-        self._right = right
-
-    def children(self) -> List[AST]:
-        return [self._left, self._right]
 
 class MulAST(BinaryAST):
 
-    def __init__(self, left:AST,right:AST, line: int, column: int):
-        super().__init__(left,right,mul, line, column)
+    def __init__(self, left:AST,right:AST):
+        super().__init__(left,right,mul)
 
 class DivAST(BinaryAST):
 
-    def __init__(self, left:AST,right:AST, line: int, column: int):
-        super().__init__(left,right,div, line, column)
+    def __init__(self, left:AST,right:AST):
+        super().__init__(left,right,div)
+
+class DivisionByZeroErrorAST(ErrorAST):
+
+    def __init__(self,left:AST,right:AST):
+        (sl,sc),(el,ec) = left.start_position,right.end_position
+        errors = {SemanticError('division by zero not allowed',sl,sc,el,ec)}
+        super().__init__(div_error,sl,sc,el,ec,errors)
+        self._left = left
+        self._right = right
+
+    def children(self) -> List[AST]:
+        return [self._left,self._right]
 
 class ExpAST(BinaryAST):
 
-    def __init__(self, left:AST,right:AST, line: int, column: int):
-        super().__init__(left,right,exp, line, column)
+    def __init__(self, left:AST,right:AST):
+        super().__init__(left,right,exp)
 ```
 
 !!! note "Why `ErrorAST`?"
@@ -187,8 +196,8 @@ For assignments, we follow the same binary structure. However, note that we over
 ```python
 class AssignmentAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, eq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, eq)
 
     def children(self) -> List[AST]:
         return [self._right]
@@ -199,30 +208,31 @@ Finally, we define leaf‑like nodes for variable references and our built‑in 
 ```python 
 class VarAST(AST):
 
-    def __init__(self,name:str,line:int,column:int):
-        super().__init__(variable,line,column)
-        self._name = name
-    
+    def __init__(self,token:Token):
+        (sl,sc),(el,ec) = token.start_position,token.end_position
+        super().__init__(variable,sl,sc,el,ec)
+        self._name = token.text
+
     @property
     def name(self) -> str:
         return self._name
-    
+
     def children(self) -> List[AST]:
         return []
 
 class ExitAST(AST):
 
-    def __init__(self,line: int, column: int):
-        super().__init__(exit, line, column)
-    
+    def __init__(self,start_line:int,start_column:int,end_line:int,end_column:int):
+        super().__init__(exit, start_line,start_column,end_line,end_column)
+
     def children(self) -> List[AST]:
         return []
 
 class ClearAST(AST):
 
-    def __init__(self, line: int, column: int):
-        super().__init__(clear, line, column)
-    
+    def __init__(self,start_line:int,start_column:int,end_line:int,end_column:int):
+        super().__init__(clear, start_line,start_column,end_line,end_column)
+
     def children(self) -> List[AST]:
         return []
 ```
@@ -233,8 +243,7 @@ File `asts.py`
 ```python
 from typing import List
 
-from pylgen.analysis.error import SemanticError
-from pylgen.common.types import AST,Symbol,ErrorAST
+from pylgen.common.types import AST,Symbol,ErrorAST,SemanticError, Token
 from .grammar_symbols import (
     clear,
     plus,
@@ -253,8 +262,9 @@ mod_error = Symbol('Module SemanticError')
 
 class BinaryAST(AST):
 
-    def __init__(self, left:AST,right:AST,symbol: Symbol, line: int, column: int):
-        super().__init__(symbol, line, column)
+    def __init__(self, left:AST,right:AST,symbol: Symbol):
+        (sl,sc),(el,ec) = left.start_position,right.end_position
+        super().__init__(symbol,sl,sc,el,ec)
         self._left:AST = left
         self._right:AST = right
 
@@ -271,24 +281,25 @@ class BinaryAST(AST):
 
 class PlusAST(BinaryAST):
 
-    def __init__(self, left:AST,right:AST, line: int, column: int):
-        super().__init__(left,right,plus, line, column)
+    def __init__(self, left:AST,right:AST):
+        super().__init__(left,right,plus)
 
 class MinusAST(BinaryAST):
 
-    def __init__(self, left:AST,right:AST, line: int, column: int):
-        super().__init__(left,right,minus, line, column)
+    def __init__(self, left:AST,right:AST):
+        super().__init__(left,right,minus)
 
 class ModAST(BinaryAST):
 
-    def __init__(self, left:AST,right:AST, line: int, column: int):
-        super().__init__(left,right,mod, line, column)
+    def __init__(self, left:AST,right:AST):
+        super().__init__(left,right,mod)
 
 class ModuleByZeroErrorAST(ErrorAST):
 
-    def __init__(self, line: int, column: int,left:AST,right:AST):
-        errors = {SemanticError('module by zero not allowed',line,column)}
-        super().__init__(mod_error, line, column, errors)
+    def __init__(self,left:AST,right:AST):
+        (sl,sc),(el,ec) = left.start_position,right.end_position
+        errors = {SemanticError('module by zero not allowed',sl,sc,el,ec)}
+        super().__init__(mod_error,sl,sc,el,ec,errors)
         self._left = left
         self._right = right
 
@@ -297,9 +308,10 @@ class ModuleByZeroErrorAST(ErrorAST):
 
 class ModuleByNotIntegerErrorAST(ErrorAST):
 
-    def __init__(self, line: int, column: int,left:AST,right:AST):
-        errors = {SemanticError('module by a non-integer not allowed',line,column)}
-        super().__init__(mod_error, line, column, errors)
+    def __init__(self,left:AST,right:AST):
+        (sl,sc),(el,ec) = left.start_position,right.end_position 
+        errors = {SemanticError('module by a non-integer not allowed',sl,sc,el,ec)}
+        super().__init__(mod_error,sl,sc,el,ec,errors)
         self._left = left
         self._right = right
 
@@ -309,19 +321,20 @@ class ModuleByNotIntegerErrorAST(ErrorAST):
 
 class MulAST(BinaryAST):
 
-    def __init__(self, left:AST,right:AST, line: int, column: int):
-        super().__init__(left,right,mul, line, column)
+    def __init__(self, left:AST,right:AST):
+        super().__init__(left,right,mul)
 
 class DivAST(BinaryAST):
 
-    def __init__(self, left:AST,right:AST, line: int, column: int):
-        super().__init__(left,right,div, line, column)
+    def __init__(self, left:AST,right:AST):
+        super().__init__(left,right,div)
 
 class DivisionByZeroErrorAST(ErrorAST):
 
-    def __init__(self,line: int, column: int,left:AST,right:AST):
-        errors = {SemanticError('division by zero not allowed',line,column)}
-        super().__init__(div_error, line, column, errors)
+    def __init__(self,left:AST,right:AST):
+        (sl,sc),(el,ec) = left.start_position,right.end_position
+        errors = {SemanticError('division by zero not allowed',sl,sc,el,ec)}
+        super().__init__(div_error,sl,sc,el,ec,errors)
         self._left = left
         self._right = right
 
@@ -330,22 +343,23 @@ class DivisionByZeroErrorAST(ErrorAST):
 
 class ExpAST(BinaryAST):
 
-    def __init__(self, left:AST,right:AST, line: int, column: int):
-        super().__init__(left,right,exp, line, column)
+    def __init__(self, left:AST,right:AST):
+        super().__init__(left,right,exp)
 
 class AssignmentAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, eq, line, column)
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, eq)
 
     def children(self) -> List[AST]:
         return [self._right]
 
 class VarAST(AST):
 
-    def __init__(self,name:str,line:int,column:int):
-        super().__init__(variable,line,column)
-        self._name = name
+    def __init__(self,token:Token):
+        (sl,sc),(el,ec) = token.start_position,token.end_position
+        super().__init__(variable,sl,sc,el,ec)
+        self._name = token.text
 
     @property
     def name(self) -> str:
@@ -356,16 +370,16 @@ class VarAST(AST):
 
 class ExitAST(AST):
 
-    def __init__(self,line: int, column: int):
-        super().__init__(exit, line, column)
+    def __init__(self,start_line:int,start_column:int,end_line:int,end_column:int):
+        super().__init__(exit, start_line,start_column,end_line,end_column)
 
     def children(self) -> List[AST]:
         return []
 
 class ClearAST(AST):
 
-    def __init__(self, line: int, column: int):
-        super().__init__(clear, line, column)
+    def __init__(self,start_line:int,start_column:int,end_line:int,end_column:int):
+        super().__init__(clear, start_line,start_column,end_line,end_column)
 
     def children(self) -> List[AST]:
         return []
@@ -382,7 +396,6 @@ We'll use PyLGEN's [`AttributedGrammar`](../api/grammar/grammar.md#attributedgra
 Let's start by importing everything we need and creating the grammar object.
 
 ```python
-from pylgen.parser.parser import BottomUpParser
 from pylgen.parser.parser_builder import ParserBuilder
 from pylgen.parser.parser_type import ParserType
 from pylgen.grammar.grammar import AttributedGrammar
@@ -408,7 +421,6 @@ from .grammar_symbols import (
     exit,
     clear
 )
-# Reductors – we will define them in the next step; for now we just import them
 from .reductors import (
     binary_reductor,
     single_reductor,
@@ -498,7 +510,6 @@ With the grammar defined and the parser built, we're almost ready to start evalu
 
 File: `grammar.py`
 ```python
-from pylgen.parser.parser import BottomUpParser
 from pylgen.parser.parser_builder import ParserBuilder
 from pylgen.parser.parser_type import ParserType
 from pylgen.grammar.grammar import AttributedGrammar
@@ -533,32 +544,33 @@ from .reductors import (
     clear_reductor
 )
 
-G = AttributedGrammar(ArithmeticExpression,END_SYMBOL)
+# Create the attributed grammar with the start symbol and end marker
+G = AttributedGrammar(ArithmeticExpression, END_SYMBOL)
 
-G[ArithmeticExpression] += (E,),single_reductor
-G[ArithmeticExpression] += (VAR,eq,E),binary_reductor
-G[ArithmeticExpression] += (exit,lp,rp),exit_reductor
-G[ArithmeticExpression] += (clear,lp,rp),clear_reductor
+G[ArithmeticExpression] += (E,), single_reductor
+G[ArithmeticExpression] += (VAR, eq, E), binary_reductor
+G[ArithmeticExpression] += (exit, lp, rp), exit_reductor
+G[ArithmeticExpression] += (clear, lp, rp), clear_reductor
 
-G[E] += (E,plus,T),binary_reductor
-G[E] += (E,minus,T),binary_reductor
-G[E] += (T,),single_reductor
+G[E] += (E, plus, T), binary_reductor
+G[E] += (E, minus, T), binary_reductor
+G[E] += (T,), single_reductor
 
-G[T] += (T,mul,F),binary_reductor
-G[T] += (T,div,F),binary_reductor
-G[T] += (T,mod,F),binary_reductor
-G[T] += (F,),single_reductor
+G[T] += (T, mul, F), binary_reductor
+G[T] += (T, div, F), binary_reductor
+G[T] += (T, mod, F), binary_reductor
+G[T] += (F,), single_reductor
 
-G[F] += (F,exp,P),binary_reductor
-G[F] += (P,),single_reductor
+G[F] += (F, exp, P), binary_reductor
+G[F] += (P,), single_reductor
 
-G[P] += (lp,E,rp),parenthesis_reductor
-G[P] += (number,),single_reductor
-G[P] += (VAR,),single_reductor
+G[P] += (lp, E, rp), parenthesis_reductor
+G[P] += (number,), single_reductor
+G[P] += (VAR,), single_reductor
 
-G[VAR] += (variable,),variable_reductor
+G[VAR] += (variable,), variable_reductor
 
-parser = ParserBuilder.build_parser_from_attributed(G,ParserType.LALR1)
+parser = ParserBuilder.build_parser_from_attributed(G, ParserType.LALR1)
 ```
 
 ## Connecting the Dots (The reductors)
@@ -578,7 +590,9 @@ from .grammar_symbols import (
     div,
     exp,
     mod,
-    eq
+    eq,
+    variable,
+    number
 )
 from .asts import (
     ClearAST,
@@ -599,7 +613,7 @@ from .asts import (
 
 > ### The Binary Reductor
 
-The `binary_reductor` handles all binary operations: addition, subtraction, multiplication, division, exponentiation, modulo, and assignment. It inspects the symbol of the middle child (`asts[1]`), which is the operator token, to determine which AST class to instantiate. It then constructs the new node using the left child (`asts[0]`), the right child (`asts[2]`), and the operator's position information.
+The `binary_reductor` handles all binary operations: addition, subtraction, multiplication, division, exponentiation, modulo, and assignment. It inspects the symbol of the middle child (`asts[1]`), which is the operator token, to determine which AST class to instantiate. It then constructs the new node using the left child (`asts[0]`), the right child (`asts[2]`).
 
 ```python
 # ...
@@ -614,7 +628,7 @@ def binary_reductor(asts:ASTListView) -> AST:
     elif asts[1].symbol == div:
         right = asts[2]
         if isinstance(right,Token) and float(right.text) == 0:
-            return DivisionByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
+            return DivisionByZeroErrorAST(asts[0],asts[2])
         ast_type = DivAST
     elif asts[1].symbol == exp:
         ast_type = ExpAST
@@ -622,15 +636,15 @@ def binary_reductor(asts:ASTListView) -> AST:
         right = asts[2]
         if isinstance(right,Token):
             if float(right.text) == 0:
-                return ModuleByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
+                return ModuleByZeroErrorAST(asts[0],asts[2])
             if '.' in right.text:
-                return ModuleByNotIntegerErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
+                return ModuleByNotIntegerErrorAST(asts[0],asts[2])
         ast_type = ModAST
     elif asts[1].symbol == eq:
         ast_type = AssignmentAST
     else:
         raise ValueError()
-    return ast_type(asts[0],asts[2],asts[1].line,asts[1].column)
+    return ast_type(asts[0],asts[2])
 ```
 
 > ### The Single Reductor
@@ -648,8 +662,13 @@ When the parser encounters `( E )`, this reductor extracts the inner expression 
 
 ```python
 def parenthesis_reductor(asts:ASTListView) -> AST:
+    asts[1].start_position = asts[0].start_position
+    asts[1].end_position = asts[2].end_position
     return asts[1]
 ```
+
+!!! tip "Details on `parenthesis_reductor`"
+    Since the internal AST (`asts[1]`) already has its own position information (that of the number or variable), we now extend its range to include the enclosing parentheses. This way, if an error regarding that subexpression is reported later, the message will correctly point to the span from `(` to `)`.
 
 > ### The Variable Reductor
 
@@ -657,7 +676,7 @@ This reductor creates a `VarAST` node from the raw token's text and its position
 
 ```python
 def variable_reductor(asts:ASTListView) -> AST:
-    return VarAST(asts[0].text,asts[0].line,asts[0].column) # type: ignore
+    return VarAST(asts[0]) # type: ignore
 ```
 
 > ### Command Reductors
@@ -666,18 +685,21 @@ Finally, we have two reductors for our built‑in commands: `exit()` and `clear(
 
 ```python
 def exit_reductor(asts:ASTListView) -> AST:
-    return ExitAST(asts[0].line,asts[0].column)
+    (sl,sc),(el,ec) = asts[0].start_position,asts[2].end_position
+    return ExitAST(sl,sc,el,ec)
 
 def clear_reductor(asts:ASTListView) -> AST:
-    return ClearAST(asts[0].line,asts[0].column)
+    (sl,sc),(el,ec) = asts[0].start_position,asts[2].end_position
+    return ClearAST(sl,sc,el,ec)
 ```
+
+!!! note "Command reducers"
+    Both `exit_reductor` and `clear_reductor` construct the range from the initial token (`exit` / `clear`) and the closing parenthesis (`asts[2]`). In this way, the node covers exactly `exit()` or `clear()` as a whole.
 
 > ### Putting It All Together
 
 File: `reductors.py`
 ```python
-from typing import List
-
 from pylgen.common.types import AST,ASTListView,Token
 from .grammar_symbols import (
     minus,
@@ -686,7 +708,9 @@ from .grammar_symbols import (
     div,
     exp,
     mod,
-    eq
+    eq,
+    variable,
+    number
 )
 from .asts import (
     ClearAST,
@@ -715,7 +739,7 @@ def binary_reductor(asts:ASTListView) -> AST:
     elif asts[1].symbol == div:
         right = asts[2]
         if isinstance(right,Token) and float(right.text) == 0:
-            return DivisionByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
+            return DivisionByZeroErrorAST(asts[0],asts[2])
         ast_type = DivAST
     elif asts[1].symbol == exp:
         ast_type = ExpAST
@@ -723,28 +747,32 @@ def binary_reductor(asts:ASTListView) -> AST:
         right = asts[2]
         if isinstance(right,Token):
             if float(right.text) == 0:
-                return ModuleByZeroErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
+                return ModuleByZeroErrorAST(asts[0],asts[2])
             if '.' in right.text:
-                return ModuleByNotIntegerErrorAST(asts[1].line,asts[1].column,asts[0],asts[2])
+                return ModuleByNotIntegerErrorAST(asts[0],asts[2])
         ast_type = ModAST
     elif asts[1].symbol == eq:
         ast_type = AssignmentAST
     else:
         raise ValueError()
-    return ast_type(asts[0],asts[2],asts[1].line,asts[1].column)
+    return ast_type(asts[0],asts[2])
 
 def single_reductor(asts:ASTListView) -> AST:
     return asts[0]
 
 def parenthesis_reductor(asts:ASTListView) -> AST:
+    asts[1].start_position = asts[0].start_position
+    asts[1].end_position = asts[2].end_position
     return asts[1]
 
 def variable_reductor(asts:ASTListView) -> AST:
-    return VarAST(asts[0].text,asts[0].line,asts[0].column) # type: ignore
+    return VarAST(asts[0]) # type: ignore
 
 def exit_reductor(asts:ASTListView) -> AST:
-    return ExitAST(asts[0].line,asts[0].column)
+    (sl,sc),(el,ec) = asts[0].start_position,asts[2].end_position
+    return ExitAST(sl,sc,el,ec)
 
 def clear_reductor(asts:ASTListView) -> AST:
-    return ClearAST(asts[0].line,asts[0].column)
+    (sl,sc),(el,ec) = asts[0].start_position,asts[2].end_position
+    return ClearAST(sl,sc,el,ec)
 ```
