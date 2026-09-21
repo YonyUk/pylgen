@@ -1,4 +1,3 @@
-from pylgen.parser.parser import BottomUpParser
 from pylgen.parser.parser_builder import ParserBuilder
 from pylgen.parser.parser_type import ParserType
 from pylgen.grammar.grammar import AttributedGrammar
