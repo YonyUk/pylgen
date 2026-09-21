@@ -11,8 +11,8 @@ from .grammar_symbols import (
 
 class ConfigsAST(AST):
 
-    def __init__(self, line: int, column: int):
-        super().__init__(Config, line, column)
+    def __init__(self, start_line: int, start_column: int, end_line:int, end_column:int):
+        super().__init__(Config, start_line, start_column,end_line,end_column)
         self._configs = []
 
     def children(self) -> List[AST]:
@@ -20,8 +20,8 @@ class ConfigsAST(AST):
 
 class ConfigSequenceAST(AST):
 
-    def __init__(self, line: int, column: int):
-        super().__init__(ConfigSequence, line, column)
+    def __init__(self, start_line: int, start_column: int, end_line:int, end_column:int):
+        super().__init__(ConfigSequence, start_line,start_column,end_line,end_column)
         self._configs = []
 
     def children(self) -> List[AST]:
@@ -29,8 +29,8 @@ class ConfigSequenceAST(AST):
 
 class ConfigSectionAST(AST):
 
-    def __init__(self, section_name:str,line: int, column: int):
-        super().__init__(Section, line, column)
+    def __init__(self, section_name:str,start_line: int, start_column: int, end_line:int, end_column:int):
+        super().__init__(Section, start_line,start_column,end_line,end_column)
         self._name = section_name
         self._configs = []
 
@@ -43,14 +43,14 @@ class ConfigSectionAST(AST):
 
 class SectionConfigSequenceAST(AST):
 
-    def __init__(self, line: int, column: int):
-        super().__init__(ConfigSequence, line, column)
+    def __init__(self, start_line: int, start_column: int, end_line:int, end_column:int):
+        super().__init__(ConfigSequence, start_line,start_column,end_line,end_column)
         self._configs = []
 
 class AtomConfigAST(AST):
 
-    def __init__(self, name:str,value:str | float | bool,line: int, column: int):
-        super().__init__(ConfigAtom, line, column)
+    def __init__(self, name:str,value:str | float | bool,start_line: int, start_column: int, end_line:int, end_column:int):
+        super().__init__(ConfigAtom, start_line,start_column,end_line,end_column)
         self._name = name
         self._value = value
 
