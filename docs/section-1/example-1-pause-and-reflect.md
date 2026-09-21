@@ -12,7 +12,7 @@ File: `main.py`
 ```python
 from arithmetic_interpreter.grammar import parser
 from arithmetic_interpreter.lexer import lexer
-from pylgen.visual import draw_ast,draw_parse_tree_from_parser
+from pylgen.visual import draw_ast,draw_parse_tree
 
 
 text = '(1 + 3)*9 - 5%3'
@@ -30,7 +30,7 @@ ast = parser.parse(lexer.tokens)
 draw_ast(ast,show=True)
 
 # Generate an interactive HTML visualization of the full parse tree
-draw_parse_tree_from_parser(parser,show=True)
+draw_parse_tree(parser.parse_tree,show=True)
 ```
 
 > ### What's happening under the hood?
