@@ -111,6 +111,9 @@ The hash is calculated once in the constructor and stored in a private `_hash` f
 | **`is_error` (property)** | `bool` | Indicates whether this node represents a semantic error. Always `False` for `AST`; overridden in `ErrorAST` | 
 | `children()` (method) | `List[AST]` | Returns a list of child AST nodes. Must be overridden. |
 
+!!! note
+    Both, `start_position` and `end_position` are 1-indexed, this means that index 1 points to 0 real index in a list.
+
 !!! warning "Validation"
     The constructor of AST raises a `ValueError` if `start_line` or `start_column` are negative, if `end_line < start_line`, or if `end_line == start_line` and `end_column <= start_column`. The setters for `start_position` and `end_position` perform similar checks.
 
@@ -147,6 +150,59 @@ The hash is calculated once in the constructor and stored in a private `_hash` f
 
 !!! tip "Best Practice"
     Always declare attributes as cdef with concrete types whenever possible. This speeds up access and assignment in reducers and visitors.
+
+## Error Hierarchy
+
+A robust error handling system is essential for any language implementation. PyLGEN provides a unified, hierarchical error model that spans all phases of the compilation pipeline, from lexing to runtime execution. Every error carries precise location information (start and end position) and a descriptive message, making it easy to report problems directly to the user.
+
+The hierarchy is built around a common base class `Error`, with specialized subclasses for each stage of processing. All errors are collected in the `Context` (semantic and runtime) or in the lexer/parser themselves (lexical and syntax), allowing you to aggregate and report multiple issues in a single pass.
+
+> ### `ErrorType` (Enumeration)
+
+The `ErrorType` enum (`pylgen.common.enums`) categorises errors by their origin:
+
+```python
+from enum import StrEnum
+
+class ErrorType(StrEnum):
+    LEXICAL = 'LEXICAL'
+    SYNTAX = 'SYNTAX'
+    SEMANTIC = 'SEMANTIC'
+    RUNTIME = 'RUNTIME'
+```
+
+These values are used internally to tag each error and to format user‑friendly messages.
+
+> ### The `Error` Base Class
+
+`Error` is the abstract base class for all compile‑time errors (lexical, syntax, semantic) and also for runtime errors. It provides the common attributes and formatting logic.
+
+| **Attribute/Property** | **Type** | **Description** |
+| :---: | :---: | :---: |
+| **`start_position` (property)** | `Tuple[int, int]` | `(start_line, start_column)` where the error starts. |
+| **`end_position` (property)** | `Tuple[int, int]` | `(end_line, end_column)` where the error ends. |
+| **`type`** | `ErrorType` | The category of the error. |
+| **`message`** | `str` | A human‑readable error message, formatted as `"{type} ERROR at line {line}: {msg}"`. |
+
+The constructor accepts the error type (either a member of `ErrorType` or a string that matches one of its values), the `start_line`/`start_column` number, the `end_line`/`end_column` number, and a custom message. If a string is given, it is internally converted to the corresponding `ErrorType` member; otherwise, a `TypeError` or `ValueError` is raised.
+
+!!! note "Hash Consistency"
+    Like `Symbol`, `Error` objects compute a deterministic 64‑bit hash based on a SHA‑256 digest of the string `f'{type_}-{start_line}-{start_column}-{end_line}-{end_column}-{msg}'`. This hash is stable across runs and is used for `set`/`dictionary` lookups (e.g., when collecting unique errors).
+
+> ### Concrete Error Classes
+
+| **Class** | **Description** |
+| :---: | :---: |
+| <span style="white-space: nowrap">**`LexicalError`**</span> | Raised during lexing when a token does not match any pattern or fails a lexical rule (e.g., malformed number, invalid character). |
+| <span style="white-space: nowrap">**`SyntaxError`**</span> | Raised during parsing when the token stream does not conform to the grammar (e.g., unexpected token, missing semicolon). |
+| <span style="white-space: nowrap">**`SemanticError`**</span> | Raised during semantic analysis for violations that cannot be detected by the grammar (e.g., undeclared variable, type mismatch, duplicate definition). |
+| <span style="white-space: nowrap">**`RuntimeError`**</span> | Raised during evaluation or execution of the AST (e.g., division by zero, invalid operation, out‑of‑bounds access). Unlike the other errors, it includes a stack trace to help debug the execution context. |
+
+All of these classes inherit directly from `Error` and simply forward their arguments to the base class constructor, providing a consistent interface.
+
+> ### Runtime Errors and Stack Traces
+
+`RuntimeError` adds a `stack_trace` property, which is a list of strings representing the call stack at the point where the error occurred. This is particularly useful for debugging interpreted languages, as it allows you to trace back through nested function calls or expression evaluations. The stack trace is maintained by the `Context` (via `push_trace` and `pop_trace`) and can be passed to the error when it is raised.
 
 ## `ErrorAST` (Handling Semantic Errors during Syntactic Analysis)
 
