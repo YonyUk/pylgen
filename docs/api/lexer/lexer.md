@@ -152,7 +152,7 @@ Parameters are the same as for `Lexer`.
 
 `Lexer` integrates with the [`analysis.lexical`](../analysis/analysis.md) module, which defines the [`LexicalRule`](../analysis/analysis.md#lexical-rules) abstract class. A lexical rule is a validation check that operates on a token's text. For example, you might have a rule that ensures a number does not have leading zeros, or that an identifier does not start with a digit.
 
-When a rule fails, it returns a [`LexicalError`](../analysis/analysis.md#concrete-error-classes) object that is added to the lexer's errors set. The tokenization process does not stop on errors; it continues to collect all errors, allowing you to report them all at once.
+When a rule fails, it returns a [`LexicalError`](../common/common.md#concrete-error-classes) object that is added to the lexer's errors set. The tokenization process does not stop on errors; it continues to collect all errors, allowing you to report them all at once.
 
 ## Building the Combined DFA
 
