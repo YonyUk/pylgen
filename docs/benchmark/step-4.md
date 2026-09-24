@@ -216,7 +216,7 @@ In batch mode, it's crucial to report errors with enough context to fix them. Th
 For example:
 
 ```bash
-RUNTIME ERROR: Division by zero not allowed at line 11, column 25
+RUNTIME ERROR: Division by zero not allowed at line 11
 ```
 
 This is much more useful than a cryptic traceback.

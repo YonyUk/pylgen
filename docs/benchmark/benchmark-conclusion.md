@@ -1,6 +1,6 @@
 # PyLGEN vs Lark Benchmark: ~2x Faster Parsing and 4x Less Memory (Performance Analysis)
 
-After building a complete, production-ready interpreter for VecLang, we arrive at the moment of the truth: **how fast is it, and how does it compare to a popular alternative like Lark?** This is not a casual micro-benchmark; it is a rigorous, real-world test on a **2-million-line, 40 MB source file** that exercises every stage of the interpreter pipeline.
+After building a complete interpreter for VecLang, we arrive at the moment of the truth: **how fast is it, and how does it compare to a popular alternative like Lark?** This is not a casual micro-benchmark; it is a rigorous, real-world test on a **2-million-line, 40 MB source file** that exercises every stage of the interpreter pipeline.
 
 This analysis is structured to be **objective, reproducible, and transparent**. We present the data, dissect the results, and address potential objections. The goal is to give you the full picture (speed, correctness, representativeness, and trade-offs), so you can make an informed decision.
 
@@ -159,32 +159,32 @@ You can explore the raw data here:
 
 | **Metric** | **Lark** + `lark_cython` | **PyLGEN** | **Speedup** |
 | :---: | :---: | :---: | :---: |
-| **Minimum Parsing Time** | 115.87 s | 59.85 s | - |
-| **Maximum Parsing Time** | 117.34 s | 61.65 s | – |
-| **Mean Parsing Time** | 116.73 s | 60.80 s | ~1.92x |
+| **Minimum Parsing Time** | 115.87 s | 59.65 s | - |
+| **Maximum Parsing Time** | 117.34 s | 63.25 s | – |
+| **Mean Parsing Time** | 116.73 s | 61.62 s | ~1.89x |
 | **AST Construction** | Separate pass | Integrated | **N/A** |
-| **Peak Memory Usage** | ~4 GB | ~928 MB | – |
+| **Peak Memory Usage** | ~4 GB | ~968 MB | – |
 
-**Interpretation**: Lark's parsing alone takes **over 116 seconds** on average. PyLGEN's parsing, which **includes AST construction** and **semantic errors collecting** via reductors, takes **about 60.8 seconds**, a **~1.92x speedup**. If we added a separate AST transformation pass to Lark (which is necessary in practice), the gap would widen further. Moreover, PyLGEN uses **~4x less memory**, a critical advantage for large-scale processing.
+**Interpretation**: Lark's parsing alone takes **over 116 seconds** on average. PyLGEN's parsing, which **includes AST construction** and **semantic errors collecting** via reductors, takes **about 61.62 seconds**, a **~1.89x speedup**. If we added a separate AST transformation pass to Lark (which is necessary in practice), the gap would widen further. Moreover, PyLGEN uses **~4x less memory**, a critical advantage for large-scale processing.
 
 > ### 2. PyLGEN Full Pipeline Breakdown
 
 | **Phase** | **Time** |
 | :---: | :---: |
-| **Source Parsing (incl. AST)** | 60.80 s |
-| **Functions Collection** | 0.11 s |
-| **Semantic Error Collection** | 1.47 s |
-| **Evaluation** | 3.65 s |
-| **Total (per-file)** | **66.03 s** |
+| **Source Parsing (incl. AST)** | 61.62 s |
+| **Functions Collection** | 0.96 s |
+| **Semantic Error Collection** | 1.37 s |
+| **Evaluation** | 3.57 s |
+| **Total (per-file)** | **67.52 s** |
 
-**Interpretation**: The parser is the dominant phase (~92% of total time). Semantic checks and evaluation add a combined ~5.2 seconds. This is a remarkably low overhead for a full interpreter, it proves that the visitor pattern, when implemented in Cython, is extremely efficient.
+**Interpretation**: The parser is the dominant phase (~92% of total time). Semantic checks and evaluation add a combined ~5.9 seconds. This is a remarkably low overhead for a full interpreter, it proves that the visitor pattern, when implemented in Cython, is extremely efficient.
 
 > ### 3. Scaling to 4M Lines
 
 | **Metric** | **Lark + `lark_cython`** | **PyLGEN** | **Speedup** |
 | :---: | :---: | :---: | :---: |
-| **Parsing Time** | 335.42 s | 122.67 s | ~2.73x |
-| **PyLGEN Full Pipeline** | – | 122.67+2.00+2.81+7.09 = 134.57 s | – |
+| **Parsing Time** | 335.42 s | 122.67 s | ~2.69x |
+| **PyLGEN Full Pipeline** | – | 124.68+1.96+2.72+7.43 = 136.79 s | – |
 | **Peak Memory Usage (PyLGEN)** | not measured | ~2 GB | – |
 
 !!! note
@@ -196,7 +196,7 @@ The speedup increases with file size, indicating that PyLGEN's integrated approa
 
 #### Analysis of Scaling Behaviour
 
-The scaling test reveals an interesting trend: the speedup of PyLGEN over Lark + `lark_cython` increases from **~1.92x** (2M lines) to **~2.73x** (4M lines). While part of this can be attributed to PyLGEN's more efficient parsing algorithm and integrated AST construction, **memory constraints likely played a significant role**.
+The scaling test reveals an interesting trend: the speedup of PyLGEN over Lark + `lark_cython` increases from **~1.89x** (2M lines) to **~2.69x** (4M lines). While part of this can be attributed to PyLGEN's more efficient parsing algorithm and integrated AST construction, **memory constraints likely played a significant role**.
 
 The benchmark hardware had only **8 GB of RAM**. For the 2M‑line file (≈40 MB), Lark's peak memory usage was already **~4 GB** (as measured by Scalene). When the input size doubled to 4M lines (≈78 MB), Lark's memory footprint likely exceeded the available physical RAM, forcing the operating system to use **swap space**. This results in:
 
@@ -215,12 +215,12 @@ This observation underscores that **performance is not just about CPU speed; mem
 The implementation, for the final block, produces the output:
 ```bash
 [15 16 17 18 19]
-[1.00000000e+00+0.j 4.50000000e+00+0.j 2.00000000e+00+3.j 1.09951163e+11+0.j]
-[2.00000000e-01+0.j 9.00000000e-01+0.j 4.00000000e-01+0.j 2.19902325e+10+0.j]
+[1.00e+00+0.j 4.50e+00+0.j 2.00e+00+3.j 1.59e+04+0.j]
+[2.00e-01+0.j  9.00e-01+0.j  4.00e-01+0.6j 3.18e+03+0.j ]
 [4 5 6 7 8 9]
-(109951162685.1+3j)
+(15907.5+3j)
 6.5
-(2.4178516348312124e+21+2.400000000000004j)
+(50562003.25+2.4000000000000004j)
 ```
 
 This confirms that both the parser and evaluator are semantically correct, the benchmark is not just a speed test, but a functional test.
@@ -310,7 +310,7 @@ The semantic and evaluator visitors are `cdef` classes with typed attributes. Ea
 
 > ### 4. Memory Efficiency
 
-Lark's parse tree retains the entire CST before transformation, consuming more memory and causing more cache misses. **Scalene** confirmed that PyLGEN's peak memory was **~928 MB**, while Lark's was **~4 GB**, a significant difference.
+Lark's parse tree retains the entire CST before transformation, consuming more memory and causing more cache misses. **Scalene** confirmed that PyLGEN's peak memory was **~968 MB**, while Lark's was **~4 GB**, a significant difference.
 
 ## Addressing Potential Objections
 
@@ -330,11 +330,11 @@ We acknowledge that Lark is a parser, not an interpreter. The comparison highlig
 
 The benchmark results are clear and robust:
 
- - **PyLGEN's parser is ~1.92x faster** than Lark with `lark_cython` on a 2-million-line, 40 MB input, and **~2.7x** faster on the 4M‑line, 78 MB input; a statistically significant, reproducible speedup.
- - **PyLGEN's full interpreter** (including AST construction, semantic checks, and evaluation) runs in ~66 seconds, an impressive feat for a full pipeline on such a large file.
+ - **PyLGEN's parser is ~1.89x faster** than Lark with `lark_cython` on a 2-million-line, 40 MB input, and **~2.69x** faster on the 4M‑line, 78 MB input; a statistically significant, reproducible speedup.
+ - **PyLGEN's full interpreter** (including AST construction, semantic checks, and evaluation) runs in ~67.52 seconds, an impressive feat for a full pipeline on such a large file.
  - **Correctness is verified**: current implementation produce identical outputs, confirming that the benchmark is not just a speed test but a functional test of the entire system.
  - **The speedup is attributable to fundamental architectural advantages**: Cython compilation, integrated AST construction; not just superficial tweaks.
- - **Memory usage is significantly lower**: PyLGEN uses **~928 MB** peak vs. Lark's **~4 GB**, making it more suitable for memory-constrained environments.
+ - **Memory usage is significantly lower**: PyLGEN uses **~968 MB** peak vs. Lark's **~4 GB**, making it more suitable for memory-constrained environments.
 
 > ### Final Thought
 
@@ -604,4 +604,101 @@ parser = Lark(GRAMMAR,parser='lalr',lexer='contextual',_plugins=lark_rust.plugin
 t = datetime.now()
 tree = parser.parse(text)
 print('parsed in',datetime.now() - t)
+```
+
+## Appendix B: `main.py` used for time measuring
+
+```python
+import os
+from sys import argv
+
+from veclang.lexer import build_lexer
+from veclang.parser import build_parser
+from veclang.visitors import build_walkers,get_ast_value
+
+from datetime import datetime
+
+def get_fragment(text:str,start:tuple[int,int],end:tuple[int,int]) -> str:
+
+    result = ''
+    reading = False
+    lines = text.splitlines()
+    for index,line in enumerate(lines):
+        if index == start[0] - 1:
+            if start[0] == end[0]:
+                return line[start[1] - 1:end[1] - 1]
+            result += line[start[1] - 1:]
+            reading = True
+        elif reading:
+            result += line
+        elif index == end[0] - 1:
+            result += line[:end[1] - 1]
+            return result
+
+    return ''
+
+t = datetime.now()
+lexer = build_lexer()
+print('lexer builded in',datetime.now() - t)
+t = datetime.now()
+lexer.initialize()
+print('lexer initialized in',datetime.now() - t)
+t = datetime.now()
+VecLangParser = build_parser()
+print('parser builded in',datetime.now() - t)
+context,error_collector,functions_collector,evaluator = build_walkers()
+
+if len(argv) < 2:
+    raise ValueError('not input provided')
+
+file = argv[1]
+
+if not (os.path.exists(file) or os.path.isfile(file)):
+    raise ValueError('Invalid argument')
+
+help_flag = False
+if len(argv) >= 3 and argv[2] == '--help':
+    from pylgen.visual import set_cache_file,draw_ast
+    help_flag = True
+    set_cache_file('cache')
+
+with open(file,'r') as f:
+    text = f.read()
+    lexer.load_text(text)
+    t = datetime.now()
+    ast = VecLangParser.parse(lexer.tokens)
+    print('source parsed in',datetime.now() - t)
+    errors = []
+    errors += list(lexer.errors)
+    errors += VecLangParser.errors
+
+    if not errors:
+        if help_flag:
+            draw_ast(ast,show=True,cache=True,select_menu=True) # type: ignore
+        t = datetime.now()
+        functions_collector.walk(ast)
+        print('functions collected in',datetime.now() - t)
+
+    if not errors:
+        t = datetime.now()
+        error_collector.walk(ast)
+        print('errors collected in',datetime.now() - t)
+
+    errors += context.errors
+
+    if not errors:
+        t = datetime.now()
+        evaluator.walk(ast)
+        print('code evaluated in',datetime.now() - t)
+        errors += context.errors
+
+    if not errors:
+        result = get_ast_value(ast,context)
+        if result is not None:
+            print(result)
+
+    if errors:
+        for error in errors:
+            print(error)
+            print('\tloc:',get_fragment(text,error.start_position,error.end_position))
 ```

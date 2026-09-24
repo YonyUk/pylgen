@@ -422,17 +422,17 @@ pre[class*="language-"] {
 
     <script>
       const profile = {
-    "alloc_samples": 116,
+    "alloc_samples": 120,
     "args": [
         ".\\main.py",
-        ".\\main.vcl"
+        ".\\benchmark.vcl"
     ],
     "async_profile": true,
     "combined_stacks": [],
     "combined_stacks_timeline": [],
-    "elapsed_time_sec": 151.4764792919159,
-    "entrypoint_dir": ".",
-    "filename": ".",
+    "elapsed_time_sec": 157.91834926605225,
+    "entrypoint_dir": "",
+    "filename": "",
     "files": {
         "C:\\Program Files\\Python313\\Lib\\encodings\\cp1252.py": {
             "functions": [],
@@ -1154,8 +1154,8 @@ pre[class*="language-"] {
                     "lineno": 23,
                     "memory_samples": [
                         [
-                            4849647400,
-                            87.78287506103516
+                            151083363400,
+                            88.2497205734253
                         ]
                     ],
                     "n_async_await_percent": 0.0,
@@ -1169,13 +1169,13 @@ pre[class*="language-"] {
                     "n_gpu_avg_memory_mb": 0.0,
                     "n_gpu_peak_memory_mb": 0.0,
                     "n_gpu_percent": 0,
-                    "n_growth_mb": 38.24708366394043,
-                    "n_malloc_mb": 38.24708366394043,
+                    "n_growth_mb": 38.247331619262695,
+                    "n_malloc_mb": 38.247331619262695,
                     "n_mallocs": 0,
-                    "n_peak_mb": 38.24708366394043,
-                    "n_python_fraction": 0.9999839999999999,
+                    "n_peak_mb": 38.247331619262695,
+                    "n_python_fraction": 0.9999840000000001,
                     "n_sys_percent": 0.0,
-                    "n_usage_fraction": 0.03407707620716001,
+                    "n_usage_fraction": 0.03289140870501412,
                     "start_function_line": 22,
                     "start_outermost_loop": 23,
                     "start_region_line": 22
@@ -10271,7 +10271,7 @@ pre[class*="language-"] {
             ],
             "percent_cpu_time": 0
         },
-        ".\\main.py": {
+        "\\main.py": {
             "functions": [],
             "imports": [
                 "from sys import argv",
@@ -10572,11 +10572,11 @@ pre[class*="language-"] {
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 10,
-                    "end_region_line": 10,
+                    "end_function_line": 27,
+                    "end_outermost_loop": 27,
+                    "end_region_line": 27,
                     "is_coroutine": false,
-                    "line": "lexer = build_lexer()\n",
+                    "line": "def get_fragment(text:str,start:tuple[int,int],end:tuple[int,int]) -\\u003e str:\n",
                     "lineno": 10,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -10597,25 +10597,20 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
+                    "start_function_line": 10,
                     "start_outermost_loop": 10,
                     "start_region_line": 10
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
+                    "end_function_line": 27,
                     "end_outermost_loop": 11,
-                    "end_region_line": 11,
+                    "end_region_line": 27,
                     "is_coroutine": false,
-                    "line": "VecLangParser = build_parser()\n",
+                    "line": "\n",
                     "lineno": 11,
-                    "memory_samples": [
-                        [
-                            3991748200,
-                            10.001690864562988
-                        ]
-                    ],
+                    "memory_samples": [],
                     "n_async_await_percent": 0.0,
                     "n_async_concurrency_mean": 0.0,
                     "n_async_concurrency_peak": 0.0,
@@ -10627,25 +10622,25 @@ pre[class*="language-"] {
                     "n_gpu_avg_memory_mb": 0.0,
                     "n_gpu_peak_memory_mb": 0.0,
                     "n_gpu_percent": 0,
-                    "n_growth_mb": 10.001690864562988,
-                    "n_malloc_mb": 10.001690864562988,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
                     "n_mallocs": 0,
-                    "n_peak_mb": 10.001690864562988,
-                    "n_python_fraction": 0.949234,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
-                    "n_usage_fraction": 0.00891122535738598,
-                    "start_function_line": 0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 10,
                     "start_outermost_loop": 11,
-                    "start_region_line": 11
+                    "start_region_line": 10
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
+                    "end_function_line": 27,
                     "end_outermost_loop": 12,
-                    "end_region_line": 12,
+                    "end_region_line": 27,
                     "is_coroutine": false,
-                    "line": "context,error_collector,functions_collector,evaluator = build_walkers()\n",
+                    "line": "    result = ''\n",
                     "lineno": 12,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -10666,18 +10661,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
+                    "start_function_line": 10,
                     "start_outermost_loop": 12,
-                    "start_region_line": 12
+                    "start_region_line": 10
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
+                    "end_function_line": 27,
                     "end_outermost_loop": 13,
-                    "end_region_line": 13,
+                    "end_region_line": 27,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "    reading = False\n",
                     "lineno": 13,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -10698,18 +10693,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
+                    "start_function_line": 10,
                     "start_outermost_loop": 13,
-                    "start_region_line": 13
+                    "start_region_line": 10
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 15,
-                    "end_region_line": 14,
+                    "end_function_line": 27,
+                    "end_outermost_loop": 14,
+                    "end_region_line": 27,
                     "is_coroutine": false,
-                    "line": "if len(argv) \\u003c 2:\n",
+                    "line": "    lines = text.splitlines()\n",
                     "lineno": 14,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -10730,18 +10725,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
+                    "start_function_line": 10,
                     "start_outermost_loop": 14,
-                    "start_region_line": 14
+                    "start_region_line": 10
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 15,
-                    "end_region_line": 15,
+                    "end_function_line": 27,
+                    "end_outermost_loop": 25,
+                    "end_region_line": 25,
                     "is_coroutine": false,
-                    "line": "    raise ValueError('not input provided')\n",
+                    "line": "    for index,line in enumerate(lines):\n",
                     "lineno": 15,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -10762,18 +10757,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
+                    "start_function_line": 10,
                     "start_outermost_loop": 15,
                     "start_region_line": 15
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 16,
-                    "end_region_line": 16,
+                    "end_function_line": 27,
+                    "end_outermost_loop": 25,
+                    "end_region_line": 25,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "        if index == start[0] - 1:\n",
                     "lineno": 16,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -10794,18 +10789,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
-                    "start_outermost_loop": 16,
-                    "start_region_line": 16
+                    "start_function_line": 10,
+                    "start_outermost_loop": 15,
+                    "start_region_line": 15
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 17,
-                    "end_region_line": 17,
+                    "end_function_line": 27,
+                    "end_outermost_loop": 25,
+                    "end_region_line": 25,
                     "is_coroutine": false,
-                    "line": "file = argv[1]\n",
+                    "line": "            if start[0] == end[0]:\n",
                     "lineno": 17,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -10826,18 +10821,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
-                    "start_outermost_loop": 17,
-                    "start_region_line": 17
+                    "start_function_line": 10,
+                    "start_outermost_loop": 15,
+                    "start_region_line": 15
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 18,
-                    "end_region_line": 18,
+                    "end_function_line": 27,
+                    "end_outermost_loop": 25,
+                    "end_region_line": 25,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "                return line[start[1] - 1:end[1] - 1]\n",
                     "lineno": 18,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -10858,18 +10853,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
-                    "start_outermost_loop": 18,
-                    "start_region_line": 18
+                    "start_function_line": 10,
+                    "start_outermost_loop": 15,
+                    "start_region_line": 15
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 20,
-                    "end_region_line": 19,
+                    "end_function_line": 27,
+                    "end_outermost_loop": 25,
+                    "end_region_line": 25,
                     "is_coroutine": false,
-                    "line": "if not (os.path.exists(file) or os.path.isfile(file)):\n",
+                    "line": "            result += line[start[1] - 1:]\n",
                     "lineno": 19,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -10890,18 +10885,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
-                    "start_outermost_loop": 19,
-                    "start_region_line": 19
+                    "start_function_line": 10,
+                    "start_outermost_loop": 15,
+                    "start_region_line": 15
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 20,
-                    "end_region_line": 20,
+                    "end_function_line": 27,
+                    "end_outermost_loop": 25,
+                    "end_region_line": 25,
                     "is_coroutine": false,
-                    "line": "    raise ValueError('Invalid argument')\n",
+                    "line": "            reading = True\n",
                     "lineno": 20,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -10922,18 +10917,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
-                    "start_outermost_loop": 20,
-                    "start_region_line": 20
+                    "start_function_line": 10,
+                    "start_outermost_loop": 15,
+                    "start_region_line": 15
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 21,
-                    "end_region_line": 21,
+                    "end_function_line": 27,
+                    "end_outermost_loop": 25,
+                    "end_region_line": 25,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "        elif reading:\n",
                     "lineno": 21,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -10954,18 +10949,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
-                    "start_outermost_loop": 21,
-                    "start_region_line": 21
+                    "start_function_line": 10,
+                    "start_outermost_loop": 15,
+                    "start_region_line": 15
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 22,
-                    "end_region_line": 22,
+                    "end_function_line": 27,
+                    "end_outermost_loop": 25,
+                    "end_region_line": 25,
                     "is_coroutine": false,
-                    "line": "help_flag = False\n",
+                    "line": "            result += line\n",
                     "lineno": 22,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -10986,18 +10981,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
-                    "start_outermost_loop": 22,
-                    "start_region_line": 22
+                    "start_function_line": 10,
+                    "start_outermost_loop": 15,
+                    "start_region_line": 15
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 26,
-                    "end_region_line": 23,
+                    "end_function_line": 27,
+                    "end_outermost_loop": 25,
+                    "end_region_line": 25,
                     "is_coroutine": false,
-                    "line": "if len(argv) \\u003e= 3 and argv[2] == '--help':\n",
+                    "line": "        elif index == end[0] - 1:\n",
                     "lineno": 23,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11018,18 +11013,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
-                    "start_outermost_loop": 23,
-                    "start_region_line": 23
+                    "start_function_line": 10,
+                    "start_outermost_loop": 15,
+                    "start_region_line": 15
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 24,
-                    "end_region_line": 24,
+                    "end_function_line": 27,
+                    "end_outermost_loop": 25,
+                    "end_region_line": 25,
                     "is_coroutine": false,
-                    "line": "    from pylgen.visual import set_cache_file,draw_ast\n",
+                    "line": "            result += line[:end[1] - 1]\n",
                     "lineno": 24,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11050,18 +11045,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
-                    "start_outermost_loop": 24,
-                    "start_region_line": 24
+                    "start_function_line": 10,
+                    "start_outermost_loop": 15,
+                    "start_region_line": 15
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
+                    "end_function_line": 27,
                     "end_outermost_loop": 25,
                     "end_region_line": 25,
                     "is_coroutine": false,
-                    "line": "    help_flag = True\n",
+                    "line": "            return result\n",
                     "lineno": 25,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11082,18 +11077,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
-                    "start_outermost_loop": 25,
-                    "start_region_line": 25
+                    "start_function_line": 10,
+                    "start_outermost_loop": 15,
+                    "start_region_line": 15
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
+                    "end_function_line": 27,
                     "end_outermost_loop": 26,
-                    "end_region_line": 26,
+                    "end_region_line": 27,
                     "is_coroutine": false,
-                    "line": "    set_cache_file('cache')\n",
+                    "line": "\n",
                     "lineno": 26,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11114,18 +11109,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
+                    "start_function_line": 10,
                     "start_outermost_loop": 26,
-                    "start_region_line": 26
+                    "start_region_line": 10
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
-                    "end_function_line": 0,
+                    "end_function_line": 27,
                     "end_outermost_loop": 27,
                     "end_region_line": 27,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "    return ''\n",
                     "lineno": 27,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11146,18 +11141,18 @@ pre[class*="language-"] {
                     "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
-                    "start_function_line": 0,
+                    "start_function_line": 10,
                     "start_outermost_loop": 27,
-                    "start_region_line": 27
+                    "start_region_line": 10
                 },
                 {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 65,
+                    "end_outermost_loop": 28,
                     "end_region_line": 28,
                     "is_coroutine": false,
-                    "line": "with open(file,'r') as f:\n",
+                    "line": "\n",
                     "lineno": 28,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11189,30 +11184,9 @@ pre[class*="language-"] {
                     "end_outermost_loop": 29,
                     "end_region_line": 29,
                     "is_coroutine": false,
-                    "line": "    text = f.read()\n",
+                    "line": "t = datetime.now()\n",
                     "lineno": 29,
-                    "memory_samples": [
-                        [
-                            4698940700,
-                            49.53579139709473
-                        ],
-                        [
-                            4849655700,
-                            126.02977561950684
-                        ],
-                        [
-                            4849666900,
-                            87.78476142883301
-                        ],
-                        [
-                            4849671000,
-                            124.12241744995117
-                        ],
-                        [
-                            4849674500,
-                            85.87744235992432
-                        ]
-                    ],
+                    "memory_samples": [],
                     "n_async_await_percent": 0.0,
                     "n_async_concurrency_mean": 0.0,
                     "n_async_concurrency_peak": 0.0,
@@ -11224,13 +11198,13 @@ pre[class*="language-"] {
                     "n_gpu_avg_memory_mb": 0.0,
                     "n_gpu_peak_memory_mb": 0.0,
                     "n_gpu_percent": 0,
-                    "n_growth_mb": 77.78100109100342,
-                    "n_malloc_mb": 114.11865711212158,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
                     "n_mallocs": 0,
-                    "n_peak_mb": 77.78100109100342,
-                    "n_python_fraction": 0.9803734031753083,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
-                    "n_usage_fraction": 0.10167651497923072,
+                    "n_usage_fraction": 0.0,
                     "start_function_line": 0,
                     "start_outermost_loop": 29,
                     "start_region_line": 29
@@ -11242,7 +11216,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 30,
                     "end_region_line": 30,
                     "is_coroutine": false,
-                    "line": "    t = datetime.now()\n",
+                    "line": "lexer = build_lexer()\n",
                     "lineno": 30,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11274,7 +11248,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 31,
                     "end_region_line": 31,
                     "is_coroutine": false,
-                    "line": "    lexer.load_text(text)\n",
+                    "line": "print('lexer builded in',datetime.now() - t)\n",
                     "lineno": 31,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11306,377 +11280,8 @@ pre[class*="language-"] {
                     "end_outermost_loop": 32,
                     "end_region_line": 32,
                     "is_coroutine": false,
-                    "line": "    ast = VecLangParser.parse(lexer.tokens)\n",
+                    "line": "t = datetime.now()\n",
                     "lineno": 32,
-                    "memory_samples": [
-                        [
-                            142058613500,
-                            48.13369178771973
-                        ],
-                        [
-                            142058623000,
-                            58.13370895385742
-                        ],
-                        [
-                            142058627400,
-                            68.1337194442749
-                        ],
-                        [
-                            142058631300,
-                            78.13373565673828
-                        ],
-                        [
-                            142058636100,
-                            88.13375282287598
-                        ],
-                        [
-                            142058640100,
-                            98.1337718963623
-                        ],
-                        [
-                            142058643000,
-                            108.13380241394043
-                        ],
-                        [
-                            142058647500,
-                            118.13386344909668
-                        ],
-                        [
-                            142058651000,
-                            128.13390827178955
-                        ],
-                        [
-                            142058654300,
-                            138.13392066955566
-                        ],
-                        [
-                            142058658000,
-                            148.133939743042
-                        ],
-                        [
-                            142058661200,
-                            158.13397121429443
-                        ],
-                        [
-                            142058664700,
-                            168.13399505615234
-                        ],
-                        [
-                            142058668300,
-                            178.1340217590332
-                        ],
-                        [
-                            142058671700,
-                            188.1340684890747
-                        ],
-                        [
-                            142058675400,
-                            198.13409996032715
-                        ],
-                        [
-                            142058678500,
-                            208.13410663604736
-                        ],
-                        [
-                            142058683100,
-                            218.1341209411621
-                        ],
-                        [
-                            142058686700,
-                            228.13414192199707
-                        ],
-                        [
-                            142058690100,
-                            238.1341953277588
-                        ],
-                        [
-                            142058693800,
-                            248.13423252105713
-                        ],
-                        [
-                            142058697000,
-                            258.1342430114746
-                        ],
-                        [
-                            142058700900,
-                            268.1342649459839
-                        ],
-                        [
-                            142058704300,
-                            278.1342878341675
-                        ],
-                        [
-                            142058707800,
-                            288.1343126296997
-                        ],
-                        [
-                            142058711600,
-                            298.134352684021
-                        ],
-                        [
-                            142058714900,
-                            308.134370803833
-                        ],
-                        [
-                            142058718000,
-                            318.1343822479248
-                        ],
-                        [
-                            142058722400,
-                            328.1344165802002
-                        ],
-                        [
-                            142058726300,
-                            338.1344394683838
-                        ],
-                        [
-                            142058729600,
-                            348.1344680786133
-                        ],
-                        [
-                            142058733100,
-                            358.1345157623291
-                        ],
-                        [
-                            142058736700,
-                            368.1345434188843
-                        ],
-                        [
-                            142058740500,
-                            378.1345548629761
-                        ],
-                        [
-                            142058744300,
-                            388.13459300994873
-                        ],
-                        [
-                            142058747500,
-                            398.13460540771484
-                        ],
-                        [
-                            142058750600,
-                            408.1346273422241
-                        ],
-                        [
-                            142058754000,
-                            418.1346855163574
-                        ],
-                        [
-                            142058757300,
-                            428.1347255706787
-                        ],
-                        [
-                            142058760300,
-                            438.1347484588623
-                        ],
-                        [
-                            142058763600,
-                            448.1347827911377
-                        ],
-                        [
-                            142058767100,
-                            458.1347961425781
-                        ],
-                        [
-                            142058770700,
-                            468.134804725647
-                        ],
-                        [
-                            142058774200,
-                            478.134822845459
-                        ],
-                        [
-                            142058777600,
-                            488.1348581314087
-                        ],
-                        [
-                            142058782000,
-                            498.13487243652344
-                        ],
-                        [
-                            142058785400,
-                            508.13488578796387
-                        ],
-                        [
-                            142058789000,
-                            518.1349124908447
-                        ],
-                        [
-                            142058793000,
-                            528.1349430084229
-                        ],
-                        [
-                            142058796300,
-                            538.1349573135376
-                        ],
-                        [
-                            142058800300,
-                            548.1349639892578
-                        ],
-                        [
-                            142058803400,
-                            558.1349792480469
-                        ],
-                        [
-                            142058807000,
-                            568.1350040435791
-                        ],
-                        [
-                            142058811500,
-                            578.1350107192993
-                        ],
-                        [
-                            142058815100,
-                            588.1350326538086
-                        ],
-                        [
-                            142058818100,
-                            598.1350574493408
-                        ],
-                        [
-                            142058821700,
-                            608.1350860595703
-                        ],
-                        [
-                            142058825600,
-                            618.135124206543
-                        ],
-                        [
-                            142058829300,
-                            628.1351413726807
-                        ],
-                        [
-                            142058832500,
-                            638.1351613998413
-                        ],
-                        [
-                            142058835800,
-                            648.135178565979
-                        ],
-                        [
-                            142058839600,
-                            658.1352081298828
-                        ],
-                        [
-                            142058843100,
-                            668.1352224349976
-                        ],
-                        [
-                            142058846300,
-                            678.1352596282959
-                        ],
-                        [
-                            142058849500,
-                            688.135274887085
-                        ],
-                        [
-                            142058853600,
-                            698.1352996826172
-                        ],
-                        [
-                            142058857100,
-                            708.1353063583374
-                        ],
-                        [
-                            142058860600,
-                            718.1353168487549
-                        ],
-                        [
-                            142058864200,
-                            728.1353511810303
-                        ],
-                        [
-                            142058867800,
-                            738.1353855133057
-                        ],
-                        [
-                            142058872000,
-                            748.1354303359985
-                        ],
-                        [
-                            142058875600,
-                            758.1354370117188
-                        ],
-                        [
-                            142058878900,
-                            768.135458946228
-                        ],
-                        [
-                            142058882000,
-                            778.1354818344116
-                        ],
-                        [
-                            142058886100,
-                            788.1354990005493
-                        ],
-                        [
-                            142058889400,
-                            798.1355476379395
-                        ],
-                        [
-                            142058893300,
-                            808.1355628967285
-                        ],
-                        [
-                            142058898100,
-                            818.1355724334717
-                        ],
-                        [
-                            142058901800,
-                            828.1356229782104
-                        ],
-                        [
-                            142058905500,
-                            838.1356649398804
-                        ],
-                        [
-                            142058908700,
-                            848.1356716156006
-                        ],
-                        [
-                            142058912500,
-                            858.1356782913208
-                        ],
-                        [
-                            142058916100,
-                            868.135703086853
-                        ],
-                        [
-                            142058919700,
-                            878.1357460021973
-                        ]
-                    ],
-                    "n_async_await_percent": 0.0,
-                    "n_async_concurrency_mean": 0.0,
-                    "n_async_concurrency_peak": 0.0,
-                    "n_avg_mb": 0.0,
-                    "n_copy_mb_s": 0.0,
-                    "n_core_utilization": 0.0,
-                    "n_cpu_percent_c": 0.0,
-                    "n_cpu_percent_python": 0.0,
-                    "n_gpu_avg_memory_mb": 0.0,
-                    "n_gpu_peak_memory_mb": 0.0,
-                    "n_gpu_percent": 0,
-                    "n_growth_mb": 830.0020542144775,
-                    "n_malloc_mb": 830.0020542144775,
-                    "n_mallocs": 0,
-                    "n_peak_mb": 830.0020542144775,
-                    "n_python_fraction": 0.9993864582958422,
-                    "n_sys_percent": 0.0,
-                    "n_usage_fraction": 0.7395084943491381,
-                    "start_function_line": 0,
-                    "start_outermost_loop": 32,
-                    "start_region_line": 32
-                },
-                {
-                    "async_task_names": [],
-                    "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 33,
-                    "end_region_line": 33,
-                    "is_coroutine": false,
-                    "line": "    print('parsed in',datetime.now() - t)\n",
-                    "lineno": 33,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
                     "n_async_concurrency_mean": 0.0,
@@ -11697,6 +11302,43 @@ pre[class*="language-"] {
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
                     "start_function_line": 0,
+                    "start_outermost_loop": 32,
+                    "start_region_line": 32
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 33,
+                    "end_region_line": 33,
+                    "is_coroutine": false,
+                    "line": "lexer.initialize()\n",
+                    "lineno": 33,
+                    "memory_samples": [
+                        [
+                            5378878600,
+                            10.000143051147461
+                        ]
+                    ],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 10.000143051147461,
+                    "n_malloc_mb": 10.000143051147461,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 10.000143051147461,
+                    "n_python_fraction": 0.93892,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.008599784044496402,
+                    "start_function_line": 0,
                     "start_outermost_loop": 33,
                     "start_region_line": 33
                 },
@@ -11707,7 +11349,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 34,
                     "end_region_line": 34,
                     "is_coroutine": false,
-                    "line": "    errors = []\n",
+                    "line": "print('lexer initialized in',datetime.now() - t)\n",
                     "lineno": 34,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11739,7 +11381,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 35,
                     "end_region_line": 35,
                     "is_coroutine": false,
-                    "line": "    errors += list(lexer.errors)\n",
+                    "line": "t = datetime.now()\n",
                     "lineno": 35,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11771,7 +11413,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 36,
                     "end_region_line": 36,
                     "is_coroutine": false,
-                    "line": "    errors += VecLangParser.errors\n",
+                    "line": "VecLangParser = build_parser()\n",
                     "lineno": 36,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11803,7 +11445,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 37,
                     "end_region_line": 37,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "print('parser builded in',datetime.now() - t)\n",
                     "lineno": 37,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11832,10 +11474,10 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 43,
+                    "end_outermost_loop": 38,
                     "end_region_line": 38,
                     "is_coroutine": false,
-                    "line": "    if not errors or ast is not None:\n",
+                    "line": "context,error_collector,functions_collector,evaluator = build_walkers()\n",
                     "lineno": 38,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11864,10 +11506,10 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 40,
+                    "end_outermost_loop": 39,
                     "end_region_line": 39,
                     "is_coroutine": false,
-                    "line": "        if help_flag:\n",
+                    "line": "\n",
                     "lineno": 39,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11896,10 +11538,10 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 40,
+                    "end_outermost_loop": 41,
                     "end_region_line": 40,
                     "is_coroutine": false,
-                    "line": "            draw_ast(ast,show=True,cache=True,select_menu=True) # type: ignore\n",
+                    "line": "if len(argv) \\u003c 2:\n",
                     "lineno": 40,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11931,7 +11573,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 41,
                     "end_region_line": 41,
                     "is_coroutine": false,
-                    "line": "        t = datetime.now()\n",
+                    "line": "    raise ValueError('not input provided')\n",
                     "lineno": 41,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -11963,46 +11605,9 @@ pre[class*="language-"] {
                     "end_outermost_loop": 42,
                     "end_region_line": 42,
                     "is_coroutine": false,
-                    "line": "        functions_collector.walk(ast)\n",
+                    "line": "\n",
                     "lineno": 42,
-                    "memory_samples": [
-                        [
-                            142058930400,
-                            888.1357669830322
-                        ],
-                        [
-                            142058934000,
-                            898.1357898712158
-                        ],
-                        [
-                            142058937600,
-                            908.1358051300049
-                        ],
-                        [
-                            142058941200,
-                            918.135835647583
-                        ],
-                        [
-                            142058944900,
-                            928.1358737945557
-                        ],
-                        [
-                            142058949300,
-                            918.135820388794
-                        ],
-                        [
-                            142058953300,
-                            908.1357822418213
-                        ],
-                        [
-                            142058956100,
-                            898.0985507965088
-                        ],
-                        [
-                            142058959100,
-                            888.0985431671143
-                        ]
-                    ],
+                    "memory_samples": [],
                     "n_async_await_percent": 0.0,
                     "n_async_concurrency_mean": 0.0,
                     "n_async_concurrency_peak": 0.0,
@@ -12014,13 +11619,13 @@ pre[class*="language-"] {
                     "n_gpu_avg_memory_mb": 0.0,
                     "n_gpu_peak_memory_mb": 0.0,
                     "n_gpu_percent": 0,
-                    "n_growth_mb": 50.0001277923584,
-                    "n_malloc_mb": 50.0001277923584,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
                     "n_mallocs": 0,
-                    "n_peak_mb": 50.0001277923584,
-                    "n_python_fraction": 0.9999869999990845,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
-                    "n_usage_fraction": 0.04454870808239802,
+                    "n_usage_fraction": 0.0,
                     "start_function_line": 0,
                     "start_outermost_loop": 42,
                     "start_region_line": 42
@@ -12032,7 +11637,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 43,
                     "end_region_line": 43,
                     "is_coroutine": false,
-                    "line": "        print('functions collected in',datetime.now() - t)\n",
+                    "line": "file = argv[1]\n",
                     "lineno": 43,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12093,10 +11698,10 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 48,
+                    "end_outermost_loop": 46,
                     "end_region_line": 45,
                     "is_coroutine": false,
-                    "line": "    if not errors:\n",
+                    "line": "if not (os.path.exists(file) or os.path.isfile(file)):\n",
                     "lineno": 45,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12128,7 +11733,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 46,
                     "end_region_line": 46,
                     "is_coroutine": false,
-                    "line": "        t = datetime.now()\n",
+                    "line": "    raise ValueError('Invalid argument')\n",
                     "lineno": 46,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12160,42 +11765,9 @@ pre[class*="language-"] {
                     "end_outermost_loop": 47,
                     "end_region_line": 47,
                     "is_coroutine": false,
-                    "line": "        error_collector.walk(ast)\n",
+                    "line": "\n",
                     "lineno": 47,
-                    "memory_samples": [
-                        [
-                            144526203600,
-                            898.098578453064
-                        ],
-                        [
-                            144526209700,
-                            908.098593711853
-                        ],
-                        [
-                            144526213900,
-                            918.0986242294312
-                        ],
-                        [
-                            144526217700,
-                            928.0986623764038
-                        ],
-                        [
-                            144526223100,
-                            918.0986394882202
-                        ],
-                        [
-                            144526226800,
-                            908.0986013412476
-                        ],
-                        [
-                            144526229400,
-                            898.098593711853
-                        ],
-                        [
-                            144526232300,
-                            888.0985860824585
-                        ]
-                    ],
+                    "memory_samples": [],
                     "n_async_await_percent": 0.0,
                     "n_async_concurrency_mean": 0.0,
                     "n_async_concurrency_peak": 0.0,
@@ -12207,13 +11779,13 @@ pre[class*="language-"] {
                     "n_gpu_avg_memory_mb": 0.0,
                     "n_gpu_peak_memory_mb": 0.0,
                     "n_gpu_percent": 0,
-                    "n_growth_mb": 40.00011920928955,
-                    "n_malloc_mb": 40.00011920928955,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
                     "n_mallocs": 0,
-                    "n_peak_mb": 40.00011920928955,
-                    "n_python_fraction": 0.9999809999978065,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
                     "n_sys_percent": 0.0,
-                    "n_usage_fraction": 0.035638981590525066,
+                    "n_usage_fraction": 0.0,
                     "start_function_line": 0,
                     "start_outermost_loop": 47,
                     "start_region_line": 47
@@ -12225,7 +11797,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 48,
                     "end_region_line": 48,
                     "is_coroutine": false,
-                    "line": "        print('errors collected in',datetime.now() - t)\n",
+                    "line": "help_flag = False\n",
                     "lineno": 48,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12254,10 +11826,10 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 49,
+                    "end_outermost_loop": 52,
                     "end_region_line": 49,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "if len(argv) \\u003e= 3 and argv[2] == '--help':\n",
                     "lineno": 49,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12289,7 +11861,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 50,
                     "end_region_line": 50,
                     "is_coroutine": false,
-                    "line": "    errors += context.errors\n",
+                    "line": "    from pylgen.visual import set_cache_file,draw_ast\n",
                     "lineno": 50,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12321,7 +11893,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 51,
                     "end_region_line": 51,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "    help_flag = True\n",
                     "lineno": 51,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12350,10 +11922,10 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 56,
+                    "end_outermost_loop": 52,
                     "end_region_line": 52,
                     "is_coroutine": false,
-                    "line": "    if not errors:\n",
+                    "line": "    set_cache_file('cache')\n",
                     "lineno": 52,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12385,7 +11957,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 53,
                     "end_region_line": 53,
                     "is_coroutine": false,
-                    "line": "        t = datetime.now()\n",
+                    "line": "\n",
                     "lineno": 53,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12414,76 +11986,11 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 54,
+                    "end_outermost_loop": 92,
                     "end_region_line": 54,
                     "is_coroutine": false,
-                    "line": "        evaluator.walk(ast)\n",
+                    "line": "with open(file,'r') as f:\n",
                     "lineno": 54,
-                    "memory_samples": [
-                        [
-                            144901104500,
-                            898.0986413955688
-                        ],
-                        [
-                            144901109500,
-                            908.0986566543579
-                        ],
-                        [
-                            144901112900,
-                            918.098687171936
-                        ],
-                        [
-                            144901115800,
-                            928.0987253189087
-                        ],
-                        [
-                            147221512400,
-                            918.0987033843994
-                        ],
-                        [
-                            148284950200,
-                            908.0986824035645
-                        ],
-                        [
-                            149543862400,
-                            898.0986518859863
-                        ],
-                        [
-                            150920918800,
-                            888.0986261367798
-                        ]
-                    ],
-                    "n_async_await_percent": 0.0,
-                    "n_async_concurrency_mean": 0.0,
-                    "n_async_concurrency_peak": 0.0,
-                    "n_avg_mb": 0.0,
-                    "n_copy_mb_s": 0.0,
-                    "n_core_utilization": 0.0,
-                    "n_cpu_percent_c": 0.0,
-                    "n_cpu_percent_python": 0.0,
-                    "n_gpu_avg_memory_mb": 0.0,
-                    "n_gpu_peak_memory_mb": 0.0,
-                    "n_gpu_percent": 0,
-                    "n_growth_mb": 40.000139236450195,
-                    "n_malloc_mb": 40.000139236450195,
-                    "n_mallocs": 0,
-                    "n_peak_mb": 40.000139236450195,
-                    "n_python_fraction": 0.999983749997437,
-                    "n_sys_percent": 0.0,
-                    "n_usage_fraction": 0.03563899943416213,
-                    "start_function_line": 0,
-                    "start_outermost_loop": 54,
-                    "start_region_line": 54
-                },
-                {
-                    "async_task_names": [],
-                    "cpu_samples_list": [],
-                    "end_function_line": 0,
-                    "end_outermost_loop": 55,
-                    "end_region_line": 55,
-                    "is_coroutine": false,
-                    "line": "        print('code evaluated in',datetime.now() - t)\n",
-                    "lineno": 55,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
                     "n_async_concurrency_mean": 0.0,
@@ -12504,6 +12011,59 @@ pre[class*="language-"] {
                     "n_sys_percent": 0.0,
                     "n_usage_fraction": 0.0,
                     "start_function_line": 0,
+                    "start_outermost_loop": 54,
+                    "start_region_line": 54
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 55,
+                    "end_region_line": 55,
+                    "is_coroutine": false,
+                    "line": "    text = f.read()\n",
+                    "lineno": 55,
+                    "memory_samples": [
+                        [
+                            6284176600,
+                            50.0023889541626
+                        ],
+                        [
+                            151083373000,
+                            126.49630928039551
+                        ],
+                        [
+                            151083386000,
+                            88.25129508972168
+                        ],
+                        [
+                            151083390500,
+                            124.58895111083984
+                        ],
+                        [
+                            151083394600,
+                            86.34397602081299
+                        ]
+                    ],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 78.24883460998535,
+                    "n_malloc_mb": 114.58649063110352,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 78.24883460998535,
+                    "n_python_fraction": 0.978287442273455,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.09854049775129259,
+                    "start_function_line": 0,
                     "start_outermost_loop": 55,
                     "start_region_line": 55
                 },
@@ -12514,7 +12074,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 56,
                     "end_region_line": 56,
                     "is_coroutine": false,
-                    "line": "        errors += context.errors\n",
+                    "line": "    lexer.load_text(text)\n",
                     "lineno": 56,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12546,7 +12106,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 57,
                     "end_region_line": 57,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "    t = datetime.now()\n",
                     "lineno": 57,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12575,12 +12135,365 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 61,
+                    "end_outermost_loop": 58,
                     "end_region_line": 58,
                     "is_coroutine": false,
-                    "line": "    if not errors:\n",
+                    "line": "    ast = VecLangParser.parse(lexer.tokens)\n",
                     "lineno": 58,
-                    "memory_samples": [],
+                    "memory_samples": [
+                        [
+                            151089883300,
+                            48.26832103729248
+                        ],
+                        [
+                            151089891400,
+                            58.268341064453125
+                        ],
+                        [
+                            151089895500,
+                            68.26835823059082
+                        ],
+                        [
+                            151089899900,
+                            78.26840209960938
+                        ],
+                        [
+                            151089903600,
+                            88.26842784881592
+                        ],
+                        [
+                            151089907700,
+                            98.26847743988037
+                        ],
+                        [
+                            151089910400,
+                            108.26850509643555
+                        ],
+                        [
+                            151089914000,
+                            118.26852226257324
+                        ],
+                        [
+                            151089917400,
+                            128.26854038238525
+                        ],
+                        [
+                            151089921400,
+                            138.26855850219727
+                        ],
+                        [
+                            151089924500,
+                            148.26861572265625
+                        ],
+                        [
+                            151089927500,
+                            158.26862621307373
+                        ],
+                        [
+                            151089930600,
+                            168.2686471939087
+                        ],
+                        [
+                            151089933800,
+                            178.26867866516113
+                        ],
+                        [
+                            151089936500,
+                            188.26869201660156
+                        ],
+                        [
+                            151089939300,
+                            198.26870155334473
+                        ],
+                        [
+                            151089942600,
+                            208.2687120437622
+                        ],
+                        [
+                            151089946400,
+                            218.26873207092285
+                        ],
+                        [
+                            151089949800,
+                            228.26876831054688
+                        ],
+                        [
+                            151089953100,
+                            238.26878547668457
+                        ],
+                        [
+                            151089956500,
+                            248.26880550384521
+                        ],
+                        [
+                            151089959700,
+                            258.2688236236572
+                        ],
+                        [
+                            151089963400,
+                            268.26885509490967
+                        ],
+                        [
+                            151089966800,
+                            278.26888847351074
+                        ],
+                        [
+                            151089970100,
+                            288.2688980102539
+                        ],
+                        [
+                            151089973600,
+                            298.2689161300659
+                        ],
+                        [
+                            151089977100,
+                            308.26893520355225
+                        ],
+                        [
+                            151089980500,
+                            318.26895236968994
+                        ],
+                        [
+                            151089983500,
+                            328.2689743041992
+                        ],
+                        [
+                            151089986900,
+                            338.2689847946167
+                        ],
+                        [
+                            151089990400,
+                            348.26899337768555
+                        ],
+                        [
+                            151089993400,
+                            358.26902770996094
+                        ],
+                        [
+                            151090003200,
+                            368.2690715789795
+                        ],
+                        [
+                            151090007800,
+                            378.26909828186035
+                        ],
+                        [
+                            151090011100,
+                            388.26910495758057
+                        ],
+                        [
+                            151090014100,
+                            398.2691116333008
+                        ],
+                        [
+                            151090017300,
+                            408.26912021636963
+                        ],
+                        [
+                            151090020500,
+                            418.2691373825073
+                        ],
+                        [
+                            151090023900,
+                            428.26917266845703
+                        ],
+                        [
+                            151090026800,
+                            438.2692050933838
+                        ],
+                        [
+                            151090030200,
+                            448.26924324035645
+                        ],
+                        [
+                            151090033600,
+                            458.26927947998047
+                        ],
+                        [
+                            151090037000,
+                            468.2692937850952
+                        ],
+                        [
+                            151090040300,
+                            478.2693061828613
+                        ],
+                        [
+                            151090043600,
+                            488.2693347930908
+                        ],
+                        [
+                            151090047400,
+                            498.2693691253662
+                        ],
+                        [
+                            151090051000,
+                            508.2693786621094
+                        ],
+                        [
+                            151090073600,
+                            518.2694244384766
+                        ],
+                        [
+                            151090077000,
+                            528.269458770752
+                        ],
+                        [
+                            151090093300,
+                            538.2694997787476
+                        ],
+                        [
+                            151090096500,
+                            548.2695360183716
+                        ],
+                        [
+                            151090099600,
+                            558.2695541381836
+                        ],
+                        [
+                            151090103100,
+                            568.2695693969727
+                        ],
+                        [
+                            151090107400,
+                            578.2695779800415
+                        ],
+                        [
+                            151090111000,
+                            588.2696056365967
+                        ],
+                        [
+                            151090114600,
+                            598.2696142196655
+                        ],
+                        [
+                            151090117600,
+                            608.2696447372437
+                        ],
+                        [
+                            151090121200,
+                            618.2696533203125
+                        ],
+                        [
+                            151090124300,
+                            628.2696809768677
+                        ],
+                        [
+                            151090127300,
+                            638.2697010040283
+                        ],
+                        [
+                            151090130400,
+                            648.2697486877441
+                        ],
+                        [
+                            151090134400,
+                            658.2697563171387
+                        ],
+                        [
+                            151090137700,
+                            668.2697696685791
+                        ],
+                        [
+                            151090141500,
+                            678.2698183059692
+                        ],
+                        [
+                            151090144800,
+                            688.2698259353638
+                        ],
+                        [
+                            151090148700,
+                            698.2698402404785
+                        ],
+                        [
+                            151090152800,
+                            708.269847869873
+                        ],
+                        [
+                            151090156600,
+                            718.269868850708
+                        ],
+                        [
+                            151090160100,
+                            728.2698831558228
+                        ],
+                        [
+                            151090163800,
+                            738.2698926925659
+                        ],
+                        [
+                            151090167200,
+                            748.2699241638184
+                        ],
+                        [
+                            151090189200,
+                            758.269965171814
+                        ],
+                        [
+                            151090192700,
+                            768.2699775695801
+                        ],
+                        [
+                            151090196900,
+                            778.2700262069702
+                        ],
+                        [
+                            151090200800,
+                            788.2700576782227
+                        ],
+                        [
+                            151090204400,
+                            798.2701063156128
+                        ],
+                        [
+                            151090208300,
+                            808.2701253890991
+                        ],
+                        [
+                            151090212600,
+                            818.2701425552368
+                        ],
+                        [
+                            151090216600,
+                            828.2701778411865
+                        ],
+                        [
+                            151090233300,
+                            838.2701978683472
+                        ],
+                        [
+                            151090236600,
+                            848.2702178955078
+                        ],
+                        [
+                            151090240300,
+                            858.2702541351318
+                        ],
+                        [
+                            151090243700,
+                            868.2703056335449
+                        ],
+                        [
+                            151090247300,
+                            878.2703485488892
+                        ],
+                        [
+                            151090250900,
+                            888.2703971862793
+                        ],
+                        [
+                            151090254200,
+                            898.2704401016235
+                        ],
+                        [
+                            151090257600,
+                            908.2704544067383
+                        ],
+                        [
+                            151090261000,
+                            918.2704772949219
+                        ]
+                    ],
                     "n_async_await_percent": 0.0,
                     "n_async_concurrency_mean": 0.0,
                     "n_async_concurrency_peak": 0.0,
@@ -12592,13 +12505,13 @@ pre[class*="language-"] {
                     "n_gpu_avg_memory_mb": 0.0,
                     "n_gpu_peak_memory_mb": 0.0,
                     "n_gpu_percent": 0,
-                    "n_growth_mb": 0.0,
-                    "n_malloc_mb": 0.0,
+                    "n_growth_mb": 870.0021562576294,
+                    "n_malloc_mb": 870.0021562576294,
                     "n_mallocs": 0,
-                    "n_peak_mb": 0.0,
-                    "n_python_fraction": 0,
+                    "n_peak_mb": 870.0021562576294,
+                    "n_python_fraction": 0.999998965517258,
                     "n_sys_percent": 0.0,
-                    "n_usage_fraction": 0.0,
+                    "n_usage_fraction": 0.7481723635146728,
                     "start_function_line": 0,
                     "start_outermost_loop": 58,
                     "start_region_line": 58
@@ -12610,7 +12523,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 59,
                     "end_region_line": 59,
                     "is_coroutine": false,
-                    "line": "        result = get_ast_value(ast,context)\n",
+                    "line": "    print('source parsed in',datetime.now() - t)\n",
                     "lineno": 59,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12639,10 +12552,10 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 61,
+                    "end_outermost_loop": 60,
                     "end_region_line": 60,
                     "is_coroutine": false,
-                    "line": "        if result is not None:\n",
+                    "line": "    errors = []\n",
                     "lineno": 60,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12674,7 +12587,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 61,
                     "end_region_line": 61,
                     "is_coroutine": false,
-                    "line": "            print(result)\n",
+                    "line": "    errors += list(lexer.errors)\n",
                     "lineno": 61,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12706,7 +12619,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 62,
                     "end_region_line": 62,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "    errors += VecLangParser.errors\n",
                     "lineno": 62,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12735,10 +12648,10 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 65,
+                    "end_outermost_loop": 63,
                     "end_region_line": 63,
                     "is_coroutine": false,
-                    "line": "    if errors:\n",
+                    "line": "\n",
                     "lineno": 63,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12767,10 +12680,10 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 64,
-                    "end_region_line": 65,
+                    "end_outermost_loop": 69,
+                    "end_region_line": 64,
                     "is_coroutine": false,
-                    "line": "        for error in errors:\n",
+                    "line": "    if not errors:\n",
                     "lineno": 64,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12799,10 +12712,10 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 65,
+                    "end_outermost_loop": 66,
                     "end_region_line": 65,
                     "is_coroutine": false,
-                    "line": "            print(error)\n",
+                    "line": "        if help_flag:\n",
                     "lineno": 65,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12825,7 +12738,7 @@ pre[class*="language-"] {
                     "n_usage_fraction": 0.0,
                     "start_function_line": 0,
                     "start_outermost_loop": 65,
-                    "start_region_line": 64
+                    "start_region_line": 65
                 },
                 {
                     "async_task_names": [],
@@ -12834,7 +12747,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 66,
                     "end_region_line": 66,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "            draw_ast(ast,show=True,cache=True,select_menu=True) # type: ignore\n",
                     "lineno": 66,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12866,7 +12779,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 67,
                     "end_region_line": 67,
                     "is_coroutine": false,
-                    "line": "# // testing built-in functions\n",
+                    "line": "        t = datetime.now()\n",
                     "lineno": 67,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12898,9 +12811,46 @@ pre[class*="language-"] {
                     "end_outermost_loop": 68,
                     "end_region_line": 68,
                     "is_coroutine": false,
-                    "line": "# print(var_slice_2)\n",
+                    "line": "        functions_collector.walk(ast)\n",
                     "lineno": 68,
-                    "memory_samples": [],
+                    "memory_samples": [
+                        [
+                            151090271000,
+                            928.2704849243164
+                        ],
+                        [
+                            151090274900,
+                            938.2705154418945
+                        ],
+                        [
+                            151090277900,
+                            948.2705688476562
+                        ],
+                        [
+                            151090281300,
+                            958.270622253418
+                        ],
+                        [
+                            151090284900,
+                            968.2706604003906
+                        ],
+                        [
+                            151090288800,
+                            958.2706146240234
+                        ],
+                        [
+                            151090293100,
+                            947.4219055175781
+                        ],
+                        [
+                            151090295400,
+                            936.1071014404297
+                        ],
+                        [
+                            151090298000,
+                            926.1070938110352
+                        ]
+                    ],
                     "n_async_await_percent": 0.0,
                     "n_async_concurrency_mean": 0.0,
                     "n_async_concurrency_peak": 0.0,
@@ -12912,13 +12862,13 @@ pre[class*="language-"] {
                     "n_gpu_avg_memory_mb": 0.0,
                     "n_gpu_peak_memory_mb": 0.0,
                     "n_gpu_percent": 0,
-                    "n_growth_mb": 0.0,
-                    "n_malloc_mb": 0.0,
+                    "n_growth_mb": 50.00018310546875,
+                    "n_malloc_mb": 50.00018310546875,
                     "n_mallocs": 0,
-                    "n_peak_mb": 0.0,
-                    "n_python_fraction": 0,
+                    "n_peak_mb": 50.00018310546875,
+                    "n_python_fraction": 0.9999865999953613,
                     "n_sys_percent": 0.0,
-                    "n_usage_fraction": 0.0,
+                    "n_usage_fraction": 0.0429984625912896,
                     "start_function_line": 0,
                     "start_outermost_loop": 68,
                     "start_region_line": 68
@@ -12930,7 +12880,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 69,
                     "end_region_line": 69,
                     "is_coroutine": false,
-                    "line": "# print(vector_1)\n",
+                    "line": "        print('functions collected in',datetime.now() - t)\n",
                     "lineno": 69,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12962,7 +12912,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 70,
                     "end_region_line": 70,
                     "is_coroutine": false,
-                    "line": "# print(vector_2)\n",
+                    "line": "\n",
                     "lineno": 70,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -12991,10 +12941,10 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 71,
+                    "end_outermost_loop": 74,
                     "end_region_line": 71,
                     "is_coroutine": false,
-                    "line": "# print(vector_3)\n",
+                    "line": "    if not errors:\n",
                     "lineno": 71,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -13026,7 +12976,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 72,
                     "end_region_line": 72,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "        t = datetime.now()\n",
                     "lineno": 72,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -13058,9 +13008,42 @@ pre[class*="language-"] {
                     "end_outermost_loop": 73,
                     "end_region_line": 73,
                     "is_coroutine": false,
-                    "line": "# var_sum = sum(vector_1)\n",
+                    "line": "        error_collector.walk(ast)\n",
                     "lineno": 73,
-                    "memory_samples": [],
+                    "memory_samples": [
+                        [
+                            151090307800,
+                            936.1071138381958
+                        ],
+                        [
+                            151090311700,
+                            946.1071290969849
+                        ],
+                        [
+                            151090316000,
+                            956.107159614563
+                        ],
+                        [
+                            151090319600,
+                            966.1071977615356
+                        ],
+                        [
+                            151090323400,
+                            956.1071901321411
+                        ],
+                        [
+                            151090326400,
+                            946.1071519851685
+                        ],
+                        [
+                            151090329000,
+                            936.1071443557739
+                        ],
+                        [
+                            151090331500,
+                            926.1071367263794
+                        ]
+                    ],
                     "n_async_await_percent": 0.0,
                     "n_async_concurrency_mean": 0.0,
                     "n_async_concurrency_peak": 0.0,
@@ -13072,13 +13055,13 @@ pre[class*="language-"] {
                     "n_gpu_avg_memory_mb": 0.0,
                     "n_gpu_peak_memory_mb": 0.0,
                     "n_gpu_percent": 0,
-                    "n_growth_mb": 0.0,
-                    "n_malloc_mb": 0.0,
+                    "n_growth_mb": 40.00010395050049,
+                    "n_malloc_mb": 40.00010395050049,
                     "n_mallocs": 0,
-                    "n_peak_mb": 0.0,
-                    "n_python_fraction": 0,
+                    "n_peak_mb": 40.00010395050049,
+                    "n_python_fraction": 0.9999830000011921,
                     "n_sys_percent": 0.0,
-                    "n_usage_fraction": 0.0,
+                    "n_usage_fraction": 0.034398733495341394,
                     "start_function_line": 0,
                     "start_outermost_loop": 73,
                     "start_region_line": 73
@@ -13090,7 +13073,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 74,
                     "end_region_line": 74,
                     "is_coroutine": false,
-                    "line": "# var_mean = mean(vector_3)\n",
+                    "line": "        print('errors collected in',datetime.now() - t)\n",
                     "lineno": 74,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -13122,7 +13105,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 75,
                     "end_region_line": 75,
                     "is_coroutine": false,
-                    "line": "# var_dot = dot(vector_1,vector_2)\n",
+                    "line": "\n",
                     "lineno": 75,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -13154,7 +13137,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 76,
                     "end_region_line": 76,
                     "is_coroutine": false,
-                    "line": "\n",
+                    "line": "    errors += context.errors\n",
                     "lineno": 76,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -13186,7 +13169,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 77,
                     "end_region_line": 77,
                     "is_coroutine": false,
-                    "line": "# print(var_sum)\n",
+                    "line": "\n",
                     "lineno": 77,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -13215,10 +13198,10 @@ pre[class*="language-"] {
                     "async_task_names": [],
                     "cpu_samples_list": [],
                     "end_function_line": 0,
-                    "end_outermost_loop": 78,
+                    "end_outermost_loop": 82,
                     "end_region_line": 78,
                     "is_coroutine": false,
-                    "line": "# print(var_mean)\n",
+                    "line": "    if not errors:\n",
                     "lineno": 78,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -13250,7 +13233,7 @@ pre[class*="language-"] {
                     "end_outermost_loop": 79,
                     "end_region_line": 79,
                     "is_coroutine": false,
-                    "line": "# print(var_dot)",
+                    "line": "        t = datetime.now()\n",
                     "lineno": 79,
                     "memory_samples": [],
                     "n_async_await_percent": 0.0,
@@ -13274,6 +13257,487 @@ pre[class*="language-"] {
                     "start_function_line": 0,
                     "start_outermost_loop": 79,
                     "start_region_line": 79
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 80,
+                    "end_region_line": 80,
+                    "is_coroutine": false,
+                    "line": "        evaluator.walk(ast)\n",
+                    "lineno": 80,
+                    "memory_samples": [
+                        [
+                            151477567300,
+                            936.1071758270264
+                        ],
+                        [
+                            151477572200,
+                            946.1071910858154
+                        ],
+                        [
+                            151477575400,
+                            956.1072216033936
+                        ],
+                        [
+                            151477578600,
+                            966.1072597503662
+                        ],
+                        [
+                            153855464000,
+                            956.1072158813477
+                        ],
+                        [
+                            154919995900,
+                            946.1071767807007
+                        ],
+                        [
+                            156156214900,
+                            936.1071691513062
+                        ],
+                        [
+                            157410682100,
+                            926.1071119308472
+                        ]
+                    ],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 40.000123023986816,
+                    "n_malloc_mb": 40.000123023986816,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 40.000123023986816,
+                    "n_python_fraction": 0.9999855000004172,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.03439874989789309,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 80,
+                    "start_region_line": 80
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 81,
+                    "end_region_line": 81,
+                    "is_coroutine": false,
+                    "line": "        print('code evaluated in',datetime.now() - t)\n",
+                    "lineno": 81,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 81,
+                    "start_region_line": 81
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 82,
+                    "end_region_line": 82,
+                    "is_coroutine": false,
+                    "line": "        errors += context.errors\n",
+                    "lineno": 82,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 82,
+                    "start_region_line": 82
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 83,
+                    "end_region_line": 83,
+                    "is_coroutine": false,
+                    "line": "\n",
+                    "lineno": 83,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 83,
+                    "start_region_line": 83
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 87,
+                    "end_region_line": 84,
+                    "is_coroutine": false,
+                    "line": "    if not errors:\n",
+                    "lineno": 84,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 84,
+                    "start_region_line": 84
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 85,
+                    "end_region_line": 85,
+                    "is_coroutine": false,
+                    "line": "        result = get_ast_value(ast,context)\n",
+                    "lineno": 85,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 85,
+                    "start_region_line": 85
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 87,
+                    "end_region_line": 86,
+                    "is_coroutine": false,
+                    "line": "        if result is not None:\n",
+                    "lineno": 86,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 86,
+                    "start_region_line": 86
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 87,
+                    "end_region_line": 87,
+                    "is_coroutine": false,
+                    "line": "            print(result)\n",
+                    "lineno": 87,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 87,
+                    "start_region_line": 87
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 88,
+                    "end_region_line": 88,
+                    "is_coroutine": false,
+                    "line": "\n",
+                    "lineno": 88,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 88,
+                    "start_region_line": 88
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 92,
+                    "end_region_line": 89,
+                    "is_coroutine": false,
+                    "line": "    if errors:\n",
+                    "lineno": 89,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 89,
+                    "start_region_line": 89
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 90,
+                    "end_region_line": 92,
+                    "is_coroutine": false,
+                    "line": "        for error in errors:\n",
+                    "lineno": 90,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 90,
+                    "start_region_line": 90
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 91,
+                    "end_region_line": 92,
+                    "is_coroutine": false,
+                    "line": "            print(error)\n",
+                    "lineno": 91,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 91,
+                    "start_region_line": 90
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 92,
+                    "end_region_line": 92,
+                    "is_coroutine": false,
+                    "line": "            print('\\tloc:',get_fragment(text,error.start_position,error.end_position))\n",
+                    "lineno": 92,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 92,
+                    "start_region_line": 90
+                },
+                {
+                    "async_task_names": [],
+                    "cpu_samples_list": [],
+                    "end_function_line": 0,
+                    "end_outermost_loop": 93,
+                    "end_region_line": 93,
+                    "is_coroutine": false,
+                    "line": "\n",
+                    "lineno": 93,
+                    "memory_samples": [],
+                    "n_async_await_percent": 0.0,
+                    "n_async_concurrency_mean": 0.0,
+                    "n_async_concurrency_peak": 0.0,
+                    "n_avg_mb": 0.0,
+                    "n_copy_mb_s": 0.0,
+                    "n_core_utilization": 0.0,
+                    "n_cpu_percent_c": 0.0,
+                    "n_cpu_percent_python": 0.0,
+                    "n_gpu_avg_memory_mb": 0.0,
+                    "n_gpu_peak_memory_mb": 0.0,
+                    "n_gpu_percent": 0,
+                    "n_growth_mb": 0.0,
+                    "n_malloc_mb": 0.0,
+                    "n_mallocs": 0,
+                    "n_peak_mb": 0.0,
+                    "n_python_fraction": 0,
+                    "n_sys_percent": 0.0,
+                    "n_usage_fraction": 0.0,
+                    "start_function_line": 0,
+                    "start_outermost_loop": 93,
+                    "start_region_line": 93
                 }
             ],
             "percent_cpu_time": 0
@@ -13281,421 +13745,421 @@ pre[class*="language-"] {
     },
     "gpu": false,
     "gpu_device": "",
-    "growth_rate": 79.12709065154172,
-    "main_thread_id": 11128,
-    "max_footprint_fname": ".\\main.py",
-    "max_footprint_lineno": 42,
-    "max_footprint_mb": 928.1358737945557,
+    "growth_rate": 79.64207235779175,
+    "main_thread_id": 6032,
+    "max_footprint_fname": "\\main.py",
+    "max_footprint_lineno": 68,
+    "max_footprint_mb": 968.2706604003906,
     "max_footprint_python_fraction": 0.999985,
     "memory": true,
     "memory_stacks": [],
     "native_allocations_mb": 0,
-    "program": ".\\main.py",
+    "program": "\\main.py",
     "samples": [
         [
-            3982273600,
-            10.001690864562988
+            5362631300,
+            10.000143051147461
         ],
         [
-            4698912600,
-            49.53579139709473
+            6284107300,
+            50.0023889541626
         ],
         [
-            4842135300,
-            126.02977561950684
+            6470531900,
+            126.49630928039551
         ],
         [
-            4842139700,
-            87.78476142883301
+            6470535800,
+            88.25129508972168
         ],
         [
-            4842144700,
-            85.87744235992432
+            6470537600,
+            124.58895111083984
         ],
         [
-            142058453200,
-            48.13369178771973
+            6470540200,
+            86.34397602081299
         ],
         [
-            142058456500,
-            58.13370895385742
+            151089688500,
+            48.26832103729248
         ],
         [
-            142058460700,
-            78.13373565673828
+            151089690800,
+            58.268341064453125
         ],
         [
-            142058462000,
-            88.13375282287598
+            151089692900,
+            68.26835823059082
         ],
         [
-            142058463100,
-            98.1337718963623
+            151089694400,
+            78.26840209960938
         ],
         [
-            142058464400,
-            108.13380241394043
+            151089695600,
+            88.26842784881592
         ],
         [
-            142058465600,
-            118.13386344909668
+            151089697400,
+            98.26847743988037
         ],
         [
-            142058467900,
-            128.13390827178955
+            151089698700,
+            108.26850509643555
         ],
         [
-            142058469400,
-            138.13392066955566
+            151089700600,
+            118.26852226257324
         ],
         [
-            142058471000,
-            148.133939743042
+            151089702300,
+            128.26854038238525
         ],
         [
-            142058472500,
-            158.13397121429443
+            151089703500,
+            138.26855850219727
         ],
         [
-            142058473700,
-            168.13399505615234
+            151089705300,
+            148.26861572265625
         ],
         [
-            142058475100,
-            178.1340217590332
+            151089706600,
+            158.26862621307373
         ],
         [
-            142058476500,
-            188.1340684890747
+            151089708400,
+            168.2686471939087
         ],
         [
-            142058478200,
-            198.13409996032715
+            151089709800,
+            178.26867866516113
         ],
         [
-            142058479300,
-            208.13410663604736
+            151089711400,
+            188.26869201660156
         ],
         [
-            142058480700,
-            218.1341209411621
+            151089712700,
+            198.26870155334473
         ],
         [
-            142058483700,
-            238.1341953277588
+            151089713800,
+            208.2687120437622
         ],
         [
-            142058485000,
-            248.13423252105713
+            151089715600,
+            218.26873207092285
         ],
         [
-            142058486500,
-            258.1342430114746
+            151089717200,
+            228.26876831054688
         ],
         [
-            142058487900,
-            268.1342649459839
+            151089718500,
+            238.26878547668457
         ],
         [
-            142058489200,
-            278.1342878341675
+            151089719600,
+            248.26880550384521
         ],
         [
-            142058490700,
-            288.1343126296997
+            151089721100,
+            258.2688236236572
         ],
         [
-            142058492000,
-            298.134352684021
+            151089722400,
+            268.26885509490967
         ],
         [
-            142058493900,
-            308.134370803833
+            151089723500,
+            278.26888847351074
         ],
         [
-            142058495200,
-            318.1343822479248
+            151089725200,
+            288.2688980102539
         ],
         [
-            142058496300,
-            328.1344165802002
+            151089726600,
+            298.2689161300659
         ],
         [
-            142058497500,
-            338.1344394683838
+            151089728400,
+            308.26893520355225
         ],
         [
-            142058498700,
-            348.1344680786133
+            151089729600,
+            318.26895236968994
         ],
         [
-            142058500000,
-            358.1345157623291
+            151089731100,
+            328.2689743041992
         ],
         [
-            142058501600,
-            368.1345434188843
+            151089732200,
+            338.2689847946167
         ],
         [
-            142058503100,
-            378.1345548629761
+            151089734700,
+            358.26902770996094
         ],
         [
-            142058505100,
-            388.13459300994873
+            151089736000,
+            368.2690715789795
         ],
         [
-            142058506500,
-            398.13460540771484
+            151089737300,
+            378.26909828186035
         ],
         [
-            142058507500,
-            408.1346273422241
+            151089741800,
+            408.26912021636963
         ],
         [
-            142058508800,
-            418.1346855163574
+            151089743000,
+            418.2691373825073
         ],
         [
-            142058510500,
-            428.1347255706787
+            151089744500,
+            428.26917266845703
         ],
         [
-            142058511700,
-            438.1347484588623
+            151089745700,
+            438.2692050933838
         ],
         [
-            142058512800,
-            448.1347827911377
+            151089746800,
+            448.26924324035645
         ],
         [
-            142058515500,
-            468.134804725647
+            151089748400,
+            458.26927947998047
         ],
         [
-            142058517300,
-            478.134822845459
+            151089749900,
+            468.2692937850952
         ],
         [
-            142058518700,
-            488.1348581314087
+            151089751100,
+            478.2693061828613
         ],
         [
-            142058519900,
-            498.13487243652344
+            151089752500,
+            488.2693347930908
         ],
         [
-            142058521400,
-            508.13488578796387
+            151089753700,
+            498.2693691253662
         ],
         [
-            142058523000,
-            518.1349124908447
+            151089756900,
+            518.2694244384766
         ],
         [
-            142058524600,
-            528.1349430084229
+            151089758100,
+            528.269458770752
         ],
         [
-            142058527500,
-            538.1349573135376
+            151089759700,
+            538.2694997787476
         ],
         [
-            142058529000,
-            548.1349639892578
+            151089761500,
+            548.2695360183716
         ],
         [
-            142058530700,
-            558.1349792480469
+            151089762700,
+            558.2695541381836
         ],
         [
-            142058532500,
-            568.1350040435791
+            151089764000,
+            568.2695693969727
         ],
         [
-            142058533700,
-            578.1350107192993
+            151089765600,
+            578.2695779800415
         ],
         [
-            142058534800,
-            588.1350326538086
+            151089766900,
+            588.2696056365967
         ],
         [
-            142058536300,
-            598.1350574493408
+            151089768200,
+            598.2696142196655
         ],
         [
-            142058537800,
-            608.1350860595703
+            151089769400,
+            608.2696447372437
         ],
         [
-            142058539900,
-            618.135124206543
+            151089770700,
+            618.2696533203125
         ],
         [
-            142058542000,
-            628.1351413726807
+            151089772900,
+            628.2696809768677
         ],
         [
-            142058543300,
-            638.1351613998413
+            151089774300,
+            638.2697010040283
         ],
         [
-            142058544800,
-            648.135178565979
+            151089775800,
+            648.2697486877441
         ],
         [
-            142058547600,
-            668.1352224349976
+            151089777100,
+            658.2697563171387
         ],
         [
-            142058549000,
-            678.1352596282959
+            151089778100,
+            668.2697696685791
         ],
         [
-            142058550600,
-            688.135274887085
+            151089779200,
+            678.2698183059692
         ],
         [
-            142058551800,
-            698.1352996826172
+            151089780700,
+            688.2698259353638
         ],
         [
-            142058553500,
-            708.1353063583374
+            151089782000,
+            698.2698402404785
         ],
         [
-            142058556400,
-            728.1353511810303
+            151089783100,
+            708.269847869873
         ],
         [
-            142058557600,
-            738.1353855133057
+            151089784500,
+            718.269868850708
         ],
         [
-            142058559400,
-            748.1354303359985
+            151089786300,
+            728.2698831558228
         ],
         [
-            142058560700,
-            758.1354370117188
+            151089787700,
+            738.2698926925659
         ],
         [
-            142058562000,
-            768.135458946228
+            151089789700,
+            748.2699241638184
         ],
         [
-            142058563500,
-            778.1354818344116
+            151089790900,
+            758.269965171814
         ],
         [
-            142058564900,
-            788.1354990005493
+            151089792300,
+            768.2699775695801
         ],
         [
-            142058566000,
-            798.1355476379395
+            151089793700,
+            778.2700262069702
         ],
         [
-            142058567500,
-            808.1355628967285
+            151089795500,
+            788.2700576782227
         ],
         [
-            142058569100,
-            818.1355724334717
+            151089798400,
+            808.2701253890991
         ],
         [
-            142058570500,
-            828.1356229782104
+            151089801000,
+            828.2701778411865
         ],
         [
-            142058572100,
-            838.1356649398804
+            151089802400,
+            838.2701978683472
         ],
         [
-            142058573400,
-            848.1356716156006
+            151089803700,
+            848.2702178955078
         ],
         [
-            142058574800,
-            858.1356782913208
+            151089805000,
+            858.2702541351318
         ],
         [
-            142058576100,
-            868.135703086853
+            151089806500,
+            868.2703056335449
         ],
         [
-            142058577200,
-            878.1357460021973
+            151089807800,
+            878.2703485488892
         ],
         [
-            142058578700,
-            888.1357669830322
+            151089809100,
+            888.2703971862793
         ],
         [
-            142058579800,
-            898.1357898712158
+            151089810500,
+            898.2704401016235
         ],
         [
-            142058584000,
-            908.1358051300049
+            151089812500,
+            908.2704544067383
         ],
         [
-            142058585300,
-            918.135835647583
+            151089813600,
+            918.2704772949219
         ],
         [
-            142058586700,
-            928.1358737945557
+            151089814700,
+            928.2704849243164
         ],
         [
-            142058591300,
-            908.1357822418213
+            151089815700,
+            938.2705154418945
         ],
         [
-            142058593100,
-            898.0985507965088
+            151089817400,
+            948.2705688476562
         ],
         [
-            142058594700,
-            888.0985431671143
+            151089819300,
+            958.270622253418
         ],
         [
-            144526126100,
-            898.098578453064
+            151089820700,
+            968.2706604003906
         ],
         [
-            144526153400,
-            918.0986242294312
+            151089844900,
+            936.1071014404297
         ],
         [
-            144526172200,
-            918.0986394882202
+            151089856500,
+            936.1071138381958
         ],
         [
-            144526179800,
-            898.098593711853
+            151089861500,
+            956.107159614563
         ],
         [
-            144901063100,
-            898.0986413955688
+            151477528500,
+            946.1071910858154
         ],
         [
-            144901076600,
-            918.098687171936
+            151477540800,
+            966.1072597503662
         ],
         [
-            147221487400,
-            918.0987033843994
+            154919975600,
+            946.1071767807007
         ],
         [
-            149543841100,
-            898.0986518859863
+            157410662400,
+            926.1071119308472
         ]
     ],
     "stacks": [],
-    "start_time_absolute": 1787878318.4493756,
-    "start_time_perf": 4661.1587288
+    "start_time_absolute": 1790126472.468617,
+    "start_time_perf": 15358.0781804
 }
 
       // API keys from environment variables (if set)
