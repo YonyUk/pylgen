@@ -1,6 +1,6 @@
 # `pylgen.common` Module (The Foundation of PyLGEN)
 
-The `common` submodule is the bedrock upon which the entire PyLGEN ecosystem is built. It provides the fundamental data types, the core abstractions for the **Abstract Syntax Tree (AST)**, **grammar symbols**, **lexical tokens**, and **transition tables** that connect all the moving parts. Understanding this module is essential, because every other submodule ([`lexer`](../lexer/lexer.md), [`parser`](../parser/parser.md), [`analysis`](../analysis/analysis.md), [`automaton`](../automaton/intro.md), [`regex`](../regex/regex.md), and [`visual`](../visual/visual.md)) depends on it.
+The `common` submodule is the bedrock upon which the entire PyLGEN ecosystem is built. It provides the fundamental data types, the core abstractions for the **Abstract Syntax Tree (AST)**, **grammar symbols**, **lexical tokens**, the **error hierarchy**, and **transition tables** that connect all the moving parts. Understanding this module is essential, because every other submodule ([`lexer`](../lexer/lexer.md), [`parser`](../parser/parser.md), [`analysis`](../analysis/analysis.md), [`automaton`](../automaton/intro.md), [`regex`](../regex/regex.md), and [`visual`](../visual/visual.md)) depends on it.
 
 In this section, we will explore each class, its purpose, its API (both in pure Python and Cython), and recommended usage patterns. You'll find practical examples that will help you internalize how and when to use each component.
 
@@ -11,12 +11,12 @@ The submodule is organized into the following files (all located in `pylgen/comm
 | **File** | **Purpose** |
 | :---: | :---: |
 | `enums.py` | Defines the `TokenType` base class (a `StrEnum`) for all token types. |
-| `types.pxd` |	Cython declarations for the Symbol, AST, ASTListView, and Token classes. |
-| `types.pyx` |	Cython implementation of those classes (with cdef and cpdef methods). |
+| `types.pxd` |	Cython declarations for `Symbol`, `AST`, the `Error` hierarchy (`Error`, `LexicalError`, `SyntaxError`, `SemanticError`, `RuntimeError`), `ErrorAST`, `ASTListView`, and `Token`. |
+| `types.pyx` |	Cython implementation of those classes (with `cdef` and `cpdef` methods). |
 | `types.pyi` |	Stubs for type checkers and IDE autocompletion in Python environments. |
-| `table.pxd` |	Cython declarations for the Table class. |
-| `table.pyx` |	Implementation of Table. |
-| `table.pyi` |	Stubs for Table. |
+| `table.pxd` |	Cython declarations for the `Table` class. |
+| `table.pyx` |	Implementation of `Table`. |
+| `table.pyi` |	Stubs for `Table`. |
 
 !!! note "Python/Cython Duality"
     All classes are defined as `cdef class` in the `.pyx` files, allowing them to be used efficiently from Cython. However, they are also fully usable from standard Python, thanks to the `.pyi` stubs and the fact that Cython generates code that is compatible with the Python interpreter. This means you can prototype in pure Python and, when you need speed, compile with Cython without changing your business logic.
@@ -95,7 +95,7 @@ The hash value of a `Symbol` is computed deterministically using the **SHA‑256
 The hash is calculated once in the constructor and stored in a private `_hash` field, making subsequent lookups in dictionaries and sets extremely fast.
 
 !!! note
-    The hash is computed using SHA‑256 and truncated to a 64‑bit integer via manual byte‑wise shifting. This provides a very low collision probability while remaining efficient. The use of a cryptographic hash is overkill for hashing, but it guarantees determinism and distribution quality.
+    The SHA‑256 digest is accumulated into a `long long` and then stored in a `cdef int _hash` field, so the final hash is a 32‑bit C integer.
 
 ## AST (The Root of Every Tree)
 
@@ -106,24 +106,26 @@ The hash is calculated once in the constructor and stored in a private `_hash` f
 | **Attribute/Method** | **Type/Return** | **Description** |
 | :---: | :---: | :---: |
 | **`symbol` (property)** |	`Symbol` | The grammar symbol associated with this node. |
-| **`line` (property)**	| `int` | The line number in the source code where this node begins. |
-| **`column` (property)** | `int` | The column number (1‑indexed) where it begins. |
+| **`start_position` (property)** | `Tuple[int, int]` | `(start_line, start_column)` where the node starts. |
+| **`end_position` (property)** | `Tuple[int, int]` | `(end_line, end_column)` where the node ends. |
 | **`is_error` (property)** | `bool` | Indicates whether this node represents a semantic error. Always `False` for `AST`; overridden in `ErrorAST` | 
 | `children()` (method) | `List[AST]` | Returns a list of child AST nodes. Must be overridden. |
 
 !!! warning "Validation"
-    The constructor of `AST` raises a `ValueError` if `line` or `column` are negative. Always pass non‑negative integers.
+    The constructor of AST raises a `ValueError` if `start_line` or `start_column` are negative, if `end_line < start_line`, or if `end_line == start_line` and `end_column <= start_column`. The setters for `start_position` and `end_position` perform similar checks.
 
 !!! note "String Representation"
     Both `__str__` and `__repr__` return the string representation of the internal `Symbol` (i.e., the symbol’s name). This makes debugging and logging more convenient.
 
 === "Python"
+
     ```python
     from pylgen.common.types import AST, Symbol
 
     class BinaryOpAST(AST):
-        def __init__(self, left: AST, right: AST, symbol: Symbol, line: int, column: int):
-            super().__init__(symbol, line, column)
+        def __init__(self, left: AST, right: AST, symbol: Symbol):
+            (start_line,start_column),(end_line,end_column) = left.start_position,right.end_position
+            super().__init__(symbol, start_line, start_column, end_line, end_column)
             self._left = left
             self._right = right
 
@@ -134,7 +136,7 @@ The hash is calculated once in the constructor and stored in a private `_hash` f
     ```cython
     from pylgen.common.types cimport AST
 
-    cdef class BinaryAST(AST):
+    cdef class BinaryOpAST(AST):
         cdef AST _left
         cdef AST _right
         cdef list[AST] _childs
@@ -160,23 +162,21 @@ By embedding `ErrorAST` nodes directly into the tree, the parser can continue pr
 === "Python"
 
     ```python
-    from pylgen.common.types import ErrorAST, Symbol
-    from pylgen.analysis.error import SemanticError
+    from pylgen.common.types import ErrorAST, Symbol, SemanticError
 
-    # A semantic error detected inside a reducer
-    error = SemanticError("semantic error detected", line=10, column=5)
-    err_node = ErrorAST(Symbol('error'), line=10, column=5, errors={error})
+    error = SemanticError("semantic error detected", 10, 5, 10, 6)
+    sl, sc = error.start_position
+    el, ec = error.end_position
+    err_node = ErrorAST(Symbol('error'), sl, sc, el, ec, {error})
     ```
 
 === "Cython"
 
     ```cython
-    from pylgen.common.types cimport ErrorAST
-    from pylgen.analysis.error cimport SemanticError
+    from pylgen.common.types cimport ErrorAST, Symbol, SemanticError
 
-    # A syntactic error raised by the parser's recovery mechanism
-    cdef SemanticError error = SemanticError("semantic error detected", 10, 5)
-    cdef ErrorAST err_node = ErrorAST(Symbol('error'), 10, 5, {error})
+    cdef SemanticError error = SemanticError("semantic error detected", 10, 5, 10, 6)
+    cdef ErrorAST err_node = ErrorAST(Symbol('error'), 10, 5, 10, 6, {error})
     ```
 
 ## `Token` (The Node from the Lexer)
@@ -221,20 +221,23 @@ The constructor requires the token text, its **type (must be an instance of a su
 In reducers, you often need to inspect the text or type of a token to build the correct AST. For example:
 
 === "Python"
+    
     ```python
     def number_reductor(asts: ASTListView) -> AST:
         token:Token = asts[0] # this is a Token
+        line, column = token.start_position
         if token.type == TokenTypeEnum.INTEGER:
-            return NumberAST(int(token.text),token.line,token.column)
-        return NumberAST(float(token.text),token.line,token.column)
+            return NumberAST(int(token.text),line,column)
+        return NumberAST(float(token.text),line,column)
     ```
+
 === "Cython"
     ```cython
     cdef AST number_reductor(ASTListView asts):
         cdef Token token = asts[0]
         if token._type == TokenTypeEnum.INTEGER:
-            return NumberAST(int(token.text),token._line,token._column)
-        return NumberAST(float(token.text),token._line,token._column)
+            return NumberAST(int(token._text),token._start_line,token._start_column)
+        return NumberAST(float(token._text),token._start_line,token._start_column)
     ```
 
 ## `ASTListView` (A Lightweight View for Reducers)
@@ -253,6 +256,7 @@ When the parser reduces a production, it passes an `ASTListView` object to the r
 > ### 2. Typical Usage
 
 === "Python"
+
     ```python
     # E -> E + T | T reductor
     def e_reductor(asts:ASTListView) -> AST:
@@ -261,9 +265,11 @@ When the parser reduces a production, it passes an `ASTListView` object to the r
         left = asts[0]
         right = asts[2]
         op = asts[1]
-        return BinaryAST(op,left,right,op.line,op.column)
+        return BinaryOpAST(left,right,op.symbol)
     ```
+
 === "Cython"
+
     ```cython
     # E -> E + T | T reductor
     cdef AST e_reductor(ASTListView asts):
@@ -273,7 +279,7 @@ When the parser reduces a production, it passes an `ASTListView` object to the r
         left = asts._get(0)
         right = asts._get(2)
         op = asts._get(1)
-        return BinaryAST(op,left,right,op._line,op._column)
+        return BinaryOpAST(left,right,op._symbol)
     ```
 
 !!! tip "Pro Tip"
@@ -314,7 +320,7 @@ print(table.items)        # [('q0','a','q1'),('q1','b','q2')]
 
 ## `TokenType` (The Base for Your Token Enumerations)
 
-`TokenType` is a class tha inherits from `StrEnum` (available in Python 3.11+). Its purpose is to provide a type-safe way to define all pssible token types your lexer can generate. You must create a subclass with the names you need:
+`TokenType` is a class tha inherits from `StrEnum` (available in Python 3.11+). Its purpose is to provide a type-safe way to define all possible token types your lexer can generate. You must create a subclass with the names you need:
 
 ```python
 from pylgen.common.enums import TokenType
@@ -346,4 +352,5 @@ The `common` module is never used in isolation. Here is a quick map of how it re
  - `1`. **Predefine symbols and tables** outside of loops (at the module level) to avoid repeated object creation.
  - `2`. **Use `cdef` for all attributes** of your AST and visitor classes. This turns attribute access into C struct member access, eliminating dictionary lookups.
  - `3`. **In reducers, use `_get(idx)` and `_size()` instead of `__getitem__(idx)` and `__len__()`** when writing Cython code.
- - `4`. **Leverage Cython compilation**: your code can run at speeds very close to C if you follow these guidelines, especially in the critical parsing and evaluation paths.
+ - `4`. **Prefer `start_position` / `end_position`** (o sus campos Cython `_start_line`, `_start_column`, etc.) over separate `line`/`column` properties, the latter do not exist in the current implementation.
+ - `5`. **Leverage Cython compilation**: your code can run at speeds very close to C if you follow these guidelines, especially in the critical parsing and evaluation paths.

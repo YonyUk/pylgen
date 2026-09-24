@@ -22,13 +22,13 @@ PyLGEN is organized into seven cohesive submodules, each with a well‑defined r
 
 | **Submodule** | **Responsability** |
 | :---: | :---: |
-| [**`common`**](common/common.md) | Core data types: `Symbol`, `AST`, `Token`, `ASTListView`, `Table`. The foundation. |
+| [**`common`**](common/common.md) | Core data types: `Symbol`, `AST`, `Token`, `Error` hierarchy, `ErrorAST` , `ASTListView`, `Table`. The foundation. |
 | [**`automaton`**](automaton/intro.md) | Finite automata construction, determinization (NFA → DFA), minimization (Hopcroft). |
 | [**`grammar`**](grammar/intro.md) | Grammar definition (productions, first/follow sets), attributed grammars with reducers. |
 | [**`regex`**](regex/regex.md) | Regular expression engine: parse patterns, build automata, convert between regex and automata. |
 | [**`lexer`**](lexer/lexer.md) | Lexical analysis: regex‑based tokenization, prioritization, validation, and error handling. |
 | [**`parser`**](parser/parser.md) | LALR(1) parser generator and runtime: conflict detection, error recovery, AST construction. |
-| [**`analysis`**](analysis/analysis.md) | Semantic analysis framework: visitors, traversal strategies, contexts, and error hierarchies. |
+| [**`analysis`**](analysis/analysis.md) | Semantic analysis framework: visitors, traversal strategies, and contexts. |
 | [**`visual`**](visual/visual.md) | Interactive graph visualization for automata, ASTs, and parse trees (via HTML/pyvis). |
 
 Each module builds upon the ones above it. The `common` module stands alone; every other module depends on it. This layered design ensures that you can use, say, the `automaton` module independently of the `parser`, if all you need is a DFA minimizer.

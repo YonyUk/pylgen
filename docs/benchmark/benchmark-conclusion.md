@@ -147,7 +147,7 @@ You can explore the raw data here:
 
 > 1. **CPU Hotspots**: Both reports confirm that the parsing phase (specifically the `reductor` functions in PyLGEN) dominates the CPU cycles. In PyLGEN, this accounts for ~85% of the native execution time, validating our optimization priorities.
 >
-> 2. **Memory Timeline**: The memory allocation graphs provide a visual confirmation of the peak usage disparity—PyLGEN's graph stays in 928 MB, while Lark's allocation curve reaches 4 GB.
+> 2. **Memory Timeline**: The memory allocation graphs provide a visual confirmation of the peak usage disparity—PyLGEN's graph stays in 968 MB, while Lark's allocation curve reaches 4 GB.
 >
 > 3. **Line-by-line Overhead**: The HTML drill-down allows you to inspect exactly which regex patterns (in the lexer) or which visit methods (in the evaluator) incur the most cost, offering actionable insights for future micro-optimizations.
 >
@@ -204,7 +204,7 @@ The benchmark hardware had only **8 GB of RAM**. For the 2M‑line file (≈40 M
 - **CPU contention**: The kernel spends more time managing memory pages, reducing the CPU cycles available for parsing.
 - **Cache thrashing**: Larger working sets degrade CPU cache efficiency.
 
-PyLGEN, by contrast, used only **~928 MB** for the 2M‑line file and **~2 GB** for the 4M‑line file, staying well within the physical RAM limit. This allowed it to avoid swapping and maintain consistent performance scaling.
+PyLGEN, by contrast, used only **~968 MB** for the 2M‑line file and **~2 GB** for the 4M‑line file, staying well within the physical RAM limit. This allowed it to avoid swapping and maintain consistent performance scaling.
 
 **Interpretation**: The widening speedup gap is also a consequence of Lark's higher memory pressure, which becomes a bottleneck under constrained hardware. In environments with abundant RAM (e.g., 32 GB or more), the difference might be smaller. However, for typical developer laptops or cloud instances with limited memory, PyLGEN's memory efficiency provides a tangible, real‑world advantage.
 
@@ -606,7 +606,7 @@ tree = parser.parse(text)
 print('parsed in',datetime.now() - t)
 ```
 
-## Appendix B: `main.py` used for time measuring
+## Appendix C: `main.py` used for time measuring
 
 ```python
 import os
