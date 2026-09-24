@@ -389,19 +389,15 @@ cdef inline AST single_reductor(ASTListView asts):
     return asts._get(0)
 
 cdef inline AST plus_reductor(ASTListView asts):
-    cdef AST ast = asts._get(1)
     return PlusAST(asts._get(0),asts._get(2))
 
 cdef inline AST minus_reductor(ASTListView asts):
-    cdef AST ast = asts._get(1)
     return MinusAST(asts._get(0),asts._get(2))
 
 cdef inline AST mul_reductor(ASTListView asts):
-    cdef AST ast = asts._get(1)
     return MulAST(asts._get(0),asts._get(2))
 
 cdef inline AST div_reductor(ASTListView asts):
-    cdef AST ast = asts._get(1)
     cdef NumberAST right
     if asts._get(2)._symbol._hash == NumberExpression._hash:
         right = asts._get(2)
@@ -410,7 +406,6 @@ cdef inline AST div_reductor(ASTListView asts):
     return DivAST(asts._get(0),asts._get(2))
 
 cdef inline AST mod_reductor(ASTListView asts):
-    cdef AST ast = asts._get(1)
     cdef NumberAST right,left
     cdef set[SemanticError] errors = set()
 
@@ -431,11 +426,9 @@ cdef inline AST mod_reductor(ASTListView asts):
     return ModAST(asts._get(0),asts._get(2))
 
 cdef inline AST exp_reductor(ASTListView asts):
-    cdef AST ast = asts._get(1)
     return ExpAST(asts._get(0),asts._get(2))
 
 cdef inline AST assignment_reductor(ASTListView asts):
-    cdef AST ast = asts._get(1)
     return AssignmentAST(asts._get(0),asts._get(2))
 
 cdef inline AST extractor_reductor(ASTListView asts):
@@ -514,7 +507,6 @@ cdef inline AST complex_number_reductor_1(ASTListView asts):
     return NumberAST(str(_value),np.complex128,img._start_line,img._start_column)
 
 cdef inline AST vector_reductor(ASTListView asts):
-    cdef Token star = asts._get(0) # type:ignore
     cdef VectorComponentsAST components = asts._get(1) # type:ignore
     return VectorAST(components)
 

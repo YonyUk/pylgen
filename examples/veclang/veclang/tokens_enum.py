@@ -10,5 +10,4 @@ class TokenTypeEnum(TokenType):
     VARIABLE = 'VARIABLE'
     JUMPLINE = 'JUMPLINE'
     COMMENT = 'COMMENT'
-    IMAGINARY_UNIT = 'IMAGINARY_UNIT'
     EOF = 'EOF'
