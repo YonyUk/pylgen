@@ -27,6 +27,7 @@ Example code in VecLang:
 ```txt
 // testing complex numbers creation
 complex_number = complex(2,3)
+complex_number_b = 1 + 3j
 
 // testing function declarations
 f(x:complex,y:float) = x / (y - 5)

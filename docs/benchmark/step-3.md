@@ -8,7 +8,7 @@ VecLang defines a hierarchy of runtime errors, all inheriting from PyLGEN's `Run
 
 File: `errors.pxd`(declarations)
 ```cython
-from pylgen.analysis.error cimport RuntimeError
+from pylgen.common.types cimport RuntimeError
 
 cdef class DivisionByZeroError(RuntimeError):
     pass
@@ -26,6 +26,9 @@ cdef class UnSupportedOperationForTypesError(UnSupportedOperationError):
     pass
 
 cdef class InvalidOperationError(RuntimeError):
+    pass
+
+cdef class BadRangeError(InvalidOperationError):
     pass
 
 cdef class IndexOutOfRangeError(RuntimeError):
@@ -34,41 +37,46 @@ cdef class IndexOutOfRangeError(RuntimeError):
 
 File: `errors.pyx`(implementations)
 ```cython
-from pylgen.analysis.error cimport RuntimeError
+from pylgen.common.types cimport RuntimeError
 
 cdef class DivisionByZeroError(RuntimeError):
 
-    def __init__(self, list[str] stack_trace, int line, int column) -> None:
-        super().__init__(stack_trace, line, column, 'Division by zero not allowed')
+    def __init__(self, list[str] stack_trace, int start_line, int start_column, int end_line, int end_column) -> None:
+        super().__init__(stack_trace, start_line, start_column, end_line, end_column, 'Division by zero not allowed')
 
 cdef class ModuleByZeroError(RuntimeError):
-    def __init__(self, list[str] stack_trace, int line, int column) -> None:
-        super().__init__(stack_trace, line, column, 'Module by zero not allowed')
+    def __init__(self, list[str] stack_trace, int start_line, int start_column, int end_line, int end_column) -> None:
+        super().__init__(stack_trace, start_line, start_column, end_line, end_column, 'Module by zero not allowed')
 
 cdef class UnSupportedOperationError(RuntimeError):
 
-    def __init__(self, list[str] stack_trace, int line, int column, str msg) -> None:
-        super().__init__(stack_trace, line, column, msg)
+    def __init__(self, list[str] stack_trace, int start_line, int start_column, int end_line, int end_column, str msg) -> None:
+        super().__init__(stack_trace, start_line, start_column, end_line, end_column, msg)
 
 cdef class UnSupportedOperationForTypeError(UnSupportedOperationError):
 
-    def __init__(self, list[str] stack_trace, int line, int column,str operation ,type _type) -> None:
-        super().__init__(stack_trace, line, column, f'operation "{operation}" not supported for type {_type}')
+    def __init__(self, list[str] stack_trace, int start_line, int start_column, int end_line, int end_column,str operation ,type _type) -> None:
+        super().__init__(stack_trace, start_line, start_column, end_line, end_column, f'operation "{operation}" not supported for type {_type}')
 
 cdef class UnSupportedOperationForTypesError(UnSupportedOperationError):
     
-    def __init__(self, list[str] stack_trace, int line, int column,str operation ,type _type1,type _type2) -> None:
-        super().__init__(stack_trace, line, column, f'operation ({_type1} "{operation}" {_type2}) not supported')
+    def __init__(self, list[str] stack_trace, int start_line, int start_column, int end_line, int end_column,str operation ,type _type1,type _type2) -> None:
+        super().__init__(stack_trace, start_line, start_column, end_line, end_column, f'operation ({_type1} "{operation}" {_type2}) not supported')
 
 cdef class InvalidOperationError(RuntimeError):
 
-    def __init__(self, list[str] stack_trace, int line, int column, str msg) -> None:
-        super().__init__(stack_trace, line, column, msg)
+    def __init__(self, list[str] stack_trace, int start_line, int start_column, int end_line, int end_column, str msg) -> None:
+        super().__init__(stack_trace, start_line, start_column, end_line, end_column, msg)
+
+cdef class BadRangeError(InvalidOperationError):
+
+    def __init__(self, list[str] stack_trace, int start_line, int start_column, int end_line, int end_column) -> None:
+        super().__init__(stack_trace, start_line, start_column, end_line, end_column, f'The args[1] < args[0] is not allowed')
 
 cdef class IndexOutOfRangeError(RuntimeError):
     
-    def __init__(self, list[str] stack_trace, int line, int column,int index, int size) -> None:
-        super().__init__(stack_trace, line, column, f'Index {index} out of range (0-{size - 1})')
+    def __init__(self, list[str] stack_trace, int start_line, int start_column, int end_line, int end_column,int index, int size) -> None:
+        super().__init__(stack_trace, start_line, start_column, end_line, end_column, f'Index {index} out of range (0-{size - 1})')
 ```
 
 By keeping them as `cdef` classes, we avoid Python attribute lookups and make error creation cheap, important when processing millions of lines.
@@ -363,9 +371,8 @@ cpdef object get_ast_value(AST ast,VecLangContext context)
 File: `visitors.pyx`
 ```cython
 from pylgen.analysis.visitor cimport ASTChildrenSelector,ASTVisitor,ASTWalker,TraversalStrategy
-from pylgen.analysis.error cimport RuntimeError,SemanticError
 from pylgen.analysis.context cimport Context
-from pylgen.common.types cimport AST
+from pylgen.common.types cimport AST,RuntimeError,SemanticError
 
 import numpy as np # type:ignore
 
@@ -406,6 +413,7 @@ from .errors cimport(
     DivisionByZeroError,
     UnSupportedOperationForTypesError,
     ModuleByZeroError,
+    BadRangeError,
     InvalidOperationError,
     IndexOutOfRangeError
 )
@@ -670,7 +678,7 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
         cdef VariableExpressionAST var
 
         if len(args._args) != 1:
-            error = SemanticError(f'Wrong number of args: got {len(args._args)}, expected 1',args._line,args._column) # type:ignore
+            error = SemanticError(f'Wrong number of args: got {len(args._args)}, expected 1',args._start_line,args._start_column,args._end_line,args._end_column) # type:ignore
             context.add_semantic_error(error)
         
         if len(args._args) < 1:
@@ -681,7 +689,7 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
         if arg._symbol == VariableExpression:
             var = arg # type:ignore
             if not (<VecLangContext>context).look_for_var(var._name)[0]:
-                error = SemanticError(f'Undeclared variable "{var._name}"',var._line,var._column) # type:ignore
+                error = SemanticError(f'Undeclared variable "{var._name}"',var._start_line,var._start_column,var._end_line,var._end_column) # type:ignore
                 context.add_semantic_error(error)
 
     cdef void _mean_checker(self,VecLangContext context, FunctionArgsAST args):
@@ -690,7 +698,7 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
         cdef VariableExpressionAST var
 
         if len(args._args) != 1:
-            error = SemanticError(f'Wrong number of args: got {len(args._args)}, expected 1',args._line,args._column) # type:ignore
+            error = SemanticError(f'Wrong number of args: got {len(args._args)}, expected 1',args._start_line,args._start_column,args._end_line,args._end_column) # type:ignore
             context.add_semantic_error(error)
         
         if len(args._args) < 1:
@@ -701,7 +709,7 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
         if arg._symbol == VariableExpression:
             var = arg # type:ignore
             if not (<VecLangContext>context).look_for_var(var._name)[0]:
-                error = SemanticError(f'Undeclared variable "{var._name}"',var._line,var._column) # type:ignore
+                error = SemanticError(f'Undeclared variable "{var._name}"',var._start_line,var._start_column,var._end_line,var._end_column) # type:ignore
                 context.add_semantic_error(error)
     
     cdef void _dot_checker(self,VecLangContext context, FunctionArgsAST args):
@@ -710,7 +718,7 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
         cdef VariableExpressionAST var
 
         if len(args._args) != 2:
-            error = SemanticError(f'Wrong number of args: got {len(args._args)}, expected 2',args._line,args._column) # type:ignore
+            error = SemanticError(f'Wrong number of args: got {len(args._args)}, expected 2',args._start_line,args._start_column,args._end_line,args._end_column) # type:ignore
             context.add_semantic_error(error)
 
         if len(args._args) < 1:
@@ -721,7 +729,7 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
         if arg._symbol == VariableExpression:
             var = arg # type:ignore
             if not (<VecLangContext>context).look_for_var(var._name)[0]:
-                error = SemanticError(f'Undeclared variable "{var._name}"',var._line,var._column) # type:ignore
+                error = SemanticError(f'Undeclared variable "{var._name}"',var._start_line,var._start_column,var._end_line,var._end_column) # type:ignore
                 context.add_semantic_error(error)
 
         if len(args._args) < 2:
@@ -732,7 +740,7 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
         if arg._symbol == VariableExpression:
             var = arg # type:ignore
             if not (<VecLangContext>context).look_for_var(var._name)[0]:
-                error = SemanticError(f'Undeclared variable "{var._name}"',var._line,var._column) # type:ignore
+                error = SemanticError(f'Undeclared variable "{var._name}"',var._start_line,var._start_column,var._end_line,var._end_column) # type:ignore
                 context.add_semantic_error(error)
 
     cdef void _sum_checker(self,VecLangContext context, FunctionArgsAST args):
@@ -741,7 +749,7 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
         cdef VariableExpressionAST var
 
         if len(args._args) != 1:
-            error = SemanticError(f'Wrong number of args: got {len(args._args)}, expected 1',args._line,args._column) # type:ignore
+            error = SemanticError(f'Wrong number of args: got {len(args._args)}, expected 1',args._start_line,args._start_column) # type:ignore
             context.add_semantic_error(error)
 
         arg = args._args[0]
@@ -749,7 +757,7 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
         if arg._symbol == VariableExpression:
             var = arg # type:ignore
             if not (<VecLangContext>context).look_for_var(var._name)[0]:
-                error = SemanticError(f'Undeclared variable "{var._name}"',var._line,var._column) # type:ignore
+                error = SemanticError(f'Undeclared variable "{var._name}"',var._start_line,var._start_column,var._end_line,var._end_column) # type:ignore
                 context.add_semantic_error(error)
 
     cdef void _check_call_loop(self,VecLangContext context, FunctionCallAST call):
@@ -775,7 +783,7 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
                 if child._symbol == FunctionCall:
                     func_call = <FunctionCallAST>child # type:ignore
                     if func_call._function_name == call._function_name:
-                        error = SemanticError(f'Infinite loop call detected for function {call._function_name}',child._line,child._column) # type:ignore
+                        error = SemanticError(f'Infinite loop call detected for function {call._function_name}',child._start_line,child._start_column,child._end_line,child._end_column) # type:ignore
                         if not error in context._errors:
                             context.add_semantic_error(error)
 
@@ -801,7 +809,7 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
 
         self._check_context_type(context)
         if not (func._function_name in (<VecLangContext>context)._functions or func._function_name in (<VecLangContext>context)._built_in_functions):
-            error = SemanticError(f'function {func._function_name} doesn\'t exists',func._line,func._column) # type:ignore
+            error = SemanticError(f'function {func._function_name} doesn\'t exists',func._start_line,func._start_column,func._end_line,func._end_column) # type:ignore
             context.add_semantic_error(error)
         
         if func._function_name in self._checkers:
@@ -822,17 +830,17 @@ cdef class FunctionCallASTErrorCollectorVisitor(ASTVisitor):
             args_len = len(args._args)
             args = func._args
             if args_len != sig_args_len:
-                error = SemanticError(f'Wrong number of args: got {args_len}, expected {sig_args_len}',args._line,args._column) # type:ignore
+                error = SemanticError(f'Wrong number of args: got {args_len}, expected {sig_args_len}',args._start_line,args._start_column,args._end_line,args._end_column) # type:ignore
                 context.add_semantic_error(error)
-
-            for idx in range(args_len):
-                arg = args._args[idx]
-                param_type_tuple = func_signature[idx]
-                if arg._symbol == VariableExpression:
-                    var_arg = arg # type:ignore
-                    if not (<VecLangContext>context).look_for_var(var_arg._name)[0]:
-                        error = SemanticError(f'Undeclared variable "{var_arg._name}"',var_arg._line,var_arg._column) # type:ignore
-                        context.add_semantic_error(error)
+            else:
+                for idx in range(args_len):
+                    arg = args._args[idx]
+                    param_type_tuple = func_signature[idx]
+                    if arg._symbol == VariableExpression:
+                        var_arg = arg # type:ignore
+                        if not (<VecLangContext>context).look_for_var(var_arg._name)[0]:
+                            error = SemanticError(f'Undeclared variable "{var_arg._name}"',var_arg._start_line,var_arg._start_column,var_arg._end_line,var_arg._end_column) # type:ignore
+                            context.add_semantic_error(error)
 
 cdef class VectorComponentsASTErrorCollector(ASTVisitor):
 
@@ -854,7 +862,7 @@ cdef class VectorComponentsASTErrorCollector(ASTVisitor):
             if component._symbol == VariableExpression:
                 var = component # type:ignore
                 if not (<VecLangContext>context).look_for_var(var._name)[0]:
-                    error = SemanticError(f'Undeclared variable "{var._name}"',var._line,var._column) # type:ignore
+                    error = SemanticError(f'Undeclared variable "{var._name}"',var._start_line,var._start_column,var._end_line,var._end_column) # type:ignore
                     context.add_semantic_error(error)
 
 cdef class SlicingASTErrorCollectorVisitor(ASTVisitor):
@@ -873,26 +881,26 @@ cdef class SlicingASTErrorCollectorVisitor(ASTVisitor):
 
         self._check_context_type(context)
         if _range._min < 0:
-            error1 = SemanticError(f'min index can\'t be less than 0',_range._line,_range._column) # type:ignore
+            error1 = SemanticError(f'min index can\'t be less than 0',_range._start_line,_range._start_column,_range._end_line,_range._end_column) # type:ignore
             context.add_semantic_error(error1)
         if target._symbol == Vector:
             components = (<VectorAST>target)._components
             if _range._max > len(components._components):
-                error2 = SemanticError(f'max index can\'t be greater than vector size',_range._line,_range._column) # type:ignore
+                error2 = SemanticError(f'max index can\'t be greater than vector size',_range._start_line,_range._start_column,_range._end_line,_range._end_column) # type:ignore
                 context.add_semantic_error(error2)
         elif target._symbol == Range:
             if _range._max > (<RangeAST>target)._max - (<RangeAST>target)._min:
-                error2 = SemanticError(f'max index can\'t be greater than range size',_range._line,_range._column) # type:ignore
+                error2 = SemanticError(f'max index can\'t be greater than range size',_range._start_line,_range._start_column,_range._end_line,_range._end_column) # type:ignore
                 context.add_semantic_error(error2)
         elif target._symbol == Slicing:
             inner_range = (<SlicingAST>target)._range
             if _range._max > inner_range._max - inner_range._min:
-                error2 = SemanticError(f'max index can\'t be greater than range size',_range._line,_range._column) # type:ignore
+                error2 = SemanticError(f'max index can\'t be greater than range size',_range._start_line,_range._start_column,_range._end_line,_range._end_column) # type:ignore
                 context.add_semantic_error(error2)
         elif target._symbol == VariableExpression:
             var = target # type:ignore
             if not (<VecLangContext>context).look_for_var(var._name)[0]:
-                error2 = SemanticError(f'undeclared variable "{var._name}"',var._line,var._column) # type:ignore
+                error2 = SemanticError(f'undeclared variable "{var._name}"',var._start_line,var._start_column,var._end_line,var._end_column) # type:ignore
                 context.add_semantic_error(error2)
 
 cdef class IndexingASTErrorCollectorVisitor(ASTVisitor):
@@ -910,11 +918,11 @@ cdef class IndexingASTErrorCollectorVisitor(ASTVisitor):
         if target._symbol == Vector:
             components = (<VectorAST>target)._components
             if indexing._index > len(components._components) - 1 or indexing._index < 0:
-                error = SemanticError(f'index out of range',indexing._line,indexing._column) # type:ignore
+                error = SemanticError(f'index out of range',indexing._start_line,indexing._start_column,indexing._end_line,indexing._end_column) # type:ignore
                 context.add_semantic_error(error)
         elif target._symbol == Range:
             if indexing._index < 0 or indexing._index > (<RangeAST>target)._max - (<RangeAST>target)._min - 1:
-                error = SemanticError(f'index out of range',indexing._line,indexing._column) # type:ignore
+                error = SemanticError(f'index out of range',indexing._start_line,indexing._start_column,indexing._end_line,indexing._end_column) # type:ignore
                 context.add_semantic_error(error)
 
 cdef class BinaryASTErrorCollectorVisitor(ASTVisitor):
@@ -933,13 +941,13 @@ cdef class BinaryASTErrorCollectorVisitor(ASTVisitor):
             var = op._left # type:ignore
             if op._symbol != eq:
                 if not _context.look_for_var(var._name)[0]:
-                    error1 = SemanticError(f'variable "{var._name}" doesn\'t exists',var._line,var._column) # type:ignore
+                    error1 = SemanticError(f'variable "{var._name}" doesn\'t exists',var._start_line,var._start_column,var._end_line,var._end_column) # type:ignore
                     context.add_semantic_error(error1)
 
         if op._right._symbol == VariableExpression:
             var = op._right # type:ignore
             if not _context.look_for_var(var._name)[0]:
-                error2 = SemanticError(f'variable "{var._name}" doesn\'t exists',var._line,var._column) # type:ignore
+                error2 = SemanticError(f'variable "{var._name}" doesn\'t exists',var._start_line,var._start_column,var._end_line,var._end_column) # type:ignore
                 context.add_semantic_error(error2)
 
 cdef class VariableIndexerVisitor(ASTVisitor):
@@ -999,7 +1007,7 @@ cdef class BinaryASTEvaluatorVisitor(ASTVisitor):
         self._left_type = type(self._left_value)
         if self._left_type == self._right_type and self._left_type == np.ndarray:
             if self._left_value.shape != self._right_value.shape: # type:ignore
-                error = InvalidOperationError(context._stack,ast._line,ast._column,'Vectors operands must have same size') # type:ignore
+                error = InvalidOperationError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column,'Vectors operands must have same size') # type:ignore
                 context.add_runtime_error(ast,error)
                 self._runtime_error = True # type:ignore
 
@@ -1057,7 +1065,6 @@ cdef class MulASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 cdef class DivASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
     cpdef void visit(self,AST ast, Context context):
-        cdef int line,column
         cdef RuntimeError error
         
         super(DivASTEvaluatorVisitor,self).visit(ast,context)
@@ -1070,9 +1077,7 @@ cdef class DivASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
             self._runtime_error = True # type:ignore
         if not self._runtime_error:
             if self._right_value == 0:
-                line = (<AST>ast)._line
-                column = (<AST>ast)._column
-                error = DivisionByZeroError(context._stack,line,column) # type:ignore
+                error = DivisionByZeroError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column) # type:ignore
                 (<VecLangContext>context).add_runtime_error(ast,error)
                 (<VecLangContext>context)._eval_stack.append(None)
             else:
@@ -1081,7 +1086,6 @@ cdef class DivASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 cdef class ModASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
 
     cpdef void visit(self,AST ast,Context context):
-        cdef int line,column
         cdef RuntimeError error
 
         super(ModASTEvaluatorVisitor,self).visit(ast,context)
@@ -1093,15 +1097,11 @@ cdef class ModASTEvaluatorVisitor(BinaryASTEvaluatorVisitor):
             self._runtime_error = True # type:ignore
         if not self._runtime_error:
             if self._left_type == np.complex128 or self._right_type == np.complex128:
-                line = (<AST>ast)._line
-                column = (<AST>ast)._column
-                error = UnSupportedOperationForTypesError(context._stack,line,column,"%",self._left_type,self._right_type) # type:ignore
+                error = UnSupportedOperationForTypesError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column,"%",self._left_type,self._right_type) # type:ignore
                 (<VecLangContext>context).add_runtime_error(ast,error)
                 (<VecLangContext>context)._eval_stack.append(None)
             elif self._right_value == 0:
-                line = (<AST>ast)._line
-                column = (<AST>ast)._column
-                error = ModuleByZeroError(context._stack,line,column) # type:ignore
+                error = ModuleByZeroError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column) # type:ignore
                 (<VecLangContext>context).add_runtime_error(ast,error)
                 (<VecLangContext>context)._eval_stack.append(None)
             else:
@@ -1208,11 +1208,11 @@ cdef class SlicingASTEvaluatorVisitor(ASTVisitor):
             value = (<VecLangContext>context).look_for_var(var._name)[1]
             var_type = type(value)
             if var_type != np.ndarray:
-                error = InvalidOperationError(context._stack,slice._line,slice._column,f'Slicing operation not supported for type "{var_type}"') # type:ignore
+                error = InvalidOperationError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column,f'Slicing operation not supported for type "{var_type}"') # type:ignore
                 (<VecLangContext>context).add_runtime_error(ast,error)
                 (<VecLangContext>context)._eval_stack.append(None)
             elif _range._max >= len(value): # type:ignore
-                error = InvalidOperationError(context._stack,slice._line,slice._column,f'max index is greater than vector size {len(value)}') # type:ignore
+                error = InvalidOperationError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column,f'max index is greater than vector size {len(value)}') # type:ignore
                 (<VecLangContext>context).add_runtime_error(ast,error)
                 (<VecLangContext>context)._eval_stack.append(None)
             else:
@@ -1238,11 +1238,11 @@ cdef class IndexingASTEvaluatorVisitor(ASTVisitor):
             value = (<VecLangContext>context).look_for_var(var._name)[1]
             var_type = type(value)
             if var_type != np.ndarray:
-                error = InvalidOperationError(context._stack,indexing._line,indexing._column,f'Indexing operation not supported for type "{var_type}"') # type:ignore
+                error = InvalidOperationError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column,f'Indexing operation not supported for type "{var_type}"') # type:ignore
                 (<VecLangContext>context).add_runtime_error(ast,error)
                 (<VecLangContext>context)._eval_stack.append(None)
             elif indexing._index >= len(value): # type:ignore
-                error = IndexOutOfRangeError(context._stack,indexing._line,indexing._column,indexing._index,len(value)) # type:ignore
+                error = IndexOutOfRangeError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column,indexing._index,len(value)) # type:ignore
                 (<VecLangContext>context).add_runtime_error(ast,error)
                 (<VecLangContext>context)._eval_stack.append(None)
             else:
@@ -1250,7 +1250,7 @@ cdef class IndexingASTEvaluatorVisitor(ASTVisitor):
         elif target._symbol == Vector or target._symbol == Range or target._symbol == Slicing:
             components = (<VecLangContext>context)._eval_stack.pop()
             if indexing._index >= len(components): # type:ignore
-                error = IndexOutOfRangeError(context._stack,indexing._line,indexing._column,indexing._index,len(components)) # type:ignore
+                error = IndexOutOfRangeError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column,indexing._index,len(components)) # type:ignore
                 (<VecLangContext>context).add_runtime_error(ast,error)
                 (<VecLangContext>context)._eval_stack.append(None)
             else:
@@ -1303,7 +1303,7 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
             var_val = context.look_for_var(var._name)[1]
             var_type = type(var_val)
             if var_type != np.ndarray and not var_val is None:
-                error = InvalidOperationError(context._stack,arg._line,arg._column,f'arg1 must be of type "Vector"; got {var_type}') # type:ignore
+                error = InvalidOperationError(context._stack,arg._start_line,arg._start_column,arg._end_line,arg._end_column,f'arg1 must be of type "Vector"; got {var_type}') # type:ignore
                 context.add_runtime_error(arg,error)
                 val = None
             else:
@@ -1312,7 +1312,7 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
             val = context._eval_stack.pop()
             var_type = type(val)
             if var_type != np.ndarray and not val is None:
-                error = InvalidOperationError(context._stack,arg._line,arg._column,f'arg1 must be of type "Vector"; got {var_type}') # type:ignore
+                error = InvalidOperationError(context._stack,arg._start_line,arg._start_column,arg._end_line,arg._end_column,f'arg1 must be of type "Vector"; got {var_type}') # type:ignore
                 context.add_runtime_error(arg,error)
         
         if val is None:
@@ -1335,7 +1335,7 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
             var_val = context.look_for_var(var._name)[1]
             var_type = type(var_val)
             if var_type != np.ndarray and not var_val is None:
-                error = InvalidOperationError(context._stack,arg2._line,arg2._column,f'arg2 must be of type "Vector"; got {var_type}') # type:ignore
+                error = InvalidOperationError(context._stack,arg2._start_line,arg2._start_column,arg2._end_line,arg2._end_column,f'arg2 must be of type "Vector"; got {var_type}') # type:ignore
                 context.add_runtime_error(arg2,error)
                 val2 = None
             else:
@@ -1344,7 +1344,7 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
             val2 = context._eval_stack.pop()
             var_type = type(val2)
             if var_type != np.ndarray and not val2 is None:
-                error = InvalidOperationError(context._stack,arg2._line,arg2._column,f'arg2 must be of type "Vector"; got {var_type}') # type:ignore
+                error = InvalidOperationError(context._stack,arg2._start_line,arg2._start_column,arg2._end_line,arg2._end_column,f'arg2 must be of type "Vector"; got {var_type}') # type:ignore
                 context.add_runtime_error(arg1,error)
         
         if arg1._symbol == VariableExpression:
@@ -1352,7 +1352,7 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
             var_val = context.look_for_var(var._name)[1]
             var_type = type(var_val)
             if var_type != np.ndarray and not var_val is None:
-                error = InvalidOperationError(context._stack,arg1._line,arg1._column,f'arg1 must be of type "Vector"; got {var_type}') # type:ignore
+                error = InvalidOperationError(context._stack,arg1._start_line,arg1._start_column,arg1._end_line,arg1._end_column,f'arg1 must be of type "Vector"; got {var_type}') # type:ignore
                 context.add_runtime_error(arg1,error)
                 val1 = None
             else:
@@ -1361,7 +1361,7 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
             val1 = context._eval_stack.pop()
             var_type = type(val1)
             if var_type != np.ndarray and not val1 is None:
-                error = InvalidOperationError(context._stack,arg1._line,arg1._column,f'arg1 must be of type "Vector"; got {var_type}') # type:ignore
+                error = InvalidOperationError(context._stack,arg1._start_line,arg1._start_column,arg1._end_line,arg1._end_column,f'arg1 must be of type "Vector"; got {var_type}') # type:ignore
                 context.add_runtime_error(arg1,error)
         
         if val1 is None:
@@ -1370,7 +1370,7 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
             context._eval_stack.append(None)
         else:
             if val1.shape != val2.shape: # type:ignore
-                error = InvalidOperationError(context._stack,arg2._line,arg2._column,f'dot product invalid; vectors must have the same size') # type:ignore
+                error = InvalidOperationError(context._stack,arg1._start_line,arg1._start_column,arg2._end_line,arg2._end_column,f'dot product invalid; vectors must have the same size') # type:ignore
                 context.add_runtime_error(args,error)
                 context._eval_stack.append(None)
             else:
@@ -1390,7 +1390,7 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
             var_val = context.look_for_var(var._name)[1]
             var_type = type(var_val)
             if var_type != np.ndarray and not var_val is None:
-                error = InvalidOperationError(context._stack,arg._line,arg._column,f'arg1 must be of type "Vector"; got {var_type}') # type:ignore
+                error = InvalidOperationError(context._stack,arg._start_line,arg._start_column,arg._end_line,arg._end_column,f'arg1 must be of type "Vector"; got {var_type}') # type:ignore
                 context.add_runtime_error(arg,error)
                 val = None
             else:
@@ -1399,7 +1399,7 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
             val = context._eval_stack.pop()
             var_type = type(val)
             if var_type != np.ndarray and not val is None:
-                error = InvalidOperationError(context._stack,arg._line,arg._column,f'arg1 must be of type "Vector"; got {var_type}') # type:ignore
+                error = InvalidOperationError(context._stack,arg._start_line,arg._start_column,arg._end_line,arg._end_column,f'arg1 must be of type "Vector"; got {var_type}') # type:ignore
                 context.add_runtime_error(arg,error)
         
         if val is None:
@@ -1468,19 +1468,19 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
                     continue
                 
                 if param_type_tuple[1] == 'vector' and arg_type != np.ndarray:
-                    error = RuntimeError(context._stack,ast._line,ast._column,f' expected type for param{idx} is {param_type_tuple[1]}; got {arg_type}') # type:ignore
+                    error = RuntimeError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column,f' expected type for param{idx} is {param_type_tuple[1]}; got {arg_type}') # type:ignore
                     context.add_runtime_error(ast,error)
                     runtime_error = True # type:ignore
                 elif param_type_tuple[1] == 'complex' and arg_type == np.ndarray:
-                    error = RuntimeError(context._stack,ast._line,ast._column,f' expected type for param{idx} is {param_type_tuple[1]}; got {arg_type}') # type:ignore
+                    error = RuntimeError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column,f' expected type for param{idx} is {param_type_tuple[1]}; got {arg_type}') # type:ignore
                     context.add_runtime_error(ast,error)
                     runtime_error = True # type:ignore
                 elif param_type_tuple[1] == 'float' and (arg_type == np.array or arg_type == np.complex128):
-                    error = RuntimeError(context._stack,ast._line,ast._column,f' expected type for param{idx} is {param_type_tuple[1]}; got {arg_type}') # type:ignore
+                    error = RuntimeError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column,f' expected type for param{idx} is {param_type_tuple[1]}; got {arg_type}') # type:ignore
                     context.add_runtime_error(ast,error)
                     runtime_error = True # type:ignore
                 elif param_type_tuple[1] == 'int' and arg_type != np.int64:
-                    error = RuntimeError(context._stack,ast._line,ast._column,f' expected type for param{idx} is {param_type_tuple[1]}; got {arg_type}') # type:ignore
+                    error = RuntimeError(context._stack,ast._start_line,ast._start_column,ast._end_line,ast._end_column,f' expected type for param{idx} is {param_type_tuple[1]}; got {arg_type}') # type:ignore
                     runtime_error = True # type:ignore
                     context.add_runtime_error(ast,error)
                 
@@ -1489,7 +1489,7 @@ cdef class FunctionCallASTEvaluatorVisitor(ASTVisitor):
                     (<VecLangContext>context)._var_values[call_var_arg_index] = arg_value
                     (<VecLangContext>context)._var_types[call_var_arg_index] = type(arg_value)
                 else:
-                    call_var_arg_index = len((<VecLangContext>context)._vars_index)
+                    call_var_arg_index = idx
                     (<VecLangContext>context)._vars_index[param_type_tuple[0]] = call_var_arg_index
                     (<VecLangContext>context)._var_values.append(arg_value)
                     (<VecLangContext>context)._var_types.append(type(arg_value))
