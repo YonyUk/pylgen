@@ -219,7 +219,7 @@ The `ASTListView` is a lightweight, immutable view over the AST stack. It provid
 
  > ### Semantic Error Collection via `ErrorAST`
 
-A critical feature of the parsing runtime is its unified handling of **semantic errors** during reductions. Reductors are not limited to constructing valid ASTs; they can also detect semantic violations (such as type mismatches) by returning an [`ErrorAST`](../common/common.md#errorast-handling-semantic-errors-during-syntactic-analysis) object (an AST subclass with the `_is_error` flag set to `True` and an `_errors` attribute containing a **set of [`SemanticError`](../analysis/analysis.md#concrete-error-classes) instances**). This allows collecting multiple semantic errors from a single reduction and aggregating them without interrupting the parsing process.
+A critical feature of the parsing runtime is its unified handling of **semantic errors** during reductions. Reductors are not limited to constructing valid ASTs; they can also detect semantic violations (such as type mismatches) by returning an [`ErrorAST`](../common/common.md#errorast-handling-semantic-errors-during-syntactic-analysis) object (an AST subclass with the `_is_error` flag set to `True` and an `_errors` attribute containing a **set of [`SemanticError`](../common/common.md#concrete-error-classes) instances**). This allows collecting multiple semantic errors from a single reduction and aggregating them without interrupting the parsing process.
 
 This design provides several advantages:
 
@@ -234,14 +234,16 @@ To leverage this feature, your reductor signature must remain `Callable[[ASTList
 ```python
 def complex_number_reductor(asts:ASTListView) -> AST:
     token:Token = asts[1]
+    (ts_line,ts_column),(te_line,te_column) = token.start_position,token.end_position
     img:NumberAST = asts[0]
+    img_line,img_column = img.start_position
     _value = complex(0,img._type(img._value))
 
     if token._text != 'j':
-        error = SemanticError(f'Unexpected symbol {token._text}',token._line,token._column)
-        return ErrorAST(semantic_error_symbol,img._line,img._column,{error})
+        error = SemanticError(f'Unexpected symbol {token.text}',ts_line,ts_column,te_line,te_column)
+        return ErrorAST(semantic_error_symbol,ts_line,ts_column,te_line,te_column,{error})
     
-    return NumberAST(str(_value),np.complex128,img._line,img._column)
+    return NumberAST(str(_value),np.complex128,img_line,img_column)
 ```
 
 !!! note "Clarification on ErrorAST Usage"
