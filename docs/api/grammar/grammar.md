@@ -99,6 +99,9 @@ print(ps.productions)  # [[E, plus, T], [T]]
 
 `AttributedProductionsSet` extends `ProductionsSet` by allowing each production to carry an associated *reductor*, a callable that transforms the right‑hand side ASTs into a new AST node for the head. This is the cornerstone of attributed grammars.
 
+!!! note "The origin of the term "reductor" (or "reducer")"
+    It stems from the REDUCE action of an LR parser. In LR parsing, upon recognizing a production, the parser performs a reduction: it replaces a sequence of symbols with a non-terminal and triggers the associated semantic action. In PyLGEN, the semantic value of each symbol is an AST; thus, this action takes the ASTs of the symbols on the right-hand side of the production and returns the AST corresponding to the non-terminal that replaces those symbols. This function is the "reductor": it reduces a list of child ASTs into a single parent AST. The parser invokes it during a REDUCE action (the corresponding syntactic operation); the reducer constitutes the semantic reduction action. Hence the name: it collapses the right-hand side ASTs into a single AST for the left-hand side non-terminal.
+
 #### Public API
 
  - **`__iadd__`**: expects a tuple of `(production_tuple, reductor)`, where `production_tuple` is a tuple of `Symbol` and `reductor` is a callable with signature `(ASTListView) -> AST`. The reductor's signature is validated at addition time (must be annotated with [`ASTListView`](../common/common.md#astlistview-a-lightweight-view-for-reducers) and return [`AST`](../common/common.md#ast-the-root-of-every-tree)).
