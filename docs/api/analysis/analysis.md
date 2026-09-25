@@ -14,8 +14,6 @@ Together, these patterns provide a clean, maintainable foundation for all semant
 
 The `analysis` module serves as the **semantic processing** layer of PyLGEN. Its responsibilities are:
 
- - **Error Management**: A unified hierarchy of errors (`LexicalError`, `SyntaxError`, `SemanticError`, `RuntimeError`) that carry location information and messages.
-
  - **Context Management**: A base `Context` class that tracks stack traces, error collections, and scopes. Subclass it to add language‑specific state (e.g., symbol tables, variable bindings).
 
  - **Lexical Rules**: A pluggable validation framework for token‑level checks (e.g., numeric ranges, identifier formats).
