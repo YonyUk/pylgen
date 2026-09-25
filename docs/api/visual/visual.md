@@ -59,26 +59,26 @@ draw_ast(root, show=True, physics=False)
 
 ## Drawing Parse Trees
 
-> ### `draw_parse_tree_from_parser(parser: Parser, **kwargs) -> None`
+> ### `draw_parse(tree: ParseTreeNode, **kwargs) -> None`
 
 Visualizes the **parse tree** (also known as the **concrete syntax tree**) that the parser built during parsing. This tree contains all grammar symbols (terminals and non‑terminals) and is useful for debugging grammar rules.
 
  - **Parameters**:
 
-    - **`parser`**: A [`pylgen.parser.parser.Parser`](../parser/parser.md#parser-abstract-base-class) instance that has already parsed some input (i.e., its `parse_tree` attribute is set).
+    - **`tree`**: A [`pylgen.parser.parser.ParseTreeNode`](../parser/parser.md#parsetreenode-parse-tree-node) instance that has already parsed some input (i.e., its `parse_tree` attribute is set).
 
     - **`**kwargs`**: Common parameters. Default filename is `parse tree`.
 
  - **Returns**: None.
 
 ```python
-from pylgen.visual import draw_parse_tree_from_parser
+from pylgen.visual import draw_parse_tree
 
 parser.set_draw_parse_tree_flag(True) # this instruct the parser to keep information for the parse tree
 
 parser.parse(lexer.tokens)
 
-draw_parse_tree_from_parser(parser, show=True)
+draw_parse_tree(parser.parse_tree, show=True)
 ```
 
 !!! warning
