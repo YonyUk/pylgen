@@ -424,8 +424,9 @@ There's a base `BinaryAST` for all binary operations:
 ```python
 class BinaryAST(AST):
 
-    def __init__(self, left:AST, right:AST, symbol: Symbol, line: int, column: int):
-        super().__init__(symbol, line, column)
+    def __init__(self, left:AST, right:AST, symbol: Symbol):
+        (sl,sc),(el,ec) = left.start_position,right.end_position
+        super().__init__(symbol, sl,sc,el,ec)
         self._left = left
         self._right = right
         self._children = [left,right]
@@ -446,12 +447,14 @@ And specific subclasses for each operator:
 
 ```python
 class PlusAST(BinaryAST):
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, plus, line, column)
+
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, plus)
 
 class MinusAST(BinaryAST):
-    def __init__(self, left: AST, right: AST, line: int, column: int):
-        super().__init__(left, right, minus, line, column)
+
+    def __init__(self, left: AST, right: AST):
+        super().__init__(left, right, minus)
 
 # ... and so on for Mul, Div, IntDiv, Mod, Pow, Eq, Neq, Le, Leq, Ge, Geq, Or, And, BitOr, BitAnd
 ```
@@ -461,8 +464,8 @@ For compound assignments, there's an intermediate `BinaryAssignAST`:
 ```python
 class BinaryAssignAST(BinaryAST):
 
-    def __init__(self, left: AST, right: AST, symbol: Symbol, line: int, column: int):
-        super().__init__(left, right, symbol, line, column)
+    def __init__(self, left: AST, right: AST, symbol: Symbol):
+        super().__init__(left, right, symbol)
 
     @property
     def variable(self) -> VariableAST:
@@ -484,8 +487,8 @@ Here's a representative one for assignment:
 
 ```python
 def PythonInstruction_Variable_assign_BoolExpr_reductor(asts:ASTListView) -> AST:
-    instruction = AssignAST(asts[0],asts[2],asts[1].line,asts[1].column)
-    return InstructionAST(instruction,instruction.line,instruction.column)
+    instruction = AssignAST(asts[0],asts[2])
+    return InstructionAST(instruction)
 ```
 
 And one for arithmetic, with a type check:
@@ -494,11 +497,11 @@ And one for arithmetic, with a type check:
 def MathExpr_MathExpr_plus_Term1_reductor(asts:ASTListView) -> AST:
     if asts[0].symbol == String:
         if asts[2].symbol == Boolean or asts[2].symbol == Number:
-            return OperationNotSupportedForTypesErrorAST(asts[0],asts[2],plus,asts[1].line,asts[1].column)
+            return OperationNotSupportedForTypesErrorAST(asts[0],asts[2],plus)
     if asts[2].symbol == String:
         if asts[0].symbol == Boolean or asts[0].symbol == Number:
-            return OperationNotSupportedForTypesErrorAST(asts[0],asts[2],plus,asts[1].line,asts[1].column)
-    return PlusAST(asts[0],asts[2],asts[1].line,asts[1].column)
+            return OperationNotSupportedForTypesErrorAST(asts[0],asts[2],plus)
+    return PlusAST(asts[0],asts[2])
 ```
 
 Notice the pattern: when a statically detectable error occurs (like adding a string to a boolean), the reductor returns an `ErrorAST` instead of a regular AST node. This is the same technique we saw in the arithmetic tutorial: **catch errors as early as possible**, without needing a separate semantic pass to re‑check the same conditions.
@@ -517,8 +520,7 @@ from typing import Any, List, Set, Tuple
 from enum import StrEnum
 
 from pylgen.analysis import Context
-from pylgen.analysis.error import RuntimeError
-from pylgen.common.types import AST
+from pylgen.common.types import AST,RuntimeError
 
 import sys
 
@@ -802,7 +804,8 @@ class FuncDefCollectorASTVisitor(ASTVisitor):
     def visit(self, ast: FuncDefAST, context: PythonContext) -> None: # type: ignore
         self._check_context_type(context)
         if context.exists_func(ast.func_name):
-            context.add_semantic_error(FunctionAlreadyDefinedError(ast.func_name,ast.line,ast.column))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_semantic_error(FunctionAlreadyDefinedError(ast.func_name,sl,sc,el,ec))
         else:
             func_args = [var.name for var in ast.args.args]
             context.define_func(ast.func_name,ast.body,*func_args)
@@ -814,8 +817,6 @@ File: `semantic_visitors.py`
 
 ```python
 from pylgen.analysis import ASTVisitor
-from pylgen.analysis.context import Context
-from pylgen.common.types import AST
 
 from grammar.asts import *
 
@@ -839,7 +840,8 @@ class VariableASTSemanticCheckingVisitor(ASTVisitor):
     def visit(self, ast: VariableAST, context: PythonContext) -> None: # type: ignore
         self._check_context_type(context)
         if not context.exists_var(ast.name):
-            context.add_semantic_error(UndeclaredVariableError(ast.name,ast.line,ast.column))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_semantic_error(UndeclaredVariableError(ast.name,sl,sc,el,ec))
 
 class FuncCallASTSemanticCheckingVisitor(ASTVisitor):
 
@@ -849,7 +851,9 @@ class FuncCallASTSemanticCheckingVisitor(ASTVisitor):
     def visit(self, ast: FuncCallAST, context: PythonContext) -> None: # type: ignore
         self._check_context_type(context)
         if not context.exists_func(ast.func_name):
-            context.add_semantic_error(UndeclaredFunctionError(ast.func_name,ast.line,ast.column))
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
+            context.add_semantic_error(UndeclaredFunctionError(ast.func_name,sl,sc,el,ec))
+            return
         _,data,_ = context.get_func_data(ast.func_name)
         expected = []
         for variants in data:
@@ -858,7 +862,8 @@ class FuncCallASTSemanticCheckingVisitor(ASTVisitor):
             expected.append(len(variants))
             if len(variants) == len(ast.args.args):
                 return
-        context.add_semantic_error(ArgumentCountMissmatchError(expected,len(ast.args.args),ast.line,ast.column))
+        (sl,sc),(el,ec) = ast.args.start_position,ast.args.end_position
+        context.add_semantic_error(ArgumentCountMissmatchError(expected,len(ast.args.args),sl,sc,el,ec))
 
 class ReturnASTSemanticCheckingVisitor(ASTVisitor):
 
@@ -868,8 +873,9 @@ class ReturnASTSemanticCheckingVisitor(ASTVisitor):
     def visit(self, ast: ReturnAST | VoidReturnAST, context: PythonContext) -> None: # type: ignore
         self._check_context_type(context)
         if not context.inside_function_scope:
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
             reason = '"return" instruction must be inside a function body'
-            context.add_semantic_error(InvalidInstructionError('return',reason,ast.line,ast.column))
+            context.add_semantic_error(InvalidInstructionError('return',reason,sl,sc,el,ec))
 
 class BreakASTSemanticVisitor(ASTVisitor):
 
@@ -879,8 +885,9 @@ class BreakASTSemanticVisitor(ASTVisitor):
     def visit(self, ast: BreakAST, context: PythonContext) -> None: # type: ignore
         self._check_context_type(context)
         if not context.inside_loop_scope:
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
             reason = '"break" instruction must be inside a loop body'
-            context.add_semantic_error(InvalidInstructionError('break',reason,ast.line,ast.column))
+            context.add_semantic_error(InvalidInstructionError('break',reason,sl,sc,el,ec))
 
 class ContinueASTSemanticVisitor(ASTVisitor):
 
@@ -890,8 +897,9 @@ class ContinueASTSemanticVisitor(ASTVisitor):
     def visit(self, ast: ContinueAST, context: PythonContext) -> None: # type: ignore
         self._check_context_type(context)
         if not context.inside_loop_scope:
+            (sl,sc),(el,ec) = ast.start_position,ast.end_position
             reason = '"continue" instruction must be inside a loop body'
-            context.add_semantic_error(InvalidInstructionError('continue',reason,ast.line,ast.column))
+            context.add_semantic_error(InvalidInstructionError('continue',reason,sl,sc,el,ec))
 ```
 
 Notice how the context tracks `_function_scope_depth` and `_loop_scope_depth`. These are incremented when the traversal enters a function or loop body, and decremented when it exits. The `return` visitor checks that we're inside a function, and the `break` and `continue` visitors check that we're inside a loop. This is a clean way to enforce contextual constraints without threading a stack through every visitor.
@@ -995,8 +1003,8 @@ class EvalPostOrder(PostOrder):
                     self._stack.append((False,body))
                     self._function_has_returned.append(False)
                     for i in range(len(variant)):
-                        context.define_var(variant[i])
-                        context.assign_var(variant[i],call_args[i])
+                        context.define_var(variant[len(variant) - 1 - i])
+                        context.assign_var(variant[len(variant) - 1 - i],call_args[i])
 
     def current(self, context: PythonContext) -> AST: # type: ignore
         if context.get_runtime_errors():
@@ -1121,8 +1129,10 @@ from datetime import datetime
 
 from pylgen.lexer import Lexer
 from pylgen.parser import Parser
-from pylgen.analysis import Context,ASTWalker,ErrorType,Error
-from pylgen.visual import draw_ast,draw_parse_tree_from_parser,set_cache_file
+from pylgen.analysis import Context,ASTWalker
+from pylgen.common.types import Error
+from pylgen.common.enums import ErrorType
+from pylgen.visual import draw_ast,draw_parse_tree,set_cache_file
 
 class TerminalOutputBridge:
 
@@ -1270,12 +1280,13 @@ class PythonEditor(Editor):
         terminal_font = font.Font(family='Consolas',size=12,weight='normal')
         self.terminal = tk.Text(lower,state=tk.DISABLED,font=terminal_font)
         sys.stdout = TerminalOutputBridge(self.terminal)
+        sys.stderr = TerminalOutputBridge(self.terminal)
         self._input_queue = Queue()
         sys.stdin = TerminalInputBridge(self._input_queue,self,self._input_callback,self._editor_set_writable_callback)
         self.terminal.configure(bg='black',fg='white',insertbackground='white',state=tk.DISABLED)
         self.terminal.pack(expand=True,fill=tk.BOTH)
 
-        self.content.tag_config("error",background='red',foreground='black') # type: ignore
+        self.content.tag_config("error_loc",underline=True,underlinefg='red') # type: ignore
         self._input_start = '1.0'
         self._waiting_input = False
         self._cache_option = False
@@ -1286,19 +1297,18 @@ class PythonEditor(Editor):
 
     def _clear_error_highlights(self):
         try:
-            self.content.tag_remove("error",1.0,tk.END) # type: ignore
+            self.content.tag_remove("error_loc",1.0,tk.END) # type: ignore
         except Exception:
             pass
 
     def _highlight_error(self,error:Error):
-        line = error.line
-        column = error.column
-        err_index = f'{line}.{column}'
-        start_idx = f'{line}.0'
-        end_idx = f'{line}.end'
-        self.content.tag_add("error",start_idx,end_idx) # type: ignore
-        self.content.mark_set(tk.INSERT,err_index) # type: ignore
-        self.content.see(err_index) # type: ignore
+        start_line,start_column = error.start_position
+        end_line,end_column = error.end_position
+        loc_start_idx = f'{start_line}.{start_column - 1}'
+        loc_end_idx = f'{end_line}.{end_column - 1}'
+        self.content.tag_add("error_loc",loc_start_idx,loc_end_idx) # type: ignore
+        self.content.mark_set(tk.INSERT,loc_start_idx) # type: ignore
+        self.content.see(loc_start_idx) # type: ignore
         self.content.focus_set()
 
     def _input_callback(self,prompt):
@@ -1422,7 +1432,7 @@ class PythonEditor(Editor):
             self._parser.set_draw_parse_tree_flag(False)
 
         def get_name(text):
-            draw_parse_tree_from_parser(self._parser,filename=text,show=True,cache=self._cache_option)
+            draw_parse_tree(self._parser.parse_tree,filename=text,show=True,cache=self._cache_option)
             self._parser.set_draw_parse_tree_flag(False)
 
         popup = Popup(self,'Filename?',get_name,_on_cancel)
@@ -1476,54 +1486,59 @@ class PythonEditor(Editor):
         if code.strip() == '':
             self.btn_run.after(0,unlock_btns)
             return
-        
-        t = datetime.now()
-        self._lexer.load_text(code)
-        ast = self._parser.parse(self._lexer.tokens)
-        errors = list(self._lexer.errors) + self._parser.errors
-        no_sintax_errors = list(filter(lambda error:error.type != ErrorType.SEMANTIC,errors))
-        if no_sintax_errors:
-            self.terminal.after(0,make_normal)
-            for error in no_sintax_errors:
-                self.terminal.after(0,insert,f'{error}\n')
-                self.after(0,self._highlight_error,error)
-            self.terminal.after(0,see)
-            self.terminal.after(0,make_disabled)
-            self.btn_run.after(0,unlock_btns)
-            return
-        self._collector.walk(ast)
-        self._checker.walk(ast)
-        errors.extend(self._context.errors)
-        if errors:
-            self.terminal.after(0,make_normal)
-            for error in errors:
-                self.terminal.after(0,insert,f'{error}\n')
-                self.after(0,self._highlight_error,error)
-            self.terminal.after(0,see)
-            self.terminal.after(0,make_disabled)
-            self.btn_run.after(0,unlock_btns)
-            return
 
-        self._evaluator.walk(ast)
-        errors.extend(self._context.errors)
-        if errors:
+        try:
+            t = datetime.now()
+            self._lexer.load_text(code)
+            ast = self._parser.parse(self._lexer.tokens)
+            errors = list(self._lexer.errors) + self._parser.errors
+            if self._parser.syntax_errors or self._lexer.errors:
+                self.terminal.after(0,make_normal)
+                for error in errors:
+                    self.terminal.after(0,insert,f'{error}\n')
+                    self.after(0,self._highlight_error,error)
+                self.terminal.after(0,see)
+                self.terminal.after(0,make_disabled)
+                self.btn_run.after(0,unlock_btns)
+                return
+            self._collector.walk(ast)
+            self._checker.walk(ast)
+            errors.extend(self._context.errors)
+            if errors:
+                self.terminal.after(0,make_normal)
+                for error in errors:
+                    self.terminal.after(0,insert,f'{error}\n')
+                    self.after(0,self._highlight_error,error)
+                self.terminal.after(0,see)
+                self.terminal.after(0,make_disabled)
+                self.btn_run.after(0,unlock_btns)
+                return
+
+            self._evaluator.walk(ast)
+            errors.extend(self._context.errors)
+            if errors:
+                self.terminal.after(0,make_normal)
+                for error in errors:
+                    self.terminal.after(0,insert,f'{error}\n')
+                    self.after(0,self._highlight_error,error)
+                self.terminal.after(0,see)
+                self.terminal.after(0,make_disabled)
+                self.btn_run.after(0,unlock_btns)
+                return
+
             self.terminal.after(0,make_normal)
-            for error in errors:
-                self.terminal.after(0,insert,f'{error}\n')
-                self.after(0,self._highlight_error,error)
+            val = self._context.last_instruction_result # type: ignore
+            if not val is None:
+                self.terminal.after(0,insert,f'{val}\n')
+            self.terminal.after(0,insert,f'\nexecution time: {datetime.now() - t}')
             self.terminal.after(0,see)
             self.terminal.after(0,make_disabled)
-            self.btn_run.after(0,unlock_btns)
-            return
-
-        self.terminal.after(0,make_normal)
-        val = self._context.last_instruction_result # type: ignore
-        if not val is None:
-            self.terminal.after(0,insert,f'{val}\n')
-        self.terminal.after(0,insert,f'\nexecution time: {datetime.now() - t}')
-        self.terminal.after(0,see)
-        self.terminal.after(0,make_disabled)
-        self.btn_run.after(0,unlock_btns)
+            self.after(0,unlock_btns)
+        except Exception as ex:
+            sys.stdout.write(f'{ex}')
+            self.terminal.after(0,see)
+            self.terminal.after(0,make_disabled)
+            self.after(0,unlock_btns)
 ```
 
 The interesting part is the terminal bridge. `TerminalOutputBridge` and `TerminalInputBridge` redirect `sys.stdout` and `sys.stdin` to the Tkinter widgets, so that `print` and `input` work as expected inside the interpreter.
@@ -1533,6 +1548,105 @@ The `write` method schedules the actual widget update on the main thread using `
 The input bridge is similar, but it reads from a queue that the terminal widget fills when the user presses `Enter`. The `_execute` method runs the whole pipeline in a background thread and `_run_code` orchestrates the pipeline.
 
 The pipeline is exactly the same as in the [**VecLang**](../../benchmark/from-arithmetic-to-veclang.md) tutorial: lex, parse, collect functions, check semantics, evaluate, report results. The only difference is the threading, which keeps the GUI responsive.
+
+## Final stop: seeing it in action
+
+We've walked through the lexer, the grammar, the AST, the reductor layer, the context, the semantic analysis, the traversal strategies, and finally the GUI. That's a lot of moving parts to hold in your head at once. So before we close the tour, let's take a step back and simply watch the thing run.
+
+Nothing explains a language implementation quite like seeing it come alive on screen. So here are a few examples of `mini-python` doing what it was built to do.
+
+> ### The program we'll be running
+
+```python
+x = 10
+y = x * 2 + 5
+
+if y > 20:
+    print("y is large")
+else:
+    print("y is small")
+
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+result = factorial(5)
+print(result)
+
+i = 0
+while i < 3:
+    print(i)
+    i += 1
+```
+
+> ### Branching: the same code, two different worlds
+
+![running our program (1)](../../images/examples/mini-python/executing-1.gif)
+
+With `x = 10`, `y` comes out to `25`, the condition `y > 20` is true, and the terminal greets us with `y is large`. Right after it, `factorial(5)` prints `120`, and the loop counts `0`, `1`, `2`. One run, three features, no surprises.
+
+![running our program (2)](../../images/examples/mini-python/executing-2.gif)
+
+Now change a single character, `10` becomes `5`, and the whole mood flips. `y` is now `15`, the condition fails, and the `else` branch takes over: `y is small`. The rest of the program is untouched and produces exactly the same output. It's a tiny edit, but it's the clearest possible demonstration that the `if`/`else` reductor is actually building two different bodies and that the traversal strategy is picking the right one at runtime.
+
+> ### When things go wrong
+
+Of course, not every run is a happy one, and the GUI is built to make failure just as informative as success.
+
+#### Basic errors
+
+![handling errors(1)](../../images/examples/mini-python/error-cacthing-1.gif)
+
+The first error demo deletes the `10` from `x = 10`, leaving a bare `x =` behind. The lexer is perfectly happy, it dutifully produces an assign token, but the parser can't complete the production `(Variable, assign, BoolExpr, jumpline)` and reports a syntax error with the exact source span. The editor underlines the offending characters in red, jumps the cursor there, and the interpreter never even makes it to the semantic phase. Fail fast, fail visibly.
+
+The second demo is subtler. Nothing about the shape of the program is wrong, so the parser succeeds and the AST is built without complaint. But then the error collector walks the tree and finds undeclared variables: a name that's read before it's ever assigned. This is exactly the check we placed in `VariableASTSemanticCheckingVisitor`, and here it is, pointing at the precise line and column that caused the trouble. No syntax error, no parse failure, just the semantic layer doing its job.
+
+> ### Source positions: the feature you didn't know you needed
+
+If there's one part of the PyLGEN API that quietly does a lot of heavy lifting, it's the pair of `start_position` and `end_position` attributes that every AST node and every `Error` carries around. They're not glamorous. They don't show up in any of the pipeline diagrams. But once you start building real tools on top of the framework, they turn out to be the difference between a parser that just says *"something's wrong"* and a parser that tells you *exactly* where.
+
+The idea is simple. Every node in the AST knows the `(line, column)` where it began and where it ended. Those coordinates come straight from the token stream, so they're as precise as the lexer can make them. And because every reductor returns an AST that inherits those positions from its children, the information propagates up the tree for free. You never have to thread positions around manually; they just come along for the ride.
+
+The `Error` base class carries the same two pairs. When the lexer rejects a token, when the parser fails a production, or when a semantic visitor spots an undeclared variable, the error it produces knows the span of source code that caused it. That single design decision unlocks a surprising number of things:
+
+ - **Inline error highlighting**. This is the one you've already seen in the examples. The GUI reads `error.start_position` and `error.end_position`, converts them into Tkinter's `line.column` text indices, and applies a red underline to that exact range. No searching, no heuristics, no fragile string matching, just two coordinates and a `tag_add`.
+
+ - **Jump to the offending line**. Because the start position is known, the editor can move the cursor there, scroll the view, and focus the widget. One line of code, and suddenly the user is looking at the bug instead of hunting for it.
+
+ - **Compiler-style diagnostics**. If you've ever used `gcc` or `rustc`, you know the value of a good `--> file:line:column` message. With `start_position` and `end_position` in hand, your error formatter can produce the same thing without any extra bookkeeping.
+
+ - **Multi-line error spans**. A function call with the wrong arity might span several lines if the arguments are laid out across them. Because both start and end are tracked, you can underline the whole call, not just the first token.
+
+ - **Better editor tooling**. Hover tooltips, go-to-definition, find-references: all of them need to know where a symbol lives in the source. The AST already knows. You don't need a separate source map.
+
+ - **Visualization with context**. The `draw_ast` and `draw_parse_tree` helpers use the positions to annotate nodes with their source ranges, so when you click on a node in the rendered HTML, you can see which part of the program it came from.
+
+ - **Testing and diffing**. If you're writing tests for your grammar, comparing positions between two runs is often the fastest way to spot a regression. An AST that shifted by one column is a red flag, even if the tree looks the same.
+
+What makes this design particularly nice is that it costs nothing when you don't need it. The positions are computed as a side effect of lexing and never looked at unless a tool asks for them. There's no separate pass, no source map to maintain, no risk of the two drifting out of sync. The AST is the source map.
+
+So if you're building your own language on top of PyLGEN, and you find yourself thinking *"I wish I knew where this came from"*, take a look at the nodes you're already holding. The answer is probably right there, in `start_position` and `end_position`.
+
+#### A litle bit more complex error
+
+![handling errors(2)](../../images/examples/mini-python/error-cacthing-2.gif)
+
+This example pushes the semantic analysis a step further. This time all the variables are properly declared, but the call to factorial passes the wrong number of arguments. The `FuncCallASTSemanticCheckingVisitor` compares the call's arity against every known signature for that function, and when none of them match, it reports an argument count mismatch with the expected arities. It's the kind of error that only becomes possible once your language has functions with parameters, and it's a good reminder that semantic analysis is about more than just checking names.
+
+> ### Putting it all together: a password loop
+
+![password loop](../../images/examples/mini-python/complex_example.gif)
+
+And we close with a slightly bigger program that ties several features together at once. It's a simple password checker: the user provides a password, and then the program asks for it in a loop until the correct one is entered. Along the way it uses an `if`/`else` to decide whether to keep going, a `while True` that only exits via `break`, and a `continue` to skip the rest of the body on a wrong guess. It also leans on the interactive side of the language, reading with input and wiping the terminal with clear between attempts.
+
+This one exercises three of the four built‑ins and both loop signals in a single run, which makes it a nice stress test for the traversal strategy. The `clear()` instruction, by the way, is just writing `\033c` to `stdout`, and the `TerminalOutputBridge` recognizes that sequence and clears the widget instead of inserting it. The `break` and `continue` signals propagate through the signal stack exactly as we described, and the `while True` condition is re‑evaluated on every iteration until the `break` finally fires.
+
+> ### One pipeline, many faces
+
+The nice thing about all of these examples is what they *don't* show: not a single line of the interpreter had to change to make any of them work. The lexer, the parser, the collector, the checker, and the evaluator are the same objects we've been building all along. The GUI is a thin shell around them, and the visualizer is a thin shell around the parse tree and the AST. The core stays clean; the presentation is a plugin.
+
+That's the pattern worth remembering when you build your own language. Your interpreter doesn't need to know it's running inside a GUI, a REPL, or a batch script. Give it a `stdin` and a `stdout`, keep the pipeline honest, and you can wrap it in whatever face your users need.
 
 ## What this example teaches
 

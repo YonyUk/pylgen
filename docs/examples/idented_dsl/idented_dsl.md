@@ -243,8 +243,8 @@ from .grammar_symbols import (
 
 class ConfigsAST(AST):
 
-    def __init__(self, line: int, column: int):
-        super().__init__(Config, line, column)
+    def __init__(self, start_line: int, start_column: int, end_line:int, end_column:int):
+        super().__init__(Config, start_line, start_column,end_line,end_column)
         self._configs = []
 
     def children(self) -> List[AST]:
@@ -252,8 +252,8 @@ class ConfigsAST(AST):
 
 class ConfigSequenceAST(AST):
 
-    def __init__(self, line: int, column: int):
-        super().__init__(ConfigSequence, line, column)
+    def __init__(self, start_line: int, start_column: int, end_line:int, end_column:int):
+        super().__init__(ConfigSequence, start_line,start_column,end_line,end_column)
         self._configs = []
 
     def children(self) -> List[AST]:
@@ -261,8 +261,8 @@ class ConfigSequenceAST(AST):
 
 class ConfigSectionAST(AST):
 
-    def __init__(self, section_name:str,line: int, column: int):
-        super().__init__(Section, line, column)
+    def __init__(self, section_name:str,start_line: int, start_column: int, end_line:int, end_column:int):
+        super().__init__(Section, start_line,start_column,end_line,end_column)
         self._name = section_name
         self._configs = []
 
@@ -275,14 +275,14 @@ class ConfigSectionAST(AST):
 
 class SectionConfigSequenceAST(AST):
 
-    def __init__(self, line: int, column: int):
-        super().__init__(ConfigSequence, line, column)
+    def __init__(self, start_line: int, start_column: int, end_line:int, end_column:int):
+        super().__init__(ConfigSequence, start_line,start_column,end_line,end_column)
         self._configs = []
 
 class AtomConfigAST(AST):
 
-    def __init__(self, name:str,value:str | float | bool,line: int, column: int):
-        super().__init__(ConfigAtom, line, column)
+    def __init__(self, name:str,value:str | float | bool,start_line: int, start_column: int, end_line:int, end_column:int):
+        super().__init__(ConfigAtom, start_line,start_column,end_line,end_column)
         self._name = name
         self._value = value
 
@@ -320,9 +320,10 @@ Let's look at a representative one:
 
 ```python
 def configatom_variable_colon_string_reductor(asts:ASTListView) -> AST:
+    (sl,sc),(el,ec) = asts[0].start_position,asts[2].end_position
     var:Token = asts[0] # type:ignore
     val:Token = asts[2] # type:ignore
-    config = AtomConfigAST(var.text,val.text[1:-1],var.line,var.column)
+    config = AtomConfigAST(var.text,val.text[1:-1],sl,sc,el,ec)
     return config
 ```
 
@@ -332,15 +333,17 @@ The number and boolean reducers are just as simple:
 
 ```python
 def configatom_variable_colon_boolean_reductor(asts:ASTListView) -> AST:
+    (sl,sc),(el,ec) = asts[0].start_position,asts[2].end_position
     var:Token = asts[0] # type:ignore
     val:Token = asts[2] # type:ignore
-    config = AtomConfigAST(var.text,val.text == 'true',var.line,var.column)
+    config = AtomConfigAST(var.text,val.text == 'true',sl,sc,el,ec)
     return config
 
 def configatom_variable_colon_number_reductor(asts:ASTListView) -> AST:
+    (sl,sc),(el,ec) = asts[0].start_position,asts[0].end_position
     var:Token = asts[0] # type:ignore
     val:Token = asts[2] # type:ignore
-    config = AtomConfigAST(var.text,float(val.text),var.line,var.column)
+    config = AtomConfigAST(var.text,float(val.text),sl,sc,el,ec)
     return config
 ```
 
@@ -360,7 +363,8 @@ from .asts import (
 )
 
 def config_configsequence_reductor(asts:ASTListView) -> AST:
-    config = ConfigsAST(1,1)
+    (sl,sc),(el,ec) = asts[0].start_position,asts[0].end_position
+    config = ConfigsAST(sl,sc,el,ec)
     config_sequence:ConfigSequenceAST = asts[0] # type:ignore
     config._configs = config_sequence._configs
     return config
@@ -368,46 +372,54 @@ def config_configsequence_reductor(asts:ASTListView) -> AST:
 def configsequence_section_reductor(asts:ASTListView) -> AST:
     config_sequence:ConfigSequenceAST = asts[0] # type:ignore
     config_sequence._configs.append(asts[1])
+    config_sequence.end_position = asts[1].end_position
     return config_sequence
 
 def configsequence_direct_reductor(asts:ASTListView) -> AST:
-    config = ConfigSequenceAST(asts[0].line,asts[0].column)
+    (sl,sc),(el,ec) = asts[0].start_position,asts[0].end_position
+    config = ConfigSequenceAST(sl,sc,el,ec)
     config._configs.append(asts[0])
     return config
 
 def section_reductor(asts:ASTListView) -> AST:
+    (sl,sc),(el,ec) = asts[0].start_position,asts[5].end_position
     configs:SectionConfigSequenceAST = asts[5] # type:ignore
     var:Token = asts[1] # type:ignore
-    config = ConfigSectionAST(var.text,asts[0].line,asts[0].column)
+    config = ConfigSectionAST(var.text,sl,sc,el,ec)
     config._configs = configs._configs
     return config
 
 def sectionconfigsequence_configatom_reductor(asts:ASTListView) -> AST:
-    config = SectionConfigSequenceAST(asts[0].line,asts[0].column)
+    (sl,sc),(el,ec) = asts[0].start_position,asts[0].end_position
+    config = SectionConfigSequenceAST(sl,sc,el,ec)
     config._configs.append(asts[0])
     return config
 
 def sectionconfigsequence_sectionconfigsequence_configatom(asts:ASTListView) -> AST:
     config:SectionConfigSequenceAST = asts[0] # type:ignore
     config._configs.append(asts[1])
+    config.end_position = asts[1].end_position
     return config
 
 def configatom_variable_colon_string_reductor(asts:ASTListView) -> AST:
+    (sl,sc),(el,ec) = asts[0].start_position,asts[2].end_position
     var:Token = asts[0] # type:ignore
     val:Token = asts[2] # type:ignore
-    config = AtomConfigAST(var.text,val.text[1:-1],var.line,var.column)
+    config = AtomConfigAST(var.text,val.text[1:-1],sl,sc,el,ec)
     return config
 
 def configatom_variable_colon_boolean_reductor(asts:ASTListView) -> AST:
+    (sl,sc),(el,ec) = asts[0].start_position,asts[2].end_position
     var:Token = asts[0] # type:ignore
     val:Token = asts[2] # type:ignore
-    config = AtomConfigAST(var.text,val.text == 'true',var.line,var.column)
+    config = AtomConfigAST(var.text,val.text == 'true',sl,sc,el,ec)
     return config
 
 def configatom_variable_colon_number_reductor(asts:ASTListView) -> AST:
+    (sl,sc),(el,ec) = asts[0].start_position,asts[0].end_position
     var:Token = asts[0] # type:ignore
     val:Token = asts[2] # type:ignore
-    config = AtomConfigAST(var.text,float(val.text),var.line,var.column)
+    config = AtomConfigAST(var.text,float(val.text),sl,sc,el,ec)
     return config
 ```
 
