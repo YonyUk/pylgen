@@ -59,7 +59,7 @@ draw_ast(root, show=True, physics=False)
 
 ## Drawing Parse Trees
 
-> ### `draw_parse(tree: ParseTreeNode, **kwargs) -> None`
+> ### `draw_parse_tree(tree: ParseTreeNode, **kwargs) -> None`
 
 Visualizes the **parse tree** (also known as the **concrete syntax tree**) that the parser built during parsing. This tree contains all grammar symbols (terminals and non‑terminals) and is useful for debugging grammar rules.
 
