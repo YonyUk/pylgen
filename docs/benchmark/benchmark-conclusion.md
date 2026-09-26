@@ -1,4 +1,4 @@
-# PyLGEN vs Lark Benchmark: ~2x Faster Parsing and 4x Less Memory (Performance Analysis)
+# PyLGEN vs Lark Benchmark: ~1.89x Faster Parsing and ~4x Less Memory (Performance Analysis)
 
 After building a complete interpreter for VecLang, we arrive at the moment of the truth: **how fast is it, and how does it compare to a popular alternative like Lark?** This is not a casual micro-benchmark; it is a rigorous, real-world test on a **2-million-line, 40 MB source file** that exercises every stage of the interpreter pipeline.
 

@@ -56,6 +56,7 @@ PyLGEN has the intention to be the **meeting point** between classic compiler th
  - **[Quick Start Guide](section-1/quick_start.md):** Get started building your first interpreter in minutes.
  - **[Benchmark: PyLGEN vs Lark](benchmark/benchmark-conclusion.md):** See how PyLGEN outperforms other tools in real-world tests.
  - **[Architecture Deep Dive](api/intro.md):** Understand the modular design and each component of the framework.
- - **API Reference:** Explore the details of the [`automaton`](api/automaton/intro.md), [`grammar`](api/grammar/intro.md), [`parser`](api/parser/parser.md), and other modules.
- - **[GitHub Repository](https://github.com/yonyuk/pylgen):** Star the project, report issues, and explore the source code.
+ - **[Under the hood](api/examples/intro.md)**: Build a lexer and parser from scratch, using the same building blocks that the framework uses internally.
  - **[Examples](examples/intro.md):** See practical examples of using PyLGEN to build interpreters and DSLs.
+ - **[Table of Contents](table_of_contents.md)**: Browse the full documentation, organized by topic.
+ - **[GitHub Repository](https://github.com/yonyuk/pylgen):** Star the project, report issues, and explore the source code.

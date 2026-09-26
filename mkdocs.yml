@@ -3,6 +3,7 @@ site_url: https://pylgen.readthedocs.io/en/latest/
 
 nav:
   - Overview: index.md
+  - Table of Contents: table_of_contents.md
   - Meeting PyLGEN:
     - Quick Start: section-1/quick_start.md
     - Example 1: 
@@ -73,6 +74,7 @@ theme:
 
 markdown_extensions:
   - attr_list
+  - md_in_html
   - pymdownx.highlight:
         use_pygments: true
   - admonition
@@ -87,6 +89,13 @@ markdown_extensions:
   - pymdownx.tilde
   - pymdownx.arithmatex:
       generic: true
+
+plugins:
+  - toc-md:
+      toc_page_title: Table of Contents
+      toc_page_description: Use this page to navigate the documentation and find the section that fits your needs.
+      output_path: table_of_contents.md
+      header_level: 5
 
 extra_css:
     - stylesheets/extra.css
