@@ -23,7 +23,7 @@ from .table import (
 
 CACHE_FILE:str | None = None
 
-class ResourceEmbedder(HTMLParser):
+class ResourceEmbedder(HTMLParser): # pragma: no cover
 
     def __init__(self,cache:Dict[str,str]={}):
         super().__init__()
@@ -258,7 +258,7 @@ def _get_graph_from_parse_tree(tree:ParseTreeNode) -> nx.DiGraph:
 
     return G
 
-def draw_automaton(automaton:Automaton,**kwargs) -> None:
+def draw_automaton(automaton:Automaton,**kwargs) -> None: # pragma: no cover
     '''
     Args:
         automaton (Automaton): automaton to draw
@@ -372,7 +372,7 @@ def draw_automaton(automaton:Automaton,**kwargs) -> None:
     if show:
         webbrowser.open(output_path,2)
 
-def draw_lexer(lexer:BaseLexer,**kwargs) -> None:
+def draw_lexer(lexer:BaseLexer,**kwargs) -> None: # pragma: no cover
     '''
     Args:
         automaton (Automaton): automaton to draw
@@ -402,7 +402,7 @@ def draw_lexer(lexer:BaseLexer,**kwargs) -> None:
     '''
     draw_automaton(lexer.dfa,**kwargs)
 
-def draw_ast(ast:AST,**kwargs) -> None:
+def draw_ast(ast:AST,**kwargs) -> None: # pragma: no cover
     '''
     Args:
         ast (AST): ast to draw
@@ -532,7 +532,7 @@ def draw_ast(ast:AST,**kwargs) -> None:
     if show:
         webbrowser.open(output_path,2)
 
-def draw_parse_tree(tree:ParseTreeNode,**kwargs) -> None:
+def draw_parse_tree(tree:ParseTreeNode,**kwargs) -> None: # pragma: no cover
     '''
     Args:
         parser (Parser): parser to draw
@@ -659,7 +659,7 @@ def draw_parse_tree(tree:ParseTreeNode,**kwargs) -> None:
     if show:
         webbrowser.open(output_path,2)
 
-def show_propagation_edges_table(g:Grammar,**kwargs) -> None:
+def show_propagation_edges_table(g:Grammar,**kwargs) -> None: # pragma: no cover
     '''
     Args:
         g (Grammar)
@@ -717,7 +717,7 @@ def show_propagation_edges_table(g:Grammar,**kwargs) -> None:
     if show:
             webbrowser.open(output_path,2)
 
-def lr_inspect_grammar(g:Grammar,type_:str | ParserType=ParserType.LALR1,**kwargs) -> bool:
+def lr_inspect_grammar(g:Grammar,type_:str | ParserType=ParserType.LALR1,**kwargs) -> bool: # pragma: no cover
     '''
         Args:
             g (Grammar)
@@ -788,7 +788,7 @@ def lr_inspect_grammar(g:Grammar,type_:str | ParserType=ParserType.LALR1,**kwarg
 
     return conflicts
 
-def set_cache_file(filename:str) -> None:
+def set_cache_file(filename:str) -> None: # pragma: no cover
     '''
     Args:
         filename (str)
