@@ -2,6 +2,11 @@ from setuptools import setup, find_packages
 from Cython.Build import cythonize
 from setuptools.extension import Extension
 
+define_macros = [
+    ('CYTHON_TRACE', '1'),
+    ('CYTHON_USE_SYS_MONITORING','0')
+]
+
 COMPILER_DIRECTIVES = {
     'binding': True,
     'boundscheck': True,
@@ -27,8 +32,8 @@ COMPILER_DIRECTIVES = {
     'nogil': False,
     'gil': False,
     'with_gil': False,
-    'profile': False,
-    'linetrace': False,
+    'profile': True,
+    'linetrace': True,
     'emit_code_comments': True,
     'annotation_typing': True,
     'infer_types': None,
@@ -85,14 +90,16 @@ common_extensions = Extension(
     name="pylgen.common.table",
     sources=[
         "pylgen/common/table.pyx",
-    ]
+    ],
+    define_macros=define_macros
 )
 
 common_types_extensions = Extension(
     name='pylgen.common.types',
     sources=[
         'pylgen/common/types.pyx'
-    ]
+    ],
+    define_macros=define_macros
 )
 ###################################################################################
 #                                  AUTOMATON
@@ -101,7 +108,8 @@ automaton_extensions = Extension(
     name="pylgen.automaton.automaton",
     sources=[
         "pylgen/automaton/automaton.pyx"
-    ]
+    ],
+    define_macros=define_macros
 )
 ###################################################################################
 #                                  GRAMMAR
@@ -110,7 +118,8 @@ grammar_extension = Extension(
     name='pylgen.grammar.grammar',
     sources=[
         'pylgen/grammar/grammar.pyx'
-    ]
+    ],
+    define_macros=define_macros
 )
 ###################################################################################
 #                                  REGEX
@@ -119,13 +128,15 @@ regex_extensions = Extension(
     name='pylgen.regex.engine',
     sources=[
         'pylgen/regex/engine.pyx'
-    ]
+    ],
+    define_macros=define_macros
 )
 regex_parser_extensions = Extension(
     name='pylgen.regex.regex_parser',
     sources=[
         'pylgen/regex/regex_parser.pyx'
-    ]
+    ],
+    define_macros=define_macros
 )
 ###################################################################################
 #                                  PARSER
@@ -134,34 +145,39 @@ parser_lr0_extensions = Extension(
     name='pylgen.parser.lr0_parser',
     sources=[
         'pylgen/parser/lr0_parser.pyx'
-    ]
+    ],
+    define_macros=define_macros
 )
 
 parser_lr1_extensions = Extension(
     name='pylgen.parser.lr1_parser',
     sources=[
         'pylgen/parser/lr1_parser.pyx'
-    ]
+    ],
+    define_macros=define_macros
 )
 parser_lalr_extensions = Extension(
     name='pylgen.parser.lalr_parser',
     sources=[
         'pylgen/parser/lalr_parser.pyx'
-    ]
+    ],
+    define_macros=define_macros
 )
 
 parser_builder_extensions = Extension(
     name='pylgen.parser.parser_builder',
     sources=[
         'pylgen/parser/parser_builder.pyx'
-    ]
+    ],
+    define_macros=define_macros
 )
 
 parser_extensions = Extension(
     name='pylgen.parser.parser',
     sources=[
         'pylgen/parser/parser.pyx'
-    ]
+    ],
+    define_macros=define_macros
 )
 ###################################################################################
 #                                  LEXER
@@ -170,14 +186,16 @@ base_lexer_extensions = Extension(
     name='pylgen.lexer.base_lexer',
     sources=[
         'pylgen/lexer/base_lexer.pyx'
-    ]
+    ],
+    define_macros=define_macros
 )
 
 lexer_extensions = Extension(
     name='pylgen.lexer.lexer',
     sources=[
         'pylgen/lexer/lexer.pyx'
-    ]
+    ],
+    define_macros=define_macros
 )
 ###################################################################################
 
@@ -187,17 +205,20 @@ lexical_rule_extension = Extension(
     name='pylgen.analysis.lexical',
     sources=[
         'pylgen/analysis/lexical.pyx',
-    ]
+    ],
+    define_macros=define_macros
 )
 
 visitor_extension = Extension(
     name='pylgen.analysis.visitor',
-    sources=['pylgen/analysis/visitor.pyx']
+    sources=['pylgen/analysis/visitor.pyx'],
+    define_macros=define_macros
 )
 
 context_extension = Extension(
     name='pylgen.analysis.context',
-    sources=['pylgen/analysis/context.pyx']
+    sources=['pylgen/analysis/context.pyx'],
+    define_macros=define_macros
 )
 
 setup(
