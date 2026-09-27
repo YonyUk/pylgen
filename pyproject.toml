@@ -92,3 +92,6 @@ exclude = ["tests*", "docs*"]
 
 [tool.setuptools.package-data]
 "*" = ["*.pyx", "*.c", "*.pxd"]
+
+[tool.coverage.report]
+fail_under = 87
