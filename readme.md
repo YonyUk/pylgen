@@ -127,11 +127,11 @@ Then build your interpreter step by step, following the complete tutorial in the
 
 ## Contributing
 
-Contributions are welcome. Please open an issue or submit a pull request.
+Contributions are welcome. Please open an issue or submit a pull request. See [Contributing.md](./contributing.md) for details.
 
 ## License
 
-This project is licensed under the **BSD 3-Clause** License. See [LICENSE](LICENSE) for details.
+This project is licensed under the **BSD 3-Clause** License. See [LICENSE](./LICENSE) for details.
 
 # Changelog
 
