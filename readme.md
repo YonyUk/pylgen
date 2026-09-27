@@ -142,7 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [0.7.0] - 2026-09-26
+## [0.7.0] - 2026-09-27
 
 ### Changed
 
