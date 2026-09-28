@@ -142,6 +142,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-09-28
+
+### Fixed
+
+- `BaseLexer` wrong behavior with idented languages.
+
 ## [0.7.0] - 2026-09-27
 
 ### Changed
