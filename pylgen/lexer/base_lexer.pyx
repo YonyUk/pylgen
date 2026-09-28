@@ -156,6 +156,7 @@ cdef class BaseLexer:
     cdef bint _move_next(self):
         cdef str current_symbol
         cdef int start
+        cdef int last_valid_position
         cdef State last_state
 
         if not self._initialized:
@@ -172,6 +173,7 @@ cdef class BaseLexer:
 
         while self._current_token is None and self._text_position_pointer < len(self._text):
             start = self._text_position_pointer
+            last_valid_position = start
             self._ignore.reset()
             current_symbol = self._text[self._text_position_pointer]
             while True:
@@ -185,7 +187,10 @@ cdef class BaseLexer:
                 if self._fault_state and self._dfa._current_state._id == self._fault_state._id:
                     break
                 self._ignore.walk(current_symbol)
-                last_state = self._dfa._current_state
+                # keep track of the last accepting state and position
+                if self._dfa._current_state._is_accept:
+                    last_valid_position = self._text_position_pointer + 1
+                    last_state = self._dfa._current_state
                 # updates the pointer
                 self._text_position_pointer += 1
                 # if the text has been ended
@@ -193,7 +198,8 @@ cdef class BaseLexer:
                     break
                 # updates the current symbol
                 current_symbol = self._text[self._text_position_pointer]
-
+            # backtrack to the last position where the prefix match
+            self._text_position_pointer = last_valid_position
             self._text_readed = self._text[start:self._text_position_pointer]
             if len(self._text_readed) == 0:
                 self._text_readed = self._text[self._text_position_pointer]
@@ -202,6 +208,7 @@ cdef class BaseLexer:
                     self._line += 1
                     self._column = 0
                 self._text_position_pointer += 1
+            # backtrack to the last accepting state
             self._dfa._current_state = last_state
             self._current_token = self._get_token(self._text_readed,self._line,self._column)
             if not self._current_token or self._current_token._type == 'INVALID_TOKEN':

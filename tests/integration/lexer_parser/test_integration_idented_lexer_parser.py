@@ -217,7 +217,7 @@ class TestIntegrationIdentedLexerParser:
         lexer[4,TokenTypeEnum.NEWLINE] = '\n'
         lexer[5,TokenTypeEnum.SYMBOL] = r'\-|:|\[|\]'
         lexer[6,TokenTypeEnum.STRING] = '".*"'
-        lexer[7,TokenTypeEnum.WHITESPACEMARKER] = '#ignore#\n'
+        lexer[7,TokenTypeEnum.WHITESPACEMARKER] = '#ignore#\n?'
         lexer[8,TokenTypeEnum.SINGLEWHITESPACE] = ' '
 
         lexer.set_ident(TokenTypeEnum.IDENTATION)
@@ -646,7 +646,7 @@ class TestIntegrationIdentedLexerParser:
         for idx,token in enumerate(tokens):
             pos = token.start_position
             assert tokens_positions[idx] == pos
-        assert len(lexer.errors) == 1
+        assert len(lexer.errors) == 0
         assert len(parser.errors) == 1
         assert ast is None
 
