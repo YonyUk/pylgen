@@ -1,5 +1,7 @@
 # Automata Theory (The Mathematical Foundations)
 
+This page covers the mathematical foundations of finite automata: the formal definition of a DFA, its tabular and graphical representations, the extended transition function, acceptance conditions, and the ε-DFA hybrid model, establishing the theoretical basis for lexical analysis in PyLGEN.
+
 ## Definition
 
 Formally, a [**deterministic finite automata (DFA)**](https://en.wikipedia.org/wiki/Deterministic_finite_automaton) is a **5-tuple $(Q,\Sigma,\delta,q_0,F)$** where:

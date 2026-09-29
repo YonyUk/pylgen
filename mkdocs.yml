@@ -49,7 +49,7 @@ nav:
 
 theme:
   name: material
-  custom_dir: docs/overrides
+  custom_dir: docs/mkdocs_extras//overrides
   features:
     - navigation.sections
     - toc.integrate
@@ -91,17 +91,29 @@ markdown_extensions:
       generic: true
 
 plugins:
+  - search
+  - gen-files:
+      scripts:
+        - docs/mkdocs_extras/hooks/group_by_sections.py
+  - meta-descriptions:
+      enable_checks: true
+      min_length: 50
+      max_length: 200
+      trim: true
+
   - toc-md:
       toc_page_title: Table of Contents
       toc_page_description: Use this page to navigate the documentation and find the section that fits your needs.
       output_path: table_of_contents.md
       header_level: 5
+      template_dir_path: docs/mkdocs_extras/templates
+      overwrite: always 
 
 extra_css:
-    - stylesheets/extra.css
+    - mkdocs_extras/stylesheets/extra.css
     - https://unpkg.com/katex@0/dist/katex.min.css
 
 extra_javascript:
-  - javascripts/katex.js
+  - mkdocs_extras/javascripts/katex.js
   - https://unpkg.com/katex@0/dist/katex.min.js
   - https://unpkg.com/katex@0/dist/contrib/auto-render.min.js

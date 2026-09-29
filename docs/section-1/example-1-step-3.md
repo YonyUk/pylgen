@@ -10,7 +10,7 @@ In a typical compiler pipeline, semantic analysis handles tasks like:
 
 For our REPL, we'll also combine **semantic analysis** with **evaluation**, after all, we're building an **interpreter**. But before we compute values, we must ensure that the computation is valid.
 
-> ### The Context (Managing State)
+## The Context (Managing State)
 
 Every interpreter needs a way to store and retrieve information during execution. Our `ArithmeticExpressionContext` class, defined in `context.py` serves as the central repository for all runtime state:
 
@@ -78,7 +78,7 @@ class ArithmeticExpressionContext(Context):
 
 This context will be passed to every visitor, providing a shared environment for both semantic error collection and evaluation.
 
-> ### Custom Runtime Errors
+## Custom Runtime Errors
 
 Our language supports a handful of arithmetic operations, and each comes with its own set of pitfalls. We define dedicated error classes in `errors.py` to provide precise, informative feedback:
 

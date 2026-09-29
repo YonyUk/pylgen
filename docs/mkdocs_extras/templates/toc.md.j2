@@ -1,0 +1,27 @@
+{% set ns = namespace(sections_deep={}) %}
+{% include "_nav_map.j2" %}
+{{ data.toc_output_comment }}
+# {{ data.page_title }}
+
+{% if data.page_description %}
+{{ data.page_description }}
+{% endif %}
+
+{% for header in data.toc_headers %}
+{% if header.level > 2 %}
+{% set indent = '    ' * (header.level - 3) %}
+{{ indent }}- [{{ header.text }}]({{ header.url }})
+{% else %}
+{% set file_path = header.url.split('#')[0] %}
+{% set deep = ns.sections_deep[file_path] %}
+{% if deep >= 2 %}
+
+> {{ deep * '#' }} **[{{ header.text }}]({{ header.url }})**
+
+{% else %}
+
+{{ deep * '#' }} **[{{ header.text }}]({{ header.url }})**
+
+{% endif %}
+{% endif %}
+{% endfor %}
