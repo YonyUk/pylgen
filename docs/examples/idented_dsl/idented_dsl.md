@@ -104,7 +104,7 @@ lexer[3,TokenTypeEnum.IDENTATION] = '    |\t'
 lexer[4,TokenTypeEnum.NEWLINE] = '\n'
 lexer[5,TokenTypeEnum.SYMBOL] = r'\-|:|\[|\]'
 lexer[6,TokenTypeEnum.STRING] = '".*"'
-lexer[7,TokenTypeEnum.WHITESPACEMARKER] = '#ignore#\n'
+lexer[7,TokenTypeEnum.WHITESPACEMARKER] = '#ignore#\n?'
 lexer[8,TokenTypeEnum.SINGLEWHITESPACE] = ' '
 
 lexer.set_ident(TokenTypeEnum.IDENTATION)
