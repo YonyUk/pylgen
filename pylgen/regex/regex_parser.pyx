@@ -1,3 +1,4 @@
+import unicodedata
 from typing import List,Set
 from string import ascii_letters,digits,printable,whitespace
 
@@ -73,6 +74,31 @@ def get_symbol_function(t:ReTokenType,tx:str) -> Symbol:
     if t == ReTokenType.ESCAPE_CHAR:
         return re_escape_char # type:ignore
     raise NotImplementedError()
+
+cdef set[str] get_latin_letters():
+    cdef int cp
+    return { chr(cp) for cp in range(0x00C0, 0x0180) if chr(cp).isalpha() }
+
+cdef set[str] get_latin_punctuation():
+    cdef int cp
+    cdef set[str] result = set()
+    cdef str category
+    for cp in range(0x2000, 0x2070):
+        c = chr(cp)
+        category = unicodedata.category(c)
+        if category[0] in ('P','S'):
+            result.add(c)
+    
+    for cp in range(0x00A1, 0x0100):
+        c = chr(cp)
+        category = unicodedata.category(c)
+        if category[0] in ('P','S'):
+            result.add(c)
+    
+    return result
+
+cdef set[str] PUNCTUATION = get_latin_punctuation()
+cdef set[str] PRINTABLE = get_latin_letters().union(printable).union(PUNCTUATION)
 
 ####################################################################################################
 #                         NON-TERMINALS
@@ -188,18 +214,18 @@ cdef class ConstantRegexAST(RegexAST):
         if self._re == '\\d':
             char_set = set(digits)
         elif self._re == '\\D':
-            char_set = set(printable).difference(set(digits))
+            char_set = PRINTABLE.difference(set(digits))
         elif self._re == '\\s':
             char_set = set(whitespace)
         elif self._re == '\\S':
-            char_set = set(printable).difference(set(whitespace))
+            char_set = PRINTABLE.difference(set(whitespace))
         elif self._re == '\\w':
             char_set = set(list(digits) + list(ascii_letters) + ['_'])
         elif self._re == '.':
-            char_set = set(printable)
+            char_set = PRINTABLE.copy()
             char_set.discard('\n')
         else:
-            char_set = set(printable).difference(set(ascii_letters+digits+'_'))
+            char_set = PRINTABLE.difference(set(ascii_letters+digits+'_'))
         
         result = DFA('start','start',char_set) # type:ignore
         for char in char_set:
@@ -339,7 +365,7 @@ cdef class ComplementCharSetAST(CharSetAST):
 
     cdef Automaton _get_automaton(self):
         cdef Automaton aut = self._char_set._get_automaton()
-        cdef set[str] _char_set = set(printable).difference(aut._alphabet)
+        cdef set[str] _char_set = PRINTABLE.difference(aut._alphabet)
         cdef DFA result = DFA('start','start',_char_set) # type:ignore
         cdef State final = State('final','final',True) # type:ignore
         cdef str char
@@ -807,18 +833,21 @@ cdef BottomUpParser _build_regex_parser():
 
 cdef BaseLexer _build_regex_lexer():
     cdef BaseLexer RE_LEXER = BaseLexer(get_symbol_function,DFA('EMPTY','EMPTY',set())) # type:ignore
-    cdef set[str] char_set = set(printable).difference(set(symbols_by_text.keys()).union(set(operatos_by_text)))
-    
+    cdef set[str] char_set = PRINTABLE.difference(set(symbols_by_text.keys()).union(set(operatos_by_text.keys())))
+    cdef DFA char_dfa
+    cdef State final = State('final',ReTokenType.CHAR,True) # type:ignore
+    cdef str char
+
     char_set.discard('.')
+    char_dfa = DFA('start','start',char_set) # type:ignore
+
+    for char in char_set:
+        char_dfa.add_transition(char_dfa._start_state,final,char)
 
     RE_LEXER._add_token(
         1,
         ReTokenType.CHAR,
-        get_words_automaton_with_value(
-            list(char_set),
-            ReTokenType.CHAR,
-            True # type:ignore
-        )
+        char_dfa
     )
     RE_LEXER._add_token(
         2,

@@ -76,6 +76,11 @@ cdef class PostOrderStrategy(TraversalStrategy):
     cdef list[RegexAST] _stack
     cdef list[RegexAST] _seen
 
+cdef set[str] PRINTABLE
+cdef set[str] PUNCTUATION
+
+cdef set[str] get_latin_punctuation()
+cdef set[str] get_latin_letters()
 cdef BottomUpParser _build_regex_parser()
 cdef BaseLexer _build_regex_lexer()
 cdef tuple[ASTWalker,RegexContext] _get_regex_ast_walker()
