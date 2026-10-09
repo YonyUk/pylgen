@@ -208,6 +208,228 @@ class TestIntegrationRegex:
     def test_parser_regex_8(self,re_exp:str,text:str,should_accept:bool):
         aut = RegexEngine.Parse(re_exp)
         assert aut.accept(list(text)) == should_accept
+
+    @pytest.mark.parametrize("regex,text,should_accept",[
+        # ============================================================
+        # LATIN LETTERS: acents
+        # ============================================================
+        ('á', 'á', True),   ('á', 'a', False),   ('á', 'é', False),
+        ('é', 'é', True),   ('é', 'e', False),
+        ('í', 'í', True),   ('í', 'i', False),
+        ('ó', 'ó', True),   ('ó', 'o', False),
+        ('ú', 'ú', True),   ('ú', 'u', False),
+        ('Á', 'Á', True),   ('Á', 'á', False),
+        ('É', 'É', True),
+        ('Í', 'Í', True),
+        ('Ó', 'Ó', True),
+        ('Ú', 'Ú', True),
+        # ============================================================
+        # LATIN LETTERS: dieresis
+        # ============================================================
+        ('ü', 'ü', True),   ('ü', 'u', False),
+        ('Ü', 'Ü', True),   ('Ü', 'ü', False),
+        # ============================================================
+        # LATIN LETTERS: eñe
+        # ============================================================
+        ('ñ', 'ñ', True),   ('ñ', 'n', False),
+        ('Ñ', 'Ñ', True),   ('Ñ', 'ñ', False),
+        # ============================================================
+        # SPANISH WORDS
+        # ============================================================
+        ('niño',     'niño',     True),
+        ('niño',     'nino',     False),
+        ('niño',     'niña',     False),
+        ('niña',     'niña',     True),
+        ('año',      'año',      True),
+        ('año',      'ano',      False),
+        ('cañón',    'cañón',    True),
+        ('cañón',    'cañon',    False),
+        ('camión',   'camión',   True),
+        ('camión',   'camion',   False),
+        ('pingüino', 'pingüino', True),
+        ('pingüino', 'pinguino', False),
+        ('vergüenza','vergüenza',True),
+        ('español',  'español',  True),
+        ('español',  'espanol',  False),
+        ('España',   'España',   True),
+        ('España',   'espana',   False),
+        ('México',   'México',   True),
+        ('México',   'Mexico',   False),
+        ('Perú',     'Perú',     True),
+        ('Japón',    'Japón',    True),
+        ('corazón',  'corazón',  True),
+        ('árbol',    'árbol',    True),
+        ('cárcel',   'cárcel',   True),
+        ('lápiz',    'lápiz',    True),
+        ('jamón',    'jamón',    True),
+        ('ratón',    'ratón',    True),
+        ('canción',  'canción',  True),
+        # ============================================================
+        # PUNCTUATION
+        # ============================================================
+        ('¿', '¿', True),   ('¿', '?', False),
+        ('¡', '¡', True),   ('¡', '!', False),
+        ('«', '«', True),
+        ('»', '»', True),
+        ('«hola»', '«hola»', True),
+        ('«hola»', 'hola',   False),
+        # ============================================================
+        # COMPLETE PHRASES
+        # ============================================================
+        ('¿qué\\?',            '¿qué?',            True),
+        ('¿qué\\?',            'que?',             False),
+        ('¡Hola!',             '¡Hola!',           True),
+        ('¡Hola!',             'Hola!',            False),
+        ('¿Cómo estás\\?',     '¿Cómo estás?',     True),
+        ('¿Cómo estás\\?',     '¿Como estas?',     False),
+        ('¡Niño!',             '¡Niño!',           True),
+        ('«adiós»',            '«adiós»',          True),
+        ('México—DF',          'México—DF',        True),
+        ('México—DF',          'Mexico-DF',        False),
+        # ============================================================
+        # OPERATORS * + ? | ( )
+        # ============================================================
+        ('ñ*', '',    True),
+        ('ñ*', 'ñ',   True),
+        ('ñ*', 'ñññ', True),
+        ('ñ*', 'n',   False),
+
+        ('ñ+', '',    False),
+        ('ñ+', 'ñ',   True),
+        ('ñ+', 'ññ',  True),
+        ('ñ+', 'n',   False),
+
+        ('ñ?', '',    True),
+        ('ñ?', 'ñ',   True),
+        ('ñ?', 'ññ',  False),
+
+        ('año|niño',  'año',  True),
+        ('año|niño',  'niño', True),
+        ('año|niño',  'nino', False),
+        ('año|niño',  'años', False),
+
+        ('(ni|ca)ñón', 'niñón', True),
+        ('(ni|ca)ñón', 'cañón', True),
+        ('(ni|ca)ñón', 'niño',  False),
+
+        ('á*é*í*',       '',        True),
+        ('á*é*í*',       'áéí',     True),
+        ('á*é*í*',       'áaéí',    False),
+        ('(á|é|í|ó|ú)+', 'áéíóú',   True),
+        ('(á|é|í|ó|ú)+', 'aeiou',   False),
+
+        # ============================================================
+        # CHARACTER CLASSES [ ... ]
+        # ============================================================
+        ('[áéíóú]', 'á', True),
+        ('[áéíóú]', 'é', True),
+        ('[áéíóú]', 'í', True),
+        ('[áéíóú]', 'ó', True),
+        ('[áéíóú]', 'ú', True),
+        ('[áéíóú]', 'a', False),
+        ('[áéíóú]', 'x', False),
+        ('[áéíóú]', 'ñ', False),
+
+        ('[ñÑ]', 'ñ', True),
+        ('[ñÑ]', 'Ñ', True),
+        ('[ñÑ]', 'n', False),
+
+        ('[aáeéiíoóuú]', 'a',  True),
+        ('[aáeéiíoóuú]', 'á',  True),
+        ('[aáeéiíoóuú]', 'é',  True),
+        ('[aáeéiíoóuú]', 'o',  True),
+        ('[aáeéiíoóuú]', 'ñ',  False),
+
+        ('[áé]|[íóú]', 'á', True),
+        ('[áé]|[íóú]', 'í', True),
+        ('[áé]|[íóú]', 'a', False),
+
+        # ============================================================
+        # NEGATED CLASSES [^ ... ]
+        # ============================================================
+        ('[^áéíóú]', 'a', True),
+        ('[^áéíóú]', 'á', False),
+        ('[^áéíóú]', 'é', False),
+        ('[^áéíóú]', 'ñ', True),
+        ('[^ñ]',     'a', True),
+        ('[^ñ]',     'ñ', False),
+        ('[^ñÑ]',    'ñ', False),
+        ('[^ñÑ]',    'Ñ', False),
+        ('[^ñÑ]',    'n', True),
+
+        # ============================================================
+        # CONSTANTS: \d \D \w \W \s \S y .
+        # ============================================================
+        ('\\d', '5', True),  ('\\d', 'a', False),  ('\\d', 'ñ', False),
+        ('\\D', 'a', True),  ('\\D', '5', False),
+        ('\\w', 'a', True),  ('\\w', '_', True),   ('\\w', '5', True),
+        ('\\w', ' ', False),
+
+        ('\\s', ' ',  True),
+        ('\\s', '\t', True),
+        ('\\s', '\n', True),
+        ('\\s', 'a',  False),
+
+        ('\\S', 'a', True),  ('\\S', ' ', False),
+        ('\\W', ' ', True),  ('\\W', 'a', False),
+
+        ('.', 'a',  True),
+        ('.', 'ñ',  True),
+        ('.', 'á',  True),
+        ('.', '¿',  True),
+        ('.', '\n', False),
+
+        # ============================================================
+        # REPEATS { min , max }
+        # ============================================================
+        ('ñ{2,3}',   '',       False),
+        ('ñ{2,3}',   'ñ',      False),
+        ('ñ{2,3}',   'ññ',     True),
+        ('ñ{2,3}',   'ñññ',    True),
+        ('ñ{2,3}',   'ññññ',   False),
+        ('ñ{2,3}',   'nnn',    False),
+
+        ('[áéíóú]{1,3}', 'á',    True),
+        ('[áéíóú]{1,3}', 'áéí',  True),
+        ('[áéíóú]{1,3}', 'áéíó', False),
+        ('[áéíóú]{1,3}', 'abc',  False),
+
+        ('(niño){2,2}', 'niñoniño', True),
+        ('(niño){2,2}', 'niño',     False),
+
+        # ============================================================
+        # REAL COMBINATIONS
+        # ============================================================
+        ('[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+', 'México',  True),
+        ('[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+', 'MEXICO',  False),
+        ('[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+', 'méxico',  False),
+        ('[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+', 'España',  True),
+        ('[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+', 'Perú',    True),
+
+        ('[a-záéíóúñ]+@[a-z]+\\.[a-z]+',
+        'niño@correo.com', True),
+        ('[a-záéíóúñ]+@[a-z]+\\.[a-z]+',
+        'nino@correo.com', True),
+
+        ('\\w+',  'canción', False),
+        ('\\w+',  'canción', False),
+        ('\\w*',  '',        True),
+
+        # ============================================================
+        # NEGATIVE CASES
+        # ============================================================
+        ('a',  'A',  False),
+        ('A',  'a',  False),
+        ('á',  'Á',  False),
+        ('Á',  'á',  False),
+        ('ñ',  'Ñ',  False),
+        ('Ñ',  'ñ',  False),
+        ('niño', 'Niño', False),
+        ('Niño', 'niño', False),
+    ])
+    def test_parser_regex_latin_characters(self,regex:str,text:str,should_accept:bool):
+        aut = RegexEngine.Parse(regex)
+        assert aut.accept(list(text)) == should_accept
     
     def test_get_regex_1(self):
         q0 = State('q0','q0')
