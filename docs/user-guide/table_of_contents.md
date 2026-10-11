@@ -56,3 +56,44 @@
 - [TokenType](user-guide-common.md#tokentype)
 
 - [Best Practices for Maximum Performance](user-guide-common.md#best-practices-for-maximum-performance)
+
+## **[Grammar Module](user-guide-grammar.md)**
+- [The grammar Module](user-guide-grammar.md#the-grammar-module)
+
+- [Production](user-guide-grammar.md#production)
+
+    - [Attributes and Properties](user-guide-grammar.md#attributes-and-properties)
+
+    - [Typical Usage](user-guide-grammar.md#typical-usage)
+
+    - [ProductionsSet](user-guide-grammar.md#productionsset)
+
+    - [Methods](user-guide-grammar.md#methods)
+
+    - [Usage](user-guide-grammar.md#usage)
+
+- [AttributedProductionsSet](user-guide-grammar.md#attributedproductionsset)
+
+    - [Methods](user-guide-grammar.md#methods_1)
+
+    - [Usage](user-guide-grammar.md#usage_1)
+
+- [Grammar](user-guide-grammar.md#grammar)
+
+    - [Constructor](user-guide-grammar.md#constructor)
+
+    - [Attributes](user-guide-grammar.md#attributes)
+
+    - [Methods](user-guide-grammar.md#methods_2)
+
+    - [Static Utilities](user-guide-grammar.md#static-utilities)
+
+    - [Typical Usage](user-guide-grammar.md#typical-usage_1)
+
+- [AttributedGrammar](user-guide-grammar.md#attributedgrammar)
+
+    - [Methods](user-guide-grammar.md#methods_3)
+
+    - [Typical Usage](user-guide-grammar.md#typical-usage_2)
+
+- [Complete Example: Defining an Arithmetic Expression Grammar](user-guide-grammar.md#complete-example-defining-an-arithmetic-expression-grammar)

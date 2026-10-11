@@ -13,6 +13,7 @@ nav:
     - Introduction: user-guide/user-guide-intro.md
     - Table of Contents: user-guide/table_of_contents.md
     - Common Module: user-guide/user-guide-common.md
+    - Grammar Module: user-guide/user-guide-grammar.md
 
 theme:
   name: material
