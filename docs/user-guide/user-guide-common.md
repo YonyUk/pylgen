@@ -1,9 +1,5 @@
 # The **`common`** Module
 
-**Audience:** Users already working with PyLGEN who need to construct ASTs, symbols, or errors.
-
-**Objective:** To understand the base types used by all other modules.
-
 The `common` module is not used in isolation. It appears at every stage of the pipeline: tokens are of type `Token`, grammar symbols are `Symbol`, tree nodes are subclasses of `AST`, and errors are subclasses of `Error`.
 
 ## `Symbol`

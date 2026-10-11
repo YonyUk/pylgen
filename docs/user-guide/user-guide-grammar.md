@@ -1,11 +1,7 @@
 # The `grammar` Module
 
-**Audience:** Users who already understand what a context-free grammar is and want to write one in PyLGEN.
-
-**Objective:** To construct an `AttributedGrammar` with reducers and use it to generate a parser.
-
 !!! note "New to grammars?" 
-    If you are unsure about what a non-terminal, a terminal, or a production is, start with [Key Concepts](../getting-started/concepts.md) or [Formal Grammars](TODO).
+    If you are unsure about what a non-terminal, a terminal, or a production is, start with [Key Concepts](../getting-started/key-concepts.md) or [Formal Grammars](TODO).
 
 ## `Production`
 

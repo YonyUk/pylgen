@@ -97,3 +97,26 @@
     - [Typical Usage](user-guide-grammar.md#typical-usage_2)
 
 - [Complete Example: Defining an Arithmetic Expression Grammar](user-guide-grammar.md#complete-example-defining-an-arithmetic-expression-grammar)
+
+## **[Lexer Module](user-guide-lexer.md)**
+- [The lexer Module](user-guide-lexer.md#the-lexer-module)
+
+- [Lexer](user-guide-lexer.md#lexer)
+
+    - [Example](user-guide-lexer.md#example)
+
+    - [Priorities](user-guide-lexer.md#priorities)
+
+    - [The mapping function](user-guide-lexer.md#the-mapping-function)
+
+    - [Attributes and Methods](user-guide-lexer.md#attributes-and-methods)
+
+- [IdentedLexer](user-guide-lexer.md#identedlexer)
+
+    - [Example](user-guide-lexer.md#example_1)
+
+    - [Methods](user-guide-lexer.md#methods)
+
+- [Lexical Rules](user-guide-lexer.md#lexical-rules)
+
+    - [Example](user-guide-lexer.md#example_2)
