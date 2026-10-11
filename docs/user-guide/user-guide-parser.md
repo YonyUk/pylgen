@@ -1,0 +1,113 @@
+# The `parser` Module
+
+## Building a parser
+
+The standard approach is `ParserBuilder.build_parser_from_attributed`:
+
+=== "Python"
+
+    ```python
+    from pylgen.parser import ParserBuilder, ParserType
+
+    parser = ParserBuilder.build_parser_from_attributed(G, ParserType.LALR1)
+    ```
+
+=== "Cython"
+
+    ```cython
+    from pylgen.parser.parser_builder cimport _build_lalr_parser_from_attribute
+
+    cdef BottomUpParser parser = _build_lalr_parser_from_attribute(G)
+    ```
+
+| **Type** | **When to use it** |
+| :---: | :---: |
+| `SLR` | Simple grammars. Fewer states, less powerful. |
+| `LR1` | Grammars that SLR cannot handle. More states, higher memory usage. |
+| `LALR1` | Recommended default. Balance between power and size. |
+
+If the grammar contains conflicts, the builder raises a specific exception (`LALRShiftReduceConflictException`, `LALRReduceReduceConflictException`, etc.) containing information about the state and the symbols involved. To inspect a grammar before building the parser, use `lr_inspect_grammar` from `pylgen.visual`.
+
+## Typical Usage
+
+```python
+lexer.load_text(source)
+ast = parser.parse(lexer.tokens)
+
+if parser.errors:
+    for error in parser.errors:
+        print(error)
+else:
+    print("Parse OK")
+```
+
+!!! note
+    `parse` **does not raise exceptions** for syntax errors. It accumulates them in `parser.errors` and continues parsing whenever possible. This allows for the detection of multiple errors in a single pass.
+
+## Attributes and Methods
+
+| **Member** | **Type** | **Description** |
+| :--- | :--- | :--- |
+| `parse(tokens)` | `AST` | Returns the root of the tree. |
+| `errors` | `List[Error]` | Accumulated errors. |
+| `syntax_errors` | `bool` | Returns `True` if any syntax error ocurred |
+| `reset()` | — | Clears state and errors. |
+| `set_draw_parse_tree_flag(flag)` | — | Enables parse tree construction. |
+| `parse_tree` | `ParseTreeNode` | Root of the parse tree (if enabled). |
+
+## Reducers and the parser
+
+Every production in the attributed grammar must have a corresponding reducer. **There is no default reducer.** If a reduction is triggered for a production without a reducer, the parser fails.
+
+=== "Python"
+
+    ```python
+
+    # ASTs definitions
+
+    def number_reductor(asts:ASTListView) -> AST:
+        return MyAST()
+
+    G[Number] += (number,), number_reductor
+    ```
+
+=== "Cython"
+
+    ```cython
+
+    # ASTs definitions
+
+    cdef AST number_reductor(ASTListView asts):
+        return MyAST()
+
+    G._add_attributed_production(Number,[number],number_reductor)
+    ```
+
+If you want a generic reducer for all uncovered productions, assign it explicitly. It is your choice, not something the parser does for you.
+
+## Parse Tree vs. AST
+
+The parser builds an **AST** by default. If you also want the **parse tree** (the complete derivation including all terminals and non-terminals), enable it before parsing:
+
+```python
+parser.set_draw_parse_tree_flag(True)
+ast = parser.parse(lexer.tokens)
+tree = parser.parse_tree
+```
+
+The parse tree is useful for debugging grammars and for visualization. It does not replace the AST; they are two distinct trees. The AST is constructed by the reducers, whereas the parse tree is built by the parser itself.
+
+## Syntax errors
+
+When the parser cannot proceed, it applies **panic-mode recovery**: it discards tokens until it finds one that allows it to continue. The accumulated errors include the exact position of the problematic token.
+
+```python
+for error in parser.errors:
+    print(error)   # SYNTAX ERROR at line 1: Unexpected symbol ")"
+```
+
+!!! important
+    If any `ErrorAST` node was added, the corresponding semantic errors will also be in `parser.errors`; it is recommended to check `parser.syntax_errors` to determine whether to proceed with the semantic analysis step, rather than simply checking if errors were detected.
+
+To report them with context in an editor, use `error.start_position` and `error.end_position`. Each error knows which snippet of code caused it.
+

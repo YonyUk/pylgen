@@ -15,6 +15,7 @@ nav:
     - Common Module: user-guide/user-guide-common.md
     - Grammar Module: user-guide/user-guide-grammar.md
     - Lexer Module: user-guide/user-guide-lexer.md
+    - Parser Module: user-guide/user-guide-parser.md
 
 theme:
   name: material

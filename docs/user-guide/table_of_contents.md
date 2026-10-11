@@ -120,3 +120,18 @@
 - [Lexical Rules](user-guide-lexer.md#lexical-rules)
 
     - [Example](user-guide-lexer.md#example_2)
+
+## **[Parser Module](user-guide-parser.md)**
+- [The parser Module](user-guide-parser.md#the-parser-module)
+
+- [Building a parser](user-guide-parser.md#building-a-parser)
+
+- [Typical Usage](user-guide-parser.md#typical-usage)
+
+- [Attributes and Methods](user-guide-parser.md#attributes-and-methods)
+
+- [Reducers and the parser](user-guide-parser.md#reducers-and-the-parser)
+
+- [Parse Tree vs. AST](user-guide-parser.md#parse-tree-vs-ast)
+
+- [Syntax errors](user-guide-parser.md#syntax-errors)
