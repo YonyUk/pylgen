@@ -3,54 +3,15 @@ site_url: https://pylgen.readthedocs.io/en/latest/
 
 nav:
   - Overview: index.md
-  - Table of Contents: table_of_contents.md
-  - Meeting PyLGEN:
-    - Quick Start: section-1/quick_start.md
-    - Example 1: 
-      - Introduction: section-1/example-1-first-approach.md
-      - Step 1 (Lexical Analysis): section-1/example-1-step-1.md
-      - Step 2 (Syntax Analysis): section-1/example-1-step-2.md
-      - Pause and Reflect (Visualizing Our Progress): section-1/example-1-pause-and-reflect.md
-      - Step 3 (Semantic Analysis): section-1/example-1-step-3.md
-      - Step 4 (The Final Step): section-1/example-1-step-4.md
-    - From Prototype to Production:
-      - Introduction: benchmark/benchmark-intro.md
-      - Getting to know VecLang: benchmark/getting-to-know-veclang.md
-      - Step 1: benchmark/step-1.md
-      - Step 2: benchmark/step-2.md
-      - Step 3: benchmark/step-3.md
-      - Language Evolution: benchmark/from-arithmetic-to-veclang.md
-      - Step 4: benchmark/step-4.md
-      - Benchmark: benchmark/benchmark-conclusion.md
-    - A Practical Tour for PyLGEN Framework:
-      - Introduction: api/intro.md
-      - Common Module: api/common/common.md
-      - Automaton Module:
-        - The Engine of Pattern Matching: api/automaton/intro.md
-        - Automata Theory: api/automaton/theory.md
-        - The Theory in Action: api/automaton/automaton.md
-      - Grammar Module:
-        - The Syntactic Blueprint: api/grammar/intro.md
-        - The Formal Foundation: api/grammar/theory.md
-        - From Theory to Implementation: api/grammar/grammar.md
-      - Regex Module: api/regex/regex.md
-      - Lexer Module: api/lexer/lexer.md
-      - Parser Module: api/parser/parser.md
-      - Analysis Module: api/analysis/analysis.md
-      - Visual Module (Bonus): api/visual/visual.md
-      - Examples: 
-        - Introduction: api/examples/intro.md
-        - Building a Lexer from Scratch: api/examples/lexer-building.md
-        - Building a Parser from Scratch: api/examples/parser-building.md
-  - Examples:
-    - Introduction: examples/intro.md
-    - idented_dsl: examples/idented_dsl/idented_dsl.md
-    - mini-python: examples/mini-python/mini-python.md
+  - First Steps:
+    - Table of Contents: getting-started/table_of_contents.md
+    - Installation: getting-started/installation.md
 
 theme:
   name: material
-  custom_dir: docs/mkdocs_extras//overrides
+  custom_dir: docs/mkdocs_extras/overrides
   features:
+    - navigation.indexes
     - navigation.sections
     - toc.integrate
     - navigation.footer
@@ -108,6 +69,11 @@ plugins:
       header_level: 5
       template_dir_path: docs/mkdocs_extras/templates
       overwrite: always 
+      subdir_index_depth: 1
+      output_root_index: false
+
+hooks:
+  - docs/mkdocs_extras/hooks/group_by_sections.py
 
 extra_css:
     - mkdocs_extras/stylesheets/extra.css
