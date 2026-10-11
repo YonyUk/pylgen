@@ -18,6 +18,8 @@ def on_config(config):
 
     def walk(sections, deep=1, parent_section=""):
         for section in sections:
+            if isinstance(section,str):
+                continue
             for label, content in section.items():
                 if isinstance(content, str):
                     normalized = content.replace('\\', '/')

@@ -9,6 +9,10 @@ nav:
     - Quick Start: getting-started/quick-start.md
     - Key Concepts: getting-started/key-concepts.md
     - Next Steps: getting-started/next-steps.md
+  - User Guide:
+    - Introduction: user-guide/user-guide-intro.md
+    - Table of Contents: user-guide/table_of_contents.md
+    - Common Module: user-guide/user-guide-common.md
 
 theme:
   name: material

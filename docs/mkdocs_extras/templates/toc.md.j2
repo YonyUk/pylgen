@@ -20,7 +20,7 @@
 
 {% if file_path != ns.last_file %}
 {# --- Primera cabecera de una nueva página --- #}
-{% if section and section != ns.last_section %}
+{% if section and section != ns.last_section and section != page_title %}
 {% set ns.last_section = section %}
 {{ '#' * (deep - 1 if deep > 1 else 1) }} **{{ section }}**
 {% endif %}
