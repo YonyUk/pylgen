@@ -12,9 +12,9 @@ def on_config(config):
     if not nav:
         return config
 
-    sections_deep  = {}   # path -> deep
-    sections_name  = {}   # path -> sección contenedora
-    sections_title = {}   # path -> título de página (label del nav)
+    sections_deep  = {}
+    sections_name  = {}
+    sections_title = {}
 
     def walk(sections, deep=1, parent_section=""):
         for section in sections:

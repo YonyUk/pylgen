@@ -1,5 +1,7 @@
 # Installation Guide
 
+PyLGEN is distributed as the `pylgen-core` package on PyPI. Install it within a virtual environment to avoid mixing it with your other projects.
+
 > ## Setting Up the Environment
 
 First, let's create our development environment. Open a terminal in your chosen directory and create a virtual environment. Then, navigate into the newly created folder, activate the environment, and install PyLGEN.

@@ -6,6 +6,9 @@ nav:
   - First Steps:
     - Table of Contents: getting-started/table_of_contents.md
     - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+    - Key Concepts: getting-started/key-concepts.md
+    - Next Steps: getting-started/next-steps.md
 
 theme:
   name: material
@@ -64,7 +67,6 @@ plugins:
 
   - toc-md:
       toc_page_title: Table of Contents
-      toc_page_description: Use this page to navigate the documentation and find the section that fits your needs.
       output_path: table_of_contents.md
       header_level: 5
       template_dir_path: docs/mkdocs_extras/templates

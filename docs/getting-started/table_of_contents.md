@@ -3,9 +3,7 @@
 <!-- ================================================= -->
 
 
-# getting-started
 
-Use this page to navigate the documentation and find the section that fits your needs.
 
 
 # **First Steps**
@@ -13,3 +11,42 @@ Use this page to navigate the documentation and find the section that fits your 
 - [Installation Guide](installation.md#installation-guide)
 
 - [Setting Up the Environment](installation.md#setting-up-the-environment)
+
+## **[Quick Start](quick-start.md)**
+- [Quick Start](quick-start.md#quick-start)
+
+- [Step 1: Token types](quick-start.md#step-1-token-types)
+
+- [Step 2: Grammar symbols](quick-start.md#step-2-grammar-symbols)
+
+- [Step 3: Build the lexer](quick-start.md#step-3-build-the-lexer)
+
+- [Step 4: AST nodes](quick-start.md#step-4-ast-nodes)
+
+- [Step 5: Reducers](quick-start.md#step-5-reducers)
+
+- [Step 6: Attributed grammar](quick-start.md#step-6-attributed-grammar)
+
+- [Step 7: Building the parser](quick-start.md#step-7-building-the-parser)
+
+- [Step 8: Parsing](quick-start.md#step-8-parsing)
+
+- [Step 9: Evaluating the AST](quick-start.md#step-9-evaluating-the-ast)
+
+- [Step 10: Obtain the result](quick-start.md#step-10-obtain-the-result)
+
+- [Optional Step 11: Visualize the AST](quick-start.md#optional-step-11-visualize-the-ast)
+
+    - [How to generate self-contained HTML](quick-start.md#how-to-generate-self-contained-html)
+
+    - [AST View Result](quick-start.md#ast-view-result)
+
+- [What you have learned](quick-start.md#what-you-have-learned)
+
+## **[Key Concepts](key-concepts.md)**
+- [Key Concepts](key-concepts.md#key-concepts)
+
+- [Glossary](key-concepts.md#glossary)
+
+## **[Next Steps](next-steps.md)**
+- [Next Steps](next-steps.md#next-steps)
