@@ -1,5 +1,7 @@
 # The `lexer` Module
 
+The PyLGEN `lexer` module brings together the tools needed for lexical analysis. Its main class, `Lexer`, converts regex patterns into a `DFA` that traverses the input text and produces tokens. `IndentedLexer` extends this functionality to indentation-sensitive languages ​​by generating `INDENT` and `DEDENT` tokens. Additionally, `LexicalRule` allows for the application of further validations to the tokens. Collectively, the module manages priorities, lexical errors, the end-of-file token, and the mapping of tokens to symbols.
+
 ## `Lexer`
 
 `Lexer` is the general-purpose class. It converts regex patterns into a DFA that traverses the input linearly.

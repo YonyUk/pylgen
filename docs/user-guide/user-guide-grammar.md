@@ -1,5 +1,7 @@
 # The `grammar` Module
 
+The `grammar` module provides the basic tools for defining grammars in PyLGEN: productions, sets of productions, and grammars; both context-free and attributed. Details regarding each class, its attributes, and its methods are explained in the following sections.
+
 !!! note "New to grammars?" 
     If you are unsure about what a non-terminal, a terminal, or a production is, start with [Key Concepts](../getting-started/key-concepts.md) or [Formal Grammars](TODO).
 

@@ -16,13 +16,13 @@ nav:
     - Grammar Module: user-guide/user-guide-grammar.md
     - Lexer Module: user-guide/user-guide-lexer.md
     - Parser Module: user-guide/user-guide-parser.md
+    - Analysis Module: user-guide/user-guide-analysis.md
 
 theme:
   name: material
   custom_dir: docs/mkdocs_extras/overrides
   features:
     - navigation.indexes
-    - navigation.sections
     - toc.integrate
     - navigation.footer
     - content.code.copy

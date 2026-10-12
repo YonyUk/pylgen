@@ -128,10 +128,21 @@
 
 - [Typical Usage](user-guide-parser.md#typical-usage)
 
-- [Attributes and Methods](user-guide-parser.md#attributes-and-methods)
+- [Parser's Attributes and Methods](user-guide-parser.md#parsers-attributes-and-methods)
 
 - [Reducers and the parser](user-guide-parser.md#reducers-and-the-parser)
 
 - [Parse Tree vs. AST](user-guide-parser.md#parse-tree-vs-ast)
 
 - [Syntax errors](user-guide-parser.md#syntax-errors)
+
+## **[Analysis Module](user-guide-analysis.md)**
+- [The analysis Module](user-guide-analysis.md#the-analysis-module)
+
+- [Context](user-guide-analysis.md#context)
+
+    - [Attributes and Methods](user-guide-analysis.md#attributes-and-methods)
+
+- [Visitor Framework](user-guide-analysis.md#visitor-framework)
+
+    - [Typical Usage](user-guide-analysis.md#typical-usage)

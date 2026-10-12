@@ -91,9 +91,9 @@ A `Symbol` represents a grammar symbol: either a terminal (token) or a non-termi
 
 | **Attribute/Method** | **Type/Return** | **Description** |
 | :---: | :---: | :---: |
-| **`symbol` (property)** |	`Symbol` | The grammar symbol associated with this node. |
-| **`start_position` (property)** | `Tuple[int, int]` | `(start_line, start_column)` where the node starts. |
-| **`end_position` (property)** | `Tuple[int, int]` | `(end_line, end_column)` where the node ends. |
+| <span style="white-space: nowrap">**`symbol` (property)**</span> | `Symbol` | The grammar symbol associated with this node. |
+| <span style="white-space: nowrap">**`start_position` (property)**</span> | <span style="white-space: nowrap">`Tuple[int, int]`</span> | `(start_line, start_column)` where the node starts. |
+| <span style="white-space: nowrap">**`end_position` (property)**</span> | <span style="white-space: nowrap">`Tuple[int, int]`</span> | `(end_line, end_column)` where the node ends. |
 | **`is_error` (property)** | `bool` | Indicates whether this node represents a semantic error. Always `False` for `AST`; overridden in `ErrorAST` | 
 | `children()` (method) | `List[AST]` | Returns a list of child AST nodes. Must be overridden. |
 

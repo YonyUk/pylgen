@@ -1,6 +1,6 @@
 # User Guide
 
-This section documents the PyLGEN public API. It is intended for users who have already installed the library and wish to use it—whether to build a language, query a class, or understand how the modules connect.
+This section documents the PyLGEN public API. It is intended for users who have already installed the library and wish to use it; whether to build a language, query a class, or understand how the modules connect.
 
 ## How to read this section
 
@@ -11,11 +11,11 @@ This section documents the PyLGEN public API. It is intended for users who have 
 
 | Module | Responsibility | Page |
 | :--- | :--- | :--- |
-| `common` | Base types: `Symbol`, `AST`, `Token`, `Error`, `ASTListView`. | [common](common.md) |
-| `grammar` | Productions, attributed grammars, reducers. | [Grammars](grammar.md) |
-| `lexer` | Tokenization using regex and lexical rules. | [Lexer](lexer.md) |
-| `parser` | Construction and execution of the LALR(1) parser. | [Parser](parser.md) |
-| `analysis` | Visitors, walkers, context, semantic analysis. | [Semantic Analysis](analysis.md) |
-| `regex` | Regular expression engine. | ​​[Regular Expressions](regex.md) |
-| `automaton` | DFA, NFA, and language operations. | [Automata](automaton.md) |
-| `visual` | Interactive HTML visualization. | [Visualization](visual.md) |
+| `common` | Base types: `Symbol`, `AST`, `Token`, `Error`, `ASTListView`. | [common](user-guide-common.md) |
+| `grammar` | Productions, attributed grammars, reducers. | [Grammars](user-guide-grammar.md) |
+| `lexer` | Tokenization using regex and lexical rules. | [Lexer](user-guide-lexer.md) |
+| `parser` | Construction and execution of the LALR(1) parser. | [Parser](user-guide-parser.md) |
+| `analysis` | Visitors, walkers, context, semantic analysis. | [Semantic Analysis](user-guide-analysis.md) |
+| `regex` | Regular expression engine. | ​​[Regular Expressions](user-guide-regex.md) |
+| `automaton` | DFA, NFA, and language operations. | [Automata](user-guide-automaton.md) |
+| `visual` | Interactive HTML visualization. | [Visualization](user-guide-visual.md) |
