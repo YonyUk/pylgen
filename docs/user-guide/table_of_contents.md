@@ -146,3 +146,12 @@
 - [Visitor Framework](user-guide-analysis.md#visitor-framework)
 
     - [Typical Usage](user-guide-analysis.md#typical-usage)
+
+## **[Regex Module](user-guide-regex.md)**
+- [The regex Module](user-guide-regex.md#the-regex-module)
+
+- [RegexEngine](user-guide-regex.md#regexengine)
+
+    - [Methods](user-guide-regex.md#methods)
+
+- [Typical Usage](user-guide-regex.md#typical-usage)

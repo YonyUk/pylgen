@@ -17,6 +17,7 @@ nav:
     - Lexer Module: user-guide/user-guide-lexer.md
     - Parser Module: user-guide/user-guide-parser.md
     - Analysis Module: user-guide/user-guide-analysis.md
+    - Regex Module: user-guide/user-guide-regex.md
 
 theme:
   name: material
