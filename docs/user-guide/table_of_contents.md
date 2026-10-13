@@ -154,4 +154,47 @@
 
     - [Methods](user-guide-regex.md#methods)
 
-- [Typical Usage](user-guide-regex.md#typical-usage)
+- [Examples](user-guide-regex.md#examples)
+
+    - [Parsing a Regex into a DFA](user-guide-regex.md#parsing-a-regex-into-a-dfa)
+
+        - [Supported Syntax](user-guide-regex.md#supported-syntax)
+
+    - [Converting a Regular Grammar to a DFA](user-guide-regex.md#converting-a-regular-grammar-to-a-dfa)
+
+    - [Deriving a Regex from an Automaton](user-guide-regex.md#deriving-a-regex-from-an-automaton)
+
+## **[Automaton Module](user-guide-automaton.md)**
+- [The automaton Module](user-guide-automaton.md#the-automaton-module)
+
+- [State](user-guide-automaton.md#state)
+
+    - [Attributes](user-guide-automaton.md#attributes)
+
+    - [Typical Usage](user-guide-automaton.md#typical-usage)
+
+- [Automaton](user-guide-automaton.md#automaton)
+
+    - [Attributes](user-guide-automaton.md#attributes_1)
+
+    - [Methods](user-guide-automaton.md#methods)
+
+    - [Operators](user-guide-automaton.md#operators)
+
+    - [Static Methods](user-guide-automaton.md#static-methods)
+
+- [DFA](user-guide-automaton.md#dfa)
+
+    - [Methods](user-guide-automaton.md#methods_1)
+
+        - [Typical Usage](user-guide-automaton.md#typical-usage_1)
+
+- [NFA](user-guide-automaton.md#nfa)
+
+    - [Methods](user-guide-automaton.md#methods_2)
+
+    - [Typical Usage](user-guide-automaton.md#typical-usage_2)
+
+- [Factory Functions](user-guide-automaton.md#factory-functions)
+
+- [Complete Example: Integer Recognizer](user-guide-automaton.md#complete-example-integer-recognizer)
