@@ -60,7 +60,7 @@ A `Production` is a rule $A \rightarrow \alpha$.
     Two `Production` objects are equal if they have the same `head` and the same production list (order matters).
 
 
-> ### `ProductionsSet`
+## `ProductionsSet`
 
 `ProductionsSet` is a mutable container that holds all productions for a given non‑terminal `head`. It is used internally by `Grammar` to manage the productions of each symbol. It provides a convenient `+=` operator to add a new production.
 
@@ -98,7 +98,7 @@ print(ps.productions)  # [[E, plus, T], [T]]
 
 > ### Methods
 
- - **`__iadd__`**: expects a tuple of `(production_tuple, reductor)`, where `production_tuple` is a tuple of `Symbol` and `reductor` is a callable with signature `(ASTListView) -> AST`. The reductor's signature is validated at addition time (must be annotated with [`ASTListView`](user-guide-common#astlistview) and return [`AST`](user-guide-common#ast)).
+ - **`__iadd__`**: expects a tuple of `(production_tuple, reductor)`, where `production_tuple` is a tuple of `Symbol` and `reductor` is a callable with signature `(ASTListView) -> AST`. The reductor's signature is validated at addition time (must be annotated with [`ASTListView`](../user-guide-common#astlistview) and return [`AST`](../user-guide-common#ast)).
 
 > ### Usage
 

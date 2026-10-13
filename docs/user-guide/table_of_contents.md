@@ -66,7 +66,7 @@
 
     - [Typical Usage](user-guide-grammar.md#typical-usage)
 
-    - [ProductionsSet](user-guide-grammar.md#productionsset)
+- [ProductionsSet](user-guide-grammar.md#productionsset)
 
     - [Methods](user-guide-grammar.md#methods)
 
@@ -198,3 +198,66 @@
 - [Factory Functions](user-guide-automaton.md#factory-functions)
 
 - [Complete Example: Integer Recognizer](user-guide-automaton.md#complete-example-integer-recognizer)
+
+## **[Visual Module](user-guide-visual.md)**
+- [The visual Module](user-guide-visual.md#the-visual-module)
+
+- [Public Functions](user-guide-visual.md#public-functions)
+
+- [Drawing Automata and Lexers](user-guide-visual.md#drawing-automata-and-lexers)
+
+    - [draw_automaton(automaton, **kwargs)](user-guide-visual.md#draw_automatonautomaton-kwargs)
+
+        - [Example](user-guide-visual.md#example)
+
+    - [draw_lexer(lexer, **kwargs)](user-guide-visual.md#draw_lexerlexer-kwargs)
+
+        - [Example](user-guide-visual.md#example_1)
+
+- [Drawing Abstract Syntax Trees and Parse Trees](user-guide-visual.md#drawing-abstract-syntax-trees-and-parse-trees)
+
+    - [draw_ast(ast, **kwargs)](user-guide-visual.md#draw_astast-kwargs)
+
+        - [Example](user-guide-visual.md#example_2)
+
+    - [draw_parse_tree(tree, **kwargs)](user-guide-visual.md#draw_parse_treetree-kwargs)
+
+        - [Example](user-guide-visual.md#example_3)
+
+- [Inspecting LR Grammars](user-guide-visual.md#inspecting-lr-grammars)
+
+    - [show_propagation_edges_table(g, **kwargs)](user-guide-visual.md#show_propagation_edges_tableg-kwargs)
+
+        - [Example](user-guide-visual.md#example_4)
+
+    - [lr_inspect_grammar(g, type_=ParserType.LALR1, **kwargs) -> bool](user-guide-visual.md#lr_inspect_grammarg-type_parsertypelalr1-kwargs-bool)
+
+        - [Example](user-guide-visual.md#example_5)
+
+    - [Examples](user-guide-visual.md#examples)
+
+        - [1: Classic LALR1 Grammar Analysis (No Conflicts)](user-guide-visual.md#1-classic-lalr1-grammar-analysis-no-conflicts)
+
+            - [Propagation Edges](user-guide-visual.md#propagation-edges)
+
+            - [ACTION and GOTO Tables](user-guide-visual.md#action-and-goto-tables)
+
+        - [2: LALR(1) Problematic Grammar Analysis](user-guide-visual.md#2-lalr1-problematic-grammar-analysis)
+
+            - [Propagation Edges](user-guide-visual.md#propagation-edges_1)
+
+            - [ACTION and GOTO Tables](user-guide-visual.md#action-and-goto-tables_1)
+
+- [Cache Management](user-guide-visual.md#cache-management)
+
+    - [set_cache_file(filename: str) -> None](user-guide-visual.md#set_cache_filefilename-str-none)
+
+        - [Example](user-guide-visual.md#example_6)
+
+- [Common Parameters](user-guide-visual.md#common-parameters)
+
+    - [Methods x Parameters Table](user-guide-visual.md#methods-x-parameters-table)
+
+    - [Parameters Details](user-guide-visual.md#parameters-details)
+
+- [Best Practices](user-guide-visual.md#best-practices)

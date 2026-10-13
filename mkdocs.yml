@@ -19,6 +19,7 @@ nav:
     - Analysis Module: user-guide/user-guide-analysis.md
     - Regex Module: user-guide/user-guide-regex.md
     - Automaton Module: user-guide/user-guide-automaton.md
+    - Visual Module: user-guide/user-guide-visual.md
 
 theme:
   name: material
