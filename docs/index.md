@@ -55,3 +55,4 @@ PyLGEN has the intention to be the **meeting point** between classic compiler th
 > ## Where to Go Next?
 
  - [First Steps](getting-started/table_of_contents.md): Installation, quick start, key concepts, and next steps.
+ - [User Guide](user-guide/user-guide-intro.md.md): Practical introduction to each module’s features and intended usage.

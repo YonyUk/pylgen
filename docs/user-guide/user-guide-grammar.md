@@ -250,10 +250,10 @@ Grammar(start_symbol: Symbol, end_symbol: str = '\x00')
 
     cdef AST add_reductor(ASTListView asts):
         # build AST for addition
-        return MyAddAST(asts[0], asts[2])
+        return MyAddAST(asts._get(0), asts._get(2))
 
     cdef AST single_reductor(ASTListView asts):
-        return asts[0]
+        return asts._get(0)
 
     G = AttributedGrammar(E)
     G._add_attributed_production(E,[E, plus, T], add_reductor)
@@ -329,13 +329,13 @@ Here is a minimal complete example that defines a simple arithmetic grammar with
 
     # Reductors (simplified)
     cdef AST binary(ASTListView asts):
-        return MyBinaryAST(asts[0], asts[2], asts[1])
+        return MyBinaryAST(asts._get(0), asts._get(2), asts._get(1))
 
     cdef AST single(ASTListView asts):
-        return asts[0]
+        return asts._get(0)
 
     cdef AST paren(ASTListView asts):
-        return asts[1]
+        return asts._get(1)
 
     # Build attributed grammar
     cdef AttributedGrammar G = AttributedGrammar(E, end_symbol='$')
