@@ -20,7 +20,13 @@ nav:
     - Regex Module: user-guide/user-guide-regex.md
     - Automaton Module: user-guide/user-guide-automaton.md
     - Visual Module: user-guide/user-guide-visual.md
-
+  - Tutorials:
+    - Introduction: tutorials/tutorials-intro.md
+    - Table of Contents: tutorials/table_of_contents.md
+    - Foundations:
+      - Introduction: tutorials/foundations/tutorials-foundations-intro.md
+      - Building a Lexer from scratch: tutorials/foundations/tutorials-foundations-building-a-lexer.md
+      - Building a Parser from scratch: tutorials/foundations/tutorials-foundations-building-a-parser.md
 theme:
   name: material
   custom_dir: docs/mkdocs_extras/overrides
