@@ -46,6 +46,9 @@ nav:
         - VecLang Evolution: tutorials/complete-languages/veclang/veclang-evolution.md
         - Step 4: tutorials/complete-languages/veclang/veclang-step-4.md
         - Next Steps: tutorials/complete-languages/veclang/veclang-next-steps.md
+  - Benchmarks:
+    - Table of Contents: benchmarks/table_of_contents.md
+    - VecLang Benchmark: benchmarks/veclang-benchmark.md
 
 theme:
   name: material

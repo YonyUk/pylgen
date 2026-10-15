@@ -4,13 +4,13 @@ You've built VecLang from the ground up: a lexer, a parser, an AST, a full set o
 
 But there's one question we haven't answered yet: ***how fast is it, really?***
 
-That's the subject of the [**VecLang Benchmark**](TODO). It's a rigorous, end-to-end performance analysis on a 2-million-line, 40 MB source file, comparing VecLang against **Lark** (a popular, production-grade parsing library) in its best-performing configuration (`lark_cython`, `LALR(1)`, `contextual lexer`).
+That's the subject of the [**VecLang Benchmark**](../../../benchmarks/veclang-benchmark.md). It's a rigorous, end-to-end performance analysis on a 2-million-line, 40 MB source file, comparing VecLang against **Lark** (a popular, production-grade parsing library) in its best-performing configuration (`lark_cython`, `LALR(1)`, `contextual lexer`).
 
 The benchmark covers:
 
  - **Parsing speed**: measured in seconds over multiple runs, with warm-up and scaling tests.
 
- - **Memory usage**: tracked with [**Scalene**](TODO) to show the real footprint of each approach.
+ - **Memory usage**: tracked with [**Scalene**](https://github.com/plasma-umass/scalene) to show the real footprint of each approach.
 
  - **Full-pipeline timing**: breaking down parsing, function collection, semantic checks, and evaluation.
 

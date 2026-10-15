@@ -55,4 +55,6 @@ PyLGEN has the intention to be the **meeting point** between classic compiler th
 > ## Where to Go Next?
 
  - [First Steps](getting-started/table_of_contents.md): Installation, quick start, key concepts, and next steps.
- - [User Guide](user-guide/user-guide-intro.md.md): Practical introduction to each module’s features and intended usage.
+ - [User Guide](user-guide/user-guide-intro.md): Practical introduction to each module’s features and intended usage.
+ - [Tutorials](tutorials/tutorials-intro.md): Hands-on, step-by-step guides to building lexers, parsers, and complete interpreters with PyLGEN.
+ - [Benchmark](benchmarks/veclang-benchmark.md): Rigorous performance analysis of VecLang vs. Lark on a 2‑million‑line, 40 MB source file, including speed, memory, and scaling results.

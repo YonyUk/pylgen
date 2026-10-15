@@ -1547,7 +1547,7 @@ The `write` method schedules the actual widget update on the main thread using `
 
 The input bridge is similar, but it reads from a queue that the terminal widget fills when the user presses `Enter`. The `_execute` method runs the whole pipeline in a background thread and `_run_code` orchestrates the pipeline.
 
-The pipeline is exactly the same as in the [**VecLang(TODO)**](../../benchmark/from-arithmetic-to-veclang.md) tutorial: lex, parse, collect functions, check semantics, evaluate, report results. The only difference is the threading, which keeps the GUI responsive.
+The pipeline is exactly the same as in the [**VecLang**](../veclang/veclang-step-4.md) tutorial: lex, parse, collect functions, check semantics, evaluate, report results. The only difference is the threading, which keeps the GUI responsive.
 
 ## Final stop: seeing it in action
 
@@ -1685,6 +1685,6 @@ Each example picked the tools it needed and left the rest aside. That's the real
 
 So where do you go from here?
 
-If you haven't already, visit the sections that interest you most. The [**VecLang benchmark(TODO)**](../../benchmark/getting-to-know-veclang.md) is worth a look if you're planning to deploy your interpreter in a performance‑critical setting. The [**grammar**](../../../user-guide/user-guide-grammar.md) and [**parser**](../../../user-guide/user-guide-parser.md) API references are a good choice to refresh the knowledge about how to build a parser with the framework.
+If you haven't already, visit the sections that interest you most. The [**VecLang**](../veclang/veclang-intro.md) is worth a look if you're planning to deploy your interpreter in a performance‑critical setting. The [**grammar**](../../../user-guide/user-guide-grammar.md) and [**parser**](../../../user-guide/user-guide-parser.md) API references are a good choice to refresh the knowledge about how to build a parser with the framework.
 
 But the best next step is to **build something of your own**. Pick a small language, something you've always wanted to design, and try to implement it. Start with a lexer, add a grammar, build an AST, and see where it takes you. You'll make mistakes, and you'll learn from them, and by the end you'll have something that's genuinely yours.
