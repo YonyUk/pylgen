@@ -213,3 +213,37 @@
     - [What this diagram tells you](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#what-this-diagram-tells-you)
 
 - [Next steps](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#next-steps)
+
+## **Complete Languages Tutorials**
+### **[Config DSL (idented_dsl)](complete-languages/config-dsl/config-dsl.md)**
+- [From configuration file to JSON: the story of idented_dsl](complete-languages/config-dsl/config-dsl.md#from-configuration-file-to-json-the-story-of-idented_dsl)
+
+- [An everyday problem](complete-languages/config-dsl/config-dsl.md#an-everyday-problem)
+
+- [The starting point: the configuration file](complete-languages/config-dsl/config-dsl.md#the-starting-point-the-configuration-file)
+
+- [First stop: the indentation-aware lexer](complete-languages/config-dsl/config-dsl.md#first-stop-the-indentation-aware-lexer)
+
+- [Second stop: the attributed grammar](complete-languages/config-dsl/config-dsl.md#second-stop-the-attributed-grammar)
+
+- [Third stop: the AST](complete-languages/config-dsl/config-dsl.md#third-stop-the-ast)
+
+- [Fourth stop: the reducers](complete-languages/config-dsl/config-dsl.md#fourth-stop-the-reducers)
+
+- [Fifth stop: code generation](complete-languages/config-dsl/config-dsl.md#fifth-stop-code-generation)
+
+- [Sixth stop: the CLI](complete-languages/config-dsl/config-dsl.md#sixth-stop-the-cli)
+
+- [What this example teaches](complete-languages/config-dsl/config-dsl.md#what-this-example-teaches)
+
+    - [Lesson 1:](complete-languages/config-dsl/config-dsl.md#lesson-1)
+
+    - [Lesson 2:](complete-languages/config-dsl/config-dsl.md#lesson-2)
+
+    - [Lesson 3:](complete-languages/config-dsl/config-dsl.md#lesson-3)
+
+    - [Lesson 4:](complete-languages/config-dsl/config-dsl.md#lesson-4)
+
+    - [Lesson 5:](complete-languages/config-dsl/config-dsl.md#lesson-5)
+
+- [What's next?](complete-languages/config-dsl/config-dsl.md#whats-next)

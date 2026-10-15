@@ -35,6 +35,7 @@ nav:
         - Step 2: tutorials/complete-languages/arithmetic-repl/arithmetic-repl-step-2.md
         - Step 3: tutorials/complete-languages/arithmetic-repl/arithmetic-repl-step-3.md
         - Step 4: tutorials/complete-languages/arithmetic-repl/arithmetic-repl-step-4.md
+      - Config DSL (idented_dsl): tutorials/complete-languages/config-dsl/config-dsl.md
 
 theme:
   name: material
