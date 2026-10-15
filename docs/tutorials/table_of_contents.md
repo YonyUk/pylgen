@@ -247,3 +247,66 @@
     - [Lesson 5:](complete-languages/config-dsl/config-dsl.md#lesson-5)
 
 - [What's next?](complete-languages/config-dsl/config-dsl.md#whats-next)
+
+### **[Python Subset (mini-python)](complete-languages/mini-python/mini-python.md)**
+- [The Python Subset: a complete interpreter with a GUI](complete-languages/mini-python/mini-python.md#the-python-subset-a-complete-interpreter-with-a-gui)
+
+- [The starting point: what the language supports](complete-languages/mini-python/mini-python.md#the-starting-point-what-the-language-supports)
+
+- [First stop: the indentation‑aware lexer](complete-languages/mini-python/mini-python.md#first-stop-the-indentationaware-lexer)
+
+- [Second stop: the attributed grammar](complete-languages/mini-python/mini-python.md#second-stop-the-attributed-grammar)
+
+- [Third stop: the AST](complete-languages/mini-python/mini-python.md#third-stop-the-ast)
+
+- [Fourth stop: the reductor layer](complete-languages/mini-python/mini-python.md#fourth-stop-the-reductor-layer)
+
+- [Fifth stop: the context](complete-languages/mini-python/mini-python.md#fifth-stop-the-context)
+
+- [Sixth stop: semantic analysis](complete-languages/mini-python/mini-python.md#sixth-stop-semantic-analysis)
+
+- [Seventh stop: evaluation with custom traversal strategies](complete-languages/mini-python/mini-python.md#seventh-stop-evaluation-with-custom-traversal-strategies)
+
+    - [Short‑circuiting on errors](complete-languages/mini-python/mini-python.md#shortcircuiting-on-errors)
+
+    - [Skipping instructions after a signal](complete-languages/mini-python/mini-python.md#skipping-instructions-after-a-signal)
+
+    - [Conditional branching](complete-languages/mini-python/mini-python.md#conditional-branching)
+
+    - [Loop iteration](complete-languages/mini-python/mini-python.md#loop-iteration)
+
+    - [Function calls](complete-languages/mini-python/mini-python.md#function-calls)
+
+- [Eighth stop: the GUI](complete-languages/mini-python/mini-python.md#eighth-stop-the-gui)
+
+- [Final stop: seeing it in action](complete-languages/mini-python/mini-python.md#final-stop-seeing-it-in-action)
+
+    - [The program we'll be running](complete-languages/mini-python/mini-python.md#the-program-well-be-running)
+
+    - [Branching: the same code, two different worlds](complete-languages/mini-python/mini-python.md#branching-the-same-code-two-different-worlds)
+
+    - [When things go wrong](complete-languages/mini-python/mini-python.md#when-things-go-wrong)
+
+        - [Basic errors](complete-languages/mini-python/mini-python.md#basic-errors)
+
+    - [Source positions: the feature you didn't know you needed](complete-languages/mini-python/mini-python.md#source-positions-the-feature-you-didnt-know-you-needed)
+
+        - [A litle bit more complex error](complete-languages/mini-python/mini-python.md#a-litle-bit-more-complex-error)
+
+    - [Putting it all together: a password loop](complete-languages/mini-python/mini-python.md#putting-it-all-together-a-password-loop)
+
+    - [One pipeline, many faces](complete-languages/mini-python/mini-python.md#one-pipeline-many-faces)
+
+- [What this example teaches](complete-languages/mini-python/mini-python.md#what-this-example-teaches)
+
+    - [Lesson 1: The pipeline scales](complete-languages/mini-python/mini-python.md#lesson-1-the-pipeline-scales)
+
+    - [Lesson 2: Control flow lives in the traversal strategy](complete-languages/mini-python/mini-python.md#lesson-2-control-flow-lives-in-the-traversal-strategy)
+
+    - [Lesson 3: Signals are a clean way to propagate control flow](complete-languages/mini-python/mini-python.md#lesson-3-signals-are-a-clean-way-to-propagate-control-flow)
+
+    - [Lesson 4: The GUI is just a thin wrapper](complete-languages/mini-python/mini-python.md#lesson-4-the-gui-is-just-a-thin-wrapper)
+
+    - [Lesson 5: PyLGEN scales with your language](complete-languages/mini-python/mini-python.md#lesson-5-pylgen-scales-with-your-language)
+
+- [What's next?](complete-languages/mini-python/mini-python.md#whats-next)
