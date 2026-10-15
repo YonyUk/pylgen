@@ -49,6 +49,14 @@ nav:
   - Benchmarks:
     - Table of Contents: benchmarks/table_of_contents.md
     - VecLang Benchmark: benchmarks/veclang-benchmark.md
+  - Formal Foundations:
+    - Introduction: formal-foundations/formal-foundations-intro.md
+    - Table of Contents: formal-foundations/table_of_contents.md
+    - Automata Theory: formal-foundations/formal-foundations-automata.md
+    - Context-Free Grammars: formal-foundations/formal-foundations-context-free-grammars.md
+    - Regular Languages: formal-foundations/formal-foundations-regular-languages.md
+    - LR Parsing: formal-foundations/formal-foundations-lr-parsing.md
+    - Tokenization: formal-foundations/formal-foundations-tokenization.md
 
 theme:
   name: material
