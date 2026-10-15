@@ -77,3 +77,139 @@
     - [Debugging Tip: Visualize the Automaton](foundations/tutorials-foundations-building-a-parser.md#debugging-tip-visualize-the-automaton)
 
 - [Summary](foundations/tutorials-foundations-building-a-parser.md#summary)
+
+## **Complete Languages Tutorials**
+### **[Introduction](complete-languages/complete-languages-intro.md)**
+- [Complete Languages Tutorials](complete-languages/complete-languages-intro.md#complete-languages-tutorials)
+
+- [What's in this subsection](complete-languages/complete-languages-intro.md#whats-in-this-subsection)
+
+### **Arithmetic REPL**
+#### **[Introduction](complete-languages/arithmetic-repl/arithmetic-repl-intro.md)**
+- [First approach](complete-languages/arithmetic-repl/arithmetic-repl-intro.md#first-approach)
+
+- [What we're building](complete-languages/arithmetic-repl/arithmetic-repl-intro.md#what-were-building)
+
+#### **[Step 1](complete-languages/arithmetic-repl/arithmetic-repl-step-1.md)**
+- [Step 1: Build the lexer](complete-languages/arithmetic-repl/arithmetic-repl-step-1.md#step-1-build-the-lexer)
+
+- [Define token types](complete-languages/arithmetic-repl/arithmetic-repl-step-1.md#define-token-types)
+
+- [Define the mapping function](complete-languages/arithmetic-repl/arithmetic-repl-step-1.md#define-the-mapping-function)
+
+- [Creating the lexer](complete-languages/arithmetic-repl/arithmetic-repl-step-1.md#creating-the-lexer)
+
+- [Defining tokens](complete-languages/arithmetic-repl/arithmetic-repl-step-1.md#defining-tokens)
+
+- [Lexical rules](complete-languages/arithmetic-repl/arithmetic-repl-step-1.md#lexical-rules)
+
+- [Recap](complete-languages/arithmetic-repl/arithmetic-repl-step-1.md#recap)
+
+#### **[Step 2](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md)**
+- [Step 2: Build the parser (Syntactic Analysis – Defining the Grammar)](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#step-2-build-the-parser-syntactic-analysis-defining-the-grammar)
+
+- [Grammar symbols](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#grammar-symbols)
+
+- [Defining the AST nodes](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#defining-the-ast-nodes)
+
+- [Designing our language](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#designing-our-language)
+
+    - [ArithmeticExpression -  the top-level rule](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#arithmeticexpression-the-top-level-rule)
+
+    - [Expression rules (E,T,F,P)](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#expression-rules-etfp)
+
+    - [Variable production](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#variable-production)
+
+    - [Building the parser](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#building-the-parser)
+
+    - [Recap](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#recap)
+
+- [Connecting the Dots (The reductors)](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#connecting-the-dots-the-reductors)
+
+    - [The Binary Reductor](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#the-binary-reductor)
+
+    - [The Single Reductor](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#the-single-reductor)
+
+    - [The Parenthesis Reductor](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#the-parenthesis-reductor)
+
+    - [The Variable Reductor](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#the-variable-reductor)
+
+    - [Command Reductors](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#command-reductors)
+
+    - [Putting It All Together](complete-languages/arithmetic-repl/arithmetic-repl-step-2.md#putting-it-all-together)
+
+#### **[Step 3](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md)**
+- [Step 3: Bringing Meaning to the Tree (Semantic Analysis)](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md#step-3-bringing-meaning-to-the-tree-semantic-analysis)
+
+- [The Context (Managing State)](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md#the-context-managing-state)
+
+- [Custom Runtime Errors](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md#custom-runtime-errors)
+
+- [The Visitor Pattern (Separating Concerns)](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md#the-visitor-pattern-separating-concerns)
+
+    - [Semantic Error Collectors](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md#semantic-error-collectors)
+
+    - [Evaluator Visitors](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md#evaluator-visitors)
+
+    - [The Traversal Strategy (Controlling the Walk)](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md#the-traversal-strategy-controlling-the-walk)
+
+    - [Recap](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md#recap)
+
+- [Bringing It All Together (The Semantic Module)](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md#bringing-it-all-together-the-semantic-module)
+
+- [The Workflow](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md#the-workflow)
+
+- [Why this design](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md#why-this-design)
+
+- [What's next?](complete-languages/arithmetic-repl/arithmetic-repl-step-3.md#whats-next)
+
+#### **[Step 4](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md)**
+- [Step 4: The REPL](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#step-4-the-repl)
+
+- [Breaking Down the Loop](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#breaking-down-the-loop)
+
+    - [1 Preparation (Cleaning the State)](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#1-preparation-cleaning-the-state)
+
+    - [2 Reading input](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#2-reading-input)
+
+    - [3 Lexical and Sintatic Analysis](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#3-lexical-and-sintatic-analysis)
+
+    - [4 Error Collection (first pass)](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#4-error-collection-first-pass)
+
+    - [5 Evaluation (second pass)](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#5-evaluation-second-pass)
+
+    - [6 Reporting results](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#6-reporting-results)
+
+- [The Workflow in Action](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#the-workflow-in-action)
+
+    - [Simple expression](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#simple-expression)
+
+    - [Variable assignment](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#variable-assignment)
+
+    - [Using a variable](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#using-a-variable)
+
+    - [Lexical and Syntax error](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#lexical-and-syntax-error)
+
+    - [Semantic error](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#semantic-error)
+
+    - [Runtime error](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#runtime-error)
+
+- [Why this design?](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#why-this-design)
+
+- [What we've built](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#what-weve-built)
+
+- [System Overview (Connecting the Dots)](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#system-overview-connecting-the-dots)
+
+- [Understanding the flow](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#understanding-the-flow)
+
+    - [The configuration stages (top)](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#the-configuration-stages-top)
+
+    - [The execution pipeline (bottom)](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#the-execution-pipeline-bottom)
+
+    - [The connections that matter](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#the-connections-that-matter)
+
+    - [Why this architecture works](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#why-this-architecture-works)
+
+    - [What this diagram tells you](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#what-this-diagram-tells-you)
+
+- [Next steps](complete-languages/arithmetic-repl/arithmetic-repl-step-4.md#next-steps)

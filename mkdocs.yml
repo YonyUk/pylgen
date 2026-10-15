@@ -27,6 +27,15 @@ nav:
       - Introduction: tutorials/foundations/tutorials-foundations-intro.md
       - Building a Lexer from scratch: tutorials/foundations/tutorials-foundations-building-a-lexer.md
       - Building a Parser from scratch: tutorials/foundations/tutorials-foundations-building-a-parser.md
+    - Complete Languages Tutorials:
+      - Introduction: tutorials/complete-languages/complete-languages-intro.md
+      - Arithmetic REPL:
+        - Introduction: tutorials/complete-languages/arithmetic-repl/arithmetic-repl-intro.md
+        - Step 1: tutorials/complete-languages/arithmetic-repl/arithmetic-repl-step-1.md
+        - Step 2: tutorials/complete-languages/arithmetic-repl/arithmetic-repl-step-2.md
+        - Step 3: tutorials/complete-languages/arithmetic-repl/arithmetic-repl-step-3.md
+        - Step 4: tutorials/complete-languages/arithmetic-repl/arithmetic-repl-step-4.md
+
 theme:
   name: material
   custom_dir: docs/mkdocs_extras/overrides
