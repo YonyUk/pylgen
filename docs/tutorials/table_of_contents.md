@@ -310,3 +310,168 @@
     - [Lesson 5: PyLGEN scales with your language](complete-languages/mini-python/mini-python.md#lesson-5-pylgen-scales-with-your-language)
 
 - [What's next?](complete-languages/mini-python/mini-python.md#whats-next)
+
+### **VecLang (The Power of Cython)**
+#### **[Introduction](complete-languages/veclang/veclang-intro.md)**
+- [From Prototype to Production (The power of Cython)](complete-languages/veclang/veclang-intro.md#from-prototype-to-production-the-power-of-cython)
+
+#### **[Getting to Know VecLang](complete-languages/veclang/getting-to-know-veclang.md)**
+- [Getting to know VecLang (A Test Language)](complete-languages/veclang/getting-to-know-veclang.md#getting-to-know-veclang-a-test-language)
+
+- [Why VecLang is a Good Benchmark Language](complete-languages/veclang/getting-to-know-veclang.md#why-veclang-is-a-good-benchmark-language)
+
+#### **[Step 1](complete-languages/veclang/veclang-step-1.md)**
+- [Step 1: Project Structure and Lexer](complete-languages/veclang/veclang-step-1.md#step-1-project-structure-and-lexer)
+
+- [1.1 Token Types (tokens_enum.py)](complete-languages/veclang/veclang-step-1.md#11-token-types-tokens_enumpy)
+
+- [1.2 The Lexer (lexer.pxd,lexer.pyx,lexer.pyi)](complete-languages/veclang/veclang-step-1.md#12-the-lexer-lexerpxdlexerpyxlexerpyi)
+
+    - [Declaration (lexer.pxd)](complete-languages/veclang/veclang-step-1.md#declaration-lexerpxd)
+
+    - [Implementation (lexer.pyx)](complete-languages/veclang/veclang-step-1.md#implementation-lexerpyx)
+
+    - [Stubs for static typing (lexer.pyi)](complete-languages/veclang/veclang-step-1.md#stubs-for-static-typing-lexerpyi)
+
+#### **[Step 2](complete-languages/veclang/veclang-step-2.md)**
+- [Step 2: Building the Parser and AST](complete-languages/veclang/veclang-step-2.md#step-2-building-the-parser-and-ast)
+
+- [Grammar Symbols: Terminals and Non-terminals](complete-languages/veclang/veclang-step-2.md#grammar-symbols-terminals-and-non-terminals)
+
+- [Designing the Abstract Syntax Tree (AST)](complete-languages/veclang/veclang-step-2.md#designing-the-abstract-syntax-tree-ast)
+
+    - [Specialised Nodes](complete-languages/veclang/veclang-step-2.md#specialised-nodes)
+
+    - [Reductors](complete-languages/veclang/veclang-step-2.md#reductors)
+
+    - [Recap](complete-languages/veclang/veclang-step-2.md#recap)
+
+    - [1. Program and Instructions Sequence](complete-languages/veclang/veclang-step-2.md#1-program-and-instructions-sequence)
+
+    - [2. Arithmetic Expressions](complete-languages/veclang/veclang-step-2.md#2-arithmetic-expressions)
+
+    - [3. Numbers and ComplexNumbers](complete-languages/veclang/veclang-step-2.md#3-numbers-and-complexnumbers)
+
+    - [4. Vectors and Ranges](complete-languages/veclang/veclang-step-2.md#4-vectors-and-ranges)
+
+    - [5. Indexing and Slicing](complete-languages/veclang/veclang-step-2.md#5-indexing-and-slicing)
+
+    - [6. Function Calls and Built-in Functions](complete-languages/veclang/veclang-step-2.md#6-function-calls-and-built-in-functions)
+
+    - [7. Function Declarations](complete-languages/veclang/veclang-step-2.md#7-function-declarations)
+
+    - [8. Instructions](complete-languages/veclang/veclang-step-2.md#8-instructions)
+
+- [Connecting the Dots: Reductors](complete-languages/veclang/veclang-step-2.md#connecting-the-dots-reductors)
+
+    - [Single and Extractor Reductors](complete-languages/veclang/veclang-step-2.md#single-and-extractor-reductors)
+
+    - [Binary Operation Reductors](complete-languages/veclang/veclang-step-2.md#binary-operation-reductors)
+
+    - [Assignment Reductor](complete-languages/veclang/veclang-step-2.md#assignment-reductor)
+
+    - [Number and Complex Number Reductors](complete-languages/veclang/veclang-step-2.md#number-and-complex-number-reductors)
+
+    - [Vector and Components](complete-languages/veclang/veclang-step-2.md#vector-and-components)
+
+    - [Range Reductors](complete-languages/veclang/veclang-step-2.md#range-reductors)
+
+    - [Indexing and Slicing](complete-languages/veclang/veclang-step-2.md#indexing-and-slicing)
+
+    - [Function Call Reductors](complete-languages/veclang/veclang-step-2.md#function-call-reductors)
+
+    - [Function Declaration and Arguments](complete-languages/veclang/veclang-step-2.md#function-declaration-and-arguments)
+
+    - [Type Reductor](complete-languages/veclang/veclang-step-2.md#type-reductor)
+
+- [Putting It All Together](complete-languages/veclang/veclang-step-2.md#putting-it-all-together)
+
+- [Performance-Driven Changes](complete-languages/veclang/veclang-step-2.md#performance-driven-changes)
+
+    - [1. Predefined Symbols Instead of Runtime Creation](complete-languages/veclang/veclang-step-2.md#1-predefined-symbols-instead-of-runtime-creation)
+
+    - [2. Separate Reductors per Operator Instead of a Single Conditional](complete-languages/veclang/veclang-step-2.md#2-separate-reductors-per-operator-instead-of-a-single-conditional)
+
+    - [3. C-Level Access to AST Attributes](complete-languages/veclang/veclang-step-2.md#3-c-level-access-to-ast-attributes)
+
+    - [4. Strong Static Typing for Local Variables](complete-languages/veclang/veclang-step-2.md#4-strong-static-typing-for-local-variables)
+
+    - [5. Compilation to Native Code](complete-languages/veclang/veclang-step-2.md#5-compilation-to-native-code)
+
+    - [Does Every Change Improve Performance? (A Balanced View)](complete-languages/veclang/veclang-step-2.md#does-every-change-improve-performance-a-balanced-view)
+
+    - [Conclusion](complete-languages/veclang/veclang-step-2.md#conclusion)
+
+#### **[Step 3](complete-languages/veclang/veclang-step-3.md)**
+- [Step 3: Semantic Analysis and Evaluation](complete-languages/veclang/veclang-step-3.md#step-3-semantic-analysis-and-evaluation)
+
+- [Custom Runtime Errors (errors.pxd,errors.pyx)](complete-languages/veclang/veclang-step-3.md#custom-runtime-errors-errorspxderrorspyx)
+
+- [The VecLangContext (Managing State)](complete-languages/veclang/veclang-step-3.md#the-veclangcontext-managing-state)
+
+- [The Visitor Pattern in Cython](complete-languages/veclang/veclang-step-3.md#the-visitor-pattern-in-cython)
+
+- [Function Collector](complete-languages/veclang/veclang-step-3.md#function-collector)
+
+- [Semantic Error Collectors](complete-languages/veclang/veclang-step-3.md#semantic-error-collectors)
+
+- [Evaluator Visitors](complete-languages/veclang/veclang-step-3.md#evaluator-visitors)
+
+- [Traversal Strategies](complete-languages/veclang/veclang-step-3.md#traversal-strategies)
+
+- [Building the Walkers](complete-languages/veclang/veclang-step-3.md#building-the-walkers)
+
+- [Getting the Final Value](complete-languages/veclang/veclang-step-3.md#getting-the-final-value)
+
+    - [Recap](complete-languages/veclang/veclang-step-3.md#recap)
+
+- [From Python to Cython: Performance-Driven Changes](complete-languages/veclang/veclang-step-3.md#from-python-to-cython-performance-driven-changes)
+
+    - [1. Typed Attributes in Visitors](complete-languages/veclang/veclang-step-3.md#1-typed-attributes-in-visitors)
+
+    - [2. Use of NumPy for Vector Operations](complete-languages/veclang/veclang-step-3.md#2-use-of-numpy-for-vector-operations)
+
+    - [3. Cython-Level Functions and Method Calls](complete-languages/veclang/veclang-step-3.md#3-cython-level-functions-and-method-calls)
+
+#### **[VecLang Evolution](complete-languages/veclang/veclang-evolution.md)**
+- [Language Evolution: From Arithmetic to VecLang](complete-languages/veclang/veclang-evolution.md#language-evolution-from-arithmetic-to-veclang)
+
+- [Reflection: Is it always that easy?](complete-languages/veclang/veclang-evolution.md#reflection-is-it-always-that-easy)
+
+- [Leveraging the Python Ecosystem](complete-languages/veclang/veclang-evolution.md#leveraging-the-python-ecosystem)
+
+    - [Trade-offs:](complete-languages/veclang/veclang-evolution.md#trade-offs)
+
+    - [Counter-argument](complete-languages/veclang/veclang-evolution.md#counter-argument)
+
+- [Next Steps](complete-languages/veclang/veclang-evolution.md#next-steps)
+
+#### **[Step 4](complete-languages/veclang/veclang-step-4.md)**
+- [Step 4: Running VecLang from a File](complete-languages/veclang/veclang-step-4.md#step-4-running-veclang-from-a-file)
+
+- [From Interactive to Batch](complete-languages/veclang/veclang-step-4.md#from-interactive-to-batch)
+
+- [The Command-Line Interface](complete-languages/veclang/veclang-step-4.md#the-command-line-interface)
+
+- [Modifications to the Pipeline](complete-languages/veclang/veclang-step-4.md#modifications-to-the-pipeline)
+
+    - [1. Reading the file](complete-languages/veclang/veclang-step-4.md#1-reading-the-file)
+
+    - [2. Parsing the Whole Program](complete-languages/veclang/veclang-step-4.md#2-parsing-the-whole-program)
+
+    - [3. Semantic Analysis Passes](complete-languages/veclang/veclang-step-4.md#3-semantic-analysis-passes)
+
+    - [4. Evaluation Pass](complete-languages/veclang/veclang-step-4.md#4-evaluation-pass)
+
+- [Implementation Sketch](complete-languages/veclang/veclang-step-4.md#implementation-sketch)
+
+    - [Differences from the REPL](complete-languages/veclang/veclang-step-4.md#differences-from-the-repl)
+
+- [Performance Considerations](complete-languages/veclang/veclang-step-4.md#performance-considerations)
+
+- [Access to the Python Ecosystem in Batch Mode](complete-languages/veclang/veclang-step-4.md#access-to-the-python-ecosystem-in-batch-mode)
+
+- [Error Reporting in Batch Mode](complete-languages/veclang/veclang-step-4.md#error-reporting-in-batch-mode)
+
+#### **[Next Steps](complete-languages/veclang/veclang-next-steps.md)**
+- [Where to Go Next](complete-languages/veclang/veclang-next-steps.md#where-to-go-next)
