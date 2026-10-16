@@ -61,8 +61,10 @@ nav:
     - Table of Contents: api-reference/table_of_contents.md
     - Python API:
       - Common Module: api-reference/python/api-reference-python-common.md
+      - Analysis Module: api-reference/python/api-reference-python-analysis.md
     - Cython API:
       - Common Module: api-reference/cython/api-reference-cython-common.md
+      - Analysis Module: api-reference/cython/api-reference-cython-analysis.md
 
 
 theme:

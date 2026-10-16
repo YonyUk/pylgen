@@ -68,6 +68,41 @@
 
         - [Methods](python/api-reference-python-common.md#methods_5)
 
+### **[Analysis Module](python/api-reference-python-analysis.md)**
+- [Module analysis](python/api-reference-python-analysis.md#module-analysis)
+
+- [Submodule analysis.context](python/api-reference-python-analysis.md#submodule-analysiscontext)
+
+    - [Context](python/api-reference-python-analysis.md#context)
+
+        - [Properties](python/api-reference-python-analysis.md#properties)
+
+        - [Methods](python/api-reference-python-analysis.md#methods)
+
+- [Submodule analysis.lexical](python/api-reference-python-analysis.md#submodule-analysislexical)
+
+    - [LexicalRule](python/api-reference-python-analysis.md#lexicalrule)
+
+        - [Methods](python/api-reference-python-analysis.md#methods_1)
+
+- [Submodule analysis.visitor](python/api-reference-python-analysis.md#submodule-analysisvisitor)
+
+    - [ASTVisitor](python/api-reference-python-analysis.md#astvisitor)
+
+        - [Methods](python/api-reference-python-analysis.md#methods_2)
+
+    - [ASTChildrenSelector](python/api-reference-python-analysis.md#astchildrenselector)
+
+        - [Methods](python/api-reference-python-analysis.md#methods_3)
+
+    - [TraversalStrategy](python/api-reference-python-analysis.md#traversalstrategy)
+
+        - [Methods](python/api-reference-python-analysis.md#methods_4)
+
+    - [ASTWalker](python/api-reference-python-analysis.md#astwalker)
+
+        - [Methods](python/api-reference-python-analysis.md#methods_5)
+
 ## **Cython API**
 ### **[Common Module](cython/api-reference-cython-common.md)**
 - [Module common](cython/api-reference-cython-common.md#module-common)
@@ -119,3 +154,48 @@
         - [Properties](cython/api-reference-cython-common.md#properties_5)
 
         - [Methods](cython/api-reference-cython-common.md#methods_3)
+
+### **[Analysis Module](cython/api-reference-cython-analysis.md)**
+- [Module analysis](cython/api-reference-cython-analysis.md#module-analysis)
+
+- [Submodule analysis.context](cython/api-reference-cython-analysis.md#submodule-analysiscontext)
+
+    - [Context](cython/api-reference-cython-analysis.md#context)
+
+        - [Properties](cython/api-reference-cython-analysis.md#properties)
+
+        - [Methods](cython/api-reference-cython-analysis.md#methods)
+
+- [Submodule analysis.lexical](cython/api-reference-cython-analysis.md#submodule-analysislexical)
+
+    - [LexicalRule](cython/api-reference-cython-analysis.md#lexicalrule)
+
+        - [Properties](cython/api-reference-cython-analysis.md#properties_1)
+
+        - [Methods](cython/api-reference-cython-analysis.md#methods_1)
+
+- [Submodule analysis.visitor](cython/api-reference-cython-analysis.md#submodule-analysisvisitor)
+
+    - [ASTVisitor](cython/api-reference-cython-analysis.md#astvisitor)
+
+        - [Properties](cython/api-reference-cython-analysis.md#properties_2)
+
+        - [Methods](cython/api-reference-cython-analysis.md#methods_2)
+
+    - [ASTChildrenSelector](cython/api-reference-cython-analysis.md#astchildrenselector)
+
+        - [Properties](cython/api-reference-cython-analysis.md#properties_3)
+
+        - [Methods](cython/api-reference-cython-analysis.md#methods_3)
+
+    - [TraversalStrategy](cython/api-reference-cython-analysis.md#traversalstrategy)
+
+        - [Properties](cython/api-reference-cython-analysis.md#properties_4)
+
+        - [Methods](cython/api-reference-cython-analysis.md#methods_4)
+
+    - [ASTWalker](cython/api-reference-cython-analysis.md#astwalker)
+
+        - [Properties](cython/api-reference-cython-analysis.md#properties_5)
+
+        - [Methods](cython/api-reference-cython-analysis.md#methods_5)
