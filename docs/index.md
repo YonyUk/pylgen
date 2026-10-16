@@ -58,3 +58,4 @@ PyLGEN has the intention to be the **meeting point** between classic compiler th
  - [User Guide](user-guide/user-guide-intro.md): Practical introduction to each module’s features and intended usage.
  - [Tutorials](tutorials/tutorials-intro.md): Hands-on, step-by-step guides to building lexers, parsers, and complete interpreters with PyLGEN.
  - [Benchmark](benchmarks/veclang-benchmark.md): Rigorous performance analysis of VecLang vs. Lark on a 2‑million‑line, 40 MB source file, including speed, memory, and scaling results.
+ - [Formal Foundations](formal-foundations/formal-foundations-intro.md): The formal mathematical foundations over which PyLGEN is built.

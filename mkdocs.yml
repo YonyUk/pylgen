@@ -57,6 +57,13 @@ nav:
     - Regular Languages: formal-foundations/formal-foundations-regular-languages.md
     - LR Parsing: formal-foundations/formal-foundations-lr-parsing.md
     - Tokenization: formal-foundations/formal-foundations-tokenization.md
+  - API Reference:
+    - Table of Contents: api-reference/table_of_contents.md
+    - Python API:
+      - Common Module: api-reference/python/api-reference-python-common.md
+    - Cython API:
+      - Common Module: api-reference/cython/api-reference-cython-common.md
+
 
 theme:
   name: material

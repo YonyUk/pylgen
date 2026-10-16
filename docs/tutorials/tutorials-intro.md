@@ -20,10 +20,10 @@ If you're not sure which tutorial to begin with, find yourself in the table belo
 | :---: | :---: | :---: | :---: |
 | [**Building a Lexer from Scratch**](./foundations/tutorials-foundations-building-a-lexer.md) | Understanding tokenization, DFAs, and maximal munch | Basic regex, basic automata | A maximal-munch tokenizer using raw DFAs |
 | [**Building a Parser from Scratch**](./foundations/tutorials-foundations-building-a-parser.md) | Understanding LR parsing, closure, and goto | The lexer tutorial | An SLR parser built by hand from LR(0) states |
-| **Arithmetic Interpreter** | Your first end-to-end interpreter | None | A REPL that evaluates arithmetic expressions |
-| **Config DSL** | A small, indentation-sensitive DSL | None | A config parser that emits JSON |
-| **Python Subset** | A full language with control flow and a GUI | The Arithmetic tutorial | A subset of Python with functions, loops, and a Tkinter GUI |
-| **VecLang** | A production-grade, Cython-compiled interpreter | The Arithmetic tutorial | A vector language compiled to native code |
+| [**Arithmetic Interpreter**](./complete-languages/arithmetic-repl/arithmetic-repl-intro.md) | Your first end-to-end interpreter | None | A REPL that evaluates arithmetic expressions |
+| [**Config DSL**](./complete-languages/config-dsl/config-dsl.md) | A small, indentation-sensitive DSL | None | A config parser that emits JSON |
+| [**Python Subset**](./complete-languages/mini-python/mini-python.md) | A full language with control flow and a GUI | The Arithmetic tutorial | A subset of Python with functions, loops, and a Tkinter GUI |
+| [**VecLang**](./complete-languages/veclang/veclang-intro.md) | A production-grade, Cython-compiled interpreter | The Arithmetic tutorial | A vector language compiled to native code |
 
 ## How to read a tutorial
 
