@@ -103,6 +103,41 @@
 
         - [Methods](python/api-reference-python-analysis.md#methods_5)
 
+### **[Automaton Module](python/api-reference-python-automaton.md)**
+- [Module automaton](python/api-reference-python-automaton.md#module-automaton)
+
+- [Submodule automaton.automaton](python/api-reference-python-automaton.md#submodule-automatonautomaton)
+
+    - [State](python/api-reference-python-automaton.md#state)
+
+        - [Properties](python/api-reference-python-automaton.md#properties)
+
+        - [Methods](python/api-reference-python-automaton.md#methods)
+
+    - [Automaton](python/api-reference-python-automaton.md#automaton)
+
+        - [Properties](python/api-reference-python-automaton.md#properties_1)
+
+        - [Static Methods](python/api-reference-python-automaton.md#static-methods)
+
+        - [Methods](python/api-reference-python-automaton.md#methods_1)
+
+        - [Operators](python/api-reference-python-automaton.md#operators)
+
+    - [DFA](python/api-reference-python-automaton.md#dfa)
+
+        - [Methods](python/api-reference-python-automaton.md#methods_2)
+
+        - [Operators](python/api-reference-python-automaton.md#operators_1)
+
+    - [NFA](python/api-reference-python-automaton.md#nfa)
+
+        - [Methods](python/api-reference-python-automaton.md#methods_3)
+
+        - [Operators](python/api-reference-python-automaton.md#operators_2)
+
+    - [Module functions](python/api-reference-python-automaton.md#module-functions)
+
 ## **Cython API**
 ### **[Common Module](cython/api-reference-cython-common.md)**
 - [Module common](cython/api-reference-cython-common.md#module-common)
@@ -201,3 +236,28 @@
         - [Methods](cython/api-reference-cython-analysis.md#methods_5)
 
     - [Note on Typing and Genericity in the analysis Module](cython/api-reference-cython-analysis.md#note-on-typing-and-genericity-in-the-analysis-module)
+
+### **[Automaton Module](cython/api-reference-cython-automaton.md)**
+- [Module automaton](cython/api-reference-cython-automaton.md#module-automaton)
+
+- [Submodule automaton.automaton](cython/api-reference-cython-automaton.md#submodule-automatonautomaton)
+
+    - [State](cython/api-reference-cython-automaton.md#state)
+
+        - [Properties](cython/api-reference-cython-automaton.md#properties)
+
+    - [Automaton](cython/api-reference-cython-automaton.md#automaton)
+
+        - [Properties](cython/api-reference-cython-automaton.md#properties_1)
+
+        - [Methods](cython/api-reference-cython-automaton.md#methods)
+
+    - [DFA](cython/api-reference-cython-automaton.md#dfa)
+
+        - [Methods](cython/api-reference-cython-automaton.md#methods_1)
+
+    - [NFA](cython/api-reference-cython-automaton.md#nfa)
+
+        - [Methods](cython/api-reference-cython-automaton.md#methods_2)
+
+    - [Module functions](cython/api-reference-cython-automaton.md#module-functions)

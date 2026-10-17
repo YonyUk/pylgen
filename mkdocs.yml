@@ -62,9 +62,11 @@ nav:
     - Python API:
       - Common Module: api-reference/python/api-reference-python-common.md
       - Analysis Module: api-reference/python/api-reference-python-analysis.md
+      - Automaton Module: api-reference/python/api-reference-python-automaton.md
     - Cython API:
       - Common Module: api-reference/cython/api-reference-cython-common.md
       - Analysis Module: api-reference/cython/api-reference-cython-analysis.md
+      - Automaton Module: api-reference/cython/api-reference-cython-automaton.md
 
 
 theme:
