@@ -199,3 +199,5 @@
         - [Properties](cython/api-reference-cython-analysis.md#properties_5)
 
         - [Methods](cython/api-reference-cython-analysis.md#methods_5)
+
+    - [Note on Typing and Genericity in the analysis Module](cython/api-reference-cython-analysis.md#note-on-typing-and-genericity-in-the-analysis-module)

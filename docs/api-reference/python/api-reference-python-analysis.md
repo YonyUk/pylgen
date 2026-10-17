@@ -73,7 +73,7 @@ Base class of a visitor on the ***Visitor Pattern***.
 
  - `__init__(context_type: type)`
     - Args:
-        - `context_type (type)`: the type of the subclass of `Context` for which this visitor is intended. 
+        - `context_type (type)`: the type of the subclass of `Context` for which this visitor is intended.
 
 #### Methods
 
@@ -94,7 +94,7 @@ Base class for AST children selectors.
 
  - `__init__(context_type: type)`
     - Args:
-        - `context_type (type)`.
+        - `context_type (type)`: the type of the subclass of `Context` for which this visitor is intended.
 
 #### Methods
 
@@ -115,7 +115,7 @@ Base class for traversal strategies for walking over ASTs.
 
  - `__init__(context_type: type)`
     - Args:
-        - `context_type (type)`
+        - `context_type (type)`: the type of the subclass of `Context` for which this visitor is intended.
     
     - Raises: `ValueError(f'context_type must be a subclass of {Context}')` if `context_type` is not a subclass of `Context`.
 

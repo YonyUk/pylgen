@@ -102,7 +102,7 @@ Base class for AST children selectors.
 
  - `__init__(type context_type)`
     - Args:
-        - `context_type (type)`
+        - `context_type (type)`: the type of the subclass of `Context` for which this visitor is intended.
 
 #### Properties
 
@@ -127,7 +127,7 @@ Base class for traversal strategies for walking over ASTs.
 
  - `__init__(type context_type)`
     - Args:
-        - `context_type (type)`
+        - `context_type (type)`: the type of the subclass of `Context` for which this visitor is intended.
     
     - Raises: `ValueError(f'context_type must be a subclass of {Context}')` if `context_type` is not a subclass of `Context`.
 
@@ -183,6 +183,7 @@ Base class for traversal strategies for walking over ASTs.
  - `cdef void set_default_selector_without_signature_checking(selector)`
     - Args:
         - `selector`: instance of a subclass of `ASTChildrenSelector`.
+
 > ### `ASTWalker`
 
 Class for an AST walker.
@@ -225,3 +226,11 @@ Class for an AST walker.
  - `cdef void set_default_visitor_without_signature_checking(visitor)`
     - Args:
         - `visitor`: instance of a subclass of `ASTVisitor`.
+
+> ### Note on Typing and Genericity in the `analysis` Module
+
+At the time the PyLGEN code was written, Cython lacked a **full-fledged generics system** that would have allowed extension classes (`cdef class`) (such as `ASTVisitor`, `ASTChildrenSelector`, `TraversalStrategy`, and `ASTWalker`), to statically infer the concrete types of the `Context` and `AST` subclasses with which they operate. Cython’s "fused types", the closest equivalent to generics, cannot be applied to extension classes. Consequently, it was not possible to create a type-safe generic hierarchy without sacrificing the performance benefits that justify the use of Cython in PyLGEN.
+
+To maintain the advantages of static typing, the arguments were typed using the base classes (`Context` and `AST`), and `_check_context_type` was implemented as a runtime safeguard. While not strictly mandatory, this function verifies that the provided context is of the expected type; its use is a recommended practice for any contributor extending these classes.
+
+It is important to emphasize that this is a **temporary compromise**. Recent versions of Cython (such as 3.3) have introduced support for generics and parameterized container types, and it is expected that support for generic extension classes will continue to mature. Once that happens, `_check_context_type` can be gradually replaced by native generic typing, rendering it obsolete. Until then, it should neither be removed nor dismissed as an unnecessary artifact, as it serves as the guarantee for type safety in the compiled version of PyLGEN.

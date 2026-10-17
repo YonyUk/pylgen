@@ -169,7 +169,7 @@ class AssignmentASTSemanticErrorCollectorVisitor(ASTVisitor):
 
     We could spend a lot of effort adding intricate type annotations and casts to satisfy the linter, but that would obscure the logic. Instead, we use `# type: ignore` to silence these false positives, keeping the code clean and readable.
 
-    We'll revisit this topic in a later chapter dedicated to PyLGEN's internal architecture, where we'll explain why this design choice makes sense. For now, feel free to add `# type: ignore` wherever your linter complains, it's a pragmatic solution that keeps us moving forward.
+    A complete explanation of why this decision can be found [here](../../../api-reference/cython/api-reference-cython-analysis.md#note-on-typing-and-genericity-in-the-analysis-module). For now, feel free to add `# type: ignore` wherever your linter complains, it's a pragmatic solution that keeps us moving forward.
 
 > ### Evaluator Visitors
 
