@@ -138,6 +138,41 @@
 
     - [Module functions](python/api-reference-python-automaton.md#module-functions)
 
+### **[Grammar Module](python/api-reference-python-grammar.md)**
+- [Module grammar](python/api-reference-python-grammar.md#module-grammar)
+
+- [Submodule grammar.grammar](python/api-reference-python-grammar.md#submodule-grammargrammar)
+
+    - [SymbolNotPresentInGrammarException](python/api-reference-python-grammar.md#symbolnotpresentingrammarexception)
+
+    - [Production](python/api-reference-python-grammar.md#production)
+
+        - [Properties](python/api-reference-python-grammar.md#properties)
+
+        - [Methods](python/api-reference-python-grammar.md#methods)
+
+    - [ProductionsSet](python/api-reference-python-grammar.md#productionsset)
+
+        - [Properties](python/api-reference-python-grammar.md#properties_1)
+
+        - [Methods](python/api-reference-python-grammar.md#methods_1)
+
+    - [AttributedProductionsSet](python/api-reference-python-grammar.md#attributedproductionsset)
+
+        - [Methods](python/api-reference-python-grammar.md#methods_2)
+
+    - [Grammar](python/api-reference-python-grammar.md#grammar)
+
+        - [Properties](python/api-reference-python-grammar.md#properties_2)
+
+        - [Static Methods](python/api-reference-python-grammar.md#static-methods)
+
+        - [Methods](python/api-reference-python-grammar.md#methods_3)
+
+    - [AttributedGrammar(Grammar)](python/api-reference-python-grammar.md#attributedgrammargrammar)
+
+        - [Methods](python/api-reference-python-grammar.md#methods_4)
+
 ## **Cython API**
 ### **[Common Module](cython/api-reference-cython-common.md)**
 - [Module common](cython/api-reference-cython-common.md#module-common)
@@ -261,3 +296,42 @@
         - [Methods](cython/api-reference-cython-automaton.md#methods_2)
 
     - [Module functions](cython/api-reference-cython-automaton.md#module-functions)
+
+### **[Grammar Module](cython/api-reference-cython-grammar.md)**
+- [Module grammar](cython/api-reference-cython-grammar.md#module-grammar)
+
+- [Submodule grammar.grammar](cython/api-reference-cython-grammar.md#submodule-grammargrammar)
+
+    - [SymbolNotPresentInGrammarException](cython/api-reference-cython-grammar.md#symbolnotpresentingrammarexception)
+
+        - [Properties](cython/api-reference-cython-grammar.md#properties)
+
+    - [Production](cython/api-reference-cython-grammar.md#production)
+
+        - [Properties](cython/api-reference-cython-grammar.md#properties_1)
+
+    - [ProductionsSet](cython/api-reference-cython-grammar.md#productionsset)
+
+        - [Properties](cython/api-reference-cython-grammar.md#properties_2)
+
+        - [Methods](cython/api-reference-cython-grammar.md#methods)
+
+    - [AttributedProductionsSet](cython/api-reference-cython-grammar.md#attributedproductionsset)
+
+        - [Properties](cython/api-reference-cython-grammar.md#properties_3)
+
+        - [Methods](cython/api-reference-cython-grammar.md#methods_1)
+
+    - [Grammar](cython/api-reference-cython-grammar.md#grammar)
+
+        - [Properties](cython/api-reference-cython-grammar.md#properties_4)
+
+        - [Methods](cython/api-reference-cython-grammar.md#methods_2)
+
+    - [AttributedGrammar(Grammar)](cython/api-reference-cython-grammar.md#attributedgrammargrammar)
+
+        - [Properties](cython/api-reference-cython-grammar.md#properties_5)
+
+        - [Methods](cython/api-reference-cython-grammar.md#methods_3)
+
+    - [Module functions](cython/api-reference-cython-grammar.md#module-functions)
