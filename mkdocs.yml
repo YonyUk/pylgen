@@ -64,11 +64,13 @@ nav:
       - Analysis Module: api-reference/python/api-reference-python-analysis.md
       - Automaton Module: api-reference/python/api-reference-python-automaton.md
       - Grammar Module: api-reference/python/api-reference-python-grammar.md
+      - Lexer Module: api-reference/python/api-reference-python-lexer.md
     - Cython API:
       - Common Module: api-reference/cython/api-reference-cython-common.md
       - Analysis Module: api-reference/cython/api-reference-cython-analysis.md
       - Automaton Module: api-reference/cython/api-reference-cython-automaton.md
       - Grammar Module: api-reference/cython/api-reference-cython-grammar.md
+      - Lexer Module: api-reference/cython/api-reference-cython-lexer.md
 
 
 theme:

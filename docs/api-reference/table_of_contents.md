@@ -173,6 +173,33 @@
 
         - [Methods](python/api-reference-python-grammar.md#methods_4)
 
+### **[Lexer Module](python/api-reference-python-lexer.md)**
+- [Module lexer](python/api-reference-python-lexer.md#module-lexer)
+
+- [Submodule lexer.base_lexer](python/api-reference-python-lexer.md#submodule-lexerbase_lexer)
+
+    - [LexerNotInitializedException](python/api-reference-python-lexer.md#lexernotinitializedexception)
+
+    - [LexerNotTokensProvidedException](python/api-reference-python-lexer.md#lexernottokensprovidedexception)
+
+    - [BaseLexer](python/api-reference-python-lexer.md#baselexer)
+
+        - [Properties](python/api-reference-python-lexer.md#properties)
+
+        - [Methods](python/api-reference-python-lexer.md#methods)
+
+- [Submodule lexer.lexer](python/api-reference-python-lexer.md#submodule-lexerlexer)
+
+    - [Lexer](python/api-reference-python-lexer.md#lexer)
+
+        - [Properties](python/api-reference-python-lexer.md#properties_1)
+
+        - [Methods](python/api-reference-python-lexer.md#methods_1)
+
+    - [IdentedLexer](python/api-reference-python-lexer.md#identedlexer)
+
+        - [Methods](python/api-reference-python-lexer.md#methods_2)
+
 ## **Cython API**
 ### **[Common Module](cython/api-reference-cython-common.md)**
 - [Module common](cython/api-reference-cython-common.md#module-common)
@@ -335,3 +362,32 @@
         - [Methods](cython/api-reference-cython-grammar.md#methods_3)
 
     - [Module functions](cython/api-reference-cython-grammar.md#module-functions)
+
+### **[Lexer Module](cython/api-reference-cython-lexer.md)**
+- [Module lexer](cython/api-reference-cython-lexer.md#module-lexer)
+
+- [Submodule lexer.base_lexer](cython/api-reference-cython-lexer.md#submodule-lexerbase_lexer)
+
+    - [LexerNotInitializedException](cython/api-reference-cython-lexer.md#lexernotinitializedexception)
+
+    - [LexerNotTokensProvidedException](cython/api-reference-cython-lexer.md#lexernottokensprovidedexception)
+
+    - [BaseLexer](cython/api-reference-cython-lexer.md#baselexer)
+
+        - [Properties](cython/api-reference-cython-lexer.md#properties)
+
+        - [Methods](cython/api-reference-cython-lexer.md#methods)
+
+- [Submodule lexer.lexer](cython/api-reference-cython-lexer.md#submodule-lexerlexer)
+
+    - [Lexer](cython/api-reference-cython-lexer.md#lexer)
+
+        - [Properties](cython/api-reference-cython-lexer.md#properties_1)
+
+        - [Methods](cython/api-reference-cython-lexer.md#methods_1)
+
+    - [IdentedLexer](cython/api-reference-cython-lexer.md#identedlexer)
+
+        - [Properties](cython/api-reference-cython-lexer.md#properties_2)
+
+        - [Methods](cython/api-reference-cython-lexer.md#methods_2)
