@@ -435,7 +435,7 @@ Exceptions raised when the parser building fails.
     - Args:
         - `g (Grammar)`
 
- - `cdef tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],tuple]] _get_goto_action_tables_slr(g)`, `cdef tuple[dict[tuple[LR0State,Symbol],LR0State],dict[tuple[LR0State,Symbol],tuple]] _get_goto_action_tables_lr1(g)`, `cdef tuple[dict[tuple[LR1State,Symbol],LR1State],dict[tuple[LR1State,Symbol],tuple]] _get_goto_action_tables_lalr(g)`: builds the `GOTO` / `ACTION` tables.
+ - `cdef tuple[dict[tuple[LALRState,Symbol],LALRState],dict[tuple[LALRState,Symbol],tuple]] _get_goto_action_tables_lalr(g)`, `cdef tuple[dict[tuple[LR0State,Symbol],LR0State],dict[tuple[LR0State,Symbol],tuple]] _get_goto_action_tables_slr(g)`, `cdef tuple[dict[tuple[LR1State,Symbol],LR1State],dict[tuple[LR1State,Symbol],tuple]] _get_goto_action_tables_lr1(g)`: builds the `GOTO` / `ACTION` tables.
     - Args:
         `g (Grammar)`
 

@@ -1638,7 +1638,7 @@ This example pushes the semantic analysis a step further. This time all the vari
 
 ![password loop](../../../assets/gifs/mini-python/complex_example.gif)
 
-And we close with a slightly bigger program that ties several features together at once. It's a simple password checker: the user provides a password, and then the program asks for it in a loop until the correct one is entered. Along the way it uses an `if`/`else` to decide whether to keep going, a `while True` that only exits via `break`, and a `continue` to skip the rest of the body on a wrong guess. It also leans on the interactive side of the language, reading with input and wiping the terminal with clear between attempts.
+And we close with a slightly bigger program that ties several features together at once. It's a simple password checker: the user provides a password, and then the program asks for it in a loop until the correct one is entered. Along the way it uses an `if`/`else` to decide whether to keep going, a `while True` that only exits via `break`, and a `continue` to skip the rest of the body on a wrong guess. It also leans on the interactive side of the language, reading with input and wiping the terminal with clear between attemps.
 
 This one exercises three of the four built‑ins and both loop signals in a single run, which makes it a nice stress test for the traversal strategy. The `clear()` instruction, by the way, is just writing `\033c` to `stdout`, and the `TerminalOutputBridge` recognizes that sequence and clears the widget instead of inserting it. The `break` and `continue` signals propagate through the signal stack exactly as we described, and the `while True` condition is re‑evaluated on every iteration until the `break` finally fires.
 

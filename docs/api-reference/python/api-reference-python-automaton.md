@@ -171,7 +171,7 @@ Class for a ***Deterministic Finite Automata***. Inherits from `Automaton` (`DFA
 
  - `__iadd__(transition)`: adds a transition via the `+=` operator.
     - Args:
-        - `transition (Tuple[State,str,State])`: has the form `(from_state,symbol,to_state)`, where `from_state` is the origin state, `from_state` is the destination state, and `symbol` is the trigger of the transition.
+        - `transition (Tuple[State,str,State])`: has the form `(from_state,symbol,to_state)`, where `from_state` is the origin state, `to_state` is the destination state, and `symbol` is the trigger of the transition.
 
 > ### `NFA`
 
@@ -197,7 +197,7 @@ Class for our [Hybrid $\epsilon$-DFA](../../formal-foundations/formal-foundation
 
  - `__iadd__(transition)`: adds a transition via the `+=` operator.
     - Args:
-        - `transition (Tuple[State,str,State])`: has the form `(from_state,symbol,to_state)`, where `from_state` is the origin state, `from_state` is the destination state, and `symbol` is the trigger of the transition.
+        - `transition (Tuple[State,str,State])`: has the form `(from_state,symbol,to_state)`, where `from_state` is the origin state, `to_state` is the destination state, and `symbol` is the trigger of the transition.
 
 > ### Module functions
 

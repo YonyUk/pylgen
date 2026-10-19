@@ -64,7 +64,6 @@ Abstract error class.
 
 #### Properties
 
- - `_symbol (cdef Symbol)`.
  - `_start_line (cdef int)`: line of the start position in source.
  - `_start_column (cdef int)`: column of the start position in source.
  - `_end_line (cdef int)`: line of the end position in source.

@@ -103,7 +103,7 @@ Base class for a grammar.
  - `cdef void _add_production(head,production)`: adds a production if not present in grammar.
     - Args:
         - `head (Symbol)`
-        - `productions (ProductionsSet)`
+        - `production (list[Symbol])`
     
     - Raises:
         - `ValueError("head can't be a terminal symbol")` if `head._is_terminal` is `True`.
@@ -146,7 +146,7 @@ Version of `Grammar` for attributed grammars. Inherits from `Grammar` (`Attribut
  - `cdef void _add_attributed_production(head,production,reductor)`: adds a production with its reductor if not present in grammar.
     - Args:
         - `head (Symbol)`
-        - `productions (ProductionsSet)`
+        - `production (list[Symbol])`
         - `reductor (object)`
     
     - Raises:

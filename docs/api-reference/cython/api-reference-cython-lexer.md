@@ -4,7 +4,7 @@
 
 > ### `LexerNotInitializedException`
 
-Exception raised when an attempt is made to obtain the internal `DFA` without initializing the lexer first. Inherits from `Exception` (`LexerNotInitializedException(Exception)`).
+Exception raised when an attemp is made to obtain the internal `DFA` without initializing the lexer first. Inherits from `Exception` (`LexerNotInitializedException(Exception)`).
 
 > ### `LexerNotTokensProvidedException`
 

@@ -40,6 +40,8 @@ Exception raised when a regex can't be parsed. Inherits from `Exception` (`Regex
     
     - Raises: `RegexParsingException` if there are runtime errors.
 
+## Submodule `regex.regex_parser`
+
  - `cdef set[str] get_latin_punctuation()`, `cdef set[str] get_latin_letters()`: gets latin letters and punctuation characters.
 
  - `cdef BottomUpParser _build_regex_parser()`: returns a parser for regex expressions.

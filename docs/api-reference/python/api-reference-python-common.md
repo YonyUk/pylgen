@@ -92,7 +92,6 @@ Abstract error class.
 
 #### Properties
 
- - `symbol (Symbol)`.
  - `start_position (Tuple[int,int])`: The tuple `(start_line,start_column)`.
  - `end_position (Tuple[int,int])`: The tuple `(end_line,end_column)`.
  - `type (ErrorType)`: The type of the error.
