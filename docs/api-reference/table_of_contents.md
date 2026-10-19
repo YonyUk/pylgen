@@ -242,6 +242,19 @@
 
     - [ParserType](python/api-reference-python-parser.md#parsertype)
 
+### **[Regex Module](python/api-reference-python-regex.md)**
+- [Module regex](python/api-reference-python-regex.md#module-regex)
+
+- [Submodule regex.engine](python/api-reference-python-regex.md#submodule-regexengine)
+
+    - [RegexParsingException](python/api-reference-python-regex.md#regexparsingexception)
+
+        - [Properties](python/api-reference-python-regex.md#properties)
+
+    - [RegexEngine](python/api-reference-python-regex.md#regexengine)
+
+        - [Methods](python/api-reference-python-regex.md#methods)
+
 ### **[Analysis Module](python/api-reference-python-analysis.md)**
 - [Module analysis](python/api-reference-python-analysis.md#module-analysis)
 
@@ -421,6 +434,17 @@
         - [Properties](cython/api-reference-cython-lexer.md#properties_2)
 
         - [Methods](cython/api-reference-cython-lexer.md#methods_2)
+
+### **[Regex Module](cython/api-reference-cython-regex.md)**
+- [Module regex](cython/api-reference-cython-regex.md#module-regex)
+
+- [Submodule regex.engine](cython/api-reference-cython-regex.md#submodule-regexengine)
+
+    - [RegexParsingException](cython/api-reference-cython-regex.md#regexparsingexception)
+
+        - [Properties](cython/api-reference-cython-regex.md#properties)
+
+    - [Internal Functions](cython/api-reference-cython-regex.md#internal-functions)
 
 ### **[Analysis Module](cython/api-reference-cython-analysis.md)**
 - [Module analysis](cython/api-reference-cython-analysis.md#module-analysis)
