@@ -6,7 +6,7 @@ from ..common.types cimport Symbol
 cdef class LR0Item:
 
     def __init__(self,head:Symbol,left:Sequence[Symbol],right:Sequence[Symbol]):
-        cdef str _left,_right
+        cdef str _left,_right,_left_hash,_right_hash
         cdef list[str] left_l,right_l
         cdef Symbol sym
         cdef bytes digest
@@ -15,12 +15,14 @@ cdef class LR0Item:
         
         left_l = [sym._symbol for sym in left]
         right_l = [sym._symbol for sym in right]
+        _left_hash = '-'.join([str(sym._hash) for sym in left])
+        _right_hash = '-'.join([str(sym._hash) for sym in right])
         _left = ' '.join(left_l)
         _right = ' '.join(right_l)
 
         self._id = f'{head} -> {_left} ◦ {_right}'
         
-        digest = sha256(self._id.encode()).digest()
+        digest = sha256(f'{head._hash}-{_left_hash}-{_right_hash}'.encode()).digest()
 
         for i in range(8):
             h = (h << 8) | digest[i]
@@ -65,17 +67,17 @@ cdef class LR0Item:
 cdef class LR0State:
 
     def __init__(self,items:Set[LR0Item],index:int=0):
-        cdef list[str] ids = []
+        cdef list[str] hashes = []
         cdef LR0Item item
         cdef bytes digest
         cdef long long h = 0 # type:ignore
         cdef int i
         
         for item in items:
-            ids.append(str(item))
-        ids.sort()
+            hashes.append(str(item._hash))
+        hashes.sort()
         
-        self._id = sha256('-'.join(ids).encode()).hexdigest()
+        self._id = sha256('-'.join(hashes).encode()).hexdigest()
         
         digest = sha256(self._id.encode()).digest()
 

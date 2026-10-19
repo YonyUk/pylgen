@@ -748,7 +748,7 @@ cdef tuple[set[LALRState],dict[tuple[LR0State,LR0Item],set[Symbol]],dict[tuple[s
                 key_to = (lr0_state_to,lr0_item_to)
                 for lookahead_symbol in lookaheads[key]:
                     if keep_edge_propagation_info:
-                        edge_key = (lr0_state._id,lr0_item,key_symbol,lr0_state_to._id,lr0_item_to)
+                        edge_key = (lr0_state._hash,lr0_item,key_symbol,lr0_state_to._hash,lr0_item_to)
                         if not edge_key in edge_propagation_info:
                             edge_propagation_info[edge_key] = set()
                         edge_propagation_info[edge_key].update(lookaheads[key])

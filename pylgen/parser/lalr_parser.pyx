@@ -6,7 +6,7 @@ from .lr0_parser cimport LR0Item
 cdef class LALRItem(LR0Item):
     
     def __init__(self, head: Symbol, left: Sequence[Symbol], right: Sequence[Symbol],lookaheads:Set[Symbol]=set()):
-        cdef str _left,_right
+        cdef str _left,_right,_left_hash,_right_hash,_lookaheads_hash
         cdef list[str] left_l,right_l
         cdef Symbol sym
         cdef bytes digest
@@ -20,12 +20,15 @@ cdef class LALRItem(LR0Item):
 
         left_l = [sym._symbol for sym in self._left]
         right_l = [sym._symbol for sym in self._right]
+        _left_hash = '-'.join([str(sym._hash) for sym in self._left])
+        _right_hash = '-'.join([str(sym._hash) for sym in self._right])
+        _lookaheads_hash = '-'.join([str(sym._hash) for sym in lookaheads])
         _left = ' '.join(left_l)
         _right = ' '.join(right_l)
 
         self._id = f'{self._head} -> {_left} ◦ {_right} {self._lookaheads}'
 
-        digest = sha256(self._id.encode()).digest()
+        digest = sha256(f'{head._hash}-{_left_hash}-{_right_hash}-{_lookaheads_hash}'.encode()).digest()
         for i in range(8):
             h = (h << 8) | digest[i]
         
@@ -54,17 +57,17 @@ cdef class LALRItem(LR0Item):
 cdef class LALRState:
 
     def __init__(self,items:Set[LALRItem],index:int=0):
-        cdef list[str] ids = []
+        cdef list[str] hashes = []
         cdef LALRItem item
         cdef bytes digest
         cdef long long h = 0 # type:ignore
         cdef int i
 
         for item in items:
-            ids.append(str(item))
+            hashes.append(str(item._hash))
+        hashes.sort()
         
-        ids.sort()
-        self._id = sha256('-'.join(ids).encode()).hexdigest()
+        self._id = sha256('-'.join(hashes).encode()).hexdigest()
         self._items = items.copy()
         self._index = index
 
