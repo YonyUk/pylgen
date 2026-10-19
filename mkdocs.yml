@@ -67,6 +67,7 @@ nav:
       - Parser Module: api-reference/python/api-reference-python-parser.md
       - Regex Module: api-reference/python/api-reference-python-regex.md
       - Analysis Module: api-reference/python/api-reference-python-analysis.md
+      - Visual Module: api-reference/python/api-reference-python-visual.md
     - Cython API:
       - Common Module: api-reference/cython/api-reference-cython-common.md
       - Automaton Module: api-reference/cython/api-reference-cython-automaton.md

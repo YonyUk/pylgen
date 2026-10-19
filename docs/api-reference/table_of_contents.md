@@ -290,6 +290,19 @@
 
         - [Methods](python/api-reference-python-analysis.md#methods_5)
 
+### **[Visual Module](python/api-reference-python-visual.md)**
+- [Module visual](python/api-reference-python-visual.md#module-visual)
+
+- [Main Submodule (__init__.py)](python/api-reference-python-visual.md#main-submodule-__init__py)
+
+    - [Public Functions](python/api-reference-python-visual.md#public-functions)
+
+- [Submodule visual.table](python/api-reference-python-visual.md#submodule-visualtable)
+
+    - [HTML templates (compressed with LZMA) used to generate reports:](python/api-reference-python-visual.md#html-templates-compressed-with-lzma-used-to-generate-reports)
+
+    - [Functions](python/api-reference-python-visual.md#functions)
+
 ## **Cython API**
 ### **[Common Module](cython/api-reference-cython-common.md)**
 - [Module common](cython/api-reference-cython-common.md#module-common)
