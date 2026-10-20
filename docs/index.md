@@ -7,6 +7,7 @@
 ![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen-core?cache=1)
 [![CI](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml/badge.svg)](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml?cache=1)
 [![codecov](https://codecov.io/gh/yonyuk/pylgen/branch/dev-coverage/graph/badge.svg)](https://codecov.io/gh/yonyuk/pylgen)
+[![Socket Badge](https://socket.dev/api/badge/pypi/package/pylgen-core)](https://socket.dev/pypi/package/pylgen-core)
 ![Supported OS](https://img.shields.io/badge/Platforms-macOS%20%7C%20Windows%20%7C%20Linux-blue)
 
 *A **Python-native [compiler](https://en.wikipedia.org/wiki/Compiler-compiler) framework** that brings the ["**Dragon Book**"](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools) to life in Python with clarity throughout. A high-performance tool to build interpreters and [Domain-Specific Languages (DSLs)](https://en.wikipedia.org/wiki/Domain-specific_language). Master every step of the compilation pipeline, from lexing to semantic analysis, with full control and clarity.*
@@ -52,6 +53,17 @@ Building a language should be **fun, educational and productive**. That's why Py
 
 PyLGEN has the intention to be the **meeting point** between classic compiler theory and modern software engineering practice. It's not trying to be the only framework or the fastest in every case, but to be the one that lets you **understand, modify, and optimize** every piece with confidence.
 
+> ## Get Involved
+
+PyLGEN is an open-source project, and it grows through the people who use it. Whether you want to report a bug, suggest a feature, improve the documentation, or contribute code, the [GitHub repository](https://github.com/yonyuk/pylgen) is the place to start:
+
+ - **Found a bug?** [Open an issue](https://github.com/yonyuk/pylgen/issues) with a minimal reproduction; it is the fastest way to get it fixed.
+ - **Have an idea?** [Start a discussion](https://github.com/yonyuk/pylgen/discussions) before writing code, so the design can be discussed in the open.
+ - **Want to contribute?** Read the contribution guide in the repository, fork the project, and send a pull request. Documentation fixes are as welcome as parser improvements.
+ - **Just like it?** A star on [GitHub](https://github.com/yonyuk/pylgen) helps others find the project.
+
+Every issue, every pull request, and every star makes PyLGEN a little better.
+
 > ## Where to Go Next?
 
  - [First Steps](getting-started/table_of_contents.md): Installation, quick start, key concepts, and next steps.
@@ -59,3 +71,4 @@ PyLGEN has the intention to be the **meeting point** between classic compiler th
  - [Tutorials](tutorials/tutorials-intro.md): Hands-on, step-by-step guides to building lexers, parsers, and complete interpreters with PyLGEN.
  - [Benchmark](benchmarks/veclang-benchmark.md): Rigorous performance analysis of VecLang vs. Lark on a 2‑million‑line, 40 MB source file, including speed, memory, and scaling results.
  - [Formal Foundations](formal-foundations/formal-foundations-intro.md): The formal mathematical foundations over which PyLGEN is built.
+ - [API Reference](api-reference/table_of_contents.md): Complete reference for every class, method, property, and exception, covering both the Python and Cython APIs.

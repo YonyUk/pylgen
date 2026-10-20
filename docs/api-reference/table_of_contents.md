@@ -7,101 +7,32 @@
 
 
 ## **Python API**
-### **[Common Module](python/api-reference-python-common.md)**
-- [Module common](python/api-reference-python-common.md#module-common)
+### **[Lexer Module](python/api-reference-python-lexer.md)**
+- [Module lexer](python/api-reference-python-lexer.md#module-lexer)
 
-- [Submodule common.enums](python/api-reference-python-common.md#submodule-commonenums)
+- [Submodule lexer.base_lexer](python/api-reference-python-lexer.md#submodule-lexerbase_lexer)
 
-    - [TokenTypeMeta(EnumMeta)](python/api-reference-python-common.md#tokentypemetaenummeta)
+    - [LexerNotInitializedException](python/api-reference-python-lexer.md#lexernotinitializedexception)
 
-    - [TokenType(StrEnum, metaclass=TokenTypeMeta)](python/api-reference-python-common.md#tokentypestrenum-metaclasstokentypemeta)
+    - [LexerNotTokensProvidedException](python/api-reference-python-lexer.md#lexernottokensprovidedexception)
 
-    - [ErrorType(StrEnum)](python/api-reference-python-common.md#errortypestrenum)
+    - [BaseLexer](python/api-reference-python-lexer.md#baselexer)
 
-- [Submodule common.types](python/api-reference-python-common.md#submodule-commontypes)
+        - [Properties](python/api-reference-python-lexer.md#properties)
 
-    - [Symbol](python/api-reference-python-common.md#symbol)
+        - [Methods](python/api-reference-python-lexer.md#methods)
 
-        - [Properties](python/api-reference-python-common.md#properties)
+- [Submodule lexer.lexer](python/api-reference-python-lexer.md#submodule-lexerlexer)
 
-        - [Methods](python/api-reference-python-common.md#methods)
+    - [Lexer](python/api-reference-python-lexer.md#lexer)
 
-    - [AST](python/api-reference-python-common.md#ast)
+        - [Properties](python/api-reference-python-lexer.md#properties_1)
 
-        - [Properties](python/api-reference-python-common.md#properties_1)
+        - [Methods](python/api-reference-python-lexer.md#methods_1)
 
-        - [Methods](python/api-reference-python-common.md#methods_1)
+    - [IdentedLexer](python/api-reference-python-lexer.md#identedlexer)
 
-    - [Error](python/api-reference-python-common.md#error)
-
-        - [Properties](python/api-reference-python-common.md#properties_2)
-
-        - [Methods](python/api-reference-python-common.md#methods_2)
-
-    - [Error subclasses](python/api-reference-python-common.md#error-subclasses)
-
-        - [LexicalError](python/api-reference-python-common.md#lexicalerror)
-
-        - [SyntaxError](python/api-reference-python-common.md#syntaxerror)
-
-        - [SemanticError](python/api-reference-python-common.md#semanticerror)
-
-        - [RuntimeError](python/api-reference-python-common.md#runtimeerror)
-
-    - [ErrorAST](python/api-reference-python-common.md#errorast)
-
-    - [ASTListView](python/api-reference-python-common.md#astlistview)
-
-        - [Methods](python/api-reference-python-common.md#methods_3)
-
-    - [Token](python/api-reference-python-common.md#token)
-
-        - [Properties](python/api-reference-python-common.md#properties_3)
-
-        - [Methods](python/api-reference-python-common.md#methods_4)
-
-- [Submodule common.table](python/api-reference-python-common.md#submodule-commontable)
-
-    - [Table](python/api-reference-python-common.md#table)
-
-        - [Properties](python/api-reference-python-common.md#properties_4)
-
-        - [Methods](python/api-reference-python-common.md#methods_5)
-
-### **[Automaton Module](python/api-reference-python-automaton.md)**
-- [Module automaton](python/api-reference-python-automaton.md#module-automaton)
-
-- [Submodule automaton.automaton](python/api-reference-python-automaton.md#submodule-automatonautomaton)
-
-    - [State](python/api-reference-python-automaton.md#state)
-
-        - [Properties](python/api-reference-python-automaton.md#properties)
-
-        - [Methods](python/api-reference-python-automaton.md#methods)
-
-    - [Automaton](python/api-reference-python-automaton.md#automaton)
-
-        - [Properties](python/api-reference-python-automaton.md#properties_1)
-
-        - [Static Methods](python/api-reference-python-automaton.md#static-methods)
-
-        - [Methods](python/api-reference-python-automaton.md#methods_1)
-
-        - [Operators](python/api-reference-python-automaton.md#operators)
-
-    - [DFA](python/api-reference-python-automaton.md#dfa)
-
-        - [Methods](python/api-reference-python-automaton.md#methods_2)
-
-        - [Operators](python/api-reference-python-automaton.md#operators_1)
-
-    - [NFA](python/api-reference-python-automaton.md#nfa)
-
-        - [Methods](python/api-reference-python-automaton.md#methods_3)
-
-        - [Operators](python/api-reference-python-automaton.md#operators_2)
-
-    - [Module functions](python/api-reference-python-automaton.md#module-functions)
+        - [Methods](python/api-reference-python-lexer.md#methods_2)
 
 ### **[Grammar Module](python/api-reference-python-grammar.md)**
 - [Module grammar](python/api-reference-python-grammar.md#module-grammar)
@@ -137,33 +68,6 @@
     - [AttributedGrammar(Grammar)](python/api-reference-python-grammar.md#attributedgrammargrammar)
 
         - [Methods](python/api-reference-python-grammar.md#methods_4)
-
-### **[Lexer Module](python/api-reference-python-lexer.md)**
-- [Module lexer](python/api-reference-python-lexer.md#module-lexer)
-
-- [Submodule lexer.base_lexer](python/api-reference-python-lexer.md#submodule-lexerbase_lexer)
-
-    - [LexerNotInitializedException](python/api-reference-python-lexer.md#lexernotinitializedexception)
-
-    - [LexerNotTokensProvidedException](python/api-reference-python-lexer.md#lexernottokensprovidedexception)
-
-    - [BaseLexer](python/api-reference-python-lexer.md#baselexer)
-
-        - [Properties](python/api-reference-python-lexer.md#properties)
-
-        - [Methods](python/api-reference-python-lexer.md#methods)
-
-- [Submodule lexer.lexer](python/api-reference-python-lexer.md#submodule-lexerlexer)
-
-    - [Lexer](python/api-reference-python-lexer.md#lexer)
-
-        - [Properties](python/api-reference-python-lexer.md#properties_1)
-
-        - [Methods](python/api-reference-python-lexer.md#methods_1)
-
-    - [IdentedLexer](python/api-reference-python-lexer.md#identedlexer)
-
-        - [Methods](python/api-reference-python-lexer.md#methods_2)
 
 ### **[Parser Module](python/api-reference-python-parser.md)**
 - [Module parser](python/api-reference-python-parser.md#module-parser)
@@ -242,19 +146,6 @@
 
     - [ParserType](python/api-reference-python-parser.md#parsertype)
 
-### **[Regex Module](python/api-reference-python-regex.md)**
-- [Module regex](python/api-reference-python-regex.md#module-regex)
-
-- [Submodule regex.engine](python/api-reference-python-regex.md#submodule-regexengine)
-
-    - [RegexParsingException](python/api-reference-python-regex.md#regexparsingexception)
-
-        - [Properties](python/api-reference-python-regex.md#properties)
-
-    - [RegexEngine](python/api-reference-python-regex.md#regexengine)
-
-        - [Methods](python/api-reference-python-regex.md#methods)
-
 ### **[Analysis Module](python/api-reference-python-analysis.md)**
 - [Module analysis](python/api-reference-python-analysis.md#module-analysis)
 
@@ -290,6 +181,115 @@
 
         - [Methods](python/api-reference-python-analysis.md#methods_5)
 
+### **[Common Module](python/api-reference-python-common.md)**
+- [Module common](python/api-reference-python-common.md#module-common)
+
+- [Submodule common.enums](python/api-reference-python-common.md#submodule-commonenums)
+
+    - [TokenTypeMeta(EnumMeta)](python/api-reference-python-common.md#tokentypemetaenummeta)
+
+    - [TokenType(StrEnum, metaclass=TokenTypeMeta)](python/api-reference-python-common.md#tokentypestrenum-metaclasstokentypemeta)
+
+    - [ErrorType(StrEnum)](python/api-reference-python-common.md#errortypestrenum)
+
+- [Submodule common.types](python/api-reference-python-common.md#submodule-commontypes)
+
+    - [Symbol](python/api-reference-python-common.md#symbol)
+
+        - [Properties](python/api-reference-python-common.md#properties)
+
+        - [Methods](python/api-reference-python-common.md#methods)
+
+    - [AST](python/api-reference-python-common.md#ast)
+
+        - [Properties](python/api-reference-python-common.md#properties_1)
+
+        - [Methods](python/api-reference-python-common.md#methods_1)
+
+    - [Error](python/api-reference-python-common.md#error)
+
+        - [Properties](python/api-reference-python-common.md#properties_2)
+
+        - [Methods](python/api-reference-python-common.md#methods_2)
+
+    - [Error subclasses](python/api-reference-python-common.md#error-subclasses)
+
+        - [LexicalError](python/api-reference-python-common.md#lexicalerror)
+
+        - [SyntaxError](python/api-reference-python-common.md#syntaxerror)
+
+        - [SemanticError](python/api-reference-python-common.md#semanticerror)
+
+        - [RuntimeError](python/api-reference-python-common.md#runtimeerror)
+
+    - [ErrorAST](python/api-reference-python-common.md#errorast)
+
+    - [ASTListView](python/api-reference-python-common.md#astlistview)
+
+        - [Methods](python/api-reference-python-common.md#methods_3)
+
+    - [Token](python/api-reference-python-common.md#token)
+
+        - [Properties](python/api-reference-python-common.md#properties_3)
+
+        - [Methods](python/api-reference-python-common.md#methods_4)
+
+- [Submodule common.table](python/api-reference-python-common.md#submodule-commontable)
+
+    - [Table](python/api-reference-python-common.md#table)
+
+        - [Properties](python/api-reference-python-common.md#properties_4)
+
+        - [Methods](python/api-reference-python-common.md#methods_5)
+
+### **[Regex Module](python/api-reference-python-regex.md)**
+- [Module regex](python/api-reference-python-regex.md#module-regex)
+
+- [Submodule regex.engine](python/api-reference-python-regex.md#submodule-regexengine)
+
+    - [RegexParsingException](python/api-reference-python-regex.md#regexparsingexception)
+
+        - [Properties](python/api-reference-python-regex.md#properties)
+
+    - [RegexEngine](python/api-reference-python-regex.md#regexengine)
+
+        - [Methods](python/api-reference-python-regex.md#methods)
+
+### **[Automaton Module](python/api-reference-python-automaton.md)**
+- [Module automaton](python/api-reference-python-automaton.md#module-automaton)
+
+- [Submodule automaton.automaton](python/api-reference-python-automaton.md#submodule-automatonautomaton)
+
+    - [State](python/api-reference-python-automaton.md#state)
+
+        - [Properties](python/api-reference-python-automaton.md#properties)
+
+        - [Methods](python/api-reference-python-automaton.md#methods)
+
+    - [Automaton](python/api-reference-python-automaton.md#automaton)
+
+        - [Properties](python/api-reference-python-automaton.md#properties_1)
+
+        - [Static Methods](python/api-reference-python-automaton.md#static-methods)
+
+        - [Methods](python/api-reference-python-automaton.md#methods_1)
+
+        - [Operators](python/api-reference-python-automaton.md#operators)
+
+    - [DFA](python/api-reference-python-automaton.md#dfa)
+
+        - [Methods](python/api-reference-python-automaton.md#methods_2)
+
+        - [Operators](python/api-reference-python-automaton.md#operators_1)
+
+    - [NFA](python/api-reference-python-automaton.md#nfa)
+
+        - [Methods](python/api-reference-python-automaton.md#methods_3)
+
+        - [Operators](python/api-reference-python-automaton.md#operators_2)
+
+    - [Module functions](python/api-reference-python-automaton.md#module-functions)
+
 ### **[Visual Module](python/api-reference-python-visual.md)**
 - [Module visual](python/api-reference-python-visual.md#module-visual)
 
@@ -304,6 +304,121 @@
     - [Functions](python/api-reference-python-visual.md#functions)
 
 ## **Cython API**
+### **[Lexer Module](cython/api-reference-cython-lexer.md)**
+- [Module lexer](cython/api-reference-cython-lexer.md#module-lexer)
+
+- [Submodule lexer.base_lexer](cython/api-reference-cython-lexer.md#submodule-lexerbase_lexer)
+
+    - [LexerNotInitializedException](cython/api-reference-cython-lexer.md#lexernotinitializedexception)
+
+    - [LexerNotTokensProvidedException](cython/api-reference-cython-lexer.md#lexernottokensprovidedexception)
+
+    - [BaseLexer](cython/api-reference-cython-lexer.md#baselexer)
+
+        - [Properties](cython/api-reference-cython-lexer.md#properties)
+
+        - [Methods](cython/api-reference-cython-lexer.md#methods)
+
+- [Submodule lexer.lexer](cython/api-reference-cython-lexer.md#submodule-lexerlexer)
+
+    - [Lexer](cython/api-reference-cython-lexer.md#lexer)
+
+        - [Properties](cython/api-reference-cython-lexer.md#properties_1)
+
+        - [Methods](cython/api-reference-cython-lexer.md#methods_1)
+
+    - [IdentedLexer](cython/api-reference-cython-lexer.md#identedlexer)
+
+        - [Properties](cython/api-reference-cython-lexer.md#properties_2)
+
+        - [Methods](cython/api-reference-cython-lexer.md#methods_2)
+
+### **[Grammar Module](cython/api-reference-cython-grammar.md)**
+- [Module grammar](cython/api-reference-cython-grammar.md#module-grammar)
+
+- [Submodule grammar.grammar](cython/api-reference-cython-grammar.md#submodule-grammargrammar)
+
+    - [SymbolNotPresentInGrammarException](cython/api-reference-cython-grammar.md#symbolnotpresentingrammarexception)
+
+        - [Properties](cython/api-reference-cython-grammar.md#properties)
+
+    - [Production](cython/api-reference-cython-grammar.md#production)
+
+        - [Properties](cython/api-reference-cython-grammar.md#properties_1)
+
+    - [ProductionsSet](cython/api-reference-cython-grammar.md#productionsset)
+
+        - [Properties](cython/api-reference-cython-grammar.md#properties_2)
+
+        - [Methods](cython/api-reference-cython-grammar.md#methods)
+
+    - [AttributedProductionsSet](cython/api-reference-cython-grammar.md#attributedproductionsset)
+
+        - [Properties](cython/api-reference-cython-grammar.md#properties_3)
+
+        - [Methods](cython/api-reference-cython-grammar.md#methods_1)
+
+    - [Grammar](cython/api-reference-cython-grammar.md#grammar)
+
+        - [Properties](cython/api-reference-cython-grammar.md#properties_4)
+
+        - [Methods](cython/api-reference-cython-grammar.md#methods_2)
+
+    - [AttributedGrammar(Grammar)](cython/api-reference-cython-grammar.md#attributedgrammargrammar)
+
+        - [Properties](cython/api-reference-cython-grammar.md#properties_5)
+
+        - [Methods](cython/api-reference-cython-grammar.md#methods_3)
+
+    - [Module functions](cython/api-reference-cython-grammar.md#module-functions)
+
+### **[Analysis Module](cython/api-reference-cython-analysis.md)**
+- [Module analysis](cython/api-reference-cython-analysis.md#module-analysis)
+
+- [Submodule analysis.context](cython/api-reference-cython-analysis.md#submodule-analysiscontext)
+
+    - [Context](cython/api-reference-cython-analysis.md#context)
+
+        - [Properties](cython/api-reference-cython-analysis.md#properties)
+
+        - [Methods](cython/api-reference-cython-analysis.md#methods)
+
+- [Submodule analysis.lexical](cython/api-reference-cython-analysis.md#submodule-analysislexical)
+
+    - [LexicalRule](cython/api-reference-cython-analysis.md#lexicalrule)
+
+        - [Properties](cython/api-reference-cython-analysis.md#properties_1)
+
+        - [Methods](cython/api-reference-cython-analysis.md#methods_1)
+
+- [Submodule analysis.visitor](cython/api-reference-cython-analysis.md#submodule-analysisvisitor)
+
+    - [ASTVisitor](cython/api-reference-cython-analysis.md#astvisitor)
+
+        - [Properties](cython/api-reference-cython-analysis.md#properties_2)
+
+        - [Methods](cython/api-reference-cython-analysis.md#methods_2)
+
+    - [ASTChildrenSelector](cython/api-reference-cython-analysis.md#astchildrenselector)
+
+        - [Properties](cython/api-reference-cython-analysis.md#properties_3)
+
+        - [Methods](cython/api-reference-cython-analysis.md#methods_3)
+
+    - [TraversalStrategy](cython/api-reference-cython-analysis.md#traversalstrategy)
+
+        - [Properties](cython/api-reference-cython-analysis.md#properties_4)
+
+        - [Methods](cython/api-reference-cython-analysis.md#methods_4)
+
+    - [ASTWalker](cython/api-reference-cython-analysis.md#astwalker)
+
+        - [Properties](cython/api-reference-cython-analysis.md#properties_5)
+
+        - [Methods](cython/api-reference-cython-analysis.md#methods_5)
+
+    - [Note on Typing and Genericity in the analysis Module](cython/api-reference-cython-analysis.md#note-on-typing-and-genericity-in-the-analysis-module)
+
 ### **[Common Module](cython/api-reference-cython-common.md)**
 - [Module common](cython/api-reference-cython-common.md#module-common)
 
@@ -355,6 +470,19 @@
 
         - [Methods](cython/api-reference-cython-common.md#methods_3)
 
+### **[Regex Module](cython/api-reference-cython-regex.md)**
+- [Module regex](cython/api-reference-cython-regex.md#module-regex)
+
+- [Submodule regex.engine](cython/api-reference-cython-regex.md#submodule-regexengine)
+
+    - [RegexParsingException](cython/api-reference-cython-regex.md#regexparsingexception)
+
+        - [Properties](cython/api-reference-cython-regex.md#properties)
+
+    - [Internal Functions](cython/api-reference-cython-regex.md#internal-functions)
+
+- [Submodule regex.regex_parser](cython/api-reference-cython-regex.md#submodule-regexregex_parser)
+
 ### **[Automaton Module](cython/api-reference-cython-automaton.md)**
 - [Module automaton](cython/api-reference-cython-automaton.md#module-automaton)
 
@@ -379,129 +507,3 @@
         - [Methods](cython/api-reference-cython-automaton.md#methods_2)
 
     - [Module functions](cython/api-reference-cython-automaton.md#module-functions)
-
-### **[Grammar Module](cython/api-reference-cython-grammar.md)**
-- [Module grammar](cython/api-reference-cython-grammar.md#module-grammar)
-
-- [Submodule grammar.grammar](cython/api-reference-cython-grammar.md#submodule-grammargrammar)
-
-    - [SymbolNotPresentInGrammarException](cython/api-reference-cython-grammar.md#symbolnotpresentingrammarexception)
-
-        - [Properties](cython/api-reference-cython-grammar.md#properties)
-
-    - [Production](cython/api-reference-cython-grammar.md#production)
-
-        - [Properties](cython/api-reference-cython-grammar.md#properties_1)
-
-    - [ProductionsSet](cython/api-reference-cython-grammar.md#productionsset)
-
-        - [Properties](cython/api-reference-cython-grammar.md#properties_2)
-
-        - [Methods](cython/api-reference-cython-grammar.md#methods)
-
-    - [AttributedProductionsSet](cython/api-reference-cython-grammar.md#attributedproductionsset)
-
-        - [Properties](cython/api-reference-cython-grammar.md#properties_3)
-
-        - [Methods](cython/api-reference-cython-grammar.md#methods_1)
-
-    - [Grammar](cython/api-reference-cython-grammar.md#grammar)
-
-        - [Properties](cython/api-reference-cython-grammar.md#properties_4)
-
-        - [Methods](cython/api-reference-cython-grammar.md#methods_2)
-
-    - [AttributedGrammar(Grammar)](cython/api-reference-cython-grammar.md#attributedgrammargrammar)
-
-        - [Properties](cython/api-reference-cython-grammar.md#properties_5)
-
-        - [Methods](cython/api-reference-cython-grammar.md#methods_3)
-
-    - [Module functions](cython/api-reference-cython-grammar.md#module-functions)
-
-### **[Lexer Module](cython/api-reference-cython-lexer.md)**
-- [Module lexer](cython/api-reference-cython-lexer.md#module-lexer)
-
-- [Submodule lexer.base_lexer](cython/api-reference-cython-lexer.md#submodule-lexerbase_lexer)
-
-    - [LexerNotInitializedException](cython/api-reference-cython-lexer.md#lexernotinitializedexception)
-
-    - [LexerNotTokensProvidedException](cython/api-reference-cython-lexer.md#lexernottokensprovidedexception)
-
-    - [BaseLexer](cython/api-reference-cython-lexer.md#baselexer)
-
-        - [Properties](cython/api-reference-cython-lexer.md#properties)
-
-        - [Methods](cython/api-reference-cython-lexer.md#methods)
-
-- [Submodule lexer.lexer](cython/api-reference-cython-lexer.md#submodule-lexerlexer)
-
-    - [Lexer](cython/api-reference-cython-lexer.md#lexer)
-
-        - [Properties](cython/api-reference-cython-lexer.md#properties_1)
-
-        - [Methods](cython/api-reference-cython-lexer.md#methods_1)
-
-    - [IdentedLexer](cython/api-reference-cython-lexer.md#identedlexer)
-
-        - [Properties](cython/api-reference-cython-lexer.md#properties_2)
-
-        - [Methods](cython/api-reference-cython-lexer.md#methods_2)
-
-### **[Regex Module](cython/api-reference-cython-regex.md)**
-- [Module regex](cython/api-reference-cython-regex.md#module-regex)
-
-- [Submodule regex.engine](cython/api-reference-cython-regex.md#submodule-regexengine)
-
-    - [RegexParsingException](cython/api-reference-cython-regex.md#regexparsingexception)
-
-        - [Properties](cython/api-reference-cython-regex.md#properties)
-
-    - [Internal Functions](cython/api-reference-cython-regex.md#internal-functions)
-
-### **[Analysis Module](cython/api-reference-cython-analysis.md)**
-- [Module analysis](cython/api-reference-cython-analysis.md#module-analysis)
-
-- [Submodule analysis.context](cython/api-reference-cython-analysis.md#submodule-analysiscontext)
-
-    - [Context](cython/api-reference-cython-analysis.md#context)
-
-        - [Properties](cython/api-reference-cython-analysis.md#properties)
-
-        - [Methods](cython/api-reference-cython-analysis.md#methods)
-
-- [Submodule analysis.lexical](cython/api-reference-cython-analysis.md#submodule-analysislexical)
-
-    - [LexicalRule](cython/api-reference-cython-analysis.md#lexicalrule)
-
-        - [Properties](cython/api-reference-cython-analysis.md#properties_1)
-
-        - [Methods](cython/api-reference-cython-analysis.md#methods_1)
-
-- [Submodule analysis.visitor](cython/api-reference-cython-analysis.md#submodule-analysisvisitor)
-
-    - [ASTVisitor](cython/api-reference-cython-analysis.md#astvisitor)
-
-        - [Properties](cython/api-reference-cython-analysis.md#properties_2)
-
-        - [Methods](cython/api-reference-cython-analysis.md#methods_2)
-
-    - [ASTChildrenSelector](cython/api-reference-cython-analysis.md#astchildrenselector)
-
-        - [Properties](cython/api-reference-cython-analysis.md#properties_3)
-
-        - [Methods](cython/api-reference-cython-analysis.md#methods_3)
-
-    - [TraversalStrategy](cython/api-reference-cython-analysis.md#traversalstrategy)
-
-        - [Properties](cython/api-reference-cython-analysis.md#properties_4)
-
-        - [Methods](cython/api-reference-cython-analysis.md#methods_4)
-
-    - [ASTWalker](cython/api-reference-cython-analysis.md#astwalker)
-
-        - [Properties](cython/api-reference-cython-analysis.md#properties_5)
-
-        - [Methods](cython/api-reference-cython-analysis.md#methods_5)
-
-    - [Note on Typing and Genericity in the analysis Module](cython/api-reference-cython-analysis.md#note-on-typing-and-genericity-in-the-analysis-module)

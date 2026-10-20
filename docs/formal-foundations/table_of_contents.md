@@ -72,6 +72,14 @@
 
 - [Limitations](formal-foundations-context-free-grammars.md#limitations)
 
+- [Attributed Grammars](formal-foundations-context-free-grammars.md#attributed-grammars)
+
+    - [From theory to PyLGEN](formal-foundations-context-free-grammars.md#from-theory-to-pylgen)
+
+    - [Why attribute at all?](formal-foundations-context-free-grammars.md#why-attribute-at-all)
+
+    - [Relation to syntax-directed translation](formal-foundations-context-free-grammars.md#relation-to-syntax-directed-translation)
+
 ## **[Regular Languages](formal-foundations-regular-languages.md)**
 - [Regular Expressions and Kleene's Theorem](formal-foundations-regular-languages.md#regular-expressions-and-kleenes-theorem)
 

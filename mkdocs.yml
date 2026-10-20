@@ -76,6 +76,7 @@ nav:
       - Common Module: api-reference/cython/api-reference-cython-common.md
       - Regex Module: api-reference/cython/api-reference-cython-regex.md
       - Automaton Module: api-reference/cython/api-reference-cython-automaton.md
+  - Acknowledgments: acknowledgments.md
 
 
 theme:

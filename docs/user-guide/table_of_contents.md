@@ -14,48 +14,28 @@
 
 - [Module Map](user-guide-intro.md#module-map)
 
-## **[Common Module](user-guide-common.md)**
-- [The common Module](user-guide-common.md#the-common-module)
+## **[Lexer Module](user-guide-lexer.md)**
+- [The lexer Module](user-guide-lexer.md#the-lexer-module)
 
-- [Symbol](user-guide-common.md#symbol)
+- [Lexer](user-guide-lexer.md#lexer)
 
-    - [Attributes](user-guide-common.md#attributes)
+    - [Example](user-guide-lexer.md#example)
 
-- [AST](user-guide-common.md#ast)
+    - [Priorities](user-guide-lexer.md#priorities)
 
-    - [Attributes and Methods](user-guide-common.md#attributes-and-methods)
+    - [The mapping function](user-guide-lexer.md#the-mapping-function)
 
-- [Error Hierarchy](user-guide-common.md#error-hierarchy)
+    - [Attributes and Methods](user-guide-lexer.md#attributes-and-methods)
 
-    - [ErrorType (Enumeration)](user-guide-common.md#errortype-enumeration)
+- [IdentedLexer](user-guide-lexer.md#identedlexer)
 
-    - [Error Base Class](user-guide-common.md#error-base-class)
+    - [Example](user-guide-lexer.md#example_1)
 
-    - [Concrete Error Classes](user-guide-common.md#concrete-error-classes)
+    - [Methods](user-guide-lexer.md#methods)
 
-    - [Runtime Errors and Stack Traces](user-guide-common.md#runtime-errors-and-stack-traces)
+- [Lexical Rules](user-guide-lexer.md#lexical-rules)
 
-- [ErrorAST](user-guide-common.md#errorast)
-
-- [Token](user-guide-common.md#token)
-
-    - [Additional Attributes](user-guide-common.md#additional-attributes)
-
-- [ASTListView](user-guide-common.md#astlistview)
-
-    - [Methods](user-guide-common.md#methods)
-
-    - [Typical Usage](user-guide-common.md#typical-usage)
-
-- [Table](user-guide-common.md#table)
-
-    - [Attributes and Methods](user-guide-common.md#attributes-and-methods_1)
-
-    - [Typical Usage](user-guide-common.md#typical-usage_1)
-
-- [TokenType](user-guide-common.md#tokentype)
-
-- [Best Practices for Maximum Performance](user-guide-common.md#best-practices-for-maximum-performance)
+    - [Example](user-guide-lexer.md#example_2)
 
 ## **[Grammar Module](user-guide-grammar.md)**
 - [The grammar Module](user-guide-grammar.md#the-grammar-module)
@@ -98,29 +78,6 @@
 
 - [Complete Example: Defining an Arithmetic Expression Grammar](user-guide-grammar.md#complete-example-defining-an-arithmetic-expression-grammar)
 
-## **[Lexer Module](user-guide-lexer.md)**
-- [The lexer Module](user-guide-lexer.md#the-lexer-module)
-
-- [Lexer](user-guide-lexer.md#lexer)
-
-    - [Example](user-guide-lexer.md#example)
-
-    - [Priorities](user-guide-lexer.md#priorities)
-
-    - [The mapping function](user-guide-lexer.md#the-mapping-function)
-
-    - [Attributes and Methods](user-guide-lexer.md#attributes-and-methods)
-
-- [IdentedLexer](user-guide-lexer.md#identedlexer)
-
-    - [Example](user-guide-lexer.md#example_1)
-
-    - [Methods](user-guide-lexer.md#methods)
-
-- [Lexical Rules](user-guide-lexer.md#lexical-rules)
-
-    - [Example](user-guide-lexer.md#example_2)
-
 ## **[Parser Module](user-guide-parser.md)**
 - [The parser Module](user-guide-parser.md#the-parser-module)
 
@@ -146,6 +103,49 @@
 - [Visitor Framework](user-guide-analysis.md#visitor-framework)
 
     - [Typical Usage](user-guide-analysis.md#typical-usage)
+
+## **[Common Module](user-guide-common.md)**
+- [The common Module](user-guide-common.md#the-common-module)
+
+- [Symbol](user-guide-common.md#symbol)
+
+    - [Attributes](user-guide-common.md#attributes)
+
+- [AST](user-guide-common.md#ast)
+
+    - [Attributes and Methods](user-guide-common.md#attributes-and-methods)
+
+- [Error Hierarchy](user-guide-common.md#error-hierarchy)
+
+    - [ErrorType (Enumeration)](user-guide-common.md#errortype-enumeration)
+
+    - [Error Base Class](user-guide-common.md#error-base-class)
+
+    - [Concrete Error Classes](user-guide-common.md#concrete-error-classes)
+
+    - [Runtime Errors and Stack Traces](user-guide-common.md#runtime-errors-and-stack-traces)
+
+- [ErrorAST](user-guide-common.md#errorast)
+
+- [Token](user-guide-common.md#token)
+
+    - [Additional Attributes](user-guide-common.md#additional-attributes)
+
+- [ASTListView](user-guide-common.md#astlistview)
+
+    - [Methods](user-guide-common.md#methods)
+
+    - [Typical Usage](user-guide-common.md#typical-usage)
+
+- [Table](user-guide-common.md#table)
+
+    - [Attributes and Methods](user-guide-common.md#attributes-and-methods_1)
+
+    - [Typical Usage](user-guide-common.md#typical-usage_1)
+
+- [TokenType](user-guide-common.md#tokentype)
+
+- [Best Practices for Maximum Performance](user-guide-common.md#best-practices-for-maximum-performance)
 
 ## **[Regex Module](user-guide-regex.md)**
 - [The regex Module](user-guide-regex.md#the-regex-module)
