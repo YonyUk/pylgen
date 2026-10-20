@@ -18,3 +18,16 @@
 [data-md-color-scheme="slate"] .md-typeset__table tr:nth-child(2n) {
     background-color: hsla(var(--md-hue), 17%, 17%, 1);
 }
+
+[data-md-color-primary="pylgen-teal"] {
+  --md-primary-fg-color: #00796b;
+  --md-primary-fg-color--light: #4db6ac;
+  --md-primary-fg-color--dark: #004d40;
+}
+
+[data-md-color-accent="pylgen-amber"] {
+  --md-accent-fg-color: #d97706;
+  --md-accent-fg-color--transparent: rgba(217, 119, 6, 0.1);
+  --md-accent-bg-color: #ffffff;
+  --md-accent-bg-color--light: rgba(255, 255, 255, 0.7);
+}

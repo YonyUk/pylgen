@@ -91,15 +91,15 @@ theme:
   palette:
     
     - scheme: default
-      primary: 'teal'
-      accent: 'amber'
+      primary: 'pylgen-teal'
+      accent: 'pylgen-amber'
       toggle:
         icon: material/brightness-7
         name: dark mode
 
     - scheme: slate
-      primary: 'teal'
-      accent: 'amber'
+      primary: 'pylgen-teal'
+      accent: 'pylgen-amber'
       toggle:
         icon: material/brightness-4
         name: light mode
