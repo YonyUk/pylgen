@@ -1,9 +1,10 @@
 # PyLGEN
-![PyPI - 0.7.2](https://img.shields.io/pypi/v/pylgen-core?cache=1)
+![PyPI - 0.7.3](https://img.shields.io/pypi/v/pylgen-core?cache=1)
 ![PyPI - 3.12](https://img.shields.io/pypi/pyversions/pylgen-core?cache=1)
 ![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen-core?cache=1)
 [![CI](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml/badge.svg)](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml?cache=1)
 [![codecov](https://codecov.io/gh/yonyuk/pylgen/branch/dev-coverage/graph/badge.svg)](https://codecov.io/gh/yonyuk/pylgen)
+[![Socket Badge](https://socket.dev/api/badge/pypi/package/pylgen-core)](https://socket.dev/pypi/package/pylgen-core)
 ![Supported OS](https://img.shields.io/badge/Platforms-macOS%20%7C%20Windows%20%7C%20Linux-blue)
 
 *From prototype to production: a **Python-native compiler framework** that brings the "**Dragon Book**" to life in Python, with clarity throughout.*
@@ -141,6 +142,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+
+## [0.7.3] - 2026-10-20
+
+### Fixed
+
+- **Breaking**: Typo error on `ParseTreeNode`, property `childrens` was replaced by `children`.
+- Fixed edge case on hash computation of `LR0Item`, `LR0State`, `LR1Item`, `LR1State`, `LALRItem` and `LALRState`.
 
 ## [0.7.2] - 2026-10-09
 
