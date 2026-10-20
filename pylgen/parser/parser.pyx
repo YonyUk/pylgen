@@ -16,13 +16,13 @@ cdef class ParsingException(Exception):
 
 cdef class ParseTreeNode:
 
-    def __init__(self,Symbol symbol,int start_line,int start_column,int end_line,int end_column,list[ParseTreeNode] childrens=[]):
+    def __init__(self,Symbol symbol,int start_line,int start_column,int end_line,int end_column,list[ParseTreeNode] children=[]):
         self._symbol = symbol
         self._start_line = start_line
         self._start_column = start_column
         self._end_line = end_line
         self._end_column = end_column
-        self._childrens = childrens
+        self._children = children
     
     @property
     def symbol(self) -> Symbol:
@@ -37,8 +37,8 @@ cdef class ParseTreeNode:
         return self._end_line,self._end_column
     
     @property
-    def childrens(self) -> List[ParseTreeNode]:
-        return self._childrens
+    def children(self) -> List[ParseTreeNode]:
+        return self._children
 
 cdef class Parser:
     '''
@@ -197,7 +197,7 @@ cdef class BottomUpParser(Parser):
         cdef long long key
         cdef AST new_ast
         cdef ParseTreeNode new_node
-        cdef list[ParseTreeNode] childrens
+        cdef list[ParseTreeNode] children
         cdef int production_len
         # local references for micro-optimizations
         cdef unsigned int symbol_id
@@ -236,8 +236,8 @@ cdef class BottomUpParser(Parser):
                 self._errors.update(errors)
             if not self._syntax_error and self._draw_parse_tree:
                 # build the parse tree
-                childrens = self._parse_tree_nodes[-1*production_len:]
-                new_node = ParseTreeNode(p._head,new_ast._start_line,new_ast._start_column,new_ast._end_line,new_ast._end_column,childrens)
+                children = self._parse_tree_nodes[-1*production_len:]
+                new_node = ParseTreeNode(p._head,new_ast._start_line,new_ast._start_column,new_ast._end_line,new_ast._end_column,children)
                 # updates the stack of parse tree nodes
                 del self._parse_tree_nodes[-1*production_len:]
                 self._parse_tree_nodes.append(new_node)

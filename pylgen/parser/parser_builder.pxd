@@ -45,6 +45,7 @@ cdef class LR1ReduceReduceConflictException(LR1ParserBuildingConflictException):
 cdef class ParserBuilder:
     pass
 
+cdef void _clear_cache()
 cdef set[LR0Item] _closure_lr0(set[LR0Item] items,Grammar g)
 cdef set[LR1Item] _closure_lr1(set[LR1Item] items,Grammar g)
 cdef set[LALRItem] _closure_lalr(set[LALRItem] items,Grammar g)

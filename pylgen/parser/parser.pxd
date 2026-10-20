@@ -7,7 +7,7 @@ cdef class ParsingException(Exception):
 cdef class ParseTreeNode:
     cdef Symbol _symbol
     cdef int _start_line,_start_column,_end_line,_end_column
-    cdef list[ParseTreeNode] _childrens
+    cdef list[ParseTreeNode] _children
 
 cdef class Parser:
     cdef AST _ast
@@ -42,6 +42,6 @@ cdef class BottomUpParser(Parser):
     cdef int _stack_states_top
     cdef int _stack_states_len
 
-    cdef void _start_recovery_mode(self,Symbol symbol,int line,int column, int source_line_interval_start, int source_line_interval_end)
+    cdef void _start_recovery_mode(self,Symbol symbol,int start_line, int start_column, int end_line, int end_column)
     cdef void _end_recovery_mode(self,Symbol symbol)
     cdef void _set_reductor(self,Production production,object reductor)

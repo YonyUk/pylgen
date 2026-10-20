@@ -30,7 +30,6 @@ cdef class Grammar:
     cdef bint _firsts_computed
     cdef bint _follows_computed
     cdef Symbol _epsilon
-    cdef set[Production] _productions_cache
     cdef set[Symbol] _symbols
 
     cdef bint _derives_in_epsilon(self,Symbol symbol)

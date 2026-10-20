@@ -152,9 +152,7 @@ cdef class ParserBuilder:
 
     @staticmethod
     def clear_cache() -> None:
-        _closures.clear()
-        _closures_lr1.clear()
-        _closures_lalr.clear()
+        _clear_cache()
 
     @staticmethod
     def closure_lr0(items:Set[LR0Item],g:Grammar) -> Set[LR0Item]:
@@ -1142,3 +1140,8 @@ cdef BottomUpParser _build_lr1_parser_from_attributed(AttributedGrammar g):
             result._set_reductor(production,g.get_reductor(production))
     
     return result
+
+cdef void _clear_cache():
+    _closures.clear()
+    _closures_lr1.clear()
+    _closures_lalr.clear()

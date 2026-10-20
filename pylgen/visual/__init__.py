@@ -244,7 +244,7 @@ def _get_graph_from_parse_tree(tree:ParseTreeNode) -> nx.DiGraph:
         current_id = f'{current.symbol}-{sl}-{sc}-{el}-{ec}-{level}'
         if not current_id in nodes_by_id:
             nodes_by_id[current_id] = (current,level)
-        for children in current.childrens:
+        for children in current.children:
             (sl,sc),(el,ec) = children.start_position,children.end_position
             children_id = f'{children.symbol}-{sl}-{sc}-{el}-{ec}-{level + 1}'
             stack.append((children,level + 1))

@@ -27,7 +27,7 @@ cdef class LR1Item(LR0Item):
 
         self._id = f'{self._head} -> {_left} ◦ {_right} ({self._lookahead})'
 
-        digest = sha256(f'{head._hash}-{_left_hash}-{_right_hash}-{lookahead._hash}'.encode()).digest()
+        digest = sha256(f'{head._hash} -> {_left_hash} ◦ {_right_hash} ({lookahead._hash})'.encode()).digest()
         for i in range(8):
             h = (h << 8) | digest[i]
         
