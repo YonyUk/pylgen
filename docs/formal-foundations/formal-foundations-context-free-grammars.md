@@ -60,3 +60,51 @@ Context-free grammars cannot express all the constraints that a real programming
  - **Matching indentation**: in Python-like languages, the block structure depends on whitespace, which a pure CFG cannot express directly.
 
 These constraints are handled **outside** the grammar, either in the lexer (for indentation, via `INDENT` and `DEDENT` tokens) or in semantic analysis (for declarations and types). This separation is a fundamental design principle of PyLGEN.
+
+## Attributed Grammars
+
+A pure CFG defines only the **syntax** of a language: which sequences of terminals are valid. It says nothing about what those sequences mean, nor about what to do with them once recognized. In practice, a parser needs to produce more than ***“yes, this is valid”***; it needs to build a structured representation (an AST) and, often, to perform checks along the way.
+
+An **attributed grammar** extends a CFG by associating a **semantic action** with each production. Formally, if $G = \lparen N,\Sigma,P,S \rparen$ is a CFG, an attributed grammar is a pair
+
+$$
+G_{\mathcal{R}} = \lparen G,\mathcal{R}\rparen
+$$
+
+where $\mathcal{R}$ maps each production $p \in P$ to a semantic action $\mathcal{R}\lparen p\rparen$. In the general theory, the action may compute **attributes** (values associated with the symbols of the production), following the scheme of ***syntax-directed translation***. In PyLGEN, the action is a **reductor**: a function that receives the ASTs of the symbols on the right-hand side of the production and returns the AST for the non-terminal on the left-hand side.
+
+$$
+\mathcal{R}\lparen A \rightarrow \alpha \rparen: AST^{|\alpha|} \rightarrow AST
+$$
+
+where $\alpha = \alpha_1 \cdots \alpha_n$ and $|\alpha| = n$.
+
+> ### From theory to PyLGEN
+
+In PyLGEN, the abstract pair $\lparen G,\mathcal{R}\rparen$ is materialized by `AttributedGrammar`, and the function $\mathcal{R}$ is stored as a mapping from `Production` to reductor. `AttributedProductionsSet` is the container that, when you write
+
+```python
+G[E] += (E, plus, T), binary_reductor
+```
+
+associates the reductor with the production and registers it in the grammar. The parser built from this attributed grammar invokes the corresponding reductor each time it reduces a production, so the AST is constructed during parsing, without a separate pass over a parse tree. This is the mechanism behind `ParserBuilder.build_parser_from_attributed`, and the reason the API speaks of attributed grammars rather than plain ones.
+
+> ### Why attribute at all?
+
+Attributing productions is not only a convenient way to build an AST. It is also the natural place to perform checks that depend **only on the shape of the parse**, before any evaluation runs:
+
+ - **Static semantic checks**: if a reductor sees that the right-hand side of a division is a literal zero, it can return an `ErrorAST` instead of a `DivAST`. The error is reported at parse time, and evaluation never sees it.
+
+ - **Type propagation**: if the grammar carries type information, the reductor can compute the type of the resulting expression and attach it to the AST node.
+
+These are the techniques used in the Arithmetic REPL and VecLang tutorials: the reductor layer catches the errors that are detectable from the tree alone, leaving the semantic analysis phase to handle dynamic checks such as undeclared variables.
+
+> ### Relation to syntax-directed translation
+
+Attributed grammars are a special case of **syntax-directed translation (SDT)**, the classical framework in which a grammar is augmented with semantic rules and/or semantic actions. The Dragon Book presents SDT in two forms:
+
+ - **S-attributed definitions**: attributes are computed bottom-up, from children to parent. This is the form PyLGEN uses: the reductor receives the ASTs of the children (already reduced) and produces the parent AST.
+
+ - **L-attributed definitions**: attributes may also depend on siblings to the left, requiring a left-to-right traversal. This is needed for some single-pass analyses (e.g., symbol tables built during parsing), but is not the default model of PyLGEN's reductors, which only see the children's ASTs.
+
+By restricting to S-attributed definitions, PyLGEN keeps the reductor signature uniform (a single `ASTListView` in, one `AST` out) and delegates anything more complex (scopes, symbol tables, cross-node state) to the `Context` in the analysis phase. This is a deliberate separation: **the parser builds structure; the visitors compute meaning**.

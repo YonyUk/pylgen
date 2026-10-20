@@ -12,11 +12,11 @@ nav:
   - User Guide:
     - Introduction: user-guide/user-guide-intro.md
     - Table of Contents: user-guide/table_of_contents.md
-    - Common Module: user-guide/user-guide-common.md
-    - Grammar Module: user-guide/user-guide-grammar.md
     - Lexer Module: user-guide/user-guide-lexer.md
+    - Grammar Module: user-guide/user-guide-grammar.md
     - Parser Module: user-guide/user-guide-parser.md
     - Analysis Module: user-guide/user-guide-analysis.md
+    - Common Module: user-guide/user-guide-common.md
     - Regex Module: user-guide/user-guide-regex.md
     - Automaton Module: user-guide/user-guide-automaton.md
     - Visual Module: user-guide/user-guide-visual.md
@@ -60,22 +60,22 @@ nav:
   - API Reference:
     - Table of Contents: api-reference/table_of_contents.md
     - Python API:
-      - Common Module: api-reference/python/api-reference-python-common.md
-      - Automaton Module: api-reference/python/api-reference-python-automaton.md
-      - Grammar Module: api-reference/python/api-reference-python-grammar.md
       - Lexer Module: api-reference/python/api-reference-python-lexer.md
+      - Grammar Module: api-reference/python/api-reference-python-grammar.md
       - Parser Module: api-reference/python/api-reference-python-parser.md
-      - Regex Module: api-reference/python/api-reference-python-regex.md
       - Analysis Module: api-reference/python/api-reference-python-analysis.md
+      - Common Module: api-reference/python/api-reference-python-common.md
+      - Regex Module: api-reference/python/api-reference-python-regex.md
+      - Automaton Module: api-reference/python/api-reference-python-automaton.md
       - Visual Module: api-reference/python/api-reference-python-visual.md
     - Cython API:
-      - Common Module: api-reference/cython/api-reference-cython-common.md
-      - Automaton Module: api-reference/cython/api-reference-cython-automaton.md
-      - Grammar Module: api-reference/cython/api-reference-cython-grammar.md
       - Lexer Module: api-reference/cython/api-reference-cython-lexer.md
+      - Grammar Module: api-reference/cython/api-reference-cython-grammar.md
       - Parser Module: api-reference/python/api-reference-cython-parser.md
-      - Regex Module: api-reference/cython/api-reference-cython-regex.md
       - Analysis Module: api-reference/cython/api-reference-cython-analysis.md
+      - Common Module: api-reference/cython/api-reference-cython-common.md
+      - Regex Module: api-reference/cython/api-reference-cython-regex.md
+      - Automaton Module: api-reference/cython/api-reference-cython-automaton.md
 
 
 theme:
