@@ -26,3 +26,17 @@ class TestLR0Item:
         assert item1 == item2
         assert item1 != item3
         assert item2 != item3
+
+    def test_lr0_item_hashing(self):
+        E = Symbol('E')
+        p = Symbol('+',True)
+        p2 = Symbol('+')
+        T = Symbol('T')
+
+        item1 = LR0Item(E,[E,p],[T])
+        item2 = LR0Item(E,[E,p],[T])
+        item3 = LR0Item(E,[E,p2],[T])
+
+        assert hash(item1) == hash(item2)
+        assert hash(item1) != hash(item3)
+        assert hash(item2) != hash(item3)

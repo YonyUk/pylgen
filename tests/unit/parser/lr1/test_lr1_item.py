@@ -1,9 +1,9 @@
 from pylgen.parser.lr1_parser import LR1Item
 from pylgen.common.types import Symbol
 
-class TestLALRItem:
+class TestLR1Item:
 
-    def test_lalr_item_creation(self):
+    def test_lr1_item_creation(self):
         E = Symbol('E')
         T = Symbol('T')
 
@@ -24,7 +24,7 @@ class TestLALRItem:
         assert item.right == [T]
         assert item.lookahead == p
     
-    def test_lalr_item_equality_1(self):
+    def test_lr1_item_equality_1(self):
         E = Symbol('E')
         T = Symbol('T')
 
@@ -40,7 +40,7 @@ class TestLALRItem:
         assert item1 != item3
         assert item2 == item3
     
-    def test_lalr_item_equality_2(self):
+    def test_lr1_item_equality_2(self):
         L = Symbol('L')
 
         id_ = Symbol('id',True)
@@ -51,3 +51,18 @@ class TestLALRItem:
 
         assert item1 == item2
         assert item1 in {item2}
+
+    def test_lr1_item_hashing(self):
+        L = Symbol('L')
+
+        id_ = Symbol('id',True)
+        eq = Symbol('=',True)
+        eq2 = Symbol('=')
+
+        item1 = LR1Item(L,[],[id_],eq)
+        item2 = LR1Item(L,[],[id_],eq)
+        item3 = LR1Item(L,[],[id_],eq2)
+
+        assert hash(item1) == hash(item2)
+        assert hash(item1) != hash(item3)
+        assert hash(item2) != hash(item3)

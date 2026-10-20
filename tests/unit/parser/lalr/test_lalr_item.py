@@ -51,3 +51,18 @@ class TestLALRItem:
 
         assert item1 == item2
         assert item1 in {item2}
+
+    def test_lalr_item_hashing(self):
+        L = Symbol('L')
+        
+        id_ = Symbol('id',True)
+        eq = Symbol('=',True)
+        eq2 = Symbol('=')
+        end = Symbol('$',True)
+
+        item1 = LALRItem(L,[],[id_],{eq,end})
+        item2 = LALRItem(L,[],[id_],{eq,end})
+        item3 = LALRItem(L,[],[id_],{eq2,end})
+
+        assert hash(item1) == hash(item2)
+        assert hash(item1) != hash(item3)
