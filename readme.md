@@ -34,7 +34,7 @@ PyLGEN gives you **complete control** over every stage of language processing. B
 | **Full Interpreter** | — | ~67.52 s (incl. semantic checks + eval) |
 | **Peak Memory** | ~4 GB | ~968 MB |
 
-[more details in the benchmark section of documentation →](https://pylgen.readthedocs.io/en/latest/benchmark/veclang-benchmark)
+[more details in the benchmark section of documentation →](https://pylgen.readthedocs.io/en/latest/benchmarks/veclang-benchmark)
 
 > PyLGEN is a framework for **building interpreters**, covering the **full compilation pipeline** from lexical analysis to execution.
 
