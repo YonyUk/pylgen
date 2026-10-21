@@ -47,6 +47,11 @@ You don't have to read them in order, but the two blocks are designed to be read
 !!! note "The examples are on GitHub"
     All the source code for these tutorials lives in the examples/ directory of the repository. If you get stuck, you can always compare your code against the reference implementation.
 
+!!! tip "Speeding up lexer initialization"
+    In some of the tutorials, the startup might feel slow. This is due to the lexer initialization process. When operating over a considerably large alphabet (standard characters plus accented Latin letters and punctuation marks), the Hopcroft minimization and the assignment of token types to each state can take some time. 
+    
+    To solve this, if your mapping function is a standard `def` function, both the function and therefore the lexer are **pickleable**. Otherwise, the lexer's internal DFA is **serializable** (it's just states and transitions in a table). You can load a pre-built DFA, set `lexer._dfa = your_dfa`, and set the `lexer._initialized = True` flag.
+
 ## A word of advice
 
 PyLGEN gives you a lot of control, and that means a lot of decisions. You can build a language with a single grammar and a handful of reducers, or you can write custom traversal strategies, visitors, and selectors for every node type. Both are valid, and the tutorials show both extremes. The point isn't to use every feature, it's to use the right features for your language.
