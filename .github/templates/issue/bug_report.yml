@@ -1,0 +1,68 @@
+name: Bug Report
+description: Create a report to help us improve PyLGEN.
+title: "[BUG]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! Please ensure you are using the latest version of PyLGEN.
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Please provide a minimal, reproducible code snippet (the grammar and the input string) that causes the issue.
+      placeholder: |
+        1. Import pylgen
+        2. Define grammar...
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: input
+    id: pylgen-version
+    attributes:
+      label: PyLGEN Version
+      description: What version of PyLGEN are you using? (e.g., 0.7.2, or commit hash)
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: On what OS are you experiencing this issue?
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other (please specify in the description)
+    validations:
+      required: true
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      description: What version of Python are you using? (e.g., 3.12, 3.13)
+    validations:
+      required: true
+  - type: textarea
+    id: traceback
+    attributes:
+      label: Traceback / Error Output
+      description: Please copy and paste any relevant traceback or error output.
+      render: python
+    validations:
+      required: false
