@@ -108,7 +108,7 @@ flowchart LR
 pip install pylgen-core
 ```
 
-Then build your interpreter step by step, following the complete tutorial in the [documentation](https://pylgen.readthedocs.io/en/latest/section-1/example-1-first-approach/).
+Then build your interpreter step by step, following the complete tutorial in the [documentation](https://pylgen.readthedocs.io/en/latest/getting-started/quick-start).
 
 ## 📖 Learn More
 
