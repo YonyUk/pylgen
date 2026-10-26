@@ -71,7 +71,7 @@ nav:
     - Cython API:
       - Lexer Module: api-reference/cython/api-reference-cython-lexer.md
       - Grammar Module: api-reference/cython/api-reference-cython-grammar.md
-      - Parser Module: api-reference/python/api-reference-cython-parser.md
+      - Parser Module: api-reference/cython/api-reference-cython-parser.md
       - Analysis Module: api-reference/cython/api-reference-cython-analysis.md
       - Common Module: api-reference/cython/api-reference-cython-common.md
       - Regex Module: api-reference/cython/api-reference-cython-regex.md

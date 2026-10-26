@@ -161,7 +161,7 @@ Exception raised when an attemp is made to obtain the parse tree after when erro
 
 Class that represents a node on the resulting parse tree after a token's stream has been parsed.
 
- - `__init__(symbol, start_line, start_column, end_line, end_column, childrens=[])`
+ - `__init__(symbol, start_line, start_column, end_line, end_column, children=[])`
     - Args:
          - `symbol (Symbol)`: symbol of this node on the parse tree.
          - `start_line (int)`: start line in the source.
@@ -178,7 +178,7 @@ Class that represents a node on the resulting parse tree after a token's stream 
 
  - `end_position (Tuple[int,int])`: tuple `(end_line,end_column)`, the end position in the source.
 
- - `childrens (List[ParseTreeNode])`: children of this node in the parse tree.
+ - `children (List[ParseTreeNode])`: children of this node in the parse tree.
 
 > ### `Parser`
 

@@ -372,6 +372,73 @@
 
     - [Module functions](cython/api-reference-cython-grammar.md#module-functions)
 
+### **[Parser Module](cython/api-reference-cython-parser.md)**
+- [Module parser](cython/api-reference-cython-parser.md#module-parser)
+
+- [Submodule parser.bottom_up_parser_actions](cython/api-reference-cython-parser.md#submodule-parserbottom_up_parser_actions)
+
+    - [BottomUpParserAction](cython/api-reference-cython-parser.md#bottomupparseraction)
+
+- [Submodule parser.lr0_parser](cython/api-reference-cython-parser.md#submodule-parserlr0_parser)
+
+    - [LR0Item](cython/api-reference-cython-parser.md#lr0item)
+
+        - [Properties](cython/api-reference-cython-parser.md#properties)
+
+    - [LR0State](cython/api-reference-cython-parser.md#lr0state)
+
+        - [Properties](cython/api-reference-cython-parser.md#properties_1)
+
+- [Submodule parser.lr1_parser](cython/api-reference-cython-parser.md#submodule-parserlr1_parser)
+
+    - [LR1Item](cython/api-reference-cython-parser.md#lr1item)
+
+        - [Properties](cython/api-reference-cython-parser.md#properties_2)
+
+    - [LR1State](cython/api-reference-cython-parser.md#lr1state)
+
+        - [Properties](cython/api-reference-cython-parser.md#properties_3)
+
+- [Submodule parser.lalr_parser](cython/api-reference-cython-parser.md#submodule-parserlalr_parser)
+
+    - [LALRItem](cython/api-reference-cython-parser.md#lalritem)
+
+        - [Properties](cython/api-reference-cython-parser.md#properties_4)
+
+    - [LALRState](cython/api-reference-cython-parser.md#lalrstate)
+
+        - [Properties](cython/api-reference-cython-parser.md#properties_5)
+
+- [Submodule parser.parser](cython/api-reference-cython-parser.md#submodule-parserparser)
+
+    - [ParsingException](cython/api-reference-cython-parser.md#parsingexception)
+
+    - [ParseTreeNode](cython/api-reference-cython-parser.md#parsetreenode)
+
+        - [Properties](cython/api-reference-cython-parser.md#properties_6)
+
+    - [Parser](cython/api-reference-cython-parser.md#parser)
+
+        - [Properties](cython/api-reference-cython-parser.md#properties_7)
+
+        - [Methods](cython/api-reference-cython-parser.md#methods)
+
+    - [BottomUpParser](cython/api-reference-cython-parser.md#bottomupparser)
+
+        - [Properties](cython/api-reference-cython-parser.md#properties_8)
+
+        - [Methods](cython/api-reference-cython-parser.md#methods_1)
+
+- [Submodule parser.parser_builder](cython/api-reference-cython-parser.md#submodule-parserparser_builder)
+
+    - [Exceptions](cython/api-reference-cython-parser.md#exceptions)
+
+    - [Module functions.](cython/api-reference-cython-parser.md#module-functions)
+
+- [Submodule parser.parser_type](cython/api-reference-cython-parser.md#submodule-parserparser_type)
+
+    - [ParserType](cython/api-reference-cython-parser.md#parsertype)
+
 ### **[Analysis Module](cython/api-reference-cython-analysis.md)**
 - [Module analysis](cython/api-reference-cython-analysis.md#module-analysis)
 
