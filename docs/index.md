@@ -1,14 +1,17 @@
 # PyLGEN: The Python-Native Compiler Framework for Building Interpreters and DSLs
 
-
-[![GitHub Repo](https://img.shields.io/badge/View%20on-GitHub-black?logo=github)](https://github.com/yonyuk/pylgen)
-[![PyPI 0.7.3](https://img.shields.io/pypi/v/pylgen-core.svg)](https://pypi.org/project/pylgen-core?cache=1)
-![PyPI - 3.12](https://img.shields.io/pypi/pyversions/pylgen-core?cache=1)
-![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen-core?cache=1)
-[![CI](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml/badge.svg)](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml?cache=1)
-[![codecov](https://codecov.io/gh/yonyuk/pylgen/branch/dev-coverage/graph/badge.svg)](https://codecov.io/gh/yonyuk/pylgen)
-[![Socket Badge](https://socket.dev/api/badge/pypi/package/pylgen-core)](https://socket.dev/pypi/package/pylgen-core)
+[![PyPI - Version](https://img.shields.io/pypi/v/pylgen-core.svg)](https://pypi.org/project/pylgen-core)
+![Python - Versions](https://img.shields.io/pypi/pyversions/pylgen-core)
 ![Supported OS](https://img.shields.io/badge/Platforms-macOS%20%7C%20Windows%20%7C%20Linux-blue)
+[![GitHub Repo](https://img.shields.io/badge/View%20on-GitHub-black?logo=github)](https://github.com/yonyuk/pylgen)
+
+**Project Health:**
+
+[![Last Commit](https://img.shields.io/github/last-commit/yonyuk/pylgen)](https://github.com/yonyuk/pylgen)
+[![codecov](https://codecov.io/gh/yonyuk/pylgen/branch/dev-coverage/graph/badge.svg)](https://codecov.io/gh/yonyuk/pylgen)
+[![socket](https://socket.dev/api/badge/pypi/package/pylgen-core)](https://socket.dev/pypi/package/pylgen-core)
+[![Monthly Downloads](https://pypistats.com/api/badges/pylgen-core)](https://pypistats.com/packages/pylgen-core)
+[![Total Downloads](https://pypistats.com/api/badges/pylgen-core?period=total)](https://pypistats.com/packages/pylgen-core)
 
 *A **Python-native [compiler](https://en.wikipedia.org/wiki/Compiler-compiler) framework** that brings the ["**Dragon Book**"](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools) to life in Python with clarity throughout. A high-performance tool to build interpreters and [Domain-Specific Languages (DSLs)](https://en.wikipedia.org/wiki/Domain-specific_language). Master every step of the compilation pipeline, from lexing to semantic analysis, with full control and clarity.*
 

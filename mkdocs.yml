@@ -1,5 +1,7 @@
 site_name: PyLGEN
 site_url: https://pylgen.readthedocs.io/en/latest/
+repo_url: https://github.com/yonyuk/pylgen
+repo_name: yonyuk/pylgen
 
 nav:
   - Overview: index.md

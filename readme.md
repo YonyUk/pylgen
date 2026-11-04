@@ -1,13 +1,22 @@
 # PyLGEN
-![PyPI - 0.7.3](https://img.shields.io/pypi/v/pylgen-core?cache=1)
-![PyPI - 3.12](https://img.shields.io/pypi/pyversions/pylgen-core?cache=1)
-![PyPI - LICENSE](https://img.shields.io/pypi/l/pylgen-core?cache=1)
-[![CI](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml/badge.svg)](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml?cache=1)
-[![codecov](https://codecov.io/gh/yonyuk/pylgen/branch/dev-coverage/graph/badge.svg)](https://codecov.io/gh/yonyuk/pylgen)
-[![Socket Badge](https://socket.dev/api/badge/pypi/package/pylgen-core)](https://socket.dev/pypi/package/pylgen-core)
-![Supported OS](https://img.shields.io/badge/Platforms-macOS%20%7C%20Windows%20%7C%20Linux-blue)
 
 *From prototype to production: a **Python-native compiler framework** that brings the "**Dragon Book**" to life in Python, with clarity throughout.*
+
+![PyPI - Version](https://img.shields.io/pypi/v/pylgen-core)
+![Python - Versions](https://img.shields.io/pypi/pyversions/pylgen-core)
+![LICENSE](https://img.shields.io/pypi/l/pylgen-core)
+[![Documentation](https://img.shields.io/badge/Documentation-Read%20the%20Docs-blue?logo=readthedocs&logoColor=white)](https://pylgen.readthedocs.io/en/latest/)
+
+[![CI](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml/badge.svg)](https://github.com/YonyUk/pylgen/actions/workflows/ci.yml?cache=1)
+[![codecov](https://codecov.io/gh/yonyuk/pylgen/branch/dev-coverage/graph/badge.svg)](https://codecov.io/gh/yonyuk/pylgen)
+[![socket](https://socket.dev/api/badge/pypi/package/pylgen-core)](https://socket.dev/pypi/package/pylgen-core)
+
+![Cython](https://img.shields.io/badge/Powered%20by-Cython-blue?logo=python&logoColor=white)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/pylgen-core)
+![cibuildwheel](https://img.shields.io/badge/wheels-cibuildwheel-blue)
+![Supported OS](https://img.shields.io/badge/Platforms-macOS%20%7C%20Windows%20%7C%20Linux-blue)
+[![Monthly Downloads](https://pypistats.com/api/badges/pylgen-core)](https://pypistats.com/packages/pylgen-core)
+[![Total Downloads](https://pypistats.com/api/badges/pylgen-core?period=total)](https://pypistats.com/packages/pylgen-core)
 
 PyLGEN gives you **complete control** over every stage of language processing. Build interpreters and compilers from scratch without leaving the Python ecosystem. Prototype rapidly in pure Python, then compile to native speed with Cython for production workloads.
 
