@@ -15,9 +15,9 @@ This analysis is structured to be **objective, reproducible, and transparent**. 
 
 > ### 1. What We Are Measuring
 
-The benchmark compares two approaches:
+The benchmark compares three approaches:
 
- - **Lark + `lark_cython`**: a popular, feature-rich parsing library with Cython acceleration plugins, used in its best-performing configuration (LALR(1) parser, contextual lexer).
+ - **Lark + (`lark-cython` or `lark-rust`)**: a popular, feature-rich parsing library with **Cython** and **Rust** acceleration plugins, used in its best-performing configuration (LALR(1) parser, contextual lexer).
  - **PyLGEN**: our custom interpreter, compiled with Cython, featuring an integrated lexer, LALR(1) parser with attributed grammar (AST construction during parsing), semantic checks, and a full evaluator.
 
 The **objective** is to measure **real-world end-to-end performance** for processing a large and realistic script. We do not cherry-pick a single phase; we measure what matters in production: **total time from source to result**.
@@ -130,9 +130,9 @@ The benchmark was executed with the following software versions:
 | **`Python`** | 3.13.7 |
 | **`Lark`** | 1.3.1 |
 | **`lark-cython`** | 0.0.17 |
-| **`lark-rust`** | 0.2.1 (attempted, not used in final results) |
+| **`lark-rust`** | 0.2.2 |
 
-These versions were obtained via `pip show` and are the latest stable releases available at the time of the experiment (September 2026).
+These versions were obtained via `pip show` and are the latest stable releases available at the time of the experiment (November 2026).
 
 > ### 6. Interactive Profiling Data (Scalene HTML Reports)
 
@@ -141,13 +141,14 @@ To uphold our commitment to **objective, reproducible, and transparent** analysi
 You can explore the raw data here:
 
 - **PyLGEN Full Report**: [`scalene_pylgen.html`](../assets/html/benchmarks/veclang/pylgen/1/scalene-pylgen.html)  
-- **Lark + `lark_cython` Full Report**: [`scalene_lark.html`](../assets/html/benchmarks/veclang/lark/scalene-lark.html)
+- **Lark + `lark-cython` Full Report**: [`scalene_lark_cython.html`](../assets/html/benchmarks/veclang/lark/scalene-lark.html)
+- **Lark + `lark-rust` Full Report**: [`scalene_lark_rust.html`](../assets/html/benchmarks/veclang/lark/scalene-lark-rust.html)
 
 > **What to look for in these reports**:
 
 > 1. **CPU Hotspots**: Both reports confirm that the parsing phase (specifically the `reductor` functions in PyLGEN) dominates the CPU cycles. In PyLGEN, this accounts for ~85% of the native execution time, validating our optimization priorities.
 >
-> 2. **Memory Timeline**: The memory allocation graphs provide a visual confirmation of the peak usage disparity; PyLGEN's graph stays in 968 MB, while Lark's allocation curve reaches 4 GB.
+> 2. **Memory Timeline**: The memory allocation graphs provide a visual confirmation of the peak usage disparity; PyLGEN's graph stays in 968 MB, while Lark's allocation curve reaches 3 GB with its **Rust** plugin, and 4 GB with its **Cython** plugin.
 >
 > 3. **Line-by-line Overhead**: The HTML drill-down allows you to inspect exactly which regex patterns (in the lexer) or which visit methods (in the evaluator) incur the most cost, offering actionable insights for future micro-optimizations.
 >
@@ -157,15 +158,15 @@ You can explore the raw data here:
 
 > ### 1. Parsing-Only Times
 
-| **Metric** | **Lark** + `lark_cython` | **PyLGEN** | **Speedup** |
-| :---: | :---: | :---: | :---: |
-| **Minimum Parsing Time** | 115.87 s | 59.65 s | - |
-| **Maximum Parsing Time** | 117.34 s | 63.25 s | – |
-| **Mean Parsing Time** | 116.73 s | 61.62 s | ~1.89x |
-| **AST Construction** | Separate pass | Integrated | **N/A** |
-| **Peak Memory Usage** | ~4 GB | ~968 MB | – |
+| **Metric** | **Lark** + `lark-cython` | **Lark** + `lark-rust` | **PyLGEN** | **Speedup** |
+| :---: | :---: | :---: | :---: | :---: |
+| **Minimum Parsing Time** | 115.87 s | 89.5 s | 59.65 s | - |
+| **Maximum Parsing Time** | 117.34 s | 92.07 s | 63.25 s | – |
+| **Mean Parsing Time** | 116.73 s | 90.46 s | 61.62 s | ~1.89x vs. `lark-cython`, ~1.47x vs. `lark-rust` |
+| **AST Construction** | Separate pass | Separate pass | Integrated | **N/A** |
+| **Peak Memory Usage** | ~4 GB | ~3 GB | ~968 MB | – |
 
-**Interpretation**: Lark's parsing alone takes **over 116 seconds** on average. PyLGEN's parsing, which **includes AST construction** and **semantic errors collecting** via reductors, takes **about 61.62 seconds**, a **~1.89x speedup**. If we added a separate AST transformation pass to Lark (which is necessary in practice), the gap would widen further. Moreover, PyLGEN uses **~4x less memory**, a critical advantage for large-scale processing.
+**Interpretation**: Lark's parsing alone takes **over 116/90 seconds** on average. PyLGEN's parsing, which **includes AST construction** and **semantic errors collecting** via reductors, takes **about 61.62 seconds**, a **~1.89x/1.47x speedup** compared to the **Cython** and **Rust** plugins, respectively. If we added a separate AST transformation pass to Lark (which is necessary in practice), the gap would widen further. Moreover, PyLGEN uses **~4x/3x less memory**, a critical advantage for large-scale processing.
 
 > ### 2. PyLGEN Full Pipeline Breakdown
 
@@ -181,11 +182,11 @@ You can explore the raw data here:
 
 > ### 3. Scaling to 4M Lines
 
-| **Metric** | **Lark + `lark_cython`** | **PyLGEN** | **Speedup** |
-| :---: | :---: | :---: | :---: |
-| **Parsing Time** | 335.42 s | 122.67 s | ~2.69x |
-| **PyLGEN Full Pipeline** | – | 124.68+1.96+2.72+7.43 = 136.79 s | – |
-| **Peak Memory Usage (PyLGEN)** | not measured | ~2 GB | – |
+| **Metric** | <span style="white-space: nowrap">**Lark + `lark-cython`**</span> | <span style="white-space: nowrap">**Lark + `lark-rust`**</span> | **PyLGEN** | **Speedup** |
+| :---: | :---: | :---: | :---: | :---: |
+| **Parsing Time** | 335.42 s | 233.55 s | 122.67 s | ~2.73x vs. `lark-cython`, ~1.9x vs. `lark-rust` |
+| **PyLGEN Full Pipeline** | – | - | 124.68+1.96+2.72+7.43 = 136.79 s | – |
+| **Peak Memory Usage (PyLGEN)** | not measured | not measured | ~2 GB | – |
 
 !!! note
     Although we did not measure Lark's memory usage for the 4M‑line file with Scalene, extrapolating from the 2M‑line case suggests it would exceed 8 GB, given the linear relationship between input size and memory consumption observed in earlier runs.
@@ -196,7 +197,7 @@ The speedup increases with file size, indicating that PyLGEN's integrated approa
 
 #### Analysis of Scaling Behaviour
 
-The scaling test reveals an interesting trend: the speedup of PyLGEN over Lark + `lark_cython` increases from **~1.89x** (2M lines) to **~2.69x** (4M lines). While part of this can be attributed to PyLGEN's more efficient parsing algorithm and integrated AST construction, **memory constraints likely played a significant role**.
+The scaling test reveals an interesting trend: the speedup of PyLGEN over Lark + `lark-cython` and Lark + `lark-rust`, increases from **~1.89x/1.47x** (2M lines) to **~2.73x/1.9x** (4M lines), respectively. While part of this can be attributed to PyLGEN's more efficient parsing algorithm and integrated AST construction, **memory constraints likely played a significant role**.
 
 The benchmark hardware had only **8 GB of RAM**. For the 2M‑line file (≈40 MB), Lark's peak memory usage was already **~4 GB** (as measured by **Scalene**). When the input size doubled to 4M lines (≈78 MB), Lark's memory footprint likely exceeded the available physical RAM, forcing the operating system to use **swap space**. This results in:
 
@@ -224,75 +225,6 @@ The implementation, for the final block, produces the output:
 ```
 
 This confirms that both the parser and evaluator are semantically correct, the benchmark is not just a speed test, but a functional test.
-
-## Attempted Benchmark with `lark-rust`
-
-In addition to the comparison with Lark + `lark_cython`, we attempted to evaluate **lark-rust** (version 0.2.1), a Rust-based accelerator for Lark that promises a 1.4x–1.7x speedup over `lark_cython`. This would have provided a more complete picture of the performance landscape, especially given that `lark-rust` is gaining attention as a high-performance alternative.
-
-> ### Methodology
-
-The same input file (2M lines, 40 MB) and the same VecLang grammar were used. The parser was instantiated with:
-
-```python
-from lark import Lark
-import lark_rust
-
-# ....
-
-parser = Lark(GRAMMAR, parser='lalr', lexer='contextual', _plugins=lark_rust.plugins)
-```
-
-This is the recommended configuration for `lark-rust` (LALR(1) with contextual lexer), and it mirrors the setup used for `lark_cython`.
-
-> ### Results
-
-The benchmark **could not be completed** due to compatibility issues between `lark-rust` and the VecLang grammar. Two errors were encountered:
-
-```bash
-Traceback (most recent call last):
-  File "[PROJECT_ROOT]\lark-pylgen-comparision\Lib\site-packages\lark_rust\__init__.py", line 99, in next_token
-    return lexer.next_token(lexer_state, parser_state)
-           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
-lark.exceptions.UnexpectedCharacters: No terminal matches '_' in the current parser context, at line 2 col 8
-
-complex_number = complex(2,3)
-       ^
-Expected one of: 
-        * LPAR
-
-Previous tokens: Token("TYPE_COMPLEX", "complex")
-
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "[PROJECT_ROOT]\lark-pylgen-comparision\main.py", line 128, in <module>
-    tree = parser.parse(text)
-  File "[PROJECT_ROOT]\lark-pylgen-comparision\Lib\site-packages\lark\lark.py", line 677, in parse
-    return self.parser.parse(text, start=start, on_error=on_error)
-           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "[PROJECT_ROOT]\lark-pylgen-comparision\Lib\site-packages\lark\parser_frontends.py", line 131, in parse
-    return self.parser.parse(stream, chosen_start, **kw)
-           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "[PROJECT_ROOT]\lark-pylgen-comparision\Lib\site-packages\lark_rust\__init__.py", line 274, in parse
-    return self.parser.parse(lexer, start)
-           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
-  File "[PROJECT_ROOT]\lark-pylgen-comparision\Lib\site-packages\lark_rust\__init__.py", line 190, in parse
-    return self.parse_from_state(parser_state)
-           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
-  File "[PROJECT_ROOT]\lark-pylgen-comparision\Lib\site-packages\lark_rust\__init__.py", line 215, in parse_from_state
-    token = inner_lexer.next_token(lexer_state, state)
-  File "[PROJECT_ROOT]\lark-pylgen-comparision\Lib\site-packages\lark_rust\__init__.py", line 107, in next_token
-    terminals_by_name=self.root_lexer.terminals_by_name,
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'builtins.BasicLexer' object has no attribute 'terminals_by_name'
-```
-
-> ### Conclusion on `lark-rust`
-
-`lark-rust` is a promising project, but at the time of writing, it is not fully compatible with complex grammars that use a contextual lexer and have token priority rules (e.g., keywords vs. identifiers). For this reason, **we were unable to include `lark-rust` in the main benchmark**.
-
-We will revisit this comparison when `lark-rust` reaches a stable state with full compatibility. In the meantime, the benchmark results against `lark_cython` remain the most robust and reproducible reference.
 
 ## Why PyLGEN is Faster
 
@@ -330,11 +262,11 @@ We acknowledge that Lark is a parser, not an interpreter. The comparison highlig
 
 The benchmark results are clear and robust:
 
- - **PyLGEN's parser is ~1.89x faster** than Lark with `lark_cython` on a 2-million-line, 40 MB input, and **~2.69x** faster on the 4M‑line, 78 MB input; a statistically significant, reproducible speedup.
+ - **PyLGEN's parser is ~1.89x faster** than Lark with `lark-cython` and **~1.47x faster** than Lark with `lark-rust`, on a 2-million-line, 40 MB input, and **~2.73x/1.9x** faster on the 4M‑line, 78 MB input; a statistically significant, reproducible speedup.
  - **PyLGEN's full interpreter** (including AST construction, semantic checks, and evaluation) runs in ~67.52 seconds, an impressive feat for a full pipeline on such a large file.
  - **Correctness is verified**: current implementation produce identical outputs, confirming that the benchmark is not just a speed test but a functional test of the entire system.
  - **The speedup is attributable to fundamental architectural advantages**: Cython compilation, integrated AST construction; not just superficial tweaks.
- - **Memory usage is significantly lower**: PyLGEN uses **~968 MB** peak vs. Lark's **~4 GB**, making it more suitable for memory-constrained environments.
+ - **Memory usage is significantly lower**: PyLGEN uses **~968 MB** peak vs. Lark's **~4/3 GB**, making it more suitable for memory-constrained environments.
 
 > ### Final Thought
 
@@ -344,7 +276,7 @@ If you are building a high‑throughput parser, a data‑processing DSL, or a la
 
 ## Appendix A: Lark Benchmark Code
 
-The following code was used to measure parsing times for Lark + `lark_cython` (and was the basis for the attempted `lark-rust` run).
+The following code was used to measure parsing times for Lark + `lark-cython` and is the basis for the `lark-rust` run.
 
 ```python
 from lark import Lark

@@ -42,14 +42,6 @@
 
     - [4. Correctness Validation](veclang-benchmark.md#4-correctness-validation)
 
-- [Attempted Benchmark with lark-rust](veclang-benchmark.md#attempted-benchmark-with-lark-rust)
-
-    - [Methodology](veclang-benchmark.md#methodology)
-
-    - [Results](veclang-benchmark.md#results_1)
-
-    - [Conclusion on lark-rust](veclang-benchmark.md#conclusion-on-lark-rust)
-
 - [Why PyLGEN is Faster](veclang-benchmark.md#why-pylgen-is-faster)
 
     - [1. Cython Compilation to Native Code](veclang-benchmark.md#1-cython-compilation-to-native-code)
