@@ -36,12 +36,12 @@ PyLGEN gives you **complete control** over every stage of language processing. B
 
 ## 📊 Benchmark at a Glance
 
-| | **Lark + `lark_cython`** | **PyLGEN** |
-| :---: | :---: | :---: |
-| **Parsing (2M lines, 40 MB)** | 116.73 s | 61.62 s |
-| **AST Construction** | Separate pass | Integrated |
-| **Full Interpreter** | — | ~67.52 s (incl. semantic checks + eval) |
-| **Peak Memory** | ~4 GB | ~968 MB |
+| | **Lark + `lark-cython`** | **Lark + `lark-rust`** | **PyLGEN** |
+| :---: | :---: | :---: | :---: |
+| **Parsing (2M lines, 40 MB)** | 116.73 s | 90.46 s | 61.62 s |
+| **AST Construction** | Separate pass | Separate pass  | Integrated |
+| **Full Interpreter** | — | — | ~67.52 s (incl. semantic checks + eval) |
+| **Peak Memory** | ~4 GB | ~3 GB | ~968 MB |
 
 [more details in the benchmark section of documentation →](https://pylgen.readthedocs.io/en/latest/benchmarks/veclang-benchmark)
 
